@@ -1,0 +1,20 @@
+/**
+ * STARFORGE TCG - Heroes Module Index
+ */
+
+export {
+  HERO_COGSMITHS,
+  HERO_LUMINAR,
+  HERO_PYROCLAST,
+  HERO_VOIDBORN,
+  HERO_BIOTITANS,
+  HERO_CRYSTALLINE,
+  HERO_PHANTOM_CORSAIRS,
+  HERO_HIVEMIND,
+  HERO_ASTROMANCERS,
+  HERO_CHRONOBOUND,
+  ALL_HEROES,
+  getHeroByRace,
+  getHeroById,
+  HeroRegistry,
+} from './HeroDefinitions';
