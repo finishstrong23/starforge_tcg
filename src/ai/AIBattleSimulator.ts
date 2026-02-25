@@ -254,7 +254,7 @@ export class AIBattleSimulator {
    * Supports thousands of games via batched parallel execution.
    */
   async runFullBalanceTest(
-    races: Race[] = [Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN, Race.BIOTITANS, Race.PHANTOM_CORSAIRS, Race.CRYSTALLINE, Race.HIVEMIND],
+    races: Race[] = [Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN, Race.BIOTITANS, Race.PHANTOM_CORSAIRS, Race.CRYSTALLINE, Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND],
     onProgress?: (opts: {
       matchupIndex: number;
       totalMatchups: number;
