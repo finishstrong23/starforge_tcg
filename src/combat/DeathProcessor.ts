@@ -1,7 +1,7 @@
 /**
  * STARFORGE TCG - Death Processor
  *
- * Handles minion death, LAST_RITES triggers, and death-related effects.
+ * Handles minion death, LAST_WORDS triggers, and death-related effects.
  */
 
 import { CardZone, hasKeyword } from '../types/Card';
@@ -37,7 +37,7 @@ export interface DeathEvent {
 export interface DeathProcessResult {
   /** Cards that died */
   deaths: DeathEvent[];
-  /** Effects that triggered (LAST_RITES, IMMOLATE, SALVAGE) */
+  /** Effects that triggered (LAST_WORDS, IMMOLATE, SALVAGE) */
   triggeredEffects: Effect[];
   /** Cards drawn from SALVAGE */
   cardsDrawn: string[];
@@ -142,15 +142,15 @@ export class DeathProcessor {
         position: death.position,
       } as CardEventData);
 
-      // Process LAST_RITES — look up definition effects and execute them
-      if (this.hasKeywordInList(death.keywords, TriggerKeyword.LAST_RITES)) {
+      // Process LAST_WORDS — look up definition effects and execute them
+      if (this.hasKeywordInList(death.keywords, TriggerKeyword.LAST_WORDS)) {
         const cardDef = globalCardDatabase.getCard(death.cardDefinitionId);
         const lastRitesEffects = (cardDef?.effects || []).filter(
           (e: any) => e.trigger === EffectTrigger.ON_DEATH
         );
         result.triggeredEffects.push(...lastRitesEffects);
 
-        // Execute LAST_RITES effects via the resolver
+        // Execute LAST_WORDS effects via the resolver
         if (this.effectResolver && lastRitesEffects.length > 0) {
           this.effectResolver.resolveEffects(lastRitesEffects, {
             sourceCardId: death.cardInstanceId,
@@ -243,7 +243,7 @@ export class DeathProcessor {
   }
 
   /**
-   * Banish a minion (remove from game, no LAST_RITES)
+   * Banish a minion (remove from game, no LAST_WORDS)
    */
   banishMinion(cardInstanceId: string): boolean {
     const card = this.board.getCard(cardInstanceId);
@@ -253,7 +253,7 @@ export class DeathProcessor {
 
     const ownerId = card.controllerId;
 
-    // Move directly to banished zone (skips LAST_RITES)
+    // Move directly to banished zone (skips LAST_WORDS)
     this.board.moveCard(cardInstanceId, ownerId, ownerId, CardZone.BANISHED);
 
     this.emitEvent(GameEventType.CARD_BANISHED, ownerId, {

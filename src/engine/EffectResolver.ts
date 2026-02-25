@@ -1,7 +1,7 @@
 /**
  * STARFORGE TCG - Effect Resolver
  *
- * Executes card effects (spells, DEPLOY, LAST_RITES, hero powers).
+ * Executes card effects (spells, DEPLOY, LAST_WORDS, hero powers).
  * Maps the Effect type system from Effects.ts to actual game state mutations.
  */
 

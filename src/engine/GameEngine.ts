@@ -80,7 +80,7 @@ export class GameEngine {
     this.effectResolver = new EffectResolver(this.stateManager, this.combatResolver, this.deathProcessor);
     this.cardFactory = cardFactory;
     this.cardDatabase = cardDatabase;
-    // Give DeathProcessor access to effect resolver for LAST_RITES
+    // Give DeathProcessor access to effect resolver for LAST_WORDS
     this.deathProcessor.setEffectResolver(this.effectResolver);
   }
 

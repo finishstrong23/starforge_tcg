@@ -62,7 +62,7 @@ const COMBAT_KEYWORDS = {
 
 const TRIGGER_KEYWORDS = {
   'DEPLOY': 'TriggerKeyword.DEPLOY',
-  'LAST_RITES': 'TriggerKeyword.LAST_RITES',
+  'LAST_WORDS': 'TriggerKeyword.LAST_WORDS',
 };
 
 // Map from XLSX text → internal key
@@ -80,7 +80,7 @@ const XLSX_COMBAT_MAP = {
 // Map from XLSX text → trigger keyword key
 const XLSX_TRIGGER_MAP = {
   'DEPLOY': 'DEPLOY',
-  'LAST WORDS': 'LAST_RITES',
+  'LAST WORDS': 'LAST_WORDS',
 };
 
 // Original keywords that will be REPLACED with combat keywords
@@ -295,8 +295,8 @@ function convertKeywords(cards, race) {
           newKeywords.push({ keyword: COMBAT_KEYWORDS[picked] });
         }
       } else if (kwInst.type === 'trigger') {
-        // DEPLOY & LAST_RITES: Add a themed combat keyword alongside.
-        // The trigger keyword itself (DEPLOY/LAST_RITES) will be re-added by
+        // DEPLOY & LAST_WORDS: Add a themed combat keyword alongside.
+        // The trigger keyword itself (DEPLOY/LAST_WORDS) will be re-added by
         // cardToTypeScript if the card has parsed effects.
         const triggerOffset = newKeywords.length;
         let triggerPicked = pickCombatKeyword(race, card.name, idx * 10 + triggerOffset, usedCombatKeys);
@@ -503,7 +503,7 @@ function parseKeywords(keywordStr) {
       continue;
     }
 
-    // 2. Trigger keyword? (DEPLOY, LAST WORDS → LAST_RITES)
+    // 2. Trigger keyword? (DEPLOY, LAST WORDS → LAST_WORDS)
     const triggerKey = XLSX_TRIGGER_MAP[xlsxKey];
     if (triggerKey) {
       results.push({ type: 'trigger', internalKey: triggerKey });
@@ -946,7 +946,7 @@ const DECK_KW_VALUES = {
   DRAIN: 3,          // Heals hero by damage dealt — moderate
   LETHAL: 3,         // Stat-independent — don't over-pick (capped at 3/deck)
   DEPLOY: 3,         // Battlecry — works via EffectResolver
-  LAST_RITES: 2,     // Deathrattle — works via EffectResolver
+  LAST_WORDS: 2,     // Death trigger — works via EffectResolver
 };
 
 const MAX_SPELLS_IN_DECK = 5;   // Exactly 5 spells per deck

@@ -7,7 +7,7 @@
 6,Timeline Splitter,2,2,2,Minion,,Common,ECHO,ECHO.,Play it once. Play it twice. Time is generous.,
 7,Second Chance,2,,,Spell,,Common,,Return a friendly minion that died this turn to play with 1 Health.,Death? In THIS timeline? Denied.,
 8,Chronosnare,2,,,Spell,,Common,,Freeze an enemy minion for 2 turns. (It can't attack.),Trapped in time. No parole.,
-9,Paradox Walker,2,2,3,Minion,,Common,,DEPLOY: The next card you play this turn costs (1) less.,Walks between moments. Saves you money.,
+9,Paradox Walker,2,2,2,Minion,,Common,LAST WORDS,DEPLOY: The next card you play this turn costs (1) less. LAST WORDS: Return a random friendly minion to your hand. It costs (1) less.,Walks between moments. Even death can't stop the loop.,
 10,Fast Forward,2,,,Spell,,Common,,Give a friendly minion +2 Attack and remove summoning sickness.,Skip to the good part. The HITTING part.,
 11,Time Elemental,3,3,3,Minion,Elemental,Common,ECHO,ECHO.,Exists twice. In the same moment. Rude.,
 12,Chrono Guard,3,2,4,Minion,,Common,"GUARDIAN, ECHO",GUARDIAN. ECHO.,One wall. Then ANOTHER wall. Same wall. Twice.,

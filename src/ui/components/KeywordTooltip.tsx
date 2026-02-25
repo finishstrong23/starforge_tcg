@@ -20,7 +20,7 @@ export const KEYWORD_DESCRIPTIONS: Record<string, { name: string; description: s
 
   // Trigger Keywords
   DEPLOY: { name: 'Deploy', description: 'Effect triggers when played from hand.' },
-  LAST_RITES: { name: 'Last Rites', description: 'Effect triggers when destroyed.' },
+  LAST_WORDS: { name: 'Last Words', description: 'Effect triggers when this minion is destroyed.' },
 
   // Original Keywords
   SALVAGE: { name: 'Salvage', description: 'Last Words: Draw a card.' },

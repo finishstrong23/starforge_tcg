@@ -1,7 +1,7 @@
 #,Card Name,Cost,Atk,HP,Type,Subtype,Rarity,Keywords,Card Text,Flavor Text,STARFORGE
 1,Prism Shard,1,1,2,Minion,Elemental,Common,RESONATE,RESONATE: Gain +1/+1.,Vibrates when you cast spells. Also when nervous.,
 2,Crystal Spark,1,,,Spell,,Common,,Deal 1 damage. Draw a card.,A tiny zap. A tiny card. A tiny WIN.,
-3,Facet Moth,1,1,1,Minion,Elemental,Common,RESONATE,RESONATE: Summon a 1/1 Crystal Shard.,"Casts spells, makes friends. Spell friends.",
+3,Facet Moth,1,1,1,Minion,Elemental,Common,"RESONATE, LAST WORDS",RESONATE: Summon a 1/1 Crystal Shard. LAST WORDS: Add a random spell to your hand.,"Casts spells, makes friends. Dies, leaves a gift.",
 4,Arcane Missile,1,,,Spell,,Common,,Deal 3 damage randomly split among all enemies.,"Aim? Where we're going, we don't NEED aim.",
 5,Mana Crystal,1,,,Spell,,Common,,Gain 1 Crystal this turn only.,Temporary power. Permanent results.,
 6,Geode Apprentice,2,2,3,Minion,,Common,RESONATE,RESONATE: Deal 1 damage to a random enemy.,Studies hard. Zaps harder.,
@@ -14,7 +14,7 @@
 13,Quartz Warden,3,2,5,Minion,Elemental,Common,"GUARDIAN, RESONATE",GUARDIAN. RESONATE: Gain BARRIER.,Shields up when you spell up.,
 14,Spell Surge,3,,,Spell,,Common,,"Draw 2 cards. If you've cast 2+ spells this turn, draw 3 instead.",More spells. More cards. More spells from cards. It's a CYCLE.,
 15,Prism Shield,3,,,Spell,,Common,,Give a minion +2/+4 and BARRIER.,Looks like glass. Hits like diamond.,
-16,Energized Sentry,3,2,4,Minion,Elemental,Common,,Gains +1 Attack for each spell you've cast this turn.,Charges up while you cast. Very polite.,
+16,Energized Sentry,3,2,3,Minion,Elemental,Common,LAST WORDS,Gains +1 Attack for each spell you've cast this turn. LAST WORDS: Your next spell costs (2) less.,Charges up while you cast. Releases energy when destroyed.,
 17,Prismora Scholar,4,3,4,Minion,,Common,DEPLOY,DEPLOY: Add 2 random Crystalline spells to your hand.,Knowledge is power. Two knowledges is MORE power.,
 18,Arcane Explosion,4,,,Spell,,Common,,Deal 2 damage to all enemy minions. Deal 1 extra for each spell you've cast this game. (Max +5.),Gets stronger the longer the game goes. Like a fine wine. Of FIRE.,
 19,Living Crystal,4,4,4,Minion,Elemental,Common,"RESONATE, RESONATE",RESONATE: Gain +1/+1 AND deal 1 damage to a random enemy. (Triggers both on each spell.),Double the resonance. Double the pain.,

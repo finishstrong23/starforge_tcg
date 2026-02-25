@@ -169,7 +169,7 @@ export const Card: React.FC<CardProps> = ({
   if (hasKeyword(card, CombatKeyword.CLOAK)) cardKeywords.push('CLOAK');
   if (hasKeyword(card, CombatKeyword.DOUBLE_STRIKE)) cardKeywords.push('DOUBLE_STRIKE');
   if (hasKeyword(card, TriggerKeyword.DEPLOY)) cardKeywords.push('DEPLOY');
-  if (hasKeyword(card, TriggerKeyword.LAST_RITES)) cardKeywords.push('LAST_RITES');
+  if (hasKeyword(card, TriggerKeyword.LAST_WORDS)) cardKeywords.push('LAST_WORDS');
   if (hasKeyword(card, OriginalKeyword.SALVAGE)) cardKeywords.push('SALVAGE');
 
   const keywordIcons: Record<string, string> = {
@@ -182,7 +182,7 @@ export const Card: React.FC<CardProps> = ({
     CLOAK: '👻',
     DOUBLE_STRIKE: '⚔️',
     DEPLOY: '📥',
-    LAST_RITES: '💀',
+    LAST_WORDS: '💀',
     SALVAGE: '♻️',
   };
 

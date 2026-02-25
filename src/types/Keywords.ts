@@ -32,8 +32,8 @@ export enum CombatKeyword {
 export enum TriggerKeyword {
   /** Effect triggers when played from hand */
   DEPLOY = 'DEPLOY',
-  /** Effect triggers when destroyed */
-  LAST_RITES = 'LAST_RITES',
+  /** Effect triggers when destroyed — "Last Words" */
+  LAST_WORDS = 'LAST_WORDS',
 }
 
 /**

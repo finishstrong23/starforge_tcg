@@ -3,7 +3,7 @@
  *
  * Smart AI opponent with strategic decision-making.
  * Evaluates board state, plans mana usage, targets spells intelligently,
- * and understands all 10 keywords (8 Combat + DEPLOY + LAST_RITES).
+ * and understands all 10 keywords (8 Combat + DEPLOY + LAST_WORDS).
  */
 
 import { GameEngine } from '../engine/GameEngine';
@@ -591,7 +591,7 @@ export class AIPlayer {
       if (isControl) score += 2; // Control needs efficient removal
     }
 
-    // ── DEPLOY & LAST_RITES: Score based on effect impact ───────────
+    // ── DEPLOY & LAST_WORDS: Score based on effect impact ───────────
     if (isMinion && hasKeyword(card, TriggerKeyword.DEPLOY as Keyword)) {
       score += 3;
       if (cardText.includes('deal') && cardText.includes('damage')) score += 2;
@@ -599,7 +599,7 @@ export class AIPlayer {
       if (cardText.includes('draw')) score += 2;
       if (cardText.includes('all')) score += 2;
     }
-    if (isMinion && hasKeyword(card, TriggerKeyword.LAST_RITES as Keyword)) {
+    if (isMinion && hasKeyword(card, TriggerKeyword.LAST_WORDS as Keyword)) {
       score += 2;
       if (cardText.includes('deal') && cardText.includes('damage')) score += 1;
       if (cardText.includes('summon')) score += 2;
