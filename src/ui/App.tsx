@@ -5,18 +5,27 @@
 import React, { useState, useCallback } from 'react';
 import { GameBoard } from './components/GameBoard';
 import { MainMenu } from './components/MainMenu';
+import { Lobby } from './components/Lobby';
 import { BalanceTester } from './components/BalanceTester';
 import { GameProvider } from './context/GameContext';
+import { PvPGameProvider } from './context/PvPGameContext';
 import { Race } from '../types/Race';
 import { AIDifficulty } from '../ai/AIPlayer';
+import type { MultiplayerManager } from './network/MultiplayerManager';
 
-type GameScreen = 'menu' | 'game' | 'balance';
+type GameScreen = 'menu' | 'game' | 'pvp-lobby' | 'pvp-game' | 'balance';
 
 export const App: React.FC = () => {
   const [screen, setScreen] = useState<GameScreen>('menu');
   const [gameConfig, setGameConfig] = useState<{
     playerRace: Race;
     aiDifficulty: AIDifficulty;
+  } | null>(null);
+  const [pvpConfig, setPvpConfig] = useState<{
+    role: 'host' | 'guest';
+    manager: MultiplayerManager;
+    myRace: Race;
+    opponentRace: Race;
   } | null>(null);
 
   const handleStartGame = useCallback((playerRace: Race, aiDifficulty: AIDifficulty) => {
@@ -25,9 +34,32 @@ export const App: React.FC = () => {
   }, []);
 
   const handleBackToMenu = useCallback(() => {
+    // Clean up PvP connection if active
+    if (pvpConfig) {
+      pvpConfig.manager.disconnect();
+      setPvpConfig(null);
+    }
     setScreen('menu');
     setGameConfig(null);
+  }, [pvpConfig]);
+
+  const handlePvPReady = useCallback((config: {
+    role: 'host' | 'guest';
+    manager: MultiplayerManager;
+    myRace: Race;
+    opponentRace: Race;
+  }) => {
+    setPvpConfig(config);
+    setScreen('pvp-game');
   }, []);
+
+  const handlePvPDisconnect = useCallback(() => {
+    if (pvpConfig) {
+      pvpConfig.manager.disconnect();
+      setPvpConfig(null);
+    }
+    setScreen('menu');
+  }, [pvpConfig]);
 
   return (
     <div style={{
@@ -38,6 +70,7 @@ export const App: React.FC = () => {
       {screen === 'menu' && (
         <MainMenu
           onStartGame={handleStartGame}
+          onPlayFriend={() => setScreen('pvp-lobby')}
           onBalanceTest={() => setScreen('balance')}
         />
       )}
@@ -51,6 +84,23 @@ export const App: React.FC = () => {
         >
           <GameBoard onBackToMenu={handleBackToMenu} />
         </GameProvider>
+      )}
+      {screen === 'pvp-lobby' && (
+        <Lobby
+          onGameReady={handlePvPReady}
+          onBack={handleBackToMenu}
+        />
+      )}
+      {screen === 'pvp-game' && pvpConfig && (
+        <PvPGameProvider
+          role={pvpConfig.role}
+          manager={pvpConfig.manager}
+          myRace={pvpConfig.myRace}
+          opponentRace={pvpConfig.opponentRace}
+          onDisconnect={handlePvPDisconnect}
+        >
+          <GameBoard onBackToMenu={handlePvPDisconnect} />
+        </PvPGameProvider>
       )}
     </div>
   );

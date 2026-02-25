@@ -8,10 +8,11 @@ import { AIDifficulty } from '../../ai/AIPlayer';
 
 interface MainMenuProps {
   onStartGame: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
+  onPlayFriend?: () => void;
   onBalanceTest?: () => void;
 }
 
-export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onBalanceTest }) => {
+export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest }) => {
   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
 
@@ -96,10 +97,31 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onBalanceTest }
           </div>
         </div>
 
-        {/* Start Button */}
-        <button style={styles.startButton} onClick={handleStartGame}>
-          Start Game
-        </button>
+        {/* Start Buttons */}
+        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '20px' }}>
+          <button style={styles.startButton} onClick={handleStartGame}>
+            Play vs AI
+          </button>
+
+          {onPlayFriend && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #4488ff 0%, #3366dd 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '18px 50px',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(68, 136, 255, 0.4)',
+              }}
+              onClick={onPlayFriend}
+            >
+              Play vs Friend
+            </button>
+          )}
+        </div>
 
         {/* Balance Test Button */}
         {onBalanceTest && (

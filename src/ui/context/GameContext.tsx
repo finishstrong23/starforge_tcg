@@ -61,7 +61,7 @@ interface GameContextValue {
   getCardDefinition: (card: CardInstance) => any;
 }
 
-const GameContext = createContext<GameContextValue | null>(null);
+export const GameContext = createContext<GameContextValue | null>(null);
 
 export const useGame = () => {
   const context = useContext(GameContext);
