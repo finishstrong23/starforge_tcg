@@ -15,6 +15,7 @@ import type {
   PlayCardData,
   AttackData,
   HeroPowerData,
+  ActivateStarforgeData,
 } from '../types/Game';
 import { CardZone, CardType, hasKeyword, getEffectiveAttack } from '../types/Card';
 import type { CardInstance } from '../types/Card';
@@ -146,7 +147,7 @@ export class AIPlayer {
       const state = stateManager.getState();
       if (state.activePlayerId !== this.playerId || state.phase !== GamePhase.MAIN) break;
 
-      const action = this.decideAction(stateManager, board);
+      const action = this.decideAction(stateManager, board, engine);
       if (!action) break;
 
       const result = engine.processAction(action);
@@ -177,7 +178,7 @@ export class AIPlayer {
       const state = stateManager.getState();
       if (state.activePlayerId !== this.playerId || state.phase !== GamePhase.MAIN) break;
 
-      const action = this.decideAction(stateManager, board);
+      const action = this.decideAction(stateManager, board, engine);
       if (!action) break;
 
       const result = engine.processAction(action);
@@ -195,16 +196,16 @@ export class AIPlayer {
 
   // ─── Action decision ───────────────────────────────────────────────────
 
-  private decideAction(stateManager: GameStateManager, board: GameBoard): GameAction | null {
+  private decideAction(stateManager: GameStateManager, board: GameBoard, engine?: GameEngine): GameAction | null {
     const player = stateManager.getPlayer(this.playerId);
     const opponentId = stateManager.getOpponentId(this.playerId);
     const opponent = stateManager.getPlayer(opponentId);
 
     switch (this.difficulty) {
       case AIDifficulty.EASY:   return this.decideEasy(board, player, opponent, opponentId);
-      case AIDifficulty.MEDIUM: return this.decideMedium(board, player, opponent, opponentId);
-      case AIDifficulty.HARD:   return this.decideHard(board, player, opponent, opponentId);
-      default:                  return this.decideHard(board, player, opponent, opponentId);
+      case AIDifficulty.MEDIUM: return this.decideMedium(board, player, opponent, opponentId, engine);
+      case AIDifficulty.HARD:   return this.decideHard(board, player, opponent, opponentId, engine);
+      default:                  return this.decideHard(board, player, opponent, opponentId, engine);
     }
   }
 
@@ -233,7 +234,11 @@ export class AIPlayer {
 
   // ─── MEDIUM AI ─────────────────────────────────────────────────────────
 
-  private decideMedium(board: GameBoard, player: PlayerState, opponent: PlayerState, opponentId: string): GameAction | null {
+  private decideMedium(board: GameBoard, player: PlayerState, opponent: PlayerState, opponentId: string, engine?: GameEngine): GameAction | null {
+    // 0. STARFORGE: If we have 10 mana and a legendary on board, forge it
+    const starforgeAction = this.tryStarforge(engine, board, player, opponent);
+    if (starforgeAction) return starforgeAction;
+
     // 1. Play cards — try to spend all mana, prefer higher value
     const playable = this.getPlayableCards(board, player);
     if (playable.length > 0) {
@@ -260,11 +265,17 @@ export class AIPlayer {
   // ─── HARD AI ───────────────────────────────────────────────────────────
   // Archetype-aware: aggro races face, control controls board, midrange adapts.
 
-  private decideHard(board: GameBoard, player: PlayerState, opponent: PlayerState, opponentId: string): GameAction | null {
+  private decideHard(board: GameBoard, player: PlayerState, opponent: PlayerState, opponentId: string, engine?: GameEngine): GameAction | null {
     const myBoard = board.getBoardCards(this.playerId);
     const oppBoard = board.getBoardCards(opponentId);
     const boardAdv = this.boardAdvantage(myBoard, oppBoard);
     const archetype = this.getArchetype(board);
+
+    // ── Step 0: STARFORGE — endgame power spike ──────────────────────────
+    // Use STARFORGE when we have 10 mana and a legendary on board.
+    // Especially valuable when we have board control or are in a stalemate.
+    const starforgeAction = this.tryStarforge(engine, board, player, opponent);
+    if (starforgeAction) return starforgeAction;
 
     // ── Step 1: Check lethal (always — every deck should win when it can) ──
     const lethal = this.checkLethal(board, player, opponent, opponentId);
@@ -793,6 +804,51 @@ export class AIPlayer {
       return total;
     };
     return evaluateBoard(myMinions) - evaluateBoard(oppMinions);
+  }
+
+  // ─── STARFORGE decision ─────────────────────────────────────────────────
+  // STARFORGE costs 10 mana and doubles a legendary minion's attack and health.
+  // The AI should use it when: it has 10 mana and a legendary on the board.
+  // Pick the best target (highest combined stats, or one with impactful keywords).
+
+  private tryStarforge(engine: GameEngine | undefined, board: GameBoard, player: PlayerState, opponent: PlayerState): GameAction | null {
+    if (!engine) return null;
+
+    const targets = engine.getStarforgeTargets(this.playerId);
+    if (targets.length === 0) return null;
+
+    // Score each forgeable legendary
+    let bestTarget: CardInstance | null = null;
+    let bestScore = 0;
+
+    for (const card of targets) {
+      const atk = card.currentAttack || 0;
+      const hp = card.currentHealth || 0;
+      let score = atk + hp; // Base: doubled stat total is the value gained
+
+      // Keyword multipliers — STARFORGE is most valuable on minions with these
+      if (hasKeyword(card, CombatKeyword.DOUBLE_STRIKE as Keyword)) score += atk * 2; // 4x effective attack!
+      if (hasKeyword(card, CombatKeyword.DRAIN as Keyword)) score += atk; // More healing per hit
+      if (hasKeyword(card, CombatKeyword.GUARDIAN as Keyword)) score += hp; // Bigger wall
+      if (hasKeyword(card, CombatKeyword.LETHAL as Keyword)) score += 5; // LETHAL + high stats = premium threat
+      if (hasKeyword(card, CombatKeyword.BLITZ as Keyword)) score += atk; // Immediate doubled damage
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestTarget = card;
+      }
+    }
+
+    if (bestTarget && bestScore >= 8) { // Only forge if the payoff is big enough
+      return {
+        type: ActionType.ACTIVATE_STARFORGE,
+        playerId: this.playerId,
+        timestamp: Date.now(),
+        data: { cardInstanceId: bestTarget.instanceId } as ActivateStarforgeData,
+      };
+    }
+
+    return null;
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────

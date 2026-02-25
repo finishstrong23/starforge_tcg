@@ -34,7 +34,7 @@ export const KEYWORD_DESCRIPTIONS: Record<string, { name: string; description: s
   SWARM: { name: 'Swarm', description: 'Gets +1/+1 for each other friendly minion.' },
   SCRY: { name: 'Scry', description: 'Look at the top cards of your deck and rearrange them.' },
   ECHO: { name: 'Echo', description: 'Can be played twice in one turn.' },
-  STARFORGE: { name: 'Starforge', description: 'This card transforms into a more powerful version when conditions are met.' },
+  STARFORGE: { name: 'Starforge', description: 'Pay 10 Crystals to double this Legendary minion\'s Attack and Health. Once per minion.' },
 };
 
 interface KeywordTooltipProps {

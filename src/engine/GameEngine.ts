@@ -23,8 +23,9 @@ import type {
   AttackData,
   HeroPowerData,
   MulliganData,
+  ActivateStarforgeData,
 } from '../types/Game';
-import { CardZone, CardType, hasKeyword } from '../types/Card';
+import { CardZone, CardType, CardRarity, hasKeyword } from '../types/Card';
 import type { CardInstance } from '../types/Card';
 import { canAffordCard, hasBoardSpace } from '../types/Player';
 import type { PlayerState } from '../types/Player';
@@ -132,6 +133,8 @@ export class GameEngine {
         return this.processMulligan(action);
       case ActionType.CONCEDE:
         return this.processConcede(action);
+      case ActionType.ACTIVATE_STARFORGE:
+        return this.processStarforge(action);
       default:
         return { success: false, error: 'Unknown action type', events: [] };
     }
@@ -163,7 +166,8 @@ export class GameEngine {
     if (
       (action.type === ActionType.PLAY_CARD ||
         action.type === ActionType.ATTACK ||
-        action.type === ActionType.HERO_POWER) &&
+        action.type === ActionType.HERO_POWER ||
+        action.type === ActionType.ACTIVATE_STARFORGE) &&
       state.phase !== GamePhase.MAIN
     ) {
       return { valid: false, error: 'Not in main phase' };
@@ -177,6 +181,8 @@ export class GameEngine {
         return this.validateAttack(action);
       case ActionType.HERO_POWER:
         return this.validateHeroPower(action);
+      case ActionType.ACTIVATE_STARFORGE:
+        return this.validateStarforge(action);
       default:
         return { valid: true };
     }
@@ -433,6 +439,81 @@ export class GameEngine {
     return { success: true, events: [] };
   }
 
+  // ─── STARFORGE: Pay 10 crystals to double a legendary minion's stats ───
+
+  private static readonly STARFORGE_COST = 10;
+
+  /**
+   * Validate STARFORGE activation
+   */
+  private validateStarforge(action: GameAction): ActionValidation {
+    const data = action.data as ActivateStarforgeData;
+    const player = this.stateManager.getPlayer(action.playerId);
+    const board = this.stateManager.getBoard();
+
+    // Find the card on the board
+    const boardCards = board.getBoardCards(action.playerId);
+    const card = boardCards.find((c) => c.instanceId === data.cardInstanceId);
+
+    if (!card) {
+      return { valid: false, error: 'Card not on your board' };
+    }
+
+    // Must be a legendary
+    const definition = this.cardDatabase.getCard(card.definitionId);
+    if (!definition || definition.rarity !== CardRarity.LEGENDARY) {
+      return { valid: false, error: 'Only Legendary minions can be Starforged' };
+    }
+
+    // Must not already be forged
+    if (card.isForged) {
+      return { valid: false, error: 'Card has already been Starforged' };
+    }
+
+    // Must have enough crystals
+    if (!canAffordCard(player, GameEngine.STARFORGE_COST)) {
+      return { valid: false, error: 'Not enough crystals (need 10)' };
+    }
+
+    return { valid: true };
+  }
+
+  /**
+   * Process STARFORGE: Double the minion's attack and health
+   */
+  private processStarforge(action: GameAction): ActionResult {
+    const data = action.data as ActivateStarforgeData;
+    const player = this.stateManager.getPlayer(action.playerId);
+    const card = this.stateManager.getCard(data.cardInstanceId);
+
+    // Spend 10 crystals
+    player.crystals.current -= GameEngine.STARFORGE_COST;
+
+    // Double attack
+    if (card.currentAttack !== undefined) {
+      card.currentAttack *= 2;
+    }
+
+    // Double health and max health
+    if (card.currentHealth !== undefined && card.maxHealth !== undefined) {
+      const ratio = card.currentHealth / card.maxHealth;
+      card.maxHealth *= 2;
+      card.currentHealth = Math.ceil(card.maxHealth * ratio);
+    }
+
+    // Mark as forged
+    card.isForged = true;
+
+    // Emit event
+    this.emitEvent(GameEventType.CARD_PLAYED, action.playerId, {
+      cardInstanceId: data.cardInstanceId,
+      cardDefinitionId: card.definitionId,
+      playerId: action.playerId,
+    } as CardEventData);
+
+    return { success: true, events: [] };
+  }
+
   /**
    * Process concede
    */
@@ -520,6 +601,28 @@ export class GameEngine {
     const state = this.stateManager.getState();
     const event = createEvent(type, state.id, state.turn, playerId, data as Record<string, unknown>);
     this.stateManager.getEvents().emit(event);
+  }
+
+  /**
+   * Get the STARFORGE cost (for AI and UI)
+   */
+  static getStarforgeCost(): number {
+    return GameEngine.STARFORGE_COST;
+  }
+
+  /**
+   * Check which board minions can be Starforged by a player
+   */
+  getStarforgeTargets(playerId: string): CardInstance[] {
+    const player = this.stateManager.getPlayer(playerId);
+    if (!canAffordCard(player, GameEngine.STARFORGE_COST)) return [];
+
+    const board = this.stateManager.getBoard();
+    return board.getBoardCards(playerId).filter((card) => {
+      if (card.isForged) return false;
+      const def = this.cardDatabase.getCard(card.definitionId);
+      return def?.rarity === CardRarity.LEGENDARY;
+    });
   }
 
   /**

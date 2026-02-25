@@ -201,6 +201,13 @@ export const Card: React.FC<CardProps> = ({
   // Barrier visual
   const showBarrier = card.hasBarrier;
 
+  // STARFORGED visual — golden glow
+  const isForged = card.isForged;
+  if (isForged) {
+    borderColor = '#ffaa00';
+    boxShadow = '0 0 12px #ffaa00, 0 0 24px #ff8800, 0 0 36px #ff6600';
+  }
+
   return (
     <div
       style={{ position: 'relative', display: 'inline-block' }}
@@ -209,7 +216,14 @@ export const Card: React.FC<CardProps> = ({
     >
       {/* Main Card */}
       <div
-        style={cardStyles}
+        style={{
+          ...cardStyles,
+          ...(isForged ? {
+            border: `3px solid #ffaa00`,
+            boxShadow: '0 0 12px #ffaa00, 0 0 24px #ff8800, 0 0 36px #ff6600',
+            background: 'linear-gradient(135deg, #3a2a1a 0%, #2a1a0a 100%)',
+          } : {}),
+        }}
         className={glowClass}
         onClick={(e) => {
           e.stopPropagation();
@@ -218,6 +232,11 @@ export const Card: React.FC<CardProps> = ({
       >
         {/* Barrier overlay */}
         {showBarrier && <div style={styles.barrierOverlay} />}
+
+        {/* STARFORGED badge */}
+        {isForged && (
+          <div style={styles.forgedBadge}>FORGED</div>
+        )}
 
         {/* Cost */}
         <div style={styles.costBadge}>
@@ -304,6 +323,7 @@ export const Card: React.FC<CardProps> = ({
 
           <div style={styles.popupRarity}>
             <span style={{ color: rarityColor }}>{definition?.rarity}</span>
+            {isForged && <span style={{ color: '#ffcc00', marginLeft: '8px' }}>STARFORGED</span>}
           </div>
 
           {definition?.cardText && (
@@ -465,6 +485,19 @@ const styles: { [key: string]: React.CSSProperties } = {
     textAlign: 'center',
     padding: '5px',
     lineHeight: '1.2',
+  },
+  forgedBadge: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%) rotate(-15deg)',
+    fontSize: '10px',
+    fontWeight: 'bold',
+    color: '#ffcc00',
+    textShadow: '0 0 6px #ff8800, 0 0 12px #ff6600',
+    letterSpacing: '2px',
+    zIndex: 15,
+    pointerEvents: 'none',
   },
   // Hover popup styles
   hoverPopup: {
