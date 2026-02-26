@@ -235,7 +235,7 @@ export class AIPlayer {
   // ─── MEDIUM AI ─────────────────────────────────────────────────────────
 
   private decideMedium(board: GameBoard, player: PlayerState, opponent: PlayerState, opponentId: string, engine?: GameEngine): GameAction | null {
-    // 0. STARFORGE: If we have 10 mana and a legendary on board, forge it
+    // 0. STARFORGE ASCENSION: If we have a legendary on board and enough mana, consider forging
     const starforgeAction = this.tryStarforge(engine, board, player, opponent);
     if (starforgeAction) return starforgeAction;
 
@@ -271,9 +271,9 @@ export class AIPlayer {
     const boardAdv = this.boardAdvantage(myBoard, oppBoard);
     const archetype = this.getArchetype(board);
 
-    // ── Step 0: STARFORGE — endgame power spike ──────────────────────────
-    // Use STARFORGE when we have 10 mana and a legendary on board.
-    // Especially valuable when we have board control or are in a stalemate.
+    // ── Step 0: STARFORGE ASCENSION — ultimate power spike ─────────────
+    // Sacrifice ALL mana + next turn's mana to ascend a legendary.
+    // Only when the payoff is overwhelming and we're not about to die.
     const starforgeAction = this.tryStarforge(engine, board, player, opponent);
     if (starforgeAction) return starforgeAction;
 
@@ -806,16 +806,33 @@ export class AIPlayer {
     return evaluateBoard(myMinions) - evaluateBoard(oppMinions);
   }
 
-  // ─── STARFORGE decision ─────────────────────────────────────────────────
-  // STARFORGE costs 10 mana and doubles a legendary minion's attack and health.
-  // The AI should use it when: it has 10 mana and a legendary on the board.
-  // Pick the best target (highest combined stats, or one with impactful keywords).
+  // ─── STARFORGE ASCENSION decision ──────────────────────────────────────
+  // STARFORGE ASCENSION costs ALL current mana + overloads next turn's mana.
+  // This is a massive 2-turn sacrifice, so the AI must be strategic:
+  //   - Only forge when the payoff is overwhelming (score >= 15)
+  //   - Consider board state: don't forge if we're about to die
+  //   - Value keyword synergies (bonus keyword is granted automatically)
+  //   - Prefer forging when opponent can't easily remove the threat
 
   private tryStarforge(engine: GameEngine | undefined, board: GameBoard, player: PlayerState, opponent: PlayerState): GameAction | null {
     if (!engine) return null;
 
     const targets = engine.getStarforgeTargets(this.playerId);
     if (targets.length === 0) return null;
+
+    const availableMana = player.crystals.current + player.crystals.temporary;
+
+    // Don't STARFORGE if we're low on health and need mana for defense
+    if (player.hero.currentHealth <= 10 && board.getBoardCards(this.playerId).length <= 1) {
+      return null;
+    }
+
+    // Don't STARFORGE if opponent has a massive board (we need mana to respond)
+    const opponentId = this.playerId === 'player' ? 'opponent' : 'player';
+    const oppBoardSize = board.getBoardCards(opponentId).length;
+    if (oppBoardSize >= 5 && player.hero.currentHealth <= 15) {
+      return null;
+    }
 
     // Score each forgeable legendary
     let bestTarget: CardInstance | null = null;
@@ -824,14 +841,25 @@ export class AIPlayer {
     for (const card of targets) {
       const atk = card.currentAttack || 0;
       const hp = card.currentHealth || 0;
-      let score = atk + hp; // Base: doubled stat total is the value gained
+      // Base: the stat gain from doubling (what you're adding)
+      let score = atk + hp;
 
-      // Keyword multipliers — STARFORGE is most valuable on minions with these
-      if (hasKeyword(card, CombatKeyword.DOUBLE_STRIKE as Keyword)) score += atk * 2; // 4x effective attack!
-      if (hasKeyword(card, CombatKeyword.DRAIN as Keyword)) score += atk; // More healing per hit
-      if (hasKeyword(card, CombatKeyword.GUARDIAN as Keyword)) score += hp; // Bigger wall
-      if (hasKeyword(card, CombatKeyword.LETHAL as Keyword)) score += 5; // LETHAL + high stats = premium threat
-      if (hasKeyword(card, CombatKeyword.BLITZ as Keyword)) score += atk; // Immediate doubled damage
+      // Keyword multipliers — value of doubling stats with these keywords
+      if (hasKeyword(card, CombatKeyword.DOUBLE_STRIKE as Keyword)) score += atk * 3; // 4x effective attack!
+      if (hasKeyword(card, CombatKeyword.DRAIN as Keyword)) score += atk * 2; // Doubled drain healing
+      if (hasKeyword(card, CombatKeyword.GUARDIAN as Keyword)) score += hp;     // Bigger wall + gains DRAIN
+      if (hasKeyword(card, CombatKeyword.LETHAL as Keyword)) score += 8;        // LETHAL + gains CLOAK = invisible assassin
+      if (hasKeyword(card, CombatKeyword.BLITZ as Keyword)) score += atk;       // Immediate doubled damage + gains LETHAL
+      if (hasKeyword(card, CombatKeyword.SWIFT as Keyword)) score += atk;       // Gains LETHAL
+      if (hasKeyword(card, CombatKeyword.CLOAK as Keyword)) score += 6;         // Gains DOUBLE_STRIKE, untargetable
+      if (hasKeyword(card, CombatKeyword.BARRIER as Keyword)) score += 4;       // Gains DOUBLE_STRIKE, already protected
+
+      // Bonus: forging gives immediate attack — extra value if it can kill something
+      score += atk; // Immediate swing damage
+
+      // Penalty: forging costs 2 turns of mana — need at least this much value
+      const manaSacrifice = availableMana + player.crystals.maximum + 1;
+      score -= Math.floor(manaSacrifice * 0.3); // Discount for mana loss
 
       if (score > bestScore) {
         bestScore = score;
@@ -839,7 +867,8 @@ export class AIPlayer {
       }
     }
 
-    if (bestTarget && bestScore >= 8) { // Only forge if the payoff is big enough
+    // Higher threshold than before — need big payoff to justify 2-turn sacrifice
+    if (bestTarget && bestScore >= 12) {
       return {
         type: ActionType.ACTIVATE_STARFORGE,
         playerId: this.playerId,
