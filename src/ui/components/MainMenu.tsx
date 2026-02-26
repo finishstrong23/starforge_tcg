@@ -5,6 +5,8 @@
 import React, { useState } from 'react';
 import { Race, RaceData } from '../../types/Race';
 import { AIDifficulty } from '../../ai/AIPlayer';
+import backgroundImg from '../../assets/background.png';
+import logoImg from '../../assets/logo.png';
 
 interface MainMenuProps {
   onStartGame: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
@@ -42,9 +44,9 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, o
   return (
     <div style={styles.container}>
       <div style={styles.content}>
-        {/* Title */}
+        {/* Logo */}
         <div style={styles.titleContainer}>
-          <h1 style={styles.title}>STARFORGE</h1>
+          <img src={logoImg} alt="STARFORGE" style={styles.logo} />
           <p style={styles.subtitle}>Trading Card Game</p>
         </div>
 
@@ -157,6 +159,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '20px',
     overflowY: 'auto',
     flexDirection: 'column',
+    backgroundImage: `url(${backgroundImg})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
   },
   content: {
     maxWidth: '900px',
@@ -172,13 +178,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     textAlign: 'center',
     marginBottom: '20px',
   },
-  title: {
-    fontSize: '64px',
-    fontWeight: 'bold',
-    color: '#00ff88',
-    textShadow: '0 0 20px #00ff88, 0 0 40px #00ff88',
-    letterSpacing: '8px',
-    margin: 0,
+  logo: {
+    maxWidth: '400px',
+    width: '100%',
+    height: 'auto',
+    filter: 'drop-shadow(0 0 20px rgba(0, 255, 136, 0.5))',
   },
   subtitle: {
     fontSize: '24px',

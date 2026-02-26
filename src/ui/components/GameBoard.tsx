@@ -21,6 +21,7 @@ import { TurnTimer } from './TurnTimer';
 import { CombatLog } from './CombatLog';
 import { AttackAnimation } from './AttackAnimation';
 import { getHeroById } from '../../heroes';
+import backgroundImg from '../../assets/background.png';
 
 interface GameBoardProps {
   onBackToMenu: () => void;
@@ -289,6 +290,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
+    backgroundImage: `url(${backgroundImg})`,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat',
   },
   loading: {
     width: '100%',
