@@ -6,6 +6,8 @@
  * - Board battlefield (middle)
  * - Player area (bottom)
  * - Spell/hero power targeting mode
+ * - Combat log / play-by-play tracker
+ * - Attack animations between combatants
  */
 
 import React, { useCallback, useMemo } from 'react';
@@ -16,6 +18,8 @@ import { CrystalBar } from './CrystalBar';
 import { EndTurnButton } from './EndTurnButton';
 import { GameOverlay } from './GameOverlay';
 import { TurnTimer } from './TurnTimer';
+import { CombatLog } from './CombatLog';
+import { AttackAnimation } from './AttackAnimation';
 import { getHeroById } from '../../heroes';
 
 interface GameBoardProps {
@@ -46,6 +50,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
     endTurn,
     handleTargetClick,
     cancelTargeting,
+    combatLog,
+    currentAnimation,
+    onAnimationComplete,
   } = useGame();
 
   // Timer callback - auto end turn when time runs out
@@ -99,6 +106,12 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
 
   return (
     <div style={styles.container}>
+      {/* Attack Animation Overlay */}
+      <AttackAnimation
+        animation={currentAnimation}
+        onComplete={onAnimationComplete}
+      />
+
       {/* Game Over Overlay */}
       {isGameOver && (
         <GameOverlay
@@ -115,13 +128,16 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
         </div>
       )}
 
+      {/* Combat Log - Play by Play Tracker */}
+      <CombatLog entries={combatLog} />
+
       {/* Opponent Area */}
       <div style={styles.opponentArea}>
         {/* Opponent Hand (face down) */}
         <div style={styles.opponentHand}>
           {opponentState.hand.map((_, index) => (
             <div key={index} style={styles.cardBack}>
-              <div style={styles.cardBackDesign}>★</div>
+              <div style={styles.cardBackDesign}>{'\u2605'}</div>
             </div>
           ))}
         </div>
@@ -143,24 +159,27 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
       <div style={styles.battlefield} onClick={handleBoardClick}>
         {/* Opponent Board */}
         <div style={styles.boardRow}>
-          <HeroPortrait
-            health={opponentState.hero.currentHealth}
-            maxHealth={opponentState.hero.maxHealth}
-            armor={opponentState.hero.armor}
-            isOpponent
-            isValidTarget={validTargets.includes('hero_opponent')}
-            onClick={() => onTargetClick('hero_opponent')}
-          />
+          <div data-card-id="hero_opponent">
+            <HeroPortrait
+              health={opponentState.hero.currentHealth}
+              maxHealth={opponentState.hero.maxHealth}
+              armor={opponentState.hero.armor}
+              isOpponent
+              isValidTarget={validTargets.includes('hero_opponent')}
+              onClick={() => onTargetClick('hero_opponent')}
+            />
+          </div>
           <div style={styles.minionsRow}>
             {opponentBoard.map((card) => (
-              <Card
-                key={card.instanceId}
-                card={card}
-                isOnBoard
-                isEnemy
-                isValidTarget={validTargets.includes(card.instanceId)}
-                onClick={() => onTargetClick(card.instanceId)}
-              />
+              <div key={card.instanceId} data-card-id={card.instanceId}>
+                <Card
+                  card={card}
+                  isOnBoard
+                  isEnemy
+                  isValidTarget={validTargets.includes(card.instanceId)}
+                  onClick={() => onTargetClick(card.instanceId)}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -177,35 +196,38 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
 
         {/* Player Board */}
         <div style={styles.boardRow}>
-          <HeroPortrait
-            health={playerState.hero.currentHealth}
-            maxHealth={playerState.hero.maxHealth}
-            armor={playerState.hero.armor}
-            heroPowerUsed={playerState.hero.heroPowerUsedThisTurn}
-            canUseHeroPower={isPlayerTurn && !playerState.hero.heroPowerUsedThisTurn && playerState.crystals.current >= 2}
-            heroPowerName={playerHeroDef?.heroPower.name}
-            heroPowerDescription={playerHeroDef?.heroPower.description}
-            onHeroPowerClick={() => useHeroPower()}
-            isValidTarget={validTargets.includes('hero_player')}
-            onClick={() => onTargetClick('hero_player')}
-          />
+          <div data-card-id="hero_player">
+            <HeroPortrait
+              health={playerState.hero.currentHealth}
+              maxHealth={playerState.hero.maxHealth}
+              armor={playerState.hero.armor}
+              heroPowerUsed={playerState.hero.heroPowerUsedThisTurn}
+              canUseHeroPower={isPlayerTurn && !playerState.hero.heroPowerUsedThisTurn && playerState.crystals.current >= 2}
+              heroPowerName={playerHeroDef?.heroPower.name}
+              heroPowerDescription={playerHeroDef?.heroPower.description}
+              onHeroPowerClick={() => useHeroPower()}
+              isValidTarget={validTargets.includes('hero_player')}
+              onClick={() => onTargetClick('hero_player')}
+            />
+          </div>
           <div style={styles.minionsRow}>
             {playerBoard.map((card) => (
-              <Card
-                key={card.instanceId}
-                card={card}
-                isOnBoard
-                isSelected={selectedCard?.instanceId === card.instanceId}
-                canAttack={canAttack(card)}
-                isValidTarget={validTargets.includes(card.instanceId)}
-                onClick={() => {
-                  if (validTargets.includes(card.instanceId)) {
-                    onTargetClick(card.instanceId);
-                  } else {
-                    handleCardClick(card);
-                  }
-                }}
-              />
+              <div key={card.instanceId} data-card-id={card.instanceId}>
+                <Card
+                  card={card}
+                  isOnBoard
+                  isSelected={selectedCard?.instanceId === card.instanceId}
+                  canAttack={canAttack(card)}
+                  isValidTarget={validTargets.includes(card.instanceId)}
+                  onClick={() => {
+                    if (validTargets.includes(card.instanceId)) {
+                      onTargetClick(card.instanceId);
+                    } else {
+                      handleCardClick(card);
+                    }
+                  }}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -253,7 +275,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
 
       {/* Back button */}
       <button style={styles.backButton} onClick={onBackToMenu}>
-        ✕
+        {'\u2715'}
       </button>
     </div>
   );

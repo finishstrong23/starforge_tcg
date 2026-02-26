@@ -19,6 +19,10 @@ import { CombatKeyword } from '../../types/Keywords';
 import { Race } from '../../types/Race';
 import { TargetType } from '../../types/Effects';
 import { getHeroById } from '../../heroes';
+import { GameEventType } from '../../events/GameEvent';
+import type { GameEvent, CombatEventData, CardEventData, DamageEventData, HealEventData, TurnEventData } from '../../events/GameEvent';
+import type { CombatLogEntry } from '../components/CombatLog';
+import type { AttackAnimationData } from '../components/AttackAnimation';
 import {
   initializeSampleDatabase,
   createSampleDeck,
@@ -110,6 +114,13 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
   const [pendingSpell, setPendingSpell] = useState<CardInstance | null>(null);
   const [pendingHeroPower, setPendingHeroPower] = useState(false);
 
+  // Combat log and animation state
+  const [combatLog, setCombatLog] = useState<CombatLogEntry[]>([]);
+  const logIdRef = useRef(0);
+  const [currentAnimation, setCurrentAnimation] = useState<AttackAnimationData | null>(null);
+  const pendingPvPAttackRef = useRef<{ attacker: CardInstance; targetId: string } | null>(null);
+  const animationIdRef = useRef(0);
+
   // Host state
   const engineRef = useRef<GameEngine | null>(null);
   const myPlayerIdRef = useRef<string>(role === 'host' ? 'player1' : 'player2');
@@ -130,6 +141,96 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     setSelectedCard(null);
     setAttackingMinion(null);
   }, []);
+
+  // Helper: add an entry to the combat log
+  const addLogEntry = useCallback((text: string, type: CombatLogEntry['type'], isPlayer: boolean, turn: number) => {
+    const entry: CombatLogEntry = {
+      id: logIdRef.current++,
+      turn,
+      text,
+      type,
+      isPlayer,
+      timestamp: Date.now(),
+    };
+    setCombatLog(prev => [...prev, entry]);
+  }, []);
+
+  // Convert game events to combat log entries (for PvP)
+  const handlePvPGameEventForLog = useCallback((event: GameEvent) => {
+    const myPlayerId = myPlayerIdRef.current;
+    const isPlayer = event.playerId === myPlayerId;
+    const who = isPlayer ? 'You' : 'Opponent';
+
+    switch (event.type) {
+      case GameEventType.TURN_STARTED: {
+        const data = event.data as TurnEventData;
+        const turnPlayer = data.playerId === myPlayerId ? 'Your' : "Opponent's";
+        addLogEntry(`--- ${turnPlayer} Turn ${data.turnNumber} ---`, 'turn', isPlayer, event.turn);
+        break;
+      }
+      case GameEventType.CARD_PLAYED: {
+        const data = event.data as CardEventData;
+        const def = globalCardDatabase.getCard(data.cardDefinitionId);
+        const name = def?.name || data.cardDefinitionId;
+        addLogEntry(`${who} played ${name}`, 'play', isPlayer, event.turn);
+        break;
+      }
+      case GameEventType.ATTACK_DECLARED: {
+        const data = event.data as CombatEventData;
+        const isHeroTarget = data.defenderId.startsWith('hero_');
+        const attacker = data.attackerOwnerId === myPlayerId ? 'Your' : "Opponent's";
+        addLogEntry(`${attacker} minion attacks ${isHeroTarget ? 'Hero' : 'minion'}`, 'attack', data.attackerOwnerId === myPlayerId, event.turn);
+        break;
+      }
+      case GameEventType.CARD_DESTROYED: {
+        const data = event.data as CardEventData;
+        const def = globalCardDatabase.getCard(data.cardDefinitionId);
+        const name = def?.name || data.cardDefinitionId;
+        const owner = data.playerId === myPlayerId ? 'Your' : "Opponent's";
+        addLogEntry(`${owner} ${name} was destroyed`, 'death', data.playerId !== myPlayerId, event.turn);
+        break;
+      }
+      case GameEventType.HERO_POWER_USED: {
+        addLogEntry(`${who} used Hero Power`, 'hero_power', isPlayer, event.turn);
+        break;
+      }
+    }
+  }, [addLogEntry]);
+
+  // Animation complete callback for PvP
+  const onAnimationComplete = useCallback(() => {
+    const pending = pendingPvPAttackRef.current;
+    pendingPvPAttackRef.current = null;
+    setCurrentAnimation(null);
+
+    if (pending && engineRef.current && role === 'host') {
+      const myPlayerId = myPlayerIdRef.current;
+      engineRef.current.processAction({
+        type: ActionType.ATTACK,
+        playerId: myPlayerId,
+        timestamp: Date.now(),
+        data: {
+          attackerId: pending.attacker.instanceId,
+          defenderId: pending.targetId,
+        },
+      });
+      forceUpdate();
+    } else if (pending && role === 'guest') {
+      const myPlayerId = myPlayerIdRef.current;
+      manager.send({
+        type: 'action',
+        action: {
+          type: ActionType.ATTACK,
+          playerId: myPlayerId,
+          timestamp: Date.now(),
+          data: {
+            attackerId: pending.attacker.instanceId,
+            defenderId: pending.targetId,
+          },
+        },
+      });
+    }
+  }, [role, manager, forceUpdate]);
 
   // --- HOST: Extract view state for the guest ---
   const extractViewForGuest = useCallback((): NetworkViewState | null => {
@@ -184,7 +285,8 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     engineRef.current = engine;
 
     const events = engine.getEvents();
-    const sub = events.subscribe(() => {
+    const sub = events.subscribe((event) => {
+      handlePvPGameEventForLog(event);
       forceUpdate();
       // Send state to guest after each event
       setTimeout(() => sendStateToGuest(), 50);
@@ -406,13 +508,26 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
   // --- Attack ---
   const attack = useCallback((attacker: CardInstance, targetId: string) => {
     if (!canAttack(attacker)) return;
-    processAction({
-      type: ActionType.ATTACK,
-      playerId: myPlayerId,
-      timestamp: Date.now(),
-      data: { attackerId: attacker.instanceId, defenderId: targetId },
+
+    // Show animation, then resolve
+    const attackDamage = attacker.currentAttack ?? 0;
+    let counterDamage = 0;
+    if (!targetId.startsWith('hero_')) {
+      const defender = [...playerBoard, ...opponentBoard].find(c => c.instanceId === targetId);
+      if (defender) counterDamage = defender.currentAttack ?? 0;
+    }
+
+    pendingPvPAttackRef.current = { attacker, targetId };
+    setCurrentAnimation({
+      id: `anim_${animationIdRef.current++}`,
+      attackerId: attacker.instanceId,
+      defenderId: targetId,
+      damage: attackDamage,
+      counterDamage,
+      isPlayerAttack: true,
     });
-  }, [canAttack, myPlayerId, processAction]);
+    cancelTargeting();
+  }, [canAttack, playerBoard, opponentBoard, cancelTargeting]);
 
   // --- Hero power ---
   const useHeroPower = useCallback((targetId?: string) => {
@@ -526,6 +641,9 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     canPlayCard,
     canAttack,
     getCardDefinition,
+    combatLog,
+    currentAnimation,
+    onAnimationComplete,
   };
 
   return (

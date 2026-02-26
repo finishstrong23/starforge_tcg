@@ -18,6 +18,10 @@ import type { PlayerState } from '../../types/Player';
 import { Race } from '../../types/Race';
 import { TargetType } from '../../types/Effects';
 import { getHeroById } from '../../heroes';
+import { GameEventType } from '../../events/GameEvent';
+import type { GameEvent, CombatEventData, CardEventData, DamageEventData, HealEventData, TurnEventData } from '../../events/GameEvent';
+import type { CombatLogEntry } from '../components/CombatLog';
+import type { AttackAnimationData } from '../components/AttackAnimation';
 import {
   initializeSampleDatabase,
   createSampleDeck,
@@ -59,6 +63,13 @@ interface GameContextValue {
   canPlayCard: (card: CardInstance) => boolean;
   canAttack: (minion: CardInstance) => boolean;
   getCardDefinition: (card: CardInstance) => any;
+
+  // Combat log
+  combatLog: CombatLogEntry[];
+
+  // Attack animation
+  currentAnimation: AttackAnimationData | null;
+  onAnimationComplete: () => void;
 }
 
 export const GameContext = createContext<GameContextValue | null>(null);
@@ -171,6 +182,15 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const [pendingSpell, setPendingSpell] = useState<CardInstance | null>(null);
   const [pendingHeroPower, setPendingHeroPower] = useState(false);
 
+  // Combat log state
+  const [combatLog, setCombatLog] = useState<CombatLogEntry[]>([]);
+  const logIdRef = useRef(0);
+
+  // Attack animation state
+  const [currentAnimation, setCurrentAnimation] = useState<AttackAnimationData | null>(null);
+  const pendingAttackRef = useRef<{ attacker: CardInstance; targetId: string } | null>(null);
+  const animationIdRef = useRef(0);
+
   const engineRef = useRef<GameEngine | null>(null);
   const aiRef = useRef<AIPlayer | null>(null);
   const aiTurnInProgressRef = useRef(false);
@@ -189,6 +209,119 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     setSelectedCard(null);
     setAttackingMinion(null);
   }, []);
+
+  // Helper: get a card's display name from instance ID
+  const getCardName = useCallback((instanceId: string): string => {
+    if (!engineRef.current) return 'Unknown';
+    try {
+      const board = engineRef.current.getStateManager().getBoard();
+      const card = board.getCard(instanceId);
+      if (card) {
+        const def = globalCardDatabase.getCard(card.definitionId);
+        return def?.name || card.definitionId;
+      }
+    } catch { /* card may have been destroyed */ }
+    return 'Unknown';
+  }, []);
+
+  // Helper: add an entry to the combat log
+  const addLogEntry = useCallback((text: string, type: CombatLogEntry['type'], isPlayer: boolean, turn: number) => {
+    const entry: CombatLogEntry = {
+      id: logIdRef.current++,
+      turn,
+      text,
+      type,
+      isPlayer,
+      timestamp: Date.now(),
+    };
+    setCombatLog(prev => [...prev, entry]);
+  }, []);
+
+  // Convert game events to combat log entries
+  const handleGameEventForLog = useCallback((event: GameEvent) => {
+    const isPlayer = event.playerId === 'player';
+    const who = isPlayer ? 'You' : 'Opponent';
+
+    switch (event.type) {
+      case GameEventType.TURN_STARTED: {
+        const data = event.data as TurnEventData;
+        const turnPlayer = data.playerId === 'player' ? 'Your' : "Opponent's";
+        addLogEntry(`--- ${turnPlayer} Turn ${data.turnNumber} ---`, 'turn', isPlayer, event.turn);
+        break;
+      }
+      case GameEventType.CARD_PLAYED: {
+        const data = event.data as CardEventData;
+        const def = globalCardDatabase.getCard(data.cardDefinitionId);
+        const name = def?.name || data.cardDefinitionId;
+        addLogEntry(`${who} played ${name}`, 'play', isPlayer, event.turn);
+        break;
+      }
+      case GameEventType.ATTACK_DECLARED: {
+        const data = event.data as CombatEventData;
+        const attackerName = getCardName(data.attackerId);
+        const isHeroTarget = data.defenderId.startsWith('hero_');
+        const defenderName = isHeroTarget ? 'Hero' : getCardName(data.defenderId);
+        const attacker = data.attackerOwnerId === 'player' ? 'Your' : "Opponent's";
+        addLogEntry(`${attacker} ${attackerName} attacks ${defenderName}`, 'attack', data.attackerOwnerId === 'player', event.turn);
+        break;
+      }
+      case GameEventType.DAMAGE_DEALT: {
+        const data = event.data as DamageEventData;
+        if (data.targetType === 'hero') {
+          const targetHero = data.targetId === 'hero_player' ? 'Your Hero' : "Opponent's Hero";
+          addLogEntry(`${targetHero} takes ${data.amount} damage`, 'damage', data.targetId === 'hero_opponent', event.turn);
+        }
+        break;
+      }
+      case GameEventType.CARD_DESTROYED: {
+        const data = event.data as CardEventData;
+        const def = globalCardDatabase.getCard(data.cardDefinitionId);
+        const name = def?.name || data.cardDefinitionId;
+        const owner = data.playerId === 'player' ? 'Your' : "Opponent's";
+        addLogEntry(`${owner} ${name} was destroyed`, 'death', data.playerId !== 'player', event.turn);
+        break;
+      }
+      case GameEventType.HEALING_DONE: {
+        const data = event.data as HealEventData;
+        if (data.actualHealing > 0) {
+          const targetName = data.targetType === 'hero'
+            ? (data.targetId === 'hero_player' ? 'Your Hero' : "Opponent's Hero")
+            : getCardName(data.targetId);
+          addLogEntry(`${targetName} healed for ${data.actualHealing}`, 'heal', data.targetId.includes('player'), event.turn);
+        }
+        break;
+      }
+      case GameEventType.HERO_POWER_USED: {
+        addLogEntry(`${who} used Hero Power`, 'hero_power', isPlayer, event.turn);
+        break;
+      }
+      case GameEventType.BARRIER_BROKEN: {
+        addLogEntry(`Barrier broken!`, 'keyword', isPlayer, event.turn);
+        break;
+      }
+    }
+  }, [getCardName, addLogEntry]);
+
+  // Animation complete callback
+  const onAnimationComplete = useCallback(() => {
+    const pending = pendingAttackRef.current;
+    pendingAttackRef.current = null;
+    setCurrentAnimation(null);
+
+    // Now actually resolve the attack
+    if (pending && engineRef.current) {
+      engineRef.current.processAction({
+        type: ActionType.ATTACK,
+        playerId: 'player',
+        timestamp: Date.now(),
+        data: {
+          attackerId: pending.attacker.instanceId,
+          defenderId: pending.targetId,
+        },
+      });
+      forceUpdate();
+    }
+  }, [forceUpdate]);
 
   // Initialize game
   useEffect(() => {
@@ -241,6 +374,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     const events = engine.getEvents();
     const subscription = events.subscribe((event) => {
       console.log('Game event:', event.type);
+      handleGameEventForLog(event);
       forceUpdate();
     });
 
@@ -250,7 +384,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [playerRace, aiDifficulty, forceUpdate]);
+  }, [playerRace, aiDifficulty, forceUpdate, handleGameEventForLog]);
 
   // Get current state from engine
   const gameState = engineRef.current?.getState() || null;
@@ -404,25 +538,36 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     forceUpdate();
   }, [canPlayCard, forceUpdate, cancelTargeting]);
 
-  // Attack action
+  // Attack action — plays animation first, then resolves
   const attack = useCallback((attacker: CardInstance, targetId: string) => {
     if (!engineRef.current || !canAttack(attacker)) return;
 
     console.log('Attacking:', attacker.definitionId, '->', targetId);
 
-    engineRef.current.processAction({
-      type: ActionType.ATTACK,
-      playerId: 'player',
-      timestamp: Date.now(),
-      data: {
-        attackerId: attacker.instanceId,
-        defenderId: targetId,
-      },
+    // Get damage for animation display
+    const attackDamage = attacker.currentAttack ?? 0;
+    let counterDamage = 0;
+    if (!targetId.startsWith('hero_')) {
+      try {
+        const board = engineRef.current.getStateManager().getBoard();
+        const defender = board.getCard(targetId);
+        if (defender) counterDamage = defender.currentAttack ?? 0;
+      } catch { /* defender may not exist */ }
+    }
+
+    // Store the pending attack and trigger animation
+    pendingAttackRef.current = { attacker, targetId };
+    setCurrentAnimation({
+      id: `anim_${animationIdRef.current++}`,
+      attackerId: attacker.instanceId,
+      defenderId: targetId,
+      damage: attackDamage,
+      counterDamage,
+      isPlayerAttack: true,
     });
 
     cancelTargeting();
-    forceUpdate();
-  }, [canAttack, forceUpdate, cancelTargeting]);
+  }, [canAttack, cancelTargeting]);
 
   // Hero power action
   const useHeroPower = useCallback((targetId?: string) => {
@@ -553,6 +698,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     getCardDefinition,
     canPlayCard,
     canAttack,
+    combatLog,
+    currentAnimation,
+    onAnimationComplete,
   };
 
   return (
