@@ -615,9 +615,12 @@ export class AIPlayer {
       if (cardText.includes('all')) score += 2;
     }
     if (isMinion && hasKeyword(card, TriggerKeyword.LAST_WORDS as Keyword)) {
-      score += 2;
-      if (cardText.includes('deal') && cardText.includes('damage')) score += 1;
-      if (cardText.includes('summon')) score += 2;
+      score += 3; // Last Words minions give value even when they die
+      if (cardText.includes('deal') && cardText.includes('damage')) score += 2;
+      if (cardText.includes('summon')) score += 3;
+      if (cardText.includes('all friendly')) score += 2;
+      // Last Words minions are better when we're behind (opponent must trade into them)
+      if (oppBoardCount >= 3) score += 2;
     }
 
     // ── Board context bonuses (archetype-aware) ──────────────────────
@@ -742,6 +745,16 @@ export class AIPlayer {
       if (hasKeyword(target, CombatKeyword.DRAIN as Keyword)) score += 3;
       if (hasKeyword(target, CombatKeyword.BLITZ as Keyword)) score += 2;
 
+      // LAST_WORDS penalty: killing their Last Words minion triggers death effects!
+      // Summon/damage effects are the worst — they get free value
+      if (hasKeyword(target, TriggerKeyword.LAST_WORDS as Keyword)) {
+        const targetDef = globalCardDatabase.getCard(target.definitionId);
+        const targetText = (targetDef?.cardText || '').toLowerCase();
+        if (targetText.includes('summon')) score -= 3; // They get free bodies
+        if (targetText.includes('deal') && targetText.includes('damage')) score -= 2; // We take damage
+        if (targetText.includes('all friendly')) score -= 2; // Their whole board gets buffed
+      }
+
       // LETHAL value scales with how much HP we'd otherwise need to punch through
       // A 1-ATK LETHAL killing a 7-HP minion saves 6 damage worth of value
       if (hasLethal && defHP > atkDmg) score += Math.min(defHP - atkDmg, 10);
@@ -767,6 +780,10 @@ export class AIPlayer {
       if (hasKeyword(target, CombatKeyword.LETHAL as Keyword)) score += 3;
       // LETHAL even-trades are actually favorable — our cheap minion kills their big one
       if (hasLethal && defHP > atkDmg) score += Math.min(defHP - atkDmg, 8);
+      // LAST_WORDS bonus: our minion dying triggers our death effects — it's like a free spell!
+      if (hasKeyword(attacker, TriggerKeyword.LAST_WORDS as Keyword)) score += 3;
+      // LAST_WORDS penalty on target: their minion also triggers
+      if (hasKeyword(target, TriggerKeyword.LAST_WORDS as Keyword)) score -= 2;
     } else if (!effectiveKill && !weWillDie) {
       // Chip damage — usually not worth it
       if (hasKeyword(target, CombatKeyword.GUARDIAN as Keyword) && (target.currentAttack || 0) >= 3) {
