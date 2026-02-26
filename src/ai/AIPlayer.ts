@@ -598,8 +598,12 @@ export class AIPlayer {
       // LETHAL: Kills ANY minion regardless of health. Premium removal.
       score += 4;
       if (oppBoardCount > 0) score += 3;
-      if (oppBoard.some(m => (m.currentHealth || 0) >= 5)) score += 3;
+      // Scale bonus with how big the enemy threats are — LETHAL excels vs big minions
+      const biggestEnemy = oppBoard.reduce((max, m) => Math.max(max, m.currentHealth || 0), 0);
+      if (biggestEnemy >= 5) score += Math.min(biggestEnemy - 2, 6);
       if (isControl) score += 2; // Control needs efficient removal
+      // LETHAL + SWIFT combo: immediately removes a minion on play
+      if (hasKeyword(card, CombatKeyword.SWIFT as Keyword)) score += 3;
     }
 
     // ── DEPLOY & LAST_WORDS: Score based on effect impact ───────────
@@ -738,8 +742,9 @@ export class AIPlayer {
       if (hasKeyword(target, CombatKeyword.DRAIN as Keyword)) score += 3;
       if (hasKeyword(target, CombatKeyword.BLITZ as Keyword)) score += 2;
 
-      // Bonus if our attacker has LETHAL (killed a big thing cheaply)
-      if (hasLethal && defHP > atkDmg) score += 4;
+      // LETHAL value scales with how much HP we'd otherwise need to punch through
+      // A 1-ATK LETHAL killing a 7-HP minion saves 6 damage worth of value
+      if (hasLethal && defHP > atkDmg) score += Math.min(defHP - atkDmg, 10);
 
       // DOUBLE_STRIKE bonus: we can still attack again this turn!
       if (hasDS) score += 3;
@@ -749,7 +754,9 @@ export class AIPlayer {
       // Use cheap/low-value attackers to pop barrier
       if (atkDmg <= 2) score += 1;
       // LETHAL minions should NOT waste their attack on barrier
-      if (hasLethal) score -= 3;
+      if (hasLethal) score -= 5;
+      // Cloaked minions shouldn't waste their stealth popping barriers
+      if (attacker.isCloaked) score -= 2;
     } else if (effectiveKill && weWillDie) {
       // Even trade — value based on their value vs ours
       const theirValue = (target.currentAttack || 0) + defHP;
@@ -758,6 +765,8 @@ export class AIPlayer {
       // Prioritize killing GUARDIAN even in even trades
       if (hasKeyword(target, CombatKeyword.GUARDIAN as Keyword)) score += 3;
       if (hasKeyword(target, CombatKeyword.LETHAL as Keyword)) score += 3;
+      // LETHAL even-trades are actually favorable — our cheap minion kills their big one
+      if (hasLethal && defHP > atkDmg) score += Math.min(defHP - atkDmg, 8);
     } else if (!effectiveKill && !weWillDie) {
       // Chip damage — usually not worth it
       if (hasKeyword(target, CombatKeyword.GUARDIAN as Keyword) && (target.currentAttack || 0) >= 3) {
@@ -777,11 +786,28 @@ export class AIPlayer {
 
   private findFaceAttack(board: GameBoard, player: PlayerState, opponentId: string): GameAction | null {
     const attackers = this.getAvailableAttackers(board, player);
-    for (const atk of attackers) {
-      const targets = this.getValidTargets(board, opponentId, atk);
-      if (targets.includes('hero')) {
-        return this.createAttackAction(atk, 'hero', opponentId);
-      }
+    // Prioritize face attacks: cloaked first (safe to send), then highest attack
+    // But LETHAL minions should trade instead of going face (their value is removing big minions)
+    const faceAttackers = attackers
+      .filter(atk => {
+        const targets = this.getValidTargets(board, opponentId, atk);
+        return targets.includes('hero');
+      })
+      .sort((a, b) => {
+        // Cloaked minions go face first (safe, can't be attacked back)
+        const aCloaked = a.isCloaked ? 1 : 0;
+        const bCloaked = b.isCloaked ? 1 : 0;
+        if (aCloaked !== bCloaked) return bCloaked - aCloaked;
+        // LETHAL minions go face last (their value is trades, not face)
+        const aLethal = hasKeyword(a, CombatKeyword.LETHAL as Keyword) ? 1 : 0;
+        const bLethal = hasKeyword(b, CombatKeyword.LETHAL as Keyword) ? 1 : 0;
+        if (aLethal !== bLethal) return aLethal - bLethal;
+        // Higher attack goes face first
+        return (getEffectiveAttack(b)) - (getEffectiveAttack(a));
+      });
+
+    if (faceAttackers.length > 0) {
+      return this.createAttackAction(faceAttackers[0], 'hero', opponentId);
     }
     return null;
   }

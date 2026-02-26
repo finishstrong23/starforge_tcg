@@ -122,91 +122,76 @@ const RARITY_MAP = {
 // Tertiary (weight 1): Rare but present for diversity
 
 const RACE_COMBAT_WEIGHTS = {
-  // === ACTIVE PHASE 1 RACES (balanced for 4-race meta) ===
-  // R14: Archetype detection uses: BLITZ*3 + SWIFT + DS (aggro) vs GUARDIAN*2 + BARRIER*2 + DRAIN + LETHAL (control).
-  // Key fix: Pyroclast stripped of sustain (DRAIN/DS), Luminar gets more GUARDIAN walls,
-  // Voidborn gets LETHAL identity (counts as control signal) to avoid AGGRO misclassification.
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DISTINCT PLAYSTYLE WEIGHTS — Balance-tuned across 10+ test runs (2250 games each)
+  // 28.4% spread (60.0% → 31.7%), middle 8 races within 47.5-60.0%
+  //
+  // Keyword Power Ranking (empirically validated):
+  // BARRIER ~5 > BLITZ ~5 > DS ~4.5 > DRAIN ~4 > GUARDIAN ~3.5
+  // > SWIFT ~3 > LETHAL ~3 > CLOAK ~2
+  //
+  // Keyword Ownership Map:
+  //   BARRIER  → COGSMITHS (Shield Engineers)
+  //   GUARDIAN → LUMINAR (Radiant Wall)
+  //   BLITZ    → PYROCLAST (Fire Blitz)
+  //   CLOAK    → VOIDBORN (Void Stalkers)
+  //   DRAIN    → BIOTITANS (Living Colossi)
+  //   BARRIER+GUARDIAN → CRYSTALLINE (Crystal Fortress)
+  //   SWIFT    → PHANTOM CORSAIRS (Speed Raiders)
+  //   LETHAL   → HIVEMIND (Venom Swarm)
+  //   DS       → ASTROMANCERS (Twin Stars)
+  //   LETHAL+DS → CHRONOBOUND (Time Reapers)
+  // ═══════════════════════════════════════════════════════════════════════════
 
-  // Cogsmiths: MIDRANGE — balanced keywords, moderate curve
+  // Cogsmiths: "Shield Engineers" — BARRIER + SWIFT midrange tempo (57-60%)
   COGSMITHS: {
-    BARRIER: 3, DOUBLE_STRIKE: 3,  // Primary: shields + efficient output
-    SWIFT: 3, DRAIN: 3,            // R15m: DRAIN 2→3 for sustain vs Biotitans (41/59 matchup)
-    GUARDIAN: 2, BLITZ: 2,         // Secondary: protection + rush
-    LETHAL: 1, CLOAK: 1            // Tertiary
+    BARRIER: 5, SWIFT: 4, GUARDIAN: 3, DRAIN: 2,
+    DOUBLE_STRIKE: 2, BLITZ: 2, LETHAL: 1, CLOAK: 1
   },
-  // Luminar: CONTROL — flat weights to prevent pool starvation (only 30 minions in pool).
-  // Luminar still classifies as CONTROL because defensive CAPS (GUARDIAN:7, BARRIER:7, DRAIN:8)
-  // are higher than offensive caps (BLITZ:4), so the deck naturally skews defensive.
+  // Luminar: "Radiant Wall" — GUARDIAN + DRAIN heal-control (52-54%)
   LUMINAR: {
-    DRAIN: 2, GUARDIAN: 2, BARRIER: 2, SWIFT: 2,
-    DOUBLE_STRIKE: 2, BLITZ: 2, LETHAL: 2, CLOAK: 2  // Flat: every keyword = 2
+    GUARDIAN: 6, DRAIN: 5, BARRIER: 3, SWIFT: 2,
+    DOUBLE_STRIKE: 1, BLITZ: 1, LETHAL: 1, CLOAK: 1
   },
-  // Pyroclast: AGGRO — R13 spiked weights restored. Accepts 22 minions (pool starvation)
-  // but keeps BARRIER=2 and GUARDIAN=1. Flat weights gave BARRIER=5 → 82.8% win rate.
+  // Pyroclast: "Fire Blitz" — BLITZ + DS aggro (56-60%, nerfed from 62%)
   PYROCLAST: {
-    BLITZ: 3, SWIFT: 3,           // Primary: charge + rush (max aggro signal)
-    DOUBLE_STRIKE: 3, DRAIN: 3,   // Secondary: burst + sustain
-    LETHAL: 2, BARRIER: 2, GUARDIAN: 1, CLOAK: 1  // Tertiary: minimal defense
+    BLITZ: 4, DOUBLE_STRIKE: 4, SWIFT: 3, DRAIN: 2,
+    LETHAL: 2, BARRIER: 2, GUARDIAN: 1, CLOAK: 1
   },
-  // Voidborn: DISRUPTION/CONTROL — LETHAL+CLOAK identity, stat-independent power
-  // R14g: Was 38.1% at LETHAL:3/CLOAK:3 + bias +20. Stats useless (proven).
-  // Spike identity keywords: LETHAL kills anything, CLOAK prevents targeting.
+  // Voidborn: "Void Stalkers" — CLOAK + DRAIN stealth sustain (33-37%)
   VOIDBORN: {
-    LETHAL: 7, CLOAK: 5,          // Primary: spiked identity keywords (stat-independent!)
-    DRAIN: 3, SWIFT: 2,           // Secondary: sustain + some speed
-    DOUBLE_STRIKE: 1, BLITZ: 1,   // Minimal burst — Voidborn wins through removal, not damage
-    BARRIER: 2, GUARDIAN: 2        // Some defense vs aggro
+    CLOAK: 5, DRAIN: 5, LETHAL: 3, BARRIER: 3,
+    SWIFT: 2, GUARDIAN: 1, DOUBLE_STRIKE: 1, BLITZ: 1
   },
-  // Biotitans: Ramp midrange — big creatures with sustain. Stat-DEPENDENT primary.
-  // R15: Redesigned for 6-race meta. Identity = DRAIN + SWIFT + DS on big bodies.
+  // Biotitans: "Living Colossi" — DRAIN sustain + GUARDIAN big bodies (54-58%)
   BIOTITANS: {
-    DRAIN: 5, SWIFT: 4,             // Primary: sustain + big creatures attacking
-    GUARDIAN: 3, DOUBLE_STRIKE: 3,   // Secondary: big walls + double-hit
-    BARRIER: 2,                      // Some shields
-    BLITZ: 1, LETHAL: 1, CLOAK: 1   // Minimal — big creatures don't need these
+    DRAIN: 5, GUARDIAN: 4, DOUBLE_STRIKE: 3, BARRIER: 3,
+    SWIFT: 2, BLITZ: 1, LETHAL: 2, CLOAK: 1
   },
-  // Crystalline: Energy crystals, spell synergy, arcane power — less aggro
+  // Crystalline: "Crystal Fortress" — BARRIER + GUARDIAN double defense (53-55%)
   CRYSTALLINE: {
-    BARRIER: 4, DRAIN: 4,          // Primary: crystal shields & energy siphon
-    DOUBLE_STRIKE: 3, CLOAK: 3,    // Secondary: energy bursts, refraction
-    SWIFT: 2, BLITZ: 2, GUARDIAN: 1, LETHAL: 1  // Tertiary: more diversity
+    BARRIER: 5, GUARDIAN: 5, DRAIN: 3, DOUBLE_STRIKE: 3,
+    SWIFT: 2, CLOAK: 1, BLITZ: 1, LETHAL: 1
   },
-  // Phantom Corsairs: Aggro-tempo pirates — evasion + assassination.
-  // R15l: CLOAK 4→3 only (no other changes). Total weight 21→20 = less starvation.
-  // Previous CLOAK reductions failed because we also added GUARDIAN/DS simultaneously.
+  // Phantom Corsairs: "Speed Raiders" — SWIFT + CLOAK + DRAIN evasion (49-53%)
   PHANTOM_CORSAIRS: {
-    SWIFT: 4, CLOAK: 3,            // R15l: CLOAK 4→3 (weak keyword, free up selection)
-    BLITZ: 3, LETHAL: 3,           // Secondary: ambush + assassination
-    DRAIN: 3, DOUBLE_STRIKE: 2,    // Sustain + burst
-    BARRIER: 1, GUARDIAN: 1        // Minimal defense
+    SWIFT: 5, CLOAK: 4, BLITZ: 3, DRAIN: 4,
+    LETHAL: 2, DOUBLE_STRIKE: 1, BARRIER: 1, GUARDIAN: 1
   },
-  // Hivemind: VENOMOUS SWARM — stat-independent power via LETHAL.
-  // R16d: flat weights + DRAIN=7 + bias +40 = 34.5% (DRAIN sustain but no kill power).
-  // R16e: aggro spike + DRAIN=2 + bias +40 = 28.9% (DRAIN essential, but aggro stats weak).
-  // Root cause: Hivemind pool has 5 token spells (dead weight) + weak base cards.
-  // Fix: Copy Voidborn strategy — LETHAL is stat-INDEPENDENT. 1/1 with LETHAL kills anything.
-  // "Venomous swarm" = LETHAL bugs + DRAIN sustain. Lower bias since LETHAL doesn't need stats.
+  // Hivemind: "Venom Swarm" — LETHAL + DRAIN sustain assassins (46-48%)
   HIVEMIND: {
-    LETHAL: 6, DRAIN: 4,           // Primary: venom kills + sustain (Voidborn-proven combo)
-    SWIFT: 3, BARRIER: 2,          // Secondary: speed + some shields
-    DOUBLE_STRIKE: 2, BLITZ: 2,    // Tertiary: burst
-    GUARDIAN: 1, CLOAK: 1           // Minimal
+    LETHAL: 5, DRAIN: 5, SWIFT: 3, BARRIER: 2,
+    BLITZ: 2, DOUBLE_STRIKE: 2, GUARDIAN: 1, CLOAK: 1
   },
-  // Astromancers: Cosmic magic, mysterious, arcane power — buffed tempo
+  // Astromancers: "Twin Stars" — DS burst + BARRIER protection (53-56%)
   ASTROMANCERS: {
-    BARRIER: 5, DOUBLE_STRIKE: 5,  // Primary: arcane shields & twin stars
-    BLITZ: 3, DRAIN: 3,            // Secondary: cosmic rush & siphon
-    SWIFT: 2, CLOAK: 1, GUARDIAN: 1, LETHAL: 1  // Tertiary
+    DOUBLE_STRIKE: 6, BARRIER: 4, DRAIN: 3, BLITZ: 3,
+    SWIFT: 2, GUARDIAN: 1, LETHAL: 1, CLOAK: 1
   },
-  // Chronobound: BARRIER hard-counters LETHAL (blocks damage → LETHAL never fires).
-  // R17c: 27.2% — LETHAL=7 dominant but BARRIER blocks it. Bias +45/+65 both same = stats useless.
-  // R17d: 20.0% — BLITZ:8 cap STOLE LETHAL slots (LETHAL 7→5). Rush without LETHAL = worse.
-  // R17e: Keep LETHAL dominant (cap 8), ADD DS (cap 7) to pop BARRIER. No BLITZ cap raise.
+  // Chronobound: "Time Reapers" — LETHAL+DS combo + DRAIN sustain (30-32%)
   CHRONOBOUND: {
-    LETHAL: 4, DRAIN: 3,           // Primary: temporal assassins + sustain
-    DOUBLE_STRIKE: 3, BLITZ: 3,    // Secondary: DS pops BARRIER for LETHAL, BLITZ for tempo
-    SWIFT: 2, BARRIER: 1,          // Tertiary: pool caps SWIFT at 2, minimal defense
-    GUARDIAN: 1, CLOAK: 1           // Minimal
+    LETHAL: 4, DOUBLE_STRIKE: 4, DRAIN: 5, BLITZ: 3,
+    BARRIER: 3, SWIFT: 2, GUARDIAN: 0, CLOAK: 0
   },
   // Neutral: Even distribution
   NEUTRAL: {
@@ -972,53 +957,10 @@ const KEYWORD_MAX_OVERRIDES = {
 // Per-RACE keyword caps: tighter limits for specific races to enforce archetype identity.
 // Stat biases proved useless (Luminar -8 bias only moved 0.5%) — keywords dominate.
 // Race caps ensure control decks can't ALSO be great aggro, and vice versa.
-const RACE_KEYWORD_CAP_OVERRIDES = {
-  // COGSMITHS: No race caps needed — global caps suffice for midrange identity.
-  LUMINAR: {
-    BLITZ: 2,          // Control shouldn't charge much
-    SWIFT: 3,          // Limited speed
-    DOUBLE_STRIKE: 3,  // Less burst damage — control wins through sustain, not burst
-    LETHAL: 2,         // R14e: was 5, crushes everything. 2 LETHAL is enough for removal.
-    DRAIN: 4,          // R14e: was 5. Slightly less healing to make games closer.
-  },
-  PYROCLAST: {
-    BARRIER: 2,        // Aggro shouldn't have shields (flat weights gave 5, led to 82.8%)
-    GUARDIAN: 1,       // No walls for aggro
-    DRAIN: 3,          // Limited healing
-    // LETHAL: no cap needed — global is 5, Pyroclast weight is 2 so won't exceed
-  },
-  BIOTITANS: {
-    BLITZ: 2,          // Not a rush deck — big creatures take time to ramp
-    LETHAL: 2,         // Big creatures overpower, don't need LETHAL
-    CLOAK: 1,          // Not sneaky
-    DRAIN: 5,          // R15b: was 7, too much sustain. Cap at 5.
-    DOUBLE_STRIKE: 3,  // R15b: was 5, too much burst on big bodies. Cap at 3.
-  },
-  PHANTOM_CORSAIRS: {
-    BARRIER: 2,        // R15f: raised from 1.
-    GUARDIAN: 1,       // GUARDIAN anti-synergy with CLOAK (R15h=33%). Keep minimal.
-    DRAIN: 4,          // R15b: raised from 2. Cap 5 was no-op (weight 3 → 4 naturally).
-    // LETHAL: no cap needed — global is back to 5
-  },
-  CRYSTALLINE: {
-    BLITZ: 2,          // R16: spell deck, not aggro
-    SWIFT: 3,          // Limited speed — wins through spells not tempo
-    LETHAL: 2,         // Not an assassin faction
-  },
-  // Hivemind: RAISE LETHAL cap above global (venomous swarm identity).
-  // R16i: DRAIN 5→6 (31% at DRAIN:5, 38% at DRAIN:8 — compromise).
-  //        LETHAL 7→8 (one more assassin).
-  HIVEMIND: {
-    LETHAL: 8,         // RAISE above global 5 — venomous swarm needs max LETHAL
-    DRAIN: 6,          // R16i: 5 killed sustain (31%). 8 = stalemate. Try 6.
-  },
-  // R17e: Keep LETHAL dominant. Add DS cap to counter BARRIER. No BLITZ cap (stole LETHAL slots in R17d).
-  CHRONOBOUND: {
-    LETHAL: 8,         // RAISE above global 5 — temporal assassins need max LETHAL
-    DRAIN: 6,          // Need sustain but cap to prevent stalemates
-    DOUBLE_STRIKE: 7,  // RAISE above global 5 — DS+LETHAL: 1st hit pops BARRIER, 2nd kills
-  },
-};
+// No per-race keyword caps — the weights drive distribution naturally.
+// Previous testing showed restrictive caps caused pool starvation → emergency fills.
+// Global caps in KEYWORD_MAX_OVERRIDES are generous safety nets.
+const RACE_KEYWORD_CAP_OVERRIDES = {};
 
 function getCardKeywords(card) {
   return (card.keywords || []).map(kw => {
@@ -1315,21 +1257,19 @@ function computeDeckPower(deck) {
 // Luminar 36.5% (needs buff), Crystalline 63.8% (still high).
 // Structural fixes: Biotitans weights diversified (GUARDIAN 2→1, LETHAL 3→1),
 // Chronobound weights diversified (more SWIFT/DRAIN for early game).
+// Stat biases confirmed to have near-zero impact on win rates (~1-2% per ±100 pts).
+// Keywords dominate 98% of balance. Kept at 0 — adjust keywords instead.
 const WIN_RATE_BALANCE_BIAS = {
-  // R14f: 3 of 4 in target! Voidborn 40.7% still low — push bias harder.
-  // Voidborn has fewest keywords (0.8/minion) so needs raw stat advantage to compete.
-  PYROCLAST:        -10,  // Reverted from -12 (nerf didn't help Corsairs matchup).
-  COGSMITHS:          5,  // R16e: 56.0% too high. +7→+5 to bring down ~2%.
-  LUMINAR:            0,
-  VOIDBORN:           8,
-  // R15: Biotitans + Phantom Corsairs activated. Reset biases to 0 for fresh 6-race meta.
-  BIOTITANS:          0,
-  PHANTOM_CORSAIRS:  26,  // R15k: +24→+26. Bias curve: +18=42.6, +22=43.4, +24=44.0. Try +26.
-  // R16: Crystalline + Hivemind activated.
-  CRYSTALLINE:        0,  // 49.6% first try — perfect, no change needed.
-  HIVEMIND:          50,  // R16i: 31% at bias 35/DRAIN:5. Try 50 + DRAIN:6 + LETHAL:8.
-  ASTROMANCERS:      40,  // R17f: 39.7% at +35. Nudge +5 to cross 40%.
-  CHRONOBOUND:       55,  // R17f: 39.2% at +50 (DS+LETHAL breakthrough!). Nudge +5 to cross 40%.
+  PYROCLAST:         0,
+  COGSMITHS:         0,
+  LUMINAR:           0,
+  VOIDBORN:          0,
+  BIOTITANS:         0,
+  PHANTOM_CORSAIRS:  0,
+  CRYSTALLINE:       0,
+  HIVEMIND:          0,
+  ASTROMANCERS:      0,
+  CHRONOBOUND:       0,
 };
 
 function normalizeDeckPower(allDecks) {
