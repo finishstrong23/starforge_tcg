@@ -613,6 +613,29 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     return globalCardDatabase.getCard(card.definitionId);
   }, []);
 
+  // --- STARFORGE: Check eligibility and activate ---
+  const canStarforge = useCallback((card: CardInstance): boolean => {
+    if (!isPlayerTurn || role !== 'host' || !engineRef.current) return false;
+    const targets = engineRef.current.getStarforgeTargets(myPlayerId);
+    return targets.some(t => t.instanceId === card.instanceId);
+  }, [isPlayerTurn, role, myPlayerId, updateCounter]);
+
+  const starforgeTargets: CardInstance[] = (() => {
+    if (!isPlayerTurn || role !== 'host' || !engineRef.current) return [];
+    return engineRef.current.getStarforgeTargets(myPlayerId);
+  })();
+
+  const activateStarforge = useCallback((card: CardInstance) => {
+    if (!canStarforge(card)) return;
+    processAction({
+      type: ActionType.ACTIVATE_STARFORGE,
+      playerId: myPlayerId,
+      timestamp: Date.now(),
+      data: { cardInstanceId: card.instanceId },
+    });
+    cancelTargeting();
+  }, [canStarforge, myPlayerId, processAction, cancelTargeting]);
+
   // --- Map winnerId for display (translate to 'player' for local win) ---
   const displayWinnerId = winnerId === myPlayerId ? 'player' : winnerId ? 'opponent' : undefined;
   const displayGameState = gameState ? { ...gameState, winnerId: displayWinnerId } : null;
@@ -638,6 +661,9 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     endTurn,
     handleTargetClick,
     cancelTargeting,
+    activateStarforge,
+    canStarforge,
+    starforgeTargets,
     canPlayCard,
     canAttack,
     getCardDefinition,

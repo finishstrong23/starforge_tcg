@@ -201,11 +201,11 @@ export const Card: React.FC<CardProps> = ({
   // Barrier visual
   const showBarrier = card.hasBarrier;
 
-  // STARFORGED visual — golden glow
+  // STARFORGED visual — cosmic golden-purple glow with pulsing effect
   const isForged = card.isForged;
   if (isForged) {
-    borderColor = '#ffaa00';
-    boxShadow = '0 0 12px #ffaa00, 0 0 24px #ff8800, 0 0 36px #ff6600';
+    borderColor = '#ffcc00';
+    boxShadow = '0 0 12px #ffcc00, 0 0 24px #ff8800, 0 0 40px #ff4400, 0 0 60px rgba(160, 60, 255, 0.4)';
   }
 
   return (
@@ -219,9 +219,9 @@ export const Card: React.FC<CardProps> = ({
         style={{
           ...cardStyles,
           ...(isForged ? {
-            border: `3px solid #ffaa00`,
-            boxShadow: '0 0 12px #ffaa00, 0 0 24px #ff8800, 0 0 36px #ff6600',
-            background: 'linear-gradient(135deg, #3a2a1a 0%, #2a1a0a 100%)',
+            border: `3px solid #ffcc00`,
+            boxShadow: '0 0 12px #ffcc00, 0 0 24px #ff8800, 0 0 40px #ff4400, 0 0 60px rgba(160, 60, 255, 0.4)',
+            background: 'linear-gradient(135deg, #3a2800 0%, #1a0f2e 50%, #2a1a00 100%)',
           } : {}),
         }}
         className={glowClass}
@@ -235,7 +235,7 @@ export const Card: React.FC<CardProps> = ({
 
         {/* STARFORGED badge */}
         {isForged && (
-          <div style={styles.forgedBadge}>FORGED</div>
+          <div style={styles.forgedBadge}>STARFORGED</div>
         )}
 
         {/* Cost */}
@@ -323,8 +323,28 @@ export const Card: React.FC<CardProps> = ({
 
           <div style={styles.popupRarity}>
             <span style={{ color: rarityColor }}>{definition?.rarity}</span>
-            {isForged && <span style={{ color: '#ffcc00', marginLeft: '8px' }}>STARFORGED</span>}
           </div>
+
+          {isForged && (
+            <div style={{
+              textAlign: 'center',
+              padding: '4px 8px',
+              marginBottom: '6px',
+              background: 'linear-gradient(90deg, rgba(255,170,0,0.2), rgba(160,60,255,0.2), rgba(255,170,0,0.2))',
+              border: '1px solid #ffaa00',
+              borderRadius: '4px',
+              fontSize: '11px',
+              fontWeight: 'bold',
+              color: '#ffdd44',
+              textShadow: '0 0 6px #ff8800',
+              letterSpacing: '2px',
+            }}>
+              STARFORGED
+              <div style={{ fontSize: '9px', color: '#cc88ff', fontWeight: 'normal', letterSpacing: '0.5px', marginTop: '2px' }}>
+                2x Stats | Immune to Silence
+              </div>
+            </div>
+          )}
 
           {definition?.cardText && (
             <div style={styles.popupText}>{definition.cardText}</div>
@@ -490,14 +510,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'absolute',
     top: '50%',
     left: '50%',
-    transform: 'translate(-50%, -50%) rotate(-15deg)',
-    fontSize: '10px',
+    transform: 'translate(-50%, -50%) rotate(-12deg)',
+    fontSize: '8px',
     fontWeight: 'bold',
-    color: '#ffcc00',
-    textShadow: '0 0 6px #ff8800, 0 0 12px #ff6600',
-    letterSpacing: '2px',
+    color: '#ffdd44',
+    textShadow: '0 0 8px #ffaa00, 0 0 16px #ff6600, 0 0 24px rgba(160, 60, 255, 0.6)',
+    letterSpacing: '1.5px',
     zIndex: 15,
     pointerEvents: 'none',
+    whiteSpace: 'nowrap',
   },
   // Hover popup styles
   hoverPopup: {

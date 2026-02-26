@@ -7,12 +7,14 @@ import React from 'react';
 interface CrystalBarProps {
   current: number;
   max: number;
+  overloaded?: number;
   isOpponent?: boolean;
 }
 
 export const CrystalBar: React.FC<CrystalBarProps> = ({
   current,
   max,
+  overloaded = 0,
   isOpponent = false,
 }) => {
   const crystals = [];
@@ -46,6 +48,9 @@ export const CrystalBar: React.FC<CrystalBarProps> = ({
       </div>
       <div style={styles.countText}>
         {current}/{max}
+        {overloaded > 0 && (
+          <span style={styles.overloadText}> (LOCKED: {overloaded})</span>
+        )}
       </div>
     </div>
   );
@@ -91,5 +96,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#00aaff',
     textShadow: '0 0 5px rgba(0, 170, 255, 0.5)',
     minWidth: '40px',
+  },
+  overloadText: {
+    fontSize: '10px',
+    color: '#ff4444',
+    fontWeight: 'bold',
+    textShadow: '0 0 4px rgba(255, 68, 68, 0.5)',
   },
 };

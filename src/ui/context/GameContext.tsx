@@ -59,6 +59,11 @@ interface GameContextValue {
   handleTargetClick: (targetId: string) => void;
   cancelTargeting: () => void;
 
+  // STARFORGE
+  activateStarforge: (card: CardInstance) => void;
+  canStarforge: (card: CardInstance) => boolean;
+  starforgeTargets: CardInstance[];
+
   // Helpers
   canPlayCard: (card: CardInstance) => boolean;
   canAttack: (minion: CardInstance) => boolean;
@@ -669,6 +674,48 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     forceUpdate();
   }, [forceUpdate, cancelTargeting]);
 
+  // STARFORGE: Check if a minion can be Starforged
+  const canStarforge = useCallback((card: CardInstance): boolean => {
+    if (!isPlayerTurn || !engineRef.current) return false;
+    const targets = engineRef.current.getStarforgeTargets('player');
+    return targets.some(t => t.instanceId === card.instanceId);
+  }, [isPlayerTurn, updateCounter]);
+
+  // STARFORGE: Get all eligible targets
+  const starforgeTargets = useMemo((): CardInstance[] => {
+    if (!isPlayerTurn || !engineRef.current) return [];
+    return engineRef.current.getStarforgeTargets('player');
+  }, [isPlayerTurn, updateCounter]);
+
+  // STARFORGE: Activate Starforge on a legendary minion
+  const activateStarforge = useCallback((card: CardInstance) => {
+    if (!engineRef.current || !canStarforge(card)) return;
+
+    console.log('STARFORGE ASCENSION:', card.definitionId);
+
+    engineRef.current.processAction({
+      type: ActionType.ACTIVATE_STARFORGE,
+      playerId: 'player',
+      timestamp: Date.now(),
+      data: {
+        cardInstanceId: card.instanceId,
+      },
+    });
+
+    // Log it
+    const def = globalCardDatabase.getCard(card.definitionId);
+    const name = def?.name || card.definitionId;
+    addLogEntry(
+      `STARFORGE ASCENSION: ${name} has been STARFORGED! 2x stats, immune to silence!`,
+      'keyword',
+      true,
+      gameState?.turn || 0
+    );
+
+    cancelTargeting();
+    forceUpdate();
+  }, [canStarforge, forceUpdate, cancelTargeting, addLogEntry, gameState]);
+
   // Get card definition
   const getCardDefinition = useCallback((card: CardInstance) => {
     return globalCardDatabase.getCard(card.definitionId);
@@ -695,6 +742,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     endTurn,
     handleTargetClick,
     cancelTargeting,
+    activateStarforge,
+    canStarforge,
+    starforgeTargets,
     getCardDefinition,
     canPlayCard,
     canAttack,

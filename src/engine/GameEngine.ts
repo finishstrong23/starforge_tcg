@@ -439,9 +439,15 @@ export class GameEngine {
     return { success: true, events: [] };
   }
 
-  // ─── STARFORGE: Pay 10 crystals to double a legendary minion's stats ───
+  // ─── STARFORGE ASCENSION ─────────────────────────────────────────────
+  // The most powerful play in any TCG: sacrifice ALL your mana this turn
+  // AND your entire next turn's mana to ascend a Legendary minion into
+  // an unstoppable force. 2x stats, BARRIER, bonus keyword, immediate
+  // attack, and permanent silence immunity. High risk, godlike reward.
+  // ─────────────────────────────────────────────────────────────────────
 
-  private static readonly STARFORGE_COST = 10;
+  /** Minimum crystals required to activate STARFORGE */
+  private static readonly STARFORGE_MIN_COST = 5;
 
   /**
    * Validate STARFORGE activation
@@ -459,52 +465,99 @@ export class GameEngine {
       return { valid: false, error: 'Card not on your board' };
     }
 
-    // Must be a legendary
+    // Must be a legendary minion
     const definition = this.cardDatabase.getCard(card.definitionId);
     if (!definition || definition.rarity !== CardRarity.LEGENDARY) {
       return { valid: false, error: 'Only Legendary minions can be Starforged' };
     }
 
-    // Must not already be forged
-    if (card.isForged) {
-      return { valid: false, error: 'Card has already been Starforged' };
+    if (definition.type !== CardType.MINION) {
+      return { valid: false, error: 'Only minions can be Starforged' };
     }
 
-    // Must have enough crystals
-    if (!canAffordCard(player, GameEngine.STARFORGE_COST)) {
-      return { valid: false, error: 'Not enough crystals (need 10)' };
+    // Must not already be forged
+    if (card.isForged) {
+      return { valid: false, error: 'This minion has already ascended' };
+    }
+
+    // Must have at least STARFORGE_MIN_COST crystals available
+    const availableMana = player.crystals.current + player.crystals.temporary;
+    if (availableMana < GameEngine.STARFORGE_MIN_COST) {
+      return { valid: false, error: `Not enough crystals (need at least ${GameEngine.STARFORGE_MIN_COST})` };
     }
 
     return { valid: true };
   }
 
   /**
-   * Process STARFORGE: Double the minion's attack and health
+   * Determine the bonus keyword granted based on existing keywords.
+   * Each legendary gets a synergistic power boost.
+   */
+  private getStarforgeBonusKeyword(card: CardInstance): CombatKeyword {
+    const has = (kw: string) => card.keywords.some(k => k.keyword === kw);
+
+    if (has(CombatKeyword.GUARDIAN))       return CombatKeyword.DRAIN;         // Unkillable tank
+    if (has(CombatKeyword.DRAIN))          return CombatKeyword.DOUBLE_STRIKE; // Massive lifesteal
+    if (has(CombatKeyword.LETHAL))         return CombatKeyword.CLOAK;         // Invisible assassin
+    if (has(CombatKeyword.CLOAK))          return CombatKeyword.DOUBLE_STRIKE; // Sneaky double damage
+    if (has(CombatKeyword.SWIFT))          return CombatKeyword.LETHAL;        // Instant killer
+    if (has(CombatKeyword.BLITZ))          return CombatKeyword.LETHAL;        // Unstoppable force
+    if (has(CombatKeyword.DOUBLE_STRIKE))  return CombatKeyword.DRAIN;         // Double drain
+    if (has(CombatKeyword.BARRIER))        return CombatKeyword.DOUBLE_STRIKE; // Protected powerhouse
+    return CombatKeyword.DOUBLE_STRIKE; // Default: raw power
+  }
+
+  /**
+   * Process STARFORGE ASCENSION
+   *
+   * Cost:   ALL current mana + overload ALL crystals next turn
+   * Effect: 2x Attack, 2x Health, BARRIER, bonus keyword,
+   *         immediate attack reset, silence immunity (via isForged)
    */
   private processStarforge(action: GameAction): ActionResult {
     const data = action.data as ActivateStarforgeData;
     const player = this.stateManager.getPlayer(action.playerId);
     const card = this.stateManager.getCard(data.cardInstanceId);
 
-    // Spend 10 crystals
-    player.crystals.current -= GameEngine.STARFORGE_COST;
+    // === COST: Drain ALL mana + overload full pool next turn ===
+    player.crystals.current = 0;
+    player.crystals.temporary = 0;
+    // Overload = maximum+1 (they gain 1 crystal next turn, so this locks all of it)
+    player.crystals.overloaded = player.crystals.maximum + 1;
 
-    // Double attack
+    // === STAT DOUBLING ===
     if (card.currentAttack !== undefined) {
       card.currentAttack *= 2;
     }
-
-    // Double health and max health
     if (card.currentHealth !== undefined && card.maxHealth !== undefined) {
-      const ratio = card.currentHealth / card.maxHealth;
       card.maxHealth *= 2;
-      card.currentHealth = Math.ceil(card.maxHealth * ratio);
+      card.currentHealth *= 2;
     }
 
-    // Mark as forged
+    // === GRANT BARRIER ===
+    if (!card.keywords.some(k => k.keyword === CombatKeyword.BARRIER)) {
+      card.keywords.push({ keyword: CombatKeyword.BARRIER });
+    }
+    card.hasBarrier = true;
+
+    // === GRANT BONUS KEYWORD ===
+    const bonusKeyword = this.getStarforgeBonusKeyword(card);
+    if (!card.keywords.some(k => k.keyword === bonusKeyword)) {
+      card.keywords.push({ keyword: bonusKeyword });
+    }
+
+    // === GRANT BLITZ (immediate attack) ===
+    if (!card.keywords.some(k => k.keyword === CombatKeyword.BLITZ)) {
+      card.keywords.push({ keyword: CombatKeyword.BLITZ });
+    }
+    card.hasAttackedThisTurn = false;
+    card.attacksMadeThisTurn = 0;
+    card.summonedThisTurn = false;
+
+    // === MARK AS STARFORGED (grants silence immunity via hasKeyword) ===
     card.isForged = true;
 
-    // Emit event
+    // Emit STARFORGED event
     this.emitEvent(GameEventType.CARD_PLAYED, action.playerId, {
       cardInstanceId: data.cardInstanceId,
       cardDefinitionId: card.definitionId,
@@ -604,10 +657,10 @@ export class GameEngine {
   }
 
   /**
-   * Get the STARFORGE cost (for AI and UI)
+   * Get the minimum STARFORGE cost (for AI and UI)
    */
   static getStarforgeCost(): number {
-    return GameEngine.STARFORGE_COST;
+    return GameEngine.STARFORGE_MIN_COST;
   }
 
   /**
@@ -615,13 +668,14 @@ export class GameEngine {
    */
   getStarforgeTargets(playerId: string): CardInstance[] {
     const player = this.stateManager.getPlayer(playerId);
-    if (!canAffordCard(player, GameEngine.STARFORGE_COST)) return [];
+    const available = player.crystals.current + player.crystals.temporary;
+    if (available < GameEngine.STARFORGE_MIN_COST) return [];
 
     const board = this.stateManager.getBoard();
     return board.getBoardCards(playerId).filter((card) => {
       if (card.isForged) return false;
       const def = this.cardDatabase.getCard(card.definitionId);
-      return def?.rarity === CardRarity.LEGENDARY;
+      return def?.rarity === CardRarity.LEGENDARY && def?.type === CardType.MINION;
     });
   }
 

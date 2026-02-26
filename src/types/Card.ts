@@ -291,10 +291,11 @@ export function getEffectiveHealth(card: CardInstance): number {
 }
 
 /**
- * Check if a card instance has a specific keyword
+ * Check if a card instance has a specific keyword.
+ * STARFORGED minions are immune to Silence — their keywords persist.
  */
 export function hasKeyword(card: CardInstance, keyword: Keyword): boolean {
-  if (card.isSilenced) return false;
+  if (card.isSilenced && !card.isForged) return false;
   return card.keywords.some((k) => k.keyword === keyword);
 }
 

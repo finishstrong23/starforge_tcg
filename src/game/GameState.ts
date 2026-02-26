@@ -296,6 +296,20 @@ export class GameStateManager {
     player.crystals.current = player.crystals.maximum;
     player.crystals.temporary = 0;
 
+    // Apply STARFORGE overload — locks crystals from previous turn's Starforge
+    if (player.crystals.overloaded > 0) {
+      const locked = Math.min(player.crystals.overloaded, player.crystals.current);
+      player.crystals.current -= locked;
+      player.crystals.overloaded = 0;
+
+      this.emitEvent(GameEventType.DAMAGE_DEALT, playerId, {
+        targetId: `hero_${playerId}`,
+        targetType: 'overload',
+        amount: locked,
+        source: 'STARFORGE_OVERLOAD',
+      });
+    }
+
     // Reset minion attack states
     const boardCards = this.board.getBoardCards(playerId);
     for (const card of boardCards) {

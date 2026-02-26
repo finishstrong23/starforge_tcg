@@ -51,6 +51,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
     endTurn,
     handleTargetClick,
     cancelTargeting,
+    activateStarforge,
+    canStarforge,
     combatLog,
     currentAnimation,
     onAnimationComplete,
@@ -213,7 +215,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
           </div>
           <div style={styles.minionsRow}>
             {playerBoard.map((card) => (
-              <div key={card.instanceId} data-card-id={card.instanceId}>
+              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative' }}>
                 <Card
                   card={card}
                   isOnBoard
@@ -228,6 +230,19 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
                     }
                   }}
                 />
+                {/* STARFORGE ASCENSION Button */}
+                {canStarforge(card) && (
+                  <button
+                    style={styles.starforgeButton}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      activateStarforge(card);
+                    }}
+                    title={`STARFORGE: Spend ALL mana + lose next turn's mana. 2x stats, BARRIER, bonus keyword, immediate attack, silence immunity.`}
+                  >
+                    STARFORGE
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -241,6 +256,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
           <CrystalBar
             current={playerState.crystals.current}
             max={playerState.crystals.maximum}
+            overloaded={playerState.crystals.overloaded}
           />
           <div style={styles.deckCount}>
             Deck: {playerState.deck.length}
@@ -451,5 +467,25 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  starforgeButton: {
+    position: 'absolute',
+    bottom: '-18px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    background: 'linear-gradient(135deg, #ffaa00 0%, #cc4400 50%, #aa00ff 100%)',
+    border: '2px solid #ffdd44',
+    borderRadius: '8px',
+    padding: '2px 6px',
+    fontSize: '8px',
+    fontWeight: 'bold',
+    color: '#ffffff',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap' as const,
+    zIndex: 30,
+    letterSpacing: '1px',
+    textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+    boxShadow: '0 0 8px #ffaa00, 0 0 16px rgba(170, 0, 255, 0.4)',
+    animation: 'starforgePulse 1.5s ease-in-out infinite',
   },
 };
