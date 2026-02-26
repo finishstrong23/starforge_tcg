@@ -25,9 +25,11 @@ import backgroundImg from '../../assets/background.png';
 
 interface GameBoardProps {
   onBackToMenu: () => void;
+  /** If true, game over overlay shows "Continue" and routes to campaign results */
+  isCampaign?: boolean;
 }
 
-export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign = false }) => {
   const {
     gameState,
     playerState,
@@ -120,6 +122,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
         <GameOverlay
           winnerId={gameState.winnerId}
           onPlayAgain={onBackToMenu}
+          isCampaign={isCampaign}
         />
       )}
 

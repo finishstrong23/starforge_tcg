@@ -91,6 +91,8 @@ interface GameProviderProps {
   children: React.ReactNode;
   playerRace: Race;
   aiDifficulty: AIDifficulty;
+  /** Force a specific opponent race (for campaign mode) */
+  opponentRace?: Race;
 }
 
 /**
@@ -177,6 +179,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   children,
   playerRace,
   aiDifficulty,
+  opponentRace: forcedOpponentRace,
 }) => {
   // Use a simple counter to force re-renders
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -339,10 +342,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     // Create player deck
     const playerDeck = createSampleDeck(playerRace, 'player');
 
-    // Create AI deck (random race for variety)
+    // Create AI deck — use forced race for campaign, random otherwise
     const allRaces = [Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.BIOTITANS, Race.CRYSTALLINE,
                       Race.VOIDBORN, Race.PHANTOM_CORSAIRS, Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND];
-    const aiRace = allRaces.filter(r => r !== playerRace)[Math.floor(Math.random() * (allRaces.length - 1))];
+    const aiRace = forcedOpponentRace || allRaces.filter(r => r !== playerRace)[Math.floor(Math.random() * (allRaces.length - 1))];
     const aiDeck = createSampleDeck(aiRace, 'opponent');
 
     // Create game engine
@@ -389,7 +392,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [playerRace, aiDifficulty, forceUpdate, handleGameEventForLog]);
+  }, [playerRace, aiDifficulty, forcedOpponentRace, forceUpdate, handleGameEventForLog]);
 
   // Get current state from engine
   const gameState = engineRef.current?.getState() || null;

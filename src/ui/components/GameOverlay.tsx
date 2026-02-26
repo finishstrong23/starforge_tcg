@@ -7,11 +7,14 @@ import React from 'react';
 interface GameOverlayProps {
   winnerId?: string;
   onPlayAgain: () => void;
+  /** If true, button says "Continue" instead of "Play Again" (for campaign) */
+  isCampaign?: boolean;
 }
 
 export const GameOverlay: React.FC<GameOverlayProps> = ({
   winnerId,
   onPlayAgain,
+  isCampaign = false,
 }) => {
   const isVictory = winnerId === 'player';
   const isDraw = !winnerId;
@@ -46,7 +49,7 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
         </div>
 
         <button style={styles.button} onClick={onPlayAgain}>
-          Play Again
+          {isCampaign ? 'Continue' : 'Play Again'}
         </button>
       </div>
     </div>

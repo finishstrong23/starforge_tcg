@@ -12,9 +12,10 @@ interface MainMenuProps {
   onStartGame: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
   onPlayFriend?: () => void;
   onBalanceTest?: () => void;
+  onCampaign?: () => void;
 }
 
-export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest }) => {
+export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign }) => {
   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
   const [logoLoaded, setLogoLoaded] = useState(true);
@@ -113,10 +114,32 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, o
           </div>
         </div>
 
-        {/* Start Buttons */}
-        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '20px' }}>
+        {/* Story Mode Button — Primary CTA */}
+        {onCampaign && (
+          <button
+            style={{
+              background: 'linear-gradient(135deg, #ff6600 0%, #ff4400 50%, #cc3300 100%)',
+              border: '2px solid #ff8844',
+              borderRadius: '14px',
+              padding: '20px 60px',
+              fontSize: '26px',
+              fontWeight: 'bold',
+              color: '#ffffff',
+              cursor: 'pointer',
+              boxShadow: '0 4px 25px rgba(255, 102, 0, 0.5), 0 0 40px rgba(255, 68, 0, 0.2)',
+              letterSpacing: '3px',
+              marginTop: '10px',
+            }}
+            onClick={onCampaign}
+          >
+            STORY MODE
+          </button>
+        )}
+
+        {/* Quick Play Buttons */}
+        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '10px' }}>
           <button style={styles.startButton} onClick={handleStartGame}>
-            Play vs AI
+            Quick Play vs AI
           </button>
 
           {onPlayFriend && (
