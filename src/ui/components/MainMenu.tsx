@@ -17,6 +17,7 @@ interface MainMenuProps {
 export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest }) => {
   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
+  const [logoLoaded, setLogoLoaded] = useState(true);
 
   const availableRaces = [
     Race.COGSMITHS,
@@ -44,9 +45,22 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, o
   return (
     <div style={styles.container}>
       <div style={styles.content}>
-        {/* Logo */}
+        {/* Logo / Title */}
         <div style={styles.titleContainer}>
-          <img src={logoImg} alt="STARFORGE" style={styles.logo} />
+          {logoLoaded ? (
+            <img
+              src={logoImg}
+              alt="STARFORGE"
+              style={styles.logo}
+              onLoad={(e) => {
+                const img = e.currentTarget;
+                if (img.naturalWidth <= 1) setLogoLoaded(false);
+              }}
+              onError={() => setLogoLoaded(false)}
+            />
+          ) : (
+            <h1 style={styles.title}>STARFORGE</h1>
+          )}
           <p style={styles.subtitle}>Trading Card Game</p>
         </div>
 
@@ -159,10 +173,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '20px',
     overflowY: 'auto',
     flexDirection: 'column',
-    backgroundImage: `url(${backgroundImg})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
   },
   content: {
     maxWidth: '900px',
@@ -177,6 +188,14 @@ const styles: { [key: string]: React.CSSProperties } = {
   titleContainer: {
     textAlign: 'center',
     marginBottom: '20px',
+  },
+  title: {
+    fontSize: '64px',
+    fontWeight: 'bold',
+    color: '#00ff88',
+    textShadow: '0 0 20px #00ff88, 0 0 40px #00ff88',
+    letterSpacing: '8px',
+    margin: 0,
   },
   logo: {
     maxWidth: '400px',

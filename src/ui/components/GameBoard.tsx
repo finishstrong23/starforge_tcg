@@ -290,10 +290,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
-    backgroundImage: `url(${backgroundImg})`,
-    backgroundSize: 'cover',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
   },
   loading: {
     width: '100%',
