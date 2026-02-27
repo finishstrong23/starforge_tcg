@@ -1,0 +1,1056 @@
+========================================
+  COGSMITHS (61 cards)
+========================================
+Alloy Plating
+Arc Welder
+Assembly Foreman
+Assembly Line
+Bolt Tightener
+Bronze Colossus
+CLOCKWORK LEVIATHAN
+CONSTRUCTOR SUPREME
+Chromatic Alloy
+Chrome Charger
+Chrome Medic
+Circuit Breaker
+Cog Worker
+Conveyor Crawler
+Copper Sentinel
+Cranky Mechanic
+Disassemble
+Emergency Protocol
+Emergency Repairs
+Exhaust Cannon
+Forge Works
+Furnace Golem
+Galvanize
+Gear Master
+Iron Curtain
+Ironclad Behemoth
+Junkyard Hound
+Magnetize
+Maintenance Drone
+Mech Fabricator
+Oil Slick
+Omega Warframe
+Overcharge
+Overclock Protocol
+Overclocked Engine
+Perpetual Engine
+Piston Puncher
+Power Core
+Prototype Alpha
+Quantum Fabricator
+Reclamation Bay
+Recycler Bot
+Repair Bay
+Rivet Gunner
+Salvage Operative
+Scrap Collector
+Scrapyard Salvager
+Siege Automaton
+Spark Plug
+Steel Rampart
+THE INFINITY COIL
+Tesla Coil
+Titan Assembler
+Titanium Fortress
+Turret Deployer
+Turret Platform
+Upgrade Station
+War Machine
+Welding Drone
+Welding Torch
+Wire Runner
+
+========================================
+  LUMINAR (72 cards)
+========================================
+ARCHON'S CHOSEN
+Absolution
+Acolyte of Light
+Aegis of Light
+Angelic Wings
+Archon Sentinel
+Avatar of Solhaven
+Beacon of Hope
+Beacon of Judgment
+Blessed Arrow
+Blessed Protector
+Blessed Radiance
+Blinding Burst
+Cathedral Guard
+Cathedral of Dawn
+Celestial Choir
+Chalice of Renewal
+Consecrate
+Consecration
+Crusading Templar
+DAWN'S LAST PROPHET
+Dawn Paladin
+Dawn Priest
+Dawn's Embrace
+Dawnbreaker
+Daybreak Charger
+Divine Intervention
+Divine Light
+Empyreal Knight
+Eternal Flame
+Glowing Moth
+Hallowed Ground
+Halo Sentinel
+High Archon
+High Priestess of Sol
+Holy Nova
+Holy Warden
+Lightbringer
+Lightforged Avenger
+Lightsworn Guardian
+Luminar Templar
+Luminous Wisp
+Martyr's Gift
+Penitent Monk
+Pilgrim of Sol
+Prayer Candle
+Purge the Shadows
+Purifying Light
+Radiance Weaver
+Radiant Aegis
+Radiant Fortress
+Radiant Shield
+Restoration Wave
+Resurrect
+SOLARIUS, THE UNDYING LIGHT
+Sanctify
+Seraphim Vanguard
+Sol's Judgment
+Solar Flare
+Solhaven Crusader
+Solhaven Knight
+Solhaven Paladin
+Sunbeam Sprite
+Sunfire Phoenix
+Sunforged Blade
+Sunlit Protector
+Sunstone Cleric
+Sunstorm
+Sunward Cleric
+Sunwell Shrine
+Temple Acolyte
+Temple Initiate
+
+========================================
+  PYROCLAST (79 cards)
+========================================
+ASHYR, THE WORLD BURNER
+Ash Berserker
+Ash Pit
+Ashbringer Titan
+Ashen Colossus
+Ashwalker
+Backdraft
+Blazing Chariot
+Caldera Giant
+Charred Berserker
+Cinder Lord
+Cinder Sprite
+Cinder Storm
+Cinderspark
+Doomfire Sentinel
+Doomsday Meteor
+Ember Imp
+Ember Wisp
+Emberstrike Assassin
+Eruption
+Eruptomancer
+Fire Cultist
+Firebolt
+Firestarter
+Firestorm Drake
+Firestorm Phoenix
+Flame Dancer
+Flame Geyser
+Flame Imp
+Flame Surge
+Flamecaller Disciple
+Flamelick
+Forge of Ignaros
+Fuel the Flames
+Furnace Fiend
+Hellfire Breath
+Ignite
+Infernal Berserker
+Infernal Juggernaut
+Infernal Pact
+Infernal Strike
+Inferno Altar
+Inferno Caller
+Inferno Drake
+Inferno Engine
+Kamikaze Construct
+Kindling
+Lava Forge
+Lava Lurker
+Lava Stalker
+Living Bomb
+MAGMA TYRANT
+Magma Giant
+Magma Hound
+Magma Vent
+Magma Wyrm
+Molten Armor
+Molten Colossus
+Obsidian Cleaver
+PHOENIX ETERNUS
+Primordial Inferno
+Pyro Bolt
+Pyroblast
+Pyroclastic Flow
+Pyromaniac
+Rain of Fire
+Scorch Dancer
+Scorched Fanatic
+Searing Touch
+Smoldering Remains
+Sparkling Igniter
+Supernova
+Volcanic Eruption
+Volcanic Heart
+Volcanic Juggernaut
+Volcanic Ravager
+Volcanic Ritual
+Volcanic Shard
+Wall of Flame
+
+========================================
+  VOIDBORN (73 cards)
+========================================
+Abyss Walker
+Abyssal Horror
+Abyssal Lurker
+Abyssal Maw
+Annihilate
+Black Hole
+Consume Reality
+Creeping Dread
+Dark Acolyte
+Devour Essence
+Devour Thoughts
+Dimensional Exile
+Dimensional Rift
+Eclipse Wraith
+Eldritch Colossus
+Entropic Cascade
+Entropic Touch
+Entropy Agent
+Entropy Weaver
+Erasure
+Existential Crisis
+Hollow Shade
+Mind Devourer
+Mind Fracture
+Mindbreaker
+NULLHEIM'S LAST WORD
+Nether Goliath
+Nether Wisp
+Nightmare Stalker
+Null Anchor
+Null Assassin
+Null Field
+Null Leviathan
+Null Shard
+Nullheim Gate
+Nullheim Stalker
+Nullify
+Oblivion
+Oblivion Herald
+Oblivion Sphere
+Oblivion Wraith
+PROPHET OF THE ENDLESS VOID
+Phantom Devourer
+Psychic Assault
+Reality Ripper
+Reality Unraveler
+Rift Walker
+Shade Assassin
+Shadow Bolt
+Shadow Creeper
+Shadow Feeder
+Shadow Nexus
+Shadow Weaver
+Soul Harvester
+THE VOID TYRANT
+Tendrils of Darkness
+Thought Shredder
+Umbral Leech
+Void Altar
+Void Drain
+Void Echo
+Void Harvester
+Void Initiate
+Void Leviathan
+Void Mirror
+Void Parasite
+Void Sentinel
+Void Siphon
+Void Tendril
+Void Tyrant
+Void Walker
+Void Wisp
+Whispers of Null
+
+========================================
+  BIOTITANS (75 cards)
+========================================
+Alpha Predator
+Ancient of Evolution
+Apex Ambusher
+Apex Call
+Apex Evolution
+Apex Stalker
+Bark Shield
+Behemoth Guardian
+Blooming Crawler
+Broodmother Rex
+Camouflage Stalker
+Canopy Guardian
+Creeping Vine
+Devour
+Egg Clutch
+Elder Treant
+Evolution Chamber
+Evolutionary Leap
+Evolving Brute
+Evolving Slime
+Extinction Event
+Fang Striker
+Feral Whelp
+Fertile Grounds
+Fungal Network
+Genesis Wave
+Hive Queen
+Iron Tortoise
+Jungle Prowler
+Law of the Jungle
+Living Ecosystem
+Living Thicket
+Marsh Leech
+Metamorph Elder
+Mutagenic Spores
+Nature's Touch
+Nest Mother
+Overgrowth
+Packmaster
+Predator's Instinct
+Primal Charger
+Primal Roar
+Primeva Behemoth
+Primeva Stalker
+Primeva's Blessing
+Primeval Titan
+Primordial Nest
+Primordial Pool
+Primordial Surge
+Progenitor Rex
+Rampaging Colossus
+Razorclaw Rex
+Razortooth Pup
+Regeneration Cocoon
+Regrowth
+Root Snapper
+Seedling Sprout
+Shell Guardian
+Spawning Pool
+Spore Pod
+Stampede
+Stampede Rhino
+Symbiotic Growth
+THE LIVING PLANET
+Thornback Raptor
+Thornbud
+Titan Egg
+Titan Wurm
+Twin-Claw Hunter
+Venomfang Hatchling
+Venomfang Lurker
+WORLDEATER HYDRA
+WORLDSHAPER THORNA
+Wild Growth
+World Serpent
+
+========================================
+  CRYSTALLINE (77 cards)
+========================================
+ARCANE NEXUS
+Amethyst Scout
+Arcane Explosion
+Arcane Missile
+Arcane Repository
+Arcane Singularity
+Arcane Storm
+Cascade
+Crystal Battery
+Crystal Colossus
+Crystal Golem
+Crystal Moth
+Crystal Pylon
+Crystal Shard
+Crystal Spark
+Crystal Titan
+Crystal Warden
+Crystal Wyrm
+Crystallize
+Diamond Guardian
+Diamond Plating
+Diamond Titan
+Echo Chamber
+Emerald Dancer
+Energized Sentry
+Facet Moth
+Feedback Loop
+GEODE SAGE LUMIS
+Gem Sprite
+Gemstone Vault
+Geode Apprentice
+Geode Sage's Staff
+Geode Sentinel
+Infinity Mirror
+Jade Templar
+Living Crystal
+Living Geode
+Living Spellbook
+Mana Crystal
+Mana Flood
+Mana Vortex
+Monolith Protector
+Obsidian Defender
+Opal Ravager
+Overload
+Prism Knight
+Prism Shard
+Prism Shield
+Prismatic Annihilation
+Prismatic Barrier
+Prismatic Bolt
+Prismatic Dragon
+Prismatic Lens
+Prismatic Shield
+Prismora Archon
+Prismora Channeler
+Prismora Scholar
+Quartz Sentry
+Quartz Warden
+Refract
+Refraction Blast
+Refraction Bolt
+Resonance Cascade
+Resonance Core
+Resonance Drake
+Resonance Mage
+Ruby Golem
+Runic Golem
+Sapphire Healer
+Shatter
+Spell Amplifier
+Spell Surge
+Spell Thief
+Spell Weaver
+Spellfire Elemental
+THE INFINITE PRISM
+Topaz Striker
+
+========================================
+  PHANTOM_CORSAIRS (75 cards)
+========================================
+Boarding Action
+CAPTAIN SHADOWVANE
+Cannon Barrage
+Cargo Raider
+Cheap Shot
+Contraband Market
+Corsair Ambush
+Corsair Duelist
+Corsair Flagship
+Corsair Quartermaster
+Corsair Raider
+Cutlass Strike
+Cutthroat Imp
+Deckhand Shade
+Deckhand Specter
+Dimensional Heist
+Dread Pirate
+Dreadnought Specter
+Ethereal Smuggler
+Evasive Maneuver
+Fence
+First Mate Phantom
+Ghost Cannon
+Ghost Captain
+Ghost Fleet Raider
+Ghost Galleon
+Ghost Gunner
+Ghost Navigator
+Ghost Parrot
+Ghostly Broadside
+Ghostly Crew
+Ghostly Cutlass
+Ghostly Rigger
+Ghostly Sabotage
+Ghostwalk
+Grand Heist
+Haunt
+Hijack
+Identity Theft
+Kraken of the Damned
+Mutiny
+Netherstorm Portal
+PHANTOM ADMIRAL
+Phantom Blade
+Phantom Boarder
+Phantom Cutlass
+Phantom Dagger
+Phantom Dreadnought
+Phantom Duelist
+Phantom Parrot
+Phantom Swap
+Phase Stalker
+Pickpocket
+Pirate Hideout
+Plunder
+Plunderstorm
+Pocket Thief
+Ransack
+Smoke Bomb
+Smuggler Scout
+Smuggler's Cache
+Smuggler's Shade
+Spectral Ambush
+Spectral Assassin
+Spectral Cannoneer
+Spectral Flagship
+Spectral Gunner
+Spectral Rigging
+Spectral Swashbuckler
+Stowaway
+Swindler
+THE NETHERSTORM
+Void Anchor
+Wraithship Bombardment
+Wraithship Gunner
+
+========================================
+  HIVEMIND (51 cards)
+========================================
+Acid Spitter
+Adaptive Carapace
+Brood Burst
+Brood Carrier
+Brood Lord
+Brood Pit
+Brood Tender
+Centipede Horror
+Chitin Charger
+Chitinous Evolution
+Chitinous Shell
+Cocoon
+Colony Collapse
+Consume and Grow
+Devouring Tide
+Egg Sac
+Explosive Hatchlings
+Extinction Swarm
+Hatchling Swarm
+Hive Colossus
+Hive Coordinator
+Hive Nexus
+Hive Warrior
+Hiveguard
+Hivemind Synapse
+Infest
+Infestation
+OVERMIND SKRYX
+Parasite Injector
+Pheromone Bomb
+Pheromone Trail
+Plague Bearer
+Plague Swarm
+Queen's Champion
+Skittering Scout
+Spawning Chamber
+Spawning Pit
+Swarm Coordinator
+Swarm Feeder
+Swarm Frenzy
+Swarm Intelligence
+Swarm Matriarch
+Swarm Singularity
+Swarm Striker
+Swarm Tide
+THE BROOD MOTHER
+THE LIVING HIVE
+Titan Beetle
+Tunnel Burrower
+Venomsting
+Worker Drone
+
+========================================
+  ASTROMANCERS (76 cards)
+========================================
+Architect of Fate
+Astral Archive
+Astral Beacon
+Astral Familiar
+Astral Guardian
+Astral Moth
+Astral Navigator
+Astral Sanctum
+Astral Titan
+Astral Wisp
+CELESTIAL ORACLE
+Celestial Acolyte
+Celestial Arbiter
+Celestial Blade
+Celestial Blessing
+Celestial Observer
+Celestial Scribe
+Constellation Emperor
+Constellation Knight
+Constellation Mapper
+Constellation Strike
+Cosmic Alignment
+Cosmic Arbiter
+Cosmic Bombardment
+Cosmic Cascade
+Cosmic Insight
+Cosmic Librarian
+Cosmic Overflow
+Cosmic Resonance
+Cosmic Sprite
+Dimensional Echo
+Divination
+Fate Weaver
+Fated Draw
+Fatespinner
+Galactic Sage
+Galaxy Drifter
+Galaxy Warden
+Knowledge is Power
+Meteor Sentinel
+Meteor Shower
+Mind Palace
+Moon Shard
+Nebula Blast
+Nebula Collapse
+Nebula Sprite
+Nebula Walker
+Nova Titan
+Nova Wisp
+ORACLE STELLARA
+Observatory
+Oracle of Celestara
+Prophecy Keeper
+Pulsar Champion
+Quasar Knight
+Solar Flare Mage
+Star Architect
+Star Chart
+Star Observatory
+Star Pupil
+Star Storm
+Starfall
+Starfall Cataclysm
+Starfall Sentinel
+Starfire
+Stargazer
+Stargazer Initiate
+Starshaper
+Stellar Beacon
+Stellar Compass
+Stellar Nexus
+Supernova Shard
+THE BOOK OF INFINITY
+Twilight Striker
+Void Dancer
+Void Telescope
+
+========================================
+  CHRONOBOUND (76 cards)
+========================================
+Aging Curse
+Chrono Blast
+Chrono Colossus
+Chrono Guard
+Chrono Ravager
+Chrono Scout
+Chrono Vault
+Chronomancer
+Chronos Titan
+Chronosmith
+Chronosnare
+Clockwork Assassin
+Clockwork Sparrow
+Clockwork Tower
+Déjà Vu
+Echo Fragment
+Epoch Blade
+Epoch Collapse
+Epoch Knight
+Epoch Recall
+Epoch Warden
+Eternity Storm
+Fast Forward
+Flux Walker
+Groundhog Day
+Hourglass
+Infinity Blade
+Infinity Loop
+Loop Agent
+Moment Stealer
+Moment Thief
+Paradox Agent
+Paradox Engine
+Paradox Sentinel
+Paradox Strike
+Paradox Walker
+Phase Shifter
+Recursion Matrix
+Recursive Sentry
+Reverse Polarity
+Rewind Sprite
+Rewrite History
+Sands of Time
+Second Chance
+THE ETERNITY ENGINE
+TIMESHAPER CHRONUS
+TIMESHAPER'S MASTERPIECE
+Temporal Ambush
+Temporal Arbiter
+Temporal Bolt
+Temporal Duelist
+Temporal Echo
+Temporal Enforcer
+Temporal Feedback
+Temporal Forge
+Temporal Juggernaut
+Temporal Knight
+Temporal Overcharge
+Temporal Patch
+Temporal Rift
+Temporal Slash
+Temporal Titan
+Temporal Wisp
+Time Bolt
+Time Collapse
+Time Elemental
+Time Heist
+Time Loop
+Time Lord
+Time Phantom
+Time Rift
+Time Stalker
+Time Stop
+Time Warp Bolt
+Timekeeper Initiate
+Timeline Splitter
+
+========================================
+  NEUTRAL (296 cards)
+========================================
+Abyssal Hunter
+Abyssal Leviathan
+Ancient Goliath
+Ancient Watcher
+Ancient Wyrm
+Annihilation Beam
+Annihilator Mech
+Arcane Colossus
+Arcane Golem
+Arcane Library
+Arcane Overlord
+Arena Challenger
+Arena Champion
+Arena Scrapper
+Armory
+Astral Behemoth
+Astral Hatchling
+Astral Wanderer
+Beast Pen
+Beast Primarch
+Bloodfang Hunter
+Board Sweep
+Bombardment Drone
+Bouncer Bot
+Bounty Board
+Bounty Hunter
+Chrome Drake
+Chrome Hydra
+Chrono Dragon
+Clockwork Prodigy
+Coin of Fortune
+Comet Rider
+Cosmic Antenna
+Cosmic Berserker
+Cosmic Betrayal
+Cosmic Cadet
+Cosmic Convergence
+Cosmic Courier
+Cosmic Curator
+Cosmic Destroyer
+Cosmic Devourer
+Cosmic Dreadnought
+Cosmic Duplication
+Cosmic Dust
+Cosmic Enforcer
+Cosmic Executioner
+Cosmic Guardian
+Cosmic Healer
+Cosmic Hydra
+Cosmic Implosion
+Cosmic Informant
+Cosmic Infusion
+Cosmic Inventor
+Cosmic Juggler
+Cosmic Leviathan
+Cosmic Medic
+Cosmic Overlord
+Cosmic Rebirth
+Cosmic Reclaimer
+Cosmic Recruit
+Cosmic Renewal
+Cosmic Shapeshifter
+Cosmic Shield
+Cosmic Storm
+Cosmic Summoner
+Cosmic Surgeon
+Cosmic Tinkerer
+Cosmic Titan
+Cosmic Twins
+Cosmic Vulture
+Cosmic Warbringer
+Cosmic Warlord
+Cosmic Wrath
+Cosmic Wyrm
+Crystal Repository
+Dark Altar
+Dimensional Anchor
+Dimensional Collapse
+Dimensional Rift Gate
+Dimensional Swap
+Dragonhawk Rider
+Dusk Stalker
+ENTROPY'S END
+Echo Blast
+Echo Knight
+Echo Tyrant
+Echo Wisp
+Eldritch Horror
+Elemental Lord
+Elemental Nexus
+Emergency Heal
+Energizer Bot
+Entropy Field
+Entropy Titan
+Exile
+Feral Tracker
+Final Nova
+Flame Titan
+Forest Ancient
+Fortify
+Frontier Guard
+Galactic Arbiter
+Galactic Brawler
+Galactic Flare
+Galactic Gladiator
+Galactic Judge
+Galactic Merchant
+Galactic Predator
+Galactic Wanderer
+Galactic Warden
+Galaxy Collapse
+Galaxy Eater
+Genesis
+Genesis Protocol
+Gravedigger
+Graveyard Tender
+Gravitational Collapse
+Gravitational Pull
+Gravity Well
+Guardian Sanctum
+Harvest Golem
+Healing Springs
+Infinite Watcher
+Inner Strength
+Ironbark Defender
+Ironclad Sentinel
+Ironjaw Enforcer
+Mana Capacitor
+Mana Thief
+Mass Adapt
+Mass Barrier
+Mass Resurrection
+Mass Shield
+Mech Assembler Prime
+Mech Overlord
+Mech Overlord Prime
+Mechanical Overlord
+Medic Drone
+Mercenary Blade
+Meteor Strike
+Mind Control Shot
+Mind Games
+Mirror Entity
+Moon Priestess
+Mushroom Forager
+Mutagenic Slime
+Mystic Sage
+NEXUS OF ALL THINGS
+NEXUS OF FATE
+Nebula Brute
+Nebula Drake
+Nebula Runner
+Nest Defender
+Nimble Pickpocket
+Nova Hound
+Omega Blast
+Omega Construct
+Orbital Striker
+Pack Leader
+Phase Imp
+Phase Spider
+Phoenix Hatchling
+Phoenix Risen
+Planet Eater
+Plasma Cannon
+Plasma Pup
+Power Surge
+Precision Strike
+Primal Titan
+Prism Guard
+Quantum Devourer
+Quantum Stabilizer
+Quick Peek
+Raging Elemental
+Reactor Core
+Reality Fracture
+Reality Shaper
+Recruitment Center
+Resurrection Engine
+Resurrection Shrine
+Salvage Hulk
+Salvage Rat
+Salvage Run
+Scavenge
+Scrap Hound
+Scrapyard
+Sea of Stars
+Shadow Dancer
+Shadow Matriarch
+Shadow Sovereign
+Shadow Strike
+Shady Merchant
+Shield Bearer
+Shield Generator
+Shielded Construct
+Siege Breaker
+Soul Harvest
+Soul Reaper
+Spark
+Spark Elemental
+Spell Eater
+Star Barrage
+Star Berserker
+Star Cannon
+Star Cataclysm
+Star Channeler
+Star Colossus
+Star Destroyer
+Star Forge Blast
+Star Gate
+Star Nova
+Star Shard
+Star Shatter
+Star Titan
+Starborn Hydra
+Starborn Phoenix
+Starborne Sentinel
+Starbound Sentinel
+Stardust Forge
+Stardust Giant
+Stardust Mite
+Starfire Bolt
+Starfire Drake
+Starfire Elementalist
+Starforge Sentinel
+Starforged Armor
+Starforged Knight
+Starport Lookout
+Starport Mechanic
+Starship Pilot
+Starsteel Golem
+Starweave Guardian
+Starweaver
+Stasis Field
+Stellar Annihilator
+Stellar Bombardment
+Stellar Dragon
+Stellar Scout
+Storm Caller
+Storm Giant
+Supernova Burst
+Supernova Elemental
+Supply Cache
+Supply Drop
+Supply Runner
+Swarm Commander
+THE COSMIC ANVIL
+THE COSMIC ARBITER
+THE COSMIC FORGE
+THE GREAT DEVOURER
+THE INFINITY WELL
+THE STAR FORGE
+THE STAR FORGER
+THE WORLD ENGINE
+Tactical Retreat
+Temporal Devourer
+Temporal Scout
+Temporal Shift
+Terraformer
+Thunder Lizard
+Time Freeze
+Titan of War
+Trade Hauler
+Training Grounds
+Turbo Charger
+Ultramech
+Void Amalgam
+Void Beacon
+Void Bolt
+Void Champion
+Void Chick
+Void Colossus
+Void Dragon
+Void Horror
+Void Lance
+Void Maelstrom
+Void Mammoth
+Void Moth
+Void Rat
+Void Reaper
+Void Rift
+Void Screamer
+Void Singularity
+Void Stalker
+Void Stalker Elite
+Void Titan
+Void Watcher
+Voidcaller
+Volatile Spark
+War Drum
+War Golem
+War Machine Mk II
+Warp Runner
+Warp Strike
+World Breaker
+World Tree
+
+Total unique cards: 1011
