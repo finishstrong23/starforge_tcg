@@ -82,4 +82,10 @@ export {
   saveCustomDecks,
   loadCustomDecks,
   getCollectionSummary,
+  // Deckbuilding → Gameplay bridge
+  buildCardLookup,
+  resolveCardIds,
+  getStarterDeckCardIds,
+  getDeckRecipes,
+  getCollectionByCategory,
 } from './CardCollection';

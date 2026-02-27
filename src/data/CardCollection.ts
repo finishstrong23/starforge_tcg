@@ -35,6 +35,8 @@ import {
   CHRONOBOUND_CARDS,
   NEUTRAL_CARDS,
 } from './SampleCards';
+import { getExpansionCardsByRace, ALL_EXPANSION_CARDS } from './ExpansionCards';
+import { getBalancedStarterDeck } from './BalancedStarterDecks';
 
 // ============================================================================
 // Collection State
@@ -79,23 +81,25 @@ export interface CustomDeck {
 // ============================================================================
 
 /**
- * Get all cards for a specific race
+ * Get all cards for a specific race (base + expansion)
  */
 function getCardsForRace(race: Race): CardDefinition[] {
+  let base: CardDefinition[];
   switch (race) {
-    case Race.COGSMITHS: return COGSMITHS_CARDS;
-    case Race.LUMINAR: return LUMINAR_CARDS;
-    case Race.PYROCLAST: return PYROCLAST_CARDS;
-    case Race.VOIDBORN: return VOIDBORN_CARDS;
-    case Race.BIOTITANS: return BIOTITANS_CARDS;
-    case Race.CRYSTALLINE: return CRYSTALLINE_CARDS;
-    case Race.PHANTOM_CORSAIRS: return PHANTOM_CORSAIRS_CARDS;
-    case Race.HIVEMIND: return HIVEMIND_CARDS;
-    case Race.ASTROMANCERS: return ASTROMANCERS_CARDS;
-    case Race.CHRONOBOUND: return CHRONOBOUND_CARDS;
-    case Race.NEUTRAL: return NEUTRAL_CARDS;
+    case Race.COGSMITHS: base = COGSMITHS_CARDS; break;
+    case Race.LUMINAR: base = LUMINAR_CARDS; break;
+    case Race.PYROCLAST: base = PYROCLAST_CARDS; break;
+    case Race.VOIDBORN: base = VOIDBORN_CARDS; break;
+    case Race.BIOTITANS: base = BIOTITANS_CARDS; break;
+    case Race.CRYSTALLINE: base = CRYSTALLINE_CARDS; break;
+    case Race.PHANTOM_CORSAIRS: base = PHANTOM_CORSAIRS_CARDS; break;
+    case Race.HIVEMIND: base = HIVEMIND_CARDS; break;
+    case Race.ASTROMANCERS: base = ASTROMANCERS_CARDS; break;
+    case Race.CHRONOBOUND: base = CHRONOBOUND_CARDS; break;
+    case Race.NEUTRAL: base = NEUTRAL_CARDS; break;
     default: return [];
   }
+  return [...base, ...getExpansionCardsByRace(race)];
 }
 
 /**
@@ -317,5 +321,181 @@ export function getCollectionSummary(collection: PlayerCollection): {
     totalRaces: 10,
     campaignComplete: collection.campaignComplete,
     canBuildCustomDecks: collection.campaignComplete,
+  };
+}
+
+// ============================================================================
+// Deckbuilding → Gameplay Bridge
+// ============================================================================
+
+/**
+ * Build a master card lookup from ALL card sources (base + expansion + balanced starters).
+ * Used to resolve card IDs to definitions when creating custom gameplay decks.
+ */
+export function buildCardLookup(): Map<string, CardDefinition> {
+  const lookup = new Map<string, CardDefinition>();
+
+  // All base faction cards
+  const allRaces = [
+    Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN, Race.BIOTITANS,
+    Race.CRYSTALLINE, Race.PHANTOM_CORSAIRS, Race.HIVEMIND, Race.ASTROMANCERS,
+    Race.CHRONOBOUND, Race.NEUTRAL,
+  ];
+
+  for (const race of allRaces) {
+    for (const card of getCardsForRace(race)) {
+      lookup.set(card.id, card);
+    }
+  }
+
+  // All balanced starter cards
+  for (const race of allRaces.filter(r => r !== Race.NEUTRAL)) {
+    for (const card of getBalancedStarterDeck(race)) {
+      lookup.set(card.id, card);
+    }
+  }
+
+  // All expansion cards
+  for (const card of ALL_EXPANSION_CARDS) {
+    lookup.set(card.id, card);
+  }
+
+  return lookup;
+}
+
+/**
+ * Resolve a list of card IDs into CardDefinitions.
+ * Returns the definitions in the same order as the IDs, skipping unknown IDs.
+ */
+export function resolveCardIds(cardIds: string[]): CardDefinition[] {
+  const lookup = buildCardLookup();
+  const resolved: CardDefinition[] = [];
+
+  for (const id of cardIds) {
+    const card = lookup.get(id);
+    if (card) {
+      resolved.push(card);
+    }
+  }
+
+  return resolved;
+}
+
+/**
+ * Get the balanced starter deck card IDs for a race.
+ * Used when the player hasn't built a custom deck yet.
+ */
+export function getStarterDeckCardIds(race: Race): string[] {
+  return getBalancedStarterDeck(race).map(card => card.id);
+}
+
+/**
+ * Get pre-built deck recipes for a race — suggested deck lists the player can
+ * use as starting points for custom deckbuilding. These are thematic and fun.
+ */
+export function getDeckRecipes(race: Race): { name: string; description: string; cardIds: string[] }[] {
+  const starter = getBalancedStarterDeck(race);
+  const expansion = getExpansionCardsByRace(race);
+  const starterIds = starter.map(c => c.id);
+
+  // Recipe 1: Pure starter (the balanced deck as-is)
+  const pureStarter = {
+    name: 'Starter Deck',
+    description: 'The balanced starter deck. A solid foundation for learning the faction.',
+    cardIds: starterIds,
+  };
+
+  // Recipe 2: Power deck — swap in expansion rares/epics for weaker starter cards
+  const expansionRares = expansion.filter(c => c.rarity === CardRarity.RARE || c.rarity === CardRarity.EPIC);
+  const powerIds = [...starterIds];
+  // Replace the weakest cards (lowest cost commons without keywords) with expansion cards
+  const weakCards = starter
+    .filter(c => c.rarity === CardRarity.COMMON && (!c.keywords || c.keywords.length === 0))
+    .sort((a, b) => a.cost - b.cost)
+    .slice(0, Math.min(expansionRares.length, 6));
+
+  for (let i = 0; i < weakCards.length && i < expansionRares.length; i++) {
+    const idx = powerIds.indexOf(weakCards[i].id);
+    if (idx !== -1) {
+      powerIds[idx] = expansionRares[i].id;
+    }
+  }
+
+  const powerDeck = {
+    name: 'Power Deck',
+    description: 'Upgraded starter with expansion cards. Stronger but higher mana curve.',
+    cardIds: powerIds,
+  };
+
+  // Recipe 3: Legendary deck — include the faction legendaries
+  const expansionLegendaries = expansion.filter(c => c.rarity === CardRarity.LEGENDARY);
+  const legendaryIds = [...powerIds];
+  // Replace highest-cost non-legendary cards with legendaries
+  const replaceTargets = starter
+    .filter(c => c.rarity !== CardRarity.LEGENDARY && c.rarity !== CardRarity.EPIC)
+    .sort((a, b) => b.cost - a.cost)
+    .slice(0, expansionLegendaries.length);
+
+  for (let i = 0; i < replaceTargets.length && i < expansionLegendaries.length; i++) {
+    const idx = legendaryIds.indexOf(replaceTargets[i].id);
+    if (idx !== -1) {
+      legendaryIds[idx] = expansionLegendaries[i].id;
+    }
+  }
+
+  const legendaryDeck = {
+    name: 'Legendary Deck',
+    description: 'Includes powerful Legendary cards with STARFORGE transformations!',
+    cardIds: legendaryIds,
+  };
+
+  return [pureStarter, powerDeck, legendaryDeck];
+}
+
+/**
+ * Get all collectible cards grouped by category for the deckbuilding UI.
+ */
+export function getCollectionByCategory(collection: PlayerCollection): {
+  byRace: Map<Race, CardDefinition[]>;
+  byRarity: Map<string, CardDefinition[]>;
+  byCost: Map<number, CardDefinition[]>;
+  starforgeCards: CardDefinition[];
+  totalUnique: number;
+} {
+  const available = getAvailableCards(collection);
+
+  const byRace = new Map<Race, CardDefinition[]>();
+  const byRarity = new Map<string, CardDefinition[]>();
+  const byCost = new Map<number, CardDefinition[]>();
+  const starforgeCards: CardDefinition[] = [];
+
+  for (const card of available) {
+    // By race
+    const race = card.race || Race.NEUTRAL;
+    if (!byRace.has(race)) byRace.set(race, []);
+    byRace.get(race)!.push(card);
+
+    // By rarity
+    const rarity = card.rarity || 'COMMON';
+    if (!byRarity.has(rarity)) byRarity.set(rarity, []);
+    byRarity.get(rarity)!.push(card);
+
+    // By cost
+    const cost = card.cost;
+    if (!byCost.has(cost)) byCost.set(cost, []);
+    byCost.get(cost)!.push(card);
+
+    // Starforge-able
+    if (card.starforge) {
+      starforgeCards.push(card);
+    }
+  }
+
+  return {
+    byRace,
+    byRarity,
+    byCost,
+    starforgeCards,
+    totalUnique: available.length,
   };
 }

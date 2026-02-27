@@ -48,7 +48,7 @@ import { GameEngine } from './engine';
 import { CardFactory, CardDatabase, globalCardDatabase, globalCardFactory } from './cards';
 import { PlayerSetup } from './game';
 import { Race } from './types';
-import { ALL_SAMPLE_CARDS, getSampleCardsByRace } from './data';
+import { ALL_SAMPLE_CARDS, getSampleCardsByRace, ALL_EXPANSION_CARDS, resolveCardIds, getBalancedStarterDeck } from './data';
 import { getHeroByRace } from './heroes';
 
 /**
@@ -56,6 +56,27 @@ import { getHeroByRace } from './heroes';
  */
 export function initializeSampleDatabase(): CardDatabase {
   globalCardDatabase.registerCards(ALL_SAMPLE_CARDS);
+  return globalCardDatabase;
+}
+
+/**
+ * Initialize the FULL card database including expansion cards and balanced starters.
+ * Call this instead of initializeSampleDatabase when custom deckbuilding is available.
+ */
+export function initializeFullDatabase(): CardDatabase {
+  globalCardDatabase.registerCards(ALL_SAMPLE_CARDS);
+  globalCardDatabase.registerCards(ALL_EXPANSION_CARDS);
+
+  // Register balanced starter deck cards (they may have unique IDs not in the main pool)
+  const allRaces = [
+    Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN, Race.BIOTITANS,
+    Race.CRYSTALLINE, Race.PHANTOM_CORSAIRS, Race.HIVEMIND, Race.ASTROMANCERS,
+    Race.CHRONOBOUND,
+  ];
+  for (const race of allRaces) {
+    globalCardDatabase.registerCards(getBalancedStarterDeck(race));
+  }
+
   return globalCardDatabase;
 }
 
@@ -100,6 +121,53 @@ export function createSampleDeck(
   );
 
   // Get hero
+  const hero = getHeroByRace(race);
+
+  return {
+    cards,
+    heroId: hero?.id || '',
+  };
+}
+
+/**
+ * Create a gameplay deck from a custom card ID list (post-story deckbuilding).
+ * Resolves card IDs to definitions, then creates card instances for the engine.
+ */
+export function createCustomGameDeck(
+  cardIds: string[],
+  race: Race,
+  playerId: string,
+  cardFactory: CardFactory = globalCardFactory
+): { cards: ReturnType<CardFactory['createInstance']>[], heroId: string } {
+  // Resolve card IDs and create instances
+  const cards = cardIds.map(id =>
+    cardFactory.createInstance(id, { ownerId: playerId })
+  );
+
+  const hero = getHeroByRace(race);
+
+  return {
+    cards,
+    heroId: hero?.id || '',
+  };
+}
+
+/**
+ * Create a gameplay deck from the balanced starter deck for a race.
+ * Use this instead of createSampleDeck for properly balanced games.
+ */
+export function createBalancedStarterGameDeck(
+  race: Race,
+  playerId: string,
+  cardFactory: CardFactory = globalCardFactory
+): { cards: ReturnType<CardFactory['createInstance']>[], heroId: string } {
+  const starterCards = getBalancedStarterDeck(race);
+  const deckCardIds = starterCards.map(card => card.id);
+
+  const cards = deckCardIds.map(id =>
+    cardFactory.createInstance(id, { ownerId: playerId })
+  );
+
   const hero = getHeroByRace(race);
 
   return {
