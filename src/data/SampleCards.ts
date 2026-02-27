@@ -12730,7 +12730,7 @@ export const STARTER_DECK_COGSMITHS: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.COGSMITHS,
     rarity: CardRarity.COMMON,
-    attack: 1,
+    attack: 2,
     health: 2,
     tribe: MinionTribe.MECH,
     keywords: [{ keyword: CombatKeyword.BLITZ }, { keyword: CombatKeyword.DRAIN }],
@@ -12764,7 +12764,7 @@ export const STARTER_DECK_COGSMITHS: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.COGSMITHS,
     rarity: CardRarity.COMMON,
-    attack: 1,
+    attack: 2,
     health: 3,
     tribe: MinionTribe.MECH,
     keywords: [{ keyword: CombatKeyword.BLITZ }, { keyword: CombatKeyword.DRAIN }],
@@ -12798,7 +12798,7 @@ export const STARTER_DECK_COGSMITHS: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.COGSMITHS,
     rarity: CardRarity.COMMON,
-    attack: 1,
+    attack: 2,
     health: 4,
     tribe: MinionTribe.MECH,
     keywords: [{ keyword: CombatKeyword.BARRIER }, { keyword: CombatKeyword.DOUBLE_STRIKE }, { keyword: CombatKeyword.DRAIN }],
@@ -12866,7 +12866,7 @@ export const STARTER_DECK_COGSMITHS: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.COGSMITHS,
     rarity: CardRarity.COMMON,
-    attack: 2,
+    attack: 3,
     health: 5,
     tribe: MinionTribe.MECH,
     keywords: [{ keyword: CombatKeyword.BLITZ }, { keyword: CombatKeyword.DRAIN }],
@@ -12900,7 +12900,7 @@ export const STARTER_DECK_COGSMITHS: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.COGSMITHS,
     rarity: CardRarity.RARE,
-    attack: 2,
+    attack: 3,
     health: 5,
     tribe: MinionTribe.MECH,
     keywords: [{ keyword: CombatKeyword.BLITZ }, { keyword: CombatKeyword.DRAIN }, { keyword: TriggerKeyword.DEPLOY }],
@@ -12934,7 +12934,7 @@ export const STARTER_DECK_COGSMITHS: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.COGSMITHS,
     rarity: CardRarity.COMMON,
-    attack: 2,
+    attack: 3,
     health: 7,
     tribe: MinionTribe.MECH,
     keywords: [{ keyword: CombatKeyword.BLITZ }, { keyword: CombatKeyword.DRAIN }, { keyword: TriggerKeyword.DEPLOY }],
@@ -14181,7 +14181,7 @@ export const STARTER_DECK_VOIDBORN: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.VOIDBORN,
     rarity: CardRarity.COMMON,
-    attack: 1,
+    attack: 2,
     health: 2,
     tribe: MinionTribe.VOID,
     keywords: [{ keyword: CombatKeyword.CLOAK }],
@@ -14215,7 +14215,7 @@ export const STARTER_DECK_VOIDBORN: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.VOIDBORN,
     rarity: CardRarity.COMMON,
-    attack: 1,
+    attack: 2,
     health: 3,
     tribe: MinionTribe.VOID,
     keywords: [{ keyword: CombatKeyword.DRAIN }, { keyword: CombatKeyword.DOUBLE_STRIKE }],
@@ -16135,9 +16135,9 @@ export const STARTER_DECK_HIVEMIND: CardDefinition[] = [
     race: Race.HIVEMIND,
     rarity: CardRarity.COMMON,
     keywords: [],
-    effects: [{ id: 'e0', type: EffectType.SUMMON, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { cardId: 'token_generated', count: 3 } as SummonEffectData, isMandatory: true }],
+    effects: [{ id: 'e0', type: EffectType.SUMMON, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { cardId: 'token_generated', count: 2 } as SummonEffectData, isMandatory: true }],
     flavorText: 'Three bugs. Three problems. Your opponent\'s problems.',
-    cardText: 'Summon three 1/1 Drones',
+    cardText: 'Summon two 1/1 Drones',
     collectible: true,
     set: 'CORE',
   },
@@ -16163,9 +16163,9 @@ export const STARTER_DECK_HIVEMIND: CardDefinition[] = [
     race: Race.HIVEMIND,
     rarity: CardRarity.COMMON,
     keywords: [],
-    effects: [{ id: 'e0', type: EffectType.SUMMON, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { cardId: 'token_generated', count: 4 } as SummonEffectData, isMandatory: true }],
-    flavorText: 'POP! Four more drones.',
-    cardText: 'Summon four 1/1 Drones',
+    effects: [{ id: 'e0', type: EffectType.SUMMON, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { cardId: 'token_generated', count: 3 } as SummonEffectData, isMandatory: true }],
+    flavorText: 'POP! Three more drones.',
+    cardText: 'Summon three 1/1 Drones',
     collectible: true,
     set: 'CORE',
   },
@@ -16300,8 +16300,8 @@ export const STARTER_DECK_HIVEMIND: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.HIVEMIND,
     rarity: CardRarity.COMMON,
-    attack: 3,
-    health: 3,
+    attack: 2,
+    health: 2,
     tribe: MinionTribe.INSECT,
     keywords: [{ keyword: CombatKeyword.SWIFT }, { keyword: CombatKeyword.DRAIN }, { keyword: TriggerKeyword.LAST_WORDS }],
     effects: [{ id: 'e0', type: EffectType.DAMAGE, trigger: EffectTrigger.ON_DEATH, targetType: TargetType.RANDOM_ENEMY, data: { amount: 1 } as DamageEffectData, isMandatory: true }],
@@ -16385,8 +16385,8 @@ export const STARTER_DECK_HIVEMIND: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.HIVEMIND,
     rarity: CardRarity.COMMON,
-    attack: 4,
-    health: 4,
+    attack: 3,
+    health: 3,
     tribe: MinionTribe.INSECT,
     keywords: [{ keyword: CombatKeyword.BLITZ }, { keyword: TriggerKeyword.LAST_WORDS }],
     effects: [{ id: 'e0', type: EffectType.BUFF, trigger: EffectTrigger.ON_DEATH, targetType: TargetType.RANDOM_FRIENDLY_MINION, data: { attack: 1, health: 1 } as BuffEffectData, isMandatory: true }],
@@ -16419,8 +16419,8 @@ export const STARTER_DECK_HIVEMIND: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.HIVEMIND,
     rarity: CardRarity.COMMON,
-    attack: 5,
-    health: 5,
+    attack: 4,
+    health: 4,
     tribe: MinionTribe.INSECT,
     keywords: [{ keyword: CombatKeyword.DRAIN }, { keyword: TriggerKeyword.LAST_WORDS }],
     effects: [{ id: 'e0', type: EffectType.DAMAGE, trigger: EffectTrigger.ON_DEATH, targetType: TargetType.RANDOM_ENEMY, data: { amount: 2 } as DamageEffectData, isMandatory: true }],
@@ -16504,8 +16504,8 @@ export const STARTER_DECK_HIVEMIND: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.HIVEMIND,
     rarity: CardRarity.COMMON,
-    attack: 7,
-    health: 7,
+    attack: 6,
+    health: 6,
     tribe: MinionTribe.INSECT,
     keywords: [{ keyword: CombatKeyword.SWIFT }, { keyword: CombatKeyword.BLITZ }, { keyword: TriggerKeyword.DEPLOY }, { keyword: TriggerKeyword.LAST_WORDS }],
     effects: [{ id: 'e0', type: EffectType.SUMMON, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { cardId: 'token_generated', count: 2 } as SummonEffectData, isMandatory: true }, { id: 'e1', type: EffectType.DAMAGE, trigger: EffectTrigger.ON_DEATH, targetType: TargetType.RANDOM_ENEMY, data: { amount: 3 } as DamageEffectData, isMandatory: true }],
@@ -16747,7 +16747,7 @@ export const STARTER_DECK_ASTROMANCERS: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.ASTROMANCERS,
     rarity: CardRarity.COMMON,
-    attack: 1,
+    attack: 2,
     health: 2,
     keywords: [{ keyword: CombatKeyword.SWIFT }],
     effects: [],
@@ -16779,7 +16779,7 @@ export const STARTER_DECK_ASTROMANCERS: CardDefinition[] = [
     type: CardType.MINION,
     race: Race.ASTROMANCERS,
     rarity: CardRarity.COMMON,
-    attack: 1,
+    attack: 2,
     health: 3,
     keywords: [{ keyword: CombatKeyword.BARRIER }],
     effects: [],
@@ -17646,20 +17646,231 @@ export const ALL_SAMPLE_CARDS: CardDefinition[] = [
   ...STARTER_DECK_COGSMITHS, ...STARTER_DECK_LUMINAR, ...STARTER_DECK_PYROCLAST, ...STARTER_DECK_VOIDBORN, ...STARTER_DECK_BIOTITANS, ...STARTER_DECK_CRYSTALLINE, ...STARTER_DECK_PHANTOM_CORSAIRS, ...STARTER_DECK_HIVEMIND, ...STARTER_DECK_ASTROMANCERS, ...STARTER_DECK_CHRONOBOUND,
 ];
 
+// Register deck legendaries in the global card database
+// (appended after DECK_LEGENDARIES definition below via push)
+
+/**
+ * Legendary cards to inject into starter decks (one per race).
+ * These are STARFORGE-able when on the board.
+ */
+const DECK_LEGENDARIES: Record<string, CardDefinition> = {
+  [Race.COGSMITHS]: {
+    id: 'cog_deck_legendary',
+    name: 'THE INFINITY COIL',
+    cost: 7,
+    type: CardType.MINION,
+    race: Race.COGSMITHS,
+    rarity: CardRarity.LEGENDARY,
+    attack: 6,
+    health: 9,
+    tribe: MinionTribe.MECH,
+    keywords: [{ keyword: CombatKeyword.GUARDIAN }, { keyword: TriggerKeyword.DEPLOY }],
+    effects: [{ id: 'e0', type: EffectType.SUMMON, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { cardId: 'token_generated', count: 2 } as SummonEffectData, isMandatory: true }],
+    flavorText: 'Infinite bots. Infinite value. Infinite FUN.',
+    cardText: 'GUARDIAN. DEPLOY: Summon two 1/1 Cog-Bots. Your Mechs cost (1) less.',
+    collectible: true,
+    set: 'CORE',
+  },
+  [Race.LUMINAR]: {
+    id: 'lum_deck_legendary',
+    name: 'SOLARIUS, THE UNDYING LIGHT',
+    cost: 8,
+    type: CardType.MINION,
+    race: Race.LUMINAR,
+    rarity: CardRarity.LEGENDARY,
+    attack: 6,
+    health: 10,
+    tribe: MinionTribe.ELEMENTAL,
+    keywords: [{ keyword: CombatKeyword.DRAIN }, { keyword: CombatKeyword.BARRIER }, { keyword: TriggerKeyword.DEPLOY }],
+    effects: [{ id: 'e0', type: EffectType.HEAL, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.ALL_FRIENDLIES, data: { amount: 4 } as HealEffectData, isMandatory: true }],
+    flavorText: 'The sun doesn\'t set on Solhaven. It KNEELS.',
+    cardText: 'DRAIN. BARRIER. DEPLOY: Restore 4 health to all friendly characters.',
+    collectible: true,
+    set: 'CORE',
+  },
+  [Race.PYROCLAST]: {
+    id: 'pyro_deck_legendary',
+    name: 'PHOENIX ETERNUS',
+    cost: 6,
+    type: CardType.MINION,
+    race: Race.PYROCLAST,
+    rarity: CardRarity.LEGENDARY,
+    attack: 6,
+    health: 5,
+    tribe: MinionTribe.ELEMENTAL,
+    keywords: [{ keyword: CombatKeyword.BLITZ }, { keyword: TriggerKeyword.LAST_WORDS }],
+    effects: [{ id: 'e0', type: EffectType.DAMAGE, trigger: EffectTrigger.ON_DEATH, targetType: TargetType.ALL_ENEMY_MINIONS, data: { amount: 3 } as DamageEffectData, isMandatory: true }],
+    flavorText: 'Death is just a phase. A very explosive phase.',
+    cardText: 'BLITZ. LAST WORDS: Deal 3 damage to all enemy minions.',
+    collectible: true,
+    set: 'CORE',
+  },
+  [Race.BIOTITANS]: {
+    id: 'bio_deck_legendary',
+    name: 'WORLDSHAPER THORNA',
+    cost: 8,
+    type: CardType.MINION,
+    race: Race.BIOTITANS,
+    rarity: CardRarity.LEGENDARY,
+    attack: 7,
+    health: 10,
+    tribe: MinionTribe.BEAST,
+    keywords: [{ keyword: CombatKeyword.GUARDIAN }, { keyword: TriggerKeyword.DEPLOY }],
+    effects: [{ id: 'e0', type: EffectType.BUFF, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.ALL_FRIENDLY_MINIONS, data: { attack: 2, health: 2 } as BuffEffectData, isMandatory: true }],
+    flavorText: 'Nature bends to her will, and worlds bloom in her wake.',
+    cardText: 'GUARDIAN. DEPLOY: Give all friendly minions +2/+2.',
+    collectible: true,
+    set: 'CORE',
+  },
+  [Race.PHANTOM_CORSAIRS]: {
+    id: 'pc_deck_legendary',
+    name: 'CAPTAIN SHADOWVANE',
+    cost: 7,
+    type: CardType.MINION,
+    race: Race.PHANTOM_CORSAIRS,
+    rarity: CardRarity.LEGENDARY,
+    attack: 6,
+    health: 6,
+    tribe: MinionTribe.PIRATE,
+    keywords: [{ keyword: CombatKeyword.SWIFT }, { keyword: CombatKeyword.CLOAK }, { keyword: TriggerKeyword.DEPLOY }],
+    effects: [{ id: 'e0', type: EffectType.DRAW, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { count: 2 } as DrawEffectData, isMandatory: true }],
+    flavorText: 'A captain of shadows sails between stars.',
+    cardText: 'SWIFT. CLOAK. DEPLOY: Draw 2 cards.',
+    collectible: true,
+    set: 'CORE',
+  },
+  [Race.ASTROMANCERS]: {
+    id: 'astro_deck_legendary',
+    name: 'ORACLE STELLARA',
+    cost: 8,
+    type: CardType.MINION,
+    race: Race.ASTROMANCERS,
+    rarity: CardRarity.LEGENDARY,
+    attack: 5,
+    health: 8,
+    tribe: MinionTribe.ELEMENTAL,
+    keywords: [{ keyword: CombatKeyword.BARRIER }, { keyword: TriggerKeyword.DEPLOY }, { keyword: TriggerKeyword.LAST_WORDS }],
+    effects: [
+      { id: 'e0', type: EffectType.DRAW, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { count: 3 } as DrawEffectData, isMandatory: true },
+      { id: 'e1', type: EffectType.DRAW, trigger: EffectTrigger.ON_DEATH, targetType: TargetType.NONE, data: { count: 2 } as DrawEffectData, isMandatory: true },
+    ],
+    flavorText: 'The stars reveal all paths. She walks the one that leads to victory.',
+    cardText: 'BARRIER. DEPLOY: Draw 3 cards. LAST WORDS: Draw 2 cards.',
+    collectible: true,
+    set: 'CORE',
+  },
+};
+
+// Register all deck legendaries in the global card database
+ALL_SAMPLE_CARDS.push(...Object.values(DECK_LEGENDARIES));
+
+/**
+ * Cards in each deck that should gain LAST_WORDS keyword + a death effect.
+ * Maps card ID → death effect. These add board stickiness and flavor.
+ */
+const LAST_WORDS_UPGRADES: Record<string, { cardIds: string[]; effectType: EffectType; effectData: any }[]> = {
+  [Race.COGSMITHS]: [
+    { cardIds: ['cog_m5'], effectType: EffectType.SUMMON, effectData: { cardId: 'token_generated', count: 1 } as SummonEffectData },
+    { cardIds: ['cog_m10'], effectType: EffectType.DRAW, effectData: { count: 1 } as DrawEffectData },
+  ],
+  [Race.LUMINAR]: [
+    { cardIds: ['lum_m5'], effectType: EffectType.HEAL, effectData: { amount: 3 } as HealEffectData },
+    { cardIds: ['lum_m9'], effectType: EffectType.HEAL, effectData: { amount: 2 } as HealEffectData },
+  ],
+  [Race.PYROCLAST]: [
+    { cardIds: ['pyro_m6'], effectType: EffectType.DAMAGE, effectData: { amount: 2 } as DamageEffectData },
+    { cardIds: ['pyro_m10'], effectType: EffectType.DAMAGE, effectData: { amount: 3 } as DamageEffectData },
+  ],
+  [Race.VOIDBORN]: [
+    { cardIds: ['void_m5'], effectType: EffectType.DAMAGE, effectData: { amount: 2 } as DamageEffectData },
+    { cardIds: ['void_m9'], effectType: EffectType.DRAW, effectData: { count: 1 } as DrawEffectData },
+  ],
+  [Race.BIOTITANS]: [
+    { cardIds: ['bio_m5'], effectType: EffectType.SUMMON, effectData: { cardId: 'token_generated', count: 1 } as SummonEffectData },
+    { cardIds: ['bio_m10'], effectType: EffectType.BUFF, effectData: { attack: 1, health: 1 } as BuffEffectData },
+  ],
+  [Race.CRYSTALLINE]: [
+    { cardIds: ['crys_m5'], effectType: EffectType.DAMAGE, effectData: { amount: 2 } as DamageEffectData },
+    { cardIds: ['crys_m9'], effectType: EffectType.DRAW, effectData: { count: 1 } as DrawEffectData },
+  ],
+  [Race.PHANTOM_CORSAIRS]: [
+    { cardIds: ['pc_m6'], effectType: EffectType.DRAW, effectData: { count: 1 } as DrawEffectData },
+    { cardIds: ['pc_m10'], effectType: EffectType.DAMAGE, effectData: { amount: 2 } as DamageEffectData },
+  ],
+  [Race.ASTROMANCERS]: [
+    { cardIds: ['astro_m7'], effectType: EffectType.DRAW, effectData: { count: 1 } as DrawEffectData },
+    { cardIds: ['astro_m10'], effectType: EffectType.DAMAGE, effectData: { amount: 2 } as DamageEffectData },
+  ],
+  [Race.CHRONOBOUND]: [
+    { cardIds: ['chrono_m5'], effectType: EffectType.DRAW, effectData: { count: 1 } as DrawEffectData },
+    { cardIds: ['chrono_m10'], effectType: EffectType.DAMAGE, effectData: { amount: 2 } as DamageEffectData },
+  ],
+  [Race.HIVEMIND]: [
+    { cardIds: ['hive_m5'], effectType: EffectType.SUMMON, effectData: { cardId: 'token_generated', count: 1 } as SummonEffectData },
+    { cardIds: ['hive_m10'], effectType: EffectType.DAMAGE, effectData: { amount: 2 } as DamageEffectData },
+  ],
+};
+
+/**
+ * Enhance a deck with LAST_WORDS on key minions and inject a legendary.
+ * Keeps deck at 30 cards by replacing the weakest high-cost filler.
+ */
+function enhanceDeck(deck: CardDefinition[], race: Race): CardDefinition[] {
+  let enhanced = deck.map(card => ({ ...card, keywords: [...card.keywords], effects: [...(card.effects || [])] }));
+
+  // Add LAST_WORDS to designated minions
+  const upgrades = LAST_WORDS_UPGRADES[race];
+  if (upgrades) {
+    for (const upgrade of upgrades) {
+      for (const card of enhanced) {
+        if (upgrade.cardIds.includes(card.id) && !card.keywords.some(k => k.keyword === TriggerKeyword.LAST_WORDS)) {
+          card.keywords.push({ keyword: TriggerKeyword.LAST_WORDS });
+          card.effects.push({
+            id: `lw_${card.id}`,
+            type: upgrade.effectType,
+            trigger: EffectTrigger.ON_DEATH,
+            targetType: upgrade.effectType === EffectType.DAMAGE ? TargetType.RANDOM_ENEMY :
+                        upgrade.effectType === EffectType.HEAL ? TargetType.FRIENDLY_HERO :
+                        upgrade.effectType === EffectType.BUFF ? TargetType.RANDOM_FRIENDLY_MINION :
+                        TargetType.NONE,
+            data: upgrade.effectData,
+            isMandatory: true,
+          });
+        }
+      }
+    }
+  }
+
+  // Inject legendary if this race has one and deck doesn't already have it
+  const legendary = DECK_LEGENDARIES[race];
+  if (legendary && !enhanced.some(c => c.rarity === CardRarity.LEGENDARY)) {
+    // Remove the last card (highest cost filler) to keep at 30
+    if (enhanced.length >= 30) {
+      enhanced = enhanced.slice(0, 29);
+    }
+    enhanced.push(legendary);
+  }
+
+  // Ensure exactly 30 cards
+  return enhanced.slice(0, 30);
+}
+
 export function getStarterDeck(race: Race): CardDefinition[] {
+  let baseDeck: CardDefinition[];
   switch (race) {
-    case Race.COGSMITHS: return [...STARTER_DECK_COGSMITHS];
-    case Race.LUMINAR: return [...STARTER_DECK_LUMINAR];
-    case Race.PYROCLAST: return [...STARTER_DECK_PYROCLAST];
-    case Race.VOIDBORN: return [...STARTER_DECK_VOIDBORN];
-    case Race.BIOTITANS: return [...STARTER_DECK_BIOTITANS];
-    case Race.CRYSTALLINE: return [...STARTER_DECK_CRYSTALLINE];
-    case Race.PHANTOM_CORSAIRS: return [...STARTER_DECK_PHANTOM_CORSAIRS];
-    case Race.HIVEMIND: return [...STARTER_DECK_HIVEMIND];
-    case Race.ASTROMANCERS: return [...STARTER_DECK_ASTROMANCERS];
-    case Race.CHRONOBOUND: return [...STARTER_DECK_CHRONOBOUND];
+    case Race.COGSMITHS: baseDeck = [...STARTER_DECK_COGSMITHS]; break;
+    case Race.LUMINAR: baseDeck = [...STARTER_DECK_LUMINAR]; break;
+    case Race.PYROCLAST: baseDeck = [...STARTER_DECK_PYROCLAST]; break;
+    case Race.VOIDBORN: baseDeck = [...STARTER_DECK_VOIDBORN]; break;
+    case Race.BIOTITANS: baseDeck = [...STARTER_DECK_BIOTITANS]; break;
+    case Race.CRYSTALLINE: baseDeck = [...STARTER_DECK_CRYSTALLINE]; break;
+    case Race.PHANTOM_CORSAIRS: baseDeck = [...STARTER_DECK_PHANTOM_CORSAIRS]; break;
+    case Race.HIVEMIND: baseDeck = [...STARTER_DECK_HIVEMIND]; break;
+    case Race.ASTROMANCERS: baseDeck = [...STARTER_DECK_ASTROMANCERS]; break;
+    case Race.CHRONOBOUND: baseDeck = [...STARTER_DECK_CHRONOBOUND]; break;
     default: return [];
   }
+  return enhanceDeck(baseDeck, race);
 }
 
 /**
