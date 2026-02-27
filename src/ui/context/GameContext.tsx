@@ -198,6 +198,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const [currentAnimation, setCurrentAnimation] = useState<AttackAnimationData | null>(null);
   const pendingAttackRef = useRef<{ attacker: CardInstance; targetId: string } | null>(null);
   const animationIdRef = useRef(0);
+  // Queue for opponent (AI) attack animations
+  const aiAnimationQueueRef = useRef<AttackAnimationData[]>([]);
+  const aiAnimationActiveRef = useRef(false);
+  const queueAiAttackRef = useRef<((data: CombatEventData) => void) | null>(null);
 
   const engineRef = useRef<GameEngine | null>(null);
   const aiRef = useRef<AIPlayer | null>(null);
@@ -271,6 +275,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const defenderName = isHeroTarget ? 'Hero' : getCardName(data.defenderId);
         const attacker = data.attackerOwnerId === 'player' ? 'Your' : "Opponent's";
         addLogEntry(`${attacker} ${attackerName} attacks ${defenderName}`, 'attack', data.attackerOwnerId === 'player', event.turn);
+        // Queue animation for opponent attacks
+        if (data.attackerOwnerId === 'opponent') {
+          queueAiAttackRef.current?.(data);
+        }
         break;
       }
       case GameEventType.DAMAGE_DEALT: {
@@ -309,6 +317,40 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       }
     }
   }, [getCardName, addLogEntry]);
+
+  // Process next AI animation from queue
+  const processAiAnimationQueue = useCallback(() => {
+    if (aiAnimationQueueRef.current.length === 0) {
+      aiAnimationActiveRef.current = false;
+      return;
+    }
+    aiAnimationActiveRef.current = true;
+    const next = aiAnimationQueueRef.current.shift()!;
+    setCurrentAnimation(next);
+    // Auto-clear after animation duration (the attack already resolved)
+    setTimeout(() => {
+      setCurrentAnimation(null);
+      forceUpdate();
+      // Small gap before next animation
+      setTimeout(() => processAiAnimationQueue(), 100);
+    }, 500);
+  }, [forceUpdate]);
+
+  // Queue an opponent attack animation — assign to ref for access from event handler
+  queueAiAttackRef.current = useCallback((data: CombatEventData) => {
+    const anim: AttackAnimationData = {
+      id: `ai_anim_${animationIdRef.current++}`,
+      attackerId: data.attackerId,
+      defenderId: data.defenderId,
+      damage: data.attackerDamage || 0,
+      counterDamage: data.defenderDamage || 0,
+      isPlayerAttack: false,
+    };
+    aiAnimationQueueRef.current.push(anim);
+    if (!aiAnimationActiveRef.current) {
+      processAiAnimationQueue();
+    }
+  }, [processAiAnimationQueue]);
 
   // Animation complete callback
   const onAnimationComplete = useCallback(() => {
@@ -371,9 +413,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     engine.startGame();
     console.log('Game started, active player:', engine.getState().activePlayerId);
 
-    // Create AI player - no delay for fast turns
+    // Create AI player with small delay so attacks are visible
     const ai = createAIPlayer('opponent', aiDifficulty);
-    ai.setThinkingDelay(0);
+    ai.setThinkingDelay(300);
 
     engineRef.current = engine;
     aiRef.current = ai;
@@ -509,12 +551,19 @@ export const GameProvider: React.FC<GameProviderProps> = ({
 
       // Check if it has CHOSEN targeting
       if (hasChosenTarget(def)) {
-        // Enter spell targeting mode
-        setPendingSpell(card);
-        setTargetingMode('spell');
         if (engineRef.current) {
           const board = engineRef.current.getStateManager().getBoard();
           const targets = computeSpellTargets(def, board, 'player', 'opponent');
+
+          // Auto-target if there's exactly 1 valid target
+          if (targets.length === 1) {
+            playCard(card, undefined, targets[0]);
+            return;
+          }
+
+          // Multiple targets — enter targeting mode
+          setPendingSpell(card);
+          setTargetingMode('spell');
           setValidTargets(targets);
         }
         return;
