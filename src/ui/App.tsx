@@ -2,7 +2,7 @@
  * STARFORGE TCG - Main App Component
  *
  * Routes between: Main Menu, Quick Play, Campaign (Story Mode),
- * PvP Lobby, PvP Game, Balance Tester.
+ * PvP Lobby, PvP Game, Balance Tester, Collection, Packs, Achievements.
  */
 
 import React, { useState, useCallback } from 'react';
@@ -19,6 +19,11 @@ import { DeckBuilder } from './components/DeckBuilder';
 import { Tutorial } from './components/Tutorial';
 import { Settings } from './components/Settings';
 import { StatsScreen } from './components/StatsScreen';
+import { PackOpening } from './components/PackOpening';
+import { CollectionManager } from './components/CollectionManager';
+import { AchievementsScreen } from './components/AchievementsScreen';
+import { DailyPanel } from './components/DailyPanel';
+import { ScreenTransition } from './components/ScreenTransition';
 import { recordGameResult } from '../stats/GameStats';
 import type { CampaignBattleResult } from './components/CampaignGame';
 import { GameProvider } from './context/GameContext';
@@ -53,7 +58,10 @@ type GameScreen =
   | 'campaign-battle'
   | 'campaign-results'
   | 'settings'
-  | 'stats';
+  | 'stats'
+  | 'collection'
+  | 'packs'
+  | 'achievements';
 
 export const App: React.FC = () => {
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -82,6 +90,9 @@ export const App: React.FC = () => {
   const [wasFirstEncounter, setWasFirstEncounter] = useState(false);
   const [wasNewUnlock, setWasNewUnlock] = useState(false);
   const [lastReward, setLastReward] = useState<BattleReward | null>(null);
+
+  // Daily panel overlay
+  const [showDailyPanel, setShowDailyPanel] = useState(false);
 
   // ---- Quick Play ----
   const handleStartGame = useCallback((playerRace: Race, aiDifficulty: AIDifficulty) => {
@@ -259,6 +270,10 @@ export const App: React.FC = () => {
           onTutorial={() => setScreen('tutorial')}
           onSettings={() => setScreen('settings')}
           onStats={() => setScreen('stats')}
+          onCollection={() => setScreen('collection')}
+          onPacks={() => setScreen('packs')}
+          onAchievements={() => setScreen('achievements')}
+          onDaily={() => setShowDailyPanel(true)}
         />
       )}
 
@@ -391,6 +406,32 @@ export const App: React.FC = () => {
           reward={lastReward || undefined}
           totalGold={campaignSave.gold || 0}
         />
+      )}
+
+      {/* Collection Manager */}
+      {screen === 'collection' && (
+        <ScreenTransition screenKey="collection">
+          <CollectionManager onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Pack Opening / Shop */}
+      {screen === 'packs' && (
+        <ScreenTransition screenKey="packs">
+          <PackOpening onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Achievements */}
+      {screen === 'achievements' && (
+        <ScreenTransition screenKey="achievements">
+          <AchievementsScreen onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Daily Panel Overlay */}
+      {showDailyPanel && (
+        <DailyPanel onClose={() => setShowDailyPanel(false)} />
       )}
     </div>
   );

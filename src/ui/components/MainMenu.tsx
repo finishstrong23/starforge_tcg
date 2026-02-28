@@ -17,9 +17,13 @@ interface MainMenuProps {
   onTutorial?: () => void;
   onSettings?: () => void;
   onStats?: () => void;
+  onCollection?: () => void;
+  onPacks?: () => void;
+  onAchievements?: () => void;
+  onDaily?: () => void;
 }
 
-export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder, onTutorial, onSettings, onStats }) => {
+export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder, onTutorial, onSettings, onStats, onCollection, onPacks, onAchievements, onDaily }) => {
   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
   const [logoLoaded, setLogoLoaded] = useState(true);
@@ -181,6 +185,83 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, o
               onClick={onPlayFriend}
             >
               Play vs Friend
+            </button>
+          )}
+        </div>
+
+        {/* Progression & Collection */}
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {onPacks && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #ffaa00 0%, #ff8800 100%)',
+                border: '2px solid #ffcc44',
+                borderRadius: '10px',
+                padding: '14px 28px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#000',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(255, 170, 0, 0.4)',
+                letterSpacing: '1px',
+              }}
+              onClick={onPacks}
+            >
+              Open Packs
+            </button>
+          )}
+          {onCollection && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #cc66ff 0%, #9933cc 100%)',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '14px 28px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(204, 102, 255, 0.3)',
+              }}
+              onClick={onCollection}
+            >
+              Collection
+            </button>
+          )}
+          {onAchievements && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #ffcc00 0%, #ddaa00 100%)',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '14px 28px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#000',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(255, 204, 0, 0.3)',
+              }}
+              onClick={onAchievements}
+            >
+              Achievements
+            </button>
+          )}
+          {onDaily && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #44ddff 0%, #0099cc 100%)',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '14px 28px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(68, 221, 255, 0.3)',
+              }}
+              onClick={onDaily}
+            >
+              Daily Quests
             </button>
           )}
         </div>
