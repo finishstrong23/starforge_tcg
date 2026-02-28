@@ -25,7 +25,11 @@ type SoundName =
   | 'error'
   | 'coinFlip'
   | 'buffApplied'
-  | 'legendaryPlay';
+  | 'legendaryPlay'
+  | 'craft'
+  | 'disenchant'
+  | 'emote'
+  | 'cardDrag';
 
 class SoundManagerClass {
   private ctx: AudioContext | null = null;
@@ -280,6 +284,36 @@ class SoundManagerClass {
           this.playTone(500, 0.15, 'sine', 0.15);
           this.playTone(700, 0.15, 'sine', 0.25);
           this.playTone(1000, 0.2, 'triangle', 0.35);
+          break;
+
+        case 'craft':
+          // Magical creation: rising shimmer + crystallize
+          this.playTone(400, 0.12, 'sine');
+          this.playTone(600, 0.12, 'sine', 0.08);
+          this.playTone(800, 0.15, 'triangle', 0.16);
+          this.playTone(1000, 0.2, 'sine', 0.24, 1400, {
+            attack: 0.02, decay: 0.05, sustain: 0.5, release: 0.1,
+          });
+          this.playNoise(0.1, 0.3, 6000);
+          break;
+
+        case 'disenchant':
+          // Dissolving: descending sweep + crumble
+          this.playTone(800, 0.2, 'sawtooth', 0, 200);
+          this.playNoise(0.25, 0.05, 3000);
+          this.playTone(300, 0.15, 'triangle', 0.15, 100);
+          break;
+
+        case 'emote':
+          // Quick notification pop
+          this.playTone(800, 0.05, 'sine');
+          this.playTone(1000, 0.08, 'sine', 0.04);
+          break;
+
+        case 'cardDrag':
+          // Soft whoosh for dragging
+          this.playNoise(0.12, 0, 2000);
+          this.playTone(300, 0.08, 'sine', 0, 500);
           break;
       }
     } catch {

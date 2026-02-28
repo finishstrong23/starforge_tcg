@@ -37,3 +37,16 @@ export {
   savePackState,
   openPack,
 } from './CardPacks';
+
+export {
+  type CraftingState,
+  DUST_VALUES,
+  loadCraftingState,
+  saveCraftingState,
+  getOwnedCount,
+  craftCard,
+  disenchantCard,
+  addCardsToCollection,
+  getAllCollectibleCards,
+  disenchantExtras,
+} from './CraftingSystem';

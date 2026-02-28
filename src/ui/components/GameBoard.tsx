@@ -10,7 +10,7 @@
  * - Attack animations between combatants
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 import { SoundManager } from '../../audio';
 import { Card } from './Card';
@@ -24,7 +24,11 @@ import { AttackAnimation } from './AttackAnimation';
 import { VFXOverlay } from './VFXOverlay';
 import { CardBack } from './CardBack';
 import { BoardBackground } from './BoardBackground';
+import { EmoteWheel, EmoteBubble, type Emote } from './EmoteWheel';
+import { CardArt } from './CardArt';
 import { getHeroById } from '../../heroes';
+import { globalCardDatabase } from '../../cards/CardDatabase';
+import type { Race } from '../../types/Race';
 
 interface GameBoardProps {
   onBackToMenu: () => void;
@@ -65,6 +69,23 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     dismissVFX,
   } = useGame();
 
+  // ── Drag-and-drop state ──
+  const [isDragOver, setIsDragOver] = useState(false);
+  const draggedCardIdRef = useRef<string | null>(null);
+
+  // ── Card flight animation state ──
+  const [flightCard, setFlightCard] = useState<{
+    definitionId: string;
+    cost: number;
+    race?: string;
+    cardType: string;
+  } | null>(null);
+  const flightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Emote state ──
+  const [playerEmote, setPlayerEmote] = useState<string | null>(null);
+  const [opponentEmote, setOpponentEmote] = useState<string | null>(null);
+
   // Timer callback - auto end turn when time runs out
   const handleTimeUp = useCallback(() => {
     if (isPlayerTurn) {
@@ -76,6 +97,29 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
   const playerHeroDef = useMemo(() =>
     getHeroById(playerState?.hero.definitionId || ''), [playerState?.hero.definitionId]);
 
+  // ── Card flight trigger ──
+  const triggerCardFlight = useCallback((card: any) => {
+    const def = globalCardDatabase.getCard(card.definitionId);
+    setFlightCard({
+      definitionId: card.definitionId,
+      cost: card.currentCost,
+      race: (def as any)?.race,
+      cardType: def?.type || 'MINION',
+    });
+    if (flightTimerRef.current) clearTimeout(flightTimerRef.current);
+    flightTimerRef.current = setTimeout(() => setFlightCard(null), 500);
+  }, []);
+
+  // ── Emote handler ──
+  const handleEmote = useCallback((emote: Emote) => {
+    setPlayerEmote(emote.message);
+    // AI responds with a random emote after a delay
+    setTimeout(() => {
+      const responses = ['Well played.', 'Greetings!', 'Thank you.', 'Wow!'];
+      setOpponentEmote(responses[Math.floor(Math.random() * responses.length)]);
+    }, 1200 + Math.random() * 1500);
+  }, []);
+
   if (!gameState || !playerState || !opponentState) {
     return (
       <div style={styles.loading}>
@@ -86,13 +130,35 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
 
   const handleCardClick = (card: any) => {
     if (card.zone === 'HAND' && canPlayCard(card)) {
-      // Use selectCard which handles targeting mode
+      triggerCardFlight(card);
       selectCard(card);
     } else if (card.zone === 'BOARD' && card.controllerId === 'player') {
-      // Select for attack
       selectCard(card);
     }
   };
+
+  // ── Drag-and-drop handlers ──
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const cardId = e.dataTransfer.getData('text/plain');
+    if (!cardId) return;
+    const card = playerHand.find(c => c.instanceId === cardId);
+    if (card && canPlayCard(card)) {
+      triggerCardFlight(card);
+      selectCard(card);
+    }
+  }, [playerHand, canPlayCard, selectCard, triggerCardFlight]);
 
   const onTargetClick = (targetId: string) => {
     handleTargetClick(targetId);
@@ -176,7 +242,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       <div style={styles.battlefield} onClick={handleBoardClick}>
         {/* Opponent Board */}
         <div style={styles.boardRow}>
-          <div data-card-id="hero_opponent">
+          <div data-card-id="hero_opponent" style={{ position: 'relative' }}>
             <HeroPortrait
               health={opponentState.hero.currentHealth}
               maxHealth={opponentState.hero.maxHealth}
@@ -185,6 +251,14 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
               isValidTarget={validTargets.includes('hero_opponent')}
               onClick={() => onTargetClick('hero_opponent')}
             />
+            {/* Opponent Emote Bubble */}
+            {opponentEmote && (
+              <EmoteBubble
+                message={opponentEmote}
+                isOpponent
+                onDone={() => setOpponentEmote(null)}
+              />
+            )}
           </div>
           <div style={styles.minionsRow}>
             {opponentBoard.map((card) => (
@@ -213,7 +287,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
 
         {/* Player Board */}
         <div style={styles.boardRow}>
-          <div data-card-id="hero_player">
+          <div data-card-id="hero_player" style={{ position: 'relative' }}>
             <HeroPortrait
               health={playerState.hero.currentHealth}
               maxHealth={playerState.hero.maxHealth}
@@ -226,8 +300,30 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
               isValidTarget={validTargets.includes('hero_player')}
               onClick={() => onTargetClick('hero_player')}
             />
+            {/* Player Emote Bubble */}
+            {playerEmote && (
+              <EmoteBubble
+                message={playerEmote}
+                onDone={() => setPlayerEmote(null)}
+              />
+            )}
+            {/* Emote Wheel */}
+            <div style={{ position: 'absolute', bottom: '-30px', left: '50%', transform: 'translateX(-50%)' }}>
+              <EmoteWheel onEmote={handleEmote} />
+            </div>
           </div>
-          <div style={styles.minionsRow}>
+          <div
+            style={{
+              ...styles.minionsRow,
+              ...(isDragOver ? {
+                borderColor: 'rgba(0, 255, 136, 0.6)',
+                boxShadow: 'inset 0 0 30px rgba(0, 255, 136, 0.15), 0 0 20px rgba(0, 255, 136, 0.2)',
+              } : {}),
+            }}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             {playerBoard.map((card) => (
               <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative' }}>
                 <Card
@@ -287,6 +383,14 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
               canPlay={canPlayCard(card)}
               isSelected={selectedCard?.instanceId === card.instanceId}
               onClick={() => handleCardClick(card)}
+              onDragStart={() => {
+                draggedCardIdRef.current = card.instanceId;
+                SoundManager.play('cardDrag' as any);
+              }}
+              onDragEnd={() => {
+                draggedCardIdRef.current = null;
+                setIsDragOver(false);
+              }}
               style={{
                 transform: `rotate(${(index - playerHand.length / 2) * 3}deg)`,
                 marginLeft: index > 0 ? '-20px' : '0',
@@ -311,6 +415,22 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       <button style={styles.backButton} onClick={onBackToMenu}>
         {'\u2715'}
       </button>
+
+      {/* Card Flight Animation Overlay */}
+      {flightCard && (
+        <div style={styles.flightOverlay}>
+          <div style={styles.flightCard}>
+            <CardArt
+              cardId={flightCard.definitionId}
+              race={flightCard.race as Race | undefined}
+              cardType={flightCard.cardType as 'MINION' | 'SPELL' | 'STRUCTURE'}
+              cost={flightCard.cost}
+              width={120}
+              height={70}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -526,5 +646,26 @@ const styles: { [key: string]: React.CSSProperties } = {
     textShadow: '0 1px 3px rgba(0,0,0,0.8)',
     boxShadow: '0 0 8px #ffaa00, 0 0 16px rgba(170, 0, 255, 0.4)',
     animation: 'starforgePulse 1.5s ease-in-out infinite',
+  },
+  flightOverlay: {
+    position: 'absolute',
+    top: '35%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    zIndex: 800,
+    pointerEvents: 'none',
+    animation: 'card-flight 0.5s ease-out forwards',
+  },
+  flightCard: {
+    width: '130px',
+    height: '80px',
+    borderRadius: '10px',
+    background: 'linear-gradient(135deg, #2a2a4a 0%, #1a1a3a 100%)',
+    border: '3px solid #00ff88',
+    boxShadow: '0 0 30px rgba(0, 255, 136, 0.5), 0 0 60px rgba(0, 255, 136, 0.2)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
   },
 };

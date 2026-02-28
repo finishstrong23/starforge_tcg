@@ -97,6 +97,8 @@ interface CardProps {
   isSelected?: boolean;
   isValidTarget?: boolean;
   onClick?: () => void;
+  onDragStart?: (e: React.DragEvent) => void;
+  onDragEnd?: (e: React.DragEvent) => void;
   style?: React.CSSProperties;
 }
 
@@ -110,9 +112,13 @@ export const Card: React.FC<CardProps> = ({
   isSelected = false,
   isValidTarget = false,
   onClick,
+  onDragStart,
+  onDragEnd,
   style = {},
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const isDraggable = isInHand && canPlay;
   const definition = globalCardDatabase.getCard(card.definitionId);
   const isMinion = card.currentAttack !== undefined;
 
@@ -212,8 +218,26 @@ export const Card: React.FC<CardProps> = ({
 
   return (
     <div
-      style={{ position: 'relative', display: 'inline-block' }}
-      onMouseEnter={() => setIsHovered(true)}
+      style={{
+        position: 'relative',
+        display: 'inline-block',
+        opacity: isDragging ? 0.4 : 1,
+        transition: 'opacity 0.15s ease',
+      }}
+      draggable={isDraggable}
+      onDragStart={(e) => {
+        if (!isDraggable) { e.preventDefault(); return; }
+        setIsDragging(true);
+        setIsHovered(false);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', card.instanceId);
+        onDragStart?.(e);
+      }}
+      onDragEnd={(e) => {
+        setIsDragging(false);
+        onDragEnd?.(e);
+      }}
+      onMouseEnter={() => { if (!isDragging) setIsHovered(true); }}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Main Card */}

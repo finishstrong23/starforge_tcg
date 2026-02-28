@@ -21,6 +21,7 @@ import { Settings } from './components/Settings';
 import { StatsScreen } from './components/StatsScreen';
 import { PackOpening } from './components/PackOpening';
 import { CollectionManager } from './components/CollectionManager';
+import { CraftingScreen } from './components/CraftingScreen';
 import { AchievementsScreen } from './components/AchievementsScreen';
 import { DailyPanel } from './components/DailyPanel';
 import { ScreenTransition } from './components/ScreenTransition';
@@ -60,6 +61,7 @@ type GameScreen =
   | 'settings'
   | 'stats'
   | 'collection'
+  | 'crafting'
   | 'packs'
   | 'achievements';
 
@@ -271,6 +273,7 @@ export const App: React.FC = () => {
           onSettings={() => setScreen('settings')}
           onStats={() => setScreen('stats')}
           onCollection={() => setScreen('collection')}
+          onCrafting={() => setScreen('crafting')}
           onPacks={() => setScreen('packs')}
           onAchievements={() => setScreen('achievements')}
           onDaily={() => setShowDailyPanel(true)}
@@ -412,6 +415,13 @@ export const App: React.FC = () => {
       {screen === 'collection' && (
         <ScreenTransition screenKey="collection">
           <CollectionManager onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Crafting Screen */}
+      {screen === 'crafting' && (
+        <ScreenTransition screenKey="crafting">
+          <CraftingScreen onBack={() => setScreen('menu')} />
         </ScreenTransition>
       )}
 
