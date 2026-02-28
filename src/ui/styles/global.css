@@ -279,3 +279,95 @@ html, body {
   background: rgba(0, 170, 255, 0.3);
   color: #ffffff;
 }
+
+/* ═══ Mobile Responsive ══════════════════════════════════════════ */
+
+/* Tablet (768px - 1024px) */
+@media (max-width: 1024px) {
+  :root {
+    --card-width: 75px;
+    --card-height: 110px;
+    --card-hand-width: 85px;
+    --card-hand-height: 125px;
+  }
+}
+
+/* Phone landscape + small tablets (max 768px) */
+@media (max-width: 768px) {
+  :root {
+    --card-width: 60px;
+    --card-height: 90px;
+    --card-hand-width: 70px;
+    --card-hand-height: 100px;
+  }
+
+  /* Make buttons touch-friendly (min 44px tap targets) */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Scale down fonts globally */
+  body {
+    font-size: 14px;
+  }
+}
+
+/* Phone portrait (max 480px) */
+@media (max-width: 480px) {
+  :root {
+    --card-width: 50px;
+    --card-height: 75px;
+    --card-hand-width: 58px;
+    --card-hand-height: 84px;
+  }
+
+  body {
+    font-size: 12px;
+  }
+
+  /* Tighten spacing on very small screens */
+  .flex-center, .flex-column {
+    gap: 4px;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  /* Disable hover effects that don't work on touch */
+  button:hover {
+    transform: none !important;
+  }
+
+  /* Bigger tap targets for interactive elements */
+  button, [role="button"], a {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  /* Disable context menu on long press for game elements */
+  .game-board {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Landscape phone optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+  :root {
+    --card-width: 55px;
+    --card-height: 80px;
+    --card-hand-width: 62px;
+    --card-hand-height: 90px;
+  }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Ensure crisp rendering on retina */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

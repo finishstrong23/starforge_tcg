@@ -19,12 +19,13 @@ interface MainMenuProps {
   onStats?: () => void;
   onCollection?: () => void;
   onCrafting?: () => void;
+  onBattlePass?: () => void;
   onPacks?: () => void;
   onAchievements?: () => void;
   onDaily?: () => void;
 }
 
-export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder, onTutorial, onSettings, onStats, onCollection, onCrafting, onPacks, onAchievements, onDaily }) => {
+export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder, onTutorial, onSettings, onStats, onCollection, onCrafting, onBattlePass, onPacks, onAchievements, onDaily }) => {
   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
   const [logoLoaded, setLogoLoaded] = useState(true);
@@ -246,6 +247,25 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, o
               onClick={onCrafting}
             >
               Crafting
+            </button>
+          )}
+          {onBattlePass && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #ff4488 0%, #cc2266 50%, #aa0044 100%)',
+                border: '2px solid #ff66aa',
+                borderRadius: '10px',
+                padding: '14px 28px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(255, 68, 136, 0.4)',
+                letterSpacing: '1px',
+              }}
+              onClick={onBattlePass}
+            >
+              Battle Pass
             </button>
           )}
           {onAchievements && (

@@ -50,3 +50,21 @@ export {
   getAllCollectibleCards,
   disenchantExtras,
 } from './CraftingSystem';
+
+export {
+  type BattlePassState,
+  type BattlePassReward,
+  type BattlePassRewardType,
+  type BattlePassTier,
+  type SeasonSummary,
+  BATTLE_PASS_TIERS,
+  XP_REWARDS,
+  loadBattlePass,
+  saveBattlePass,
+  addXP,
+  claimFreeReward,
+  claimPremiumReward,
+  upgradeToPremium,
+  getLevelProgress,
+  getDaysRemaining,
+} from './BattlePass';

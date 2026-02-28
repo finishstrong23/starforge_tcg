@@ -21,6 +21,17 @@ export interface PvPMatch {
   timestamp: number;
 }
 
+export interface SeasonArchive {
+  season: number;
+  seasonName: string;
+  finalRating: number;
+  peakRating: number;
+  wins: number;
+  losses: number;
+  bestWinStreak: number;
+  rankTitle: string;
+}
+
 export interface PvPProfile {
   /** Current ELO rating (starts at 1000) */
   rating: number;
@@ -38,11 +49,36 @@ export interface PvPProfile {
   bestWinStreak: number;
   /** Match history (most recent 50) */
   matchHistory: PvPMatch[];
+  /** Current ranked season number */
+  currentSeason: number;
+  /** Archived past seasons */
+  seasonHistory: SeasonArchive[];
 }
 
 const DEFAULT_RATING = 1000;
 const K_FACTOR = 32;
 const MAX_HISTORY = 50;
+
+/** Get current season number (changes every 30 days) */
+function getCurrentSeason(): number {
+  const epoch = new Date('2025-01-01').getTime();
+  return Math.floor((Date.now() - epoch) / (30 * 24 * 60 * 60 * 1000)) + 1;
+}
+
+const SEASON_NAMES = [
+  'Season of the Void', 'Season of Starfire', 'Season of the Swarm',
+  'Season of Chrono', 'Season of the Forge', 'Season of Crystals',
+  'Season of Phantoms', 'Season of Lumina',
+];
+
+function getSeasonName(season: number): string {
+  return SEASON_NAMES[(season - 1) % SEASON_NAMES.length];
+}
+
+/** Soft-reset rating toward baseline (halfway between current and default) */
+function softResetRating(rating: number): number {
+  return Math.round((rating + DEFAULT_RATING) / 2);
+}
 
 function createDefaultProfile(): PvPProfile {
   return {
@@ -54,17 +90,66 @@ function createDefaultProfile(): PvPProfile {
     streak: 0,
     bestWinStreak: 0,
     matchHistory: [],
+    currentSeason: getCurrentSeason(),
+    seasonHistory: [],
   };
+}
+
+/** Check if season rolled over; archive old data and soft-reset */
+function checkSeasonRollover(profile: PvPProfile): PvPProfile {
+  const currentSeason = getCurrentSeason();
+  if (profile.currentSeason === currentSeason) return profile;
+
+  // Archive the old season
+  const rank = getRankTitle(profile.rating);
+  const archive: SeasonArchive = {
+    season: profile.currentSeason,
+    seasonName: getSeasonName(profile.currentSeason),
+    finalRating: profile.rating,
+    peakRating: profile.peakRating,
+    wins: profile.wins,
+    losses: profile.losses,
+    bestWinStreak: profile.bestWinStreak,
+    rankTitle: rank.title,
+  };
+
+  const newRating = softResetRating(profile.rating);
+
+  const updated: PvPProfile = {
+    rating: newRating,
+    peakRating: newRating,
+    totalGames: 0,
+    wins: 0,
+    losses: 0,
+    streak: 0,
+    bestWinStreak: 0,
+    matchHistory: [],
+    currentSeason: currentSeason,
+    seasonHistory: [...(profile.seasonHistory || []), archive].slice(-10),
+  };
+
+  savePvPProfile(updated);
+  return updated;
 }
 
 export function loadPvPProfile(): PvPProfile {
   try {
     const raw = localStorage.getItem(PVP_KEY);
     if (!raw) return createDefaultProfile();
-    return { ...createDefaultProfile(), ...JSON.parse(raw) };
+    const profile = { ...createDefaultProfile(), ...JSON.parse(raw) };
+    return checkSeasonRollover(profile);
   } catch {
     return createDefaultProfile();
   }
+}
+
+/** Get current season info */
+export function getSeasonInfo(): { season: number; name: string; daysLeft: number } {
+  const season = getCurrentSeason();
+  const epoch = new Date('2025-01-01').getTime();
+  const seasonEndMs = epoch + season * 30 * 24 * 60 * 60 * 1000;
+  const daysLeft = Math.max(0, Math.ceil((seasonEndMs - Date.now()) / (1000 * 60 * 60 * 24)));
+  return { season, name: getSeasonName(season), daysLeft };
 }
 
 function savePvPProfile(profile: PvPProfile): void {
