@@ -15,6 +15,7 @@ import { CampaignMap } from './components/CampaignMap';
 import { PreBattle } from './components/PreBattle';
 import { PostBattle } from './components/PostBattle';
 import { CampaignGame } from './components/CampaignGame';
+import { DeckBuilder } from './components/DeckBuilder';
 import type { CampaignBattleResult } from './components/CampaignGame';
 import { GameProvider } from './context/GameContext';
 import { PvPGameProvider } from './context/PvPGameContext';
@@ -34,12 +35,14 @@ import type { MultiplayerManager } from './network/MultiplayerManager';
 type GameScreen =
   | 'menu'
   | 'game'
+  | 'deckbuilder'
   | 'pvp-lobby'
   | 'pvp-game'
   | 'balance'
   | 'campaign-select'
   | 'campaign-map'
   | 'campaign-prebattle'
+  | 'campaign-deckbuilder'
   | 'campaign-battle'
   | 'campaign-results';
 
@@ -60,6 +63,9 @@ export const App: React.FC = () => {
     opponentRace: Race;
   } | null>(null);
 
+  // Custom deck state
+  const [customDeckCardIds, setCustomDeckCardIds] = useState<string[] | null>(null);
+
   // Campaign state
   const [campaignSave, setCampaignSave] = useState<CampaignSave | null>(null);
   const [campaignOpponent, setCampaignOpponent] = useState<Race | null>(null);
@@ -71,6 +77,39 @@ export const App: React.FC = () => {
   const handleStartGame = useCallback((playerRace: Race, aiDifficulty: AIDifficulty) => {
     setGameConfig({ playerRace, aiDifficulty });
     setScreen('game');
+  }, []);
+
+  // ---- Quick Play with Deckbuilder ----
+  const handleStartDeckbuilder = useCallback((playerRace: Race, aiDifficulty: AIDifficulty) => {
+    setGameConfig({ playerRace, aiDifficulty });
+    setCustomDeckCardIds(null);
+    setScreen('deckbuilder');
+  }, []);
+
+  const handleDeckConfirmed = useCallback((cardIds: string[]) => {
+    setCustomDeckCardIds(cardIds);
+    setScreen('game');
+  }, []);
+
+  const handleDeckbuilderBack = useCallback(() => {
+    setCustomDeckCardIds(null);
+    setScreen('menu');
+  }, []);
+
+  // ---- Campaign Deckbuilder ----
+  const handleCampaignDeckbuilder = useCallback(() => {
+    setCustomDeckCardIds(null);
+    setScreen('campaign-deckbuilder');
+  }, []);
+
+  const handleCampaignDeckConfirmed = useCallback((cardIds: string[]) => {
+    setCustomDeckCardIds(cardIds);
+    setScreen('campaign-battle');
+  }, []);
+
+  const handleCampaignDeckbuilderBack = useCallback(() => {
+    setCustomDeckCardIds(null);
+    setScreen('campaign-prebattle');
   }, []);
 
   const handleBackToMenu = useCallback(() => {
@@ -190,6 +229,7 @@ export const App: React.FC = () => {
           onPlayFriend={() => setScreen('pvp-lobby')}
           onBalanceTest={() => setScreen('balance')}
           onCampaign={handleStartCampaign}
+          onDeckbuilder={handleStartDeckbuilder}
         />
       )}
 
@@ -198,11 +238,22 @@ export const App: React.FC = () => {
         <BalanceTester onBack={handleBackToMenu} />
       )}
 
+      {/* Deckbuilder (Quick Play) */}
+      {screen === 'deckbuilder' && gameConfig && (
+        <DeckBuilder
+          playerRace={gameConfig.playerRace}
+          onConfirm={handleDeckConfirmed}
+          onBack={handleDeckbuilderBack}
+          isUnlocked={true}
+        />
+      )}
+
       {/* Quick Play */}
       {screen === 'game' && gameConfig && (
         <GameProvider
           playerRace={gameConfig.playerRace}
           aiDifficulty={gameConfig.aiDifficulty}
+          customDeckCardIds={customDeckCardIds || undefined}
         >
           <GameBoard onBackToMenu={handleBackToMenu} />
         </GameProvider>
@@ -252,6 +303,17 @@ export const App: React.FC = () => {
           stats={campaignSave.planetStats[campaignOpponent]}
           onFight={handleCampaignFight}
           onBack={handleCampaignContinue}
+          onCustomizeDeck={handleCampaignDeckbuilder}
+        />
+      )}
+
+      {/* Campaign: Deckbuilder */}
+      {screen === 'campaign-deckbuilder' && campaignSave && (
+        <DeckBuilder
+          playerRace={campaignSave.homeRace}
+          onConfirm={handleCampaignDeckConfirmed}
+          onBack={handleCampaignDeckbuilderBack}
+          isUnlocked={true}
         />
       )}
 
@@ -262,6 +324,7 @@ export const App: React.FC = () => {
           opponentRace={campaignOpponent}
           difficulty={PLANET_ENCOUNTERS[campaignOpponent].difficulty}
           onBattleEnd={handleCampaignBattleEnd}
+          customDeckCardIds={customDeckCardIds || undefined}
         />
       )}
 

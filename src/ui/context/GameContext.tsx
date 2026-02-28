@@ -25,6 +25,8 @@ import type { AttackAnimationData } from '../components/AttackAnimation';
 import {
   initializeSampleDatabase,
   createSampleDeck,
+  createCustomGameDeck,
+  initializeFullDatabase,
   globalCardDatabase,
 } from '../../index';
 
@@ -93,6 +95,8 @@ interface GameProviderProps {
   aiDifficulty: AIDifficulty;
   /** Force a specific opponent race (for campaign mode) */
   opponentRace?: Race;
+  /** Custom deck card IDs (for custom deckbuilding) */
+  customDeckCardIds?: string[];
 }
 
 /**
@@ -180,6 +184,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   playerRace,
   aiDifficulty,
   opponentRace: forcedOpponentRace,
+  customDeckCardIds,
 }) => {
   // Use a simple counter to force re-renders
   const [updateCounter, setUpdateCounter] = useState(0);
@@ -379,10 +384,16 @@ export const GameProvider: React.FC<GameProviderProps> = ({
 
     // Clear previous database and reinitialize
     globalCardDatabase.clear();
-    initializeSampleDatabase();
+    if (customDeckCardIds) {
+      initializeFullDatabase();
+    } else {
+      initializeSampleDatabase();
+    }
 
-    // Create player deck
-    const playerDeck = createSampleDeck(playerRace, 'player');
+    // Create player deck — use custom deck if provided, otherwise auto-generate
+    const playerDeck = customDeckCardIds
+      ? createCustomGameDeck(customDeckCardIds, playerRace, 'player')
+      : createSampleDeck(playerRace, 'player');
 
     // Create AI deck — use forced race for campaign, random otherwise
     const allRaces = [Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.BIOTITANS, Race.CRYSTALLINE,

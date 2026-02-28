@@ -17,6 +17,7 @@ interface PreBattleProps {
   stats?: PlanetStats;
   onFight: () => void;
   onBack: () => void;
+  onCustomizeDeck?: () => void;
 }
 
 export const PreBattle: React.FC<PreBattleProps> = ({
@@ -25,6 +26,7 @@ export const PreBattle: React.FC<PreBattleProps> = ({
   stats,
   onFight,
   onBack,
+  onCustomizeDeck,
 }) => {
   const encounter = PLANET_ENCOUNTERS[opponentRace];
   const playerInfo = RaceData[playerRace];
@@ -114,19 +116,42 @@ export const PreBattle: React.FC<PreBattleProps> = ({
           </div>
         </div>
 
-        {/* Fight button */}
-        <button
-          style={{
-            ...styles.fightButton,
-            background: `linear-gradient(135deg, ${encounter.color} 0%, ${encounter.color}cc 100%)`,
-            opacity: ready ? 1 : 0.5,
-            transform: ready ? 'scale(1)' : 'scale(0.95)',
-          }}
-          onClick={onFight}
-          disabled={!ready}
-        >
-          ENGAGE
-        </button>
+        {/* Action buttons */}
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {onCustomizeDeck && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #9933ff 0%, #7722cc 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '14px 30px',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(153, 51, 255, 0.4)',
+                letterSpacing: '2px',
+                opacity: ready ? 1 : 0.5,
+              }}
+              onClick={onCustomizeDeck}
+              disabled={!ready}
+            >
+              CUSTOMIZE DECK
+            </button>
+          )}
+          <button
+            style={{
+              ...styles.fightButton,
+              background: `linear-gradient(135deg, ${encounter.color} 0%, ${encounter.color}cc 100%)`,
+              opacity: ready ? 1 : 0.5,
+              transform: ready ? 'scale(1)' : 'scale(0.95)',
+            }}
+            onClick={onFight}
+            disabled={!ready}
+          >
+            ENGAGE
+          </button>
+        </div>
       </div>
     </div>
   );

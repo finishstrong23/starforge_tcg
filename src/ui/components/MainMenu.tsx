@@ -13,9 +13,10 @@ interface MainMenuProps {
   onPlayFriend?: () => void;
   onBalanceTest?: () => void;
   onCampaign?: () => void;
+  onDeckbuilder?: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
 }
 
-export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign }) => {
+export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder }) => {
   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
   const [logoLoaded, setLogoLoaded] = useState(true);
@@ -141,6 +142,25 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, o
           <button style={styles.startButton} onClick={handleStartGame}>
             Quick Play vs AI
           </button>
+
+          {onDeckbuilder && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #9933ff 0%, #7722cc 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '18px 50px',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(153, 51, 255, 0.4)',
+              }}
+              onClick={() => onDeckbuilder(selectedRace, selectedDifficulty)}
+            >
+              Build Deck
+            </button>
+          )}
 
           {onPlayFriend && (
             <button

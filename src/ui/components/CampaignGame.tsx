@@ -23,6 +23,7 @@ interface CampaignGameProps {
   opponentRace: Race;
   difficulty: AIDifficulty;
   onBattleEnd: (result: CampaignBattleResult) => void;
+  customDeckCardIds?: string[];
 }
 
 /**
@@ -58,12 +59,14 @@ export const CampaignGame: React.FC<CampaignGameProps> = ({
   opponentRace,
   difficulty,
   onBattleEnd,
+  customDeckCardIds,
 }) => {
   return (
     <GameProvider
       playerRace={playerRace}
       aiDifficulty={difficulty}
       opponentRace={opponentRace}
+      customDeckCardIds={customDeckCardIds}
     >
       <CampaignGameInner onBattleEnd={onBattleEnd} />
     </GameProvider>
