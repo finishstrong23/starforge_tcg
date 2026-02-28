@@ -17,6 +17,8 @@ import type { CardInstance } from '../../types/Card';
 import { CombatKeyword, OriginalKeyword, TriggerKeyword } from '../../types/Keywords';
 import { globalCardDatabase } from '../../cards/CardDatabase';
 import { KEYWORD_DESCRIPTIONS } from './KeywordTooltip';
+import { CardArt } from './CardArt';
+import type { Race } from '../../types/Race';
 
 // Card art mapping (emoji-based for now, can be replaced with actual images)
 const CARD_ART: Record<string, string> = {
@@ -262,7 +264,15 @@ export const Card: React.FC<CardProps> = ({
           {card.isCloaked ? (
             <div style={styles.cloakedOverlay}>👻</div>
           ) : (
-            <div style={styles.cardArtEmoji}>{cardArt}</div>
+            <CardArt
+              cardId={card.definitionId}
+              race={(definition as any)?.race as Race | undefined}
+              cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
+              cost={card.currentCost}
+              width={isInHand ? 92 : 77}
+              height={isInHand ? 55 : 45}
+              isForged={card.isForged}
+            />
           )}
         </div>
 
@@ -301,7 +311,17 @@ export const Card: React.FC<CardProps> = ({
             <span style={styles.popupName}>{definition?.name || 'Unknown'}</span>
           </div>
 
-          <div style={styles.popupArt}>{cardArt}</div>
+          <div style={styles.popupArt}>
+            <CardArt
+              cardId={card.definitionId}
+              race={(definition as any)?.race as Race | undefined}
+              cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
+              cost={card.currentCost}
+              width={196}
+              height={100}
+              isForged={card.isForged}
+            />
+          </div>
 
           {isMinion && (
             <div style={styles.popupStats}>

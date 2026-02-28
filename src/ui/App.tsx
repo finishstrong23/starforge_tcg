@@ -16,24 +16,28 @@ import { PreBattle } from './components/PreBattle';
 import { PostBattle } from './components/PostBattle';
 import { CampaignGame } from './components/CampaignGame';
 import { DeckBuilder } from './components/DeckBuilder';
+import { Tutorial } from './components/Tutorial';
 import type { CampaignBattleResult } from './components/CampaignGame';
 import { GameProvider } from './context/GameContext';
 import { PvPGameProvider } from './context/PvPGameContext';
 import { Race } from '../types/Race';
 import { AIDifficulty } from '../ai/AIPlayer';
 import { PLANET_ENCOUNTERS } from '../campaign/CampaignData';
-import type { CampaignSave } from '../campaign/CampaignState';
+import type { CampaignSave, BattleReward } from '../campaign/CampaignState';
 import {
   loadCampaign,
   saveCampaign,
   deleteCampaign,
   createNewCampaign,
   recordBattleResult,
+  calculateBattleReward,
+  applyRewards,
 } from '../campaign/CampaignState';
 import type { MultiplayerManager } from './network/MultiplayerManager';
 
 type GameScreen =
   | 'menu'
+  | 'tutorial'
   | 'game'
   | 'deckbuilder'
   | 'pvp-lobby'
@@ -72,6 +76,7 @@ export const App: React.FC = () => {
   const [battleResult, setBattleResult] = useState<CampaignBattleResult | null>(null);
   const [wasFirstEncounter, setWasFirstEncounter] = useState(false);
   const [wasNewUnlock, setWasNewUnlock] = useState(false);
+  const [lastReward, setLastReward] = useState<BattleReward | null>(null);
 
   // ---- Quick Play ----
   const handleStartGame = useCallback((playerRace: Race, aiDifficulty: AIDifficulty) => {
@@ -174,6 +179,15 @@ export const App: React.FC = () => {
     const firstEncounter = !opponentStats || opponentStats.attempts === 0;
     const previouslyUnlocked = campaignSave.unlockedRaces.includes(campaignOpponent);
 
+    // Calculate rewards before recording result (uses pre-win stats)
+    const reward = calculateBattleReward(
+      campaignSave,
+      campaignOpponent,
+      result.won,
+      result.playerHealthRemaining,
+      result.turnCount,
+    );
+
     const updatedSave = recordBattleResult(
       campaignSave,
       campaignOpponent,
@@ -182,12 +196,16 @@ export const App: React.FC = () => {
       result.turnCount,
     );
 
+    // Apply rewards to save
+    const saveWithRewards = applyRewards(updatedSave, reward);
+
     const newUnlock = result.won && !previouslyUnlocked;
 
-    setCampaignSave(updatedSave);
+    setCampaignSave(saveWithRewards);
     setBattleResult(result);
     setWasFirstEncounter(firstEncounter);
     setWasNewUnlock(newUnlock);
+    setLastReward(reward);
     setScreen('campaign-results');
   }, [campaignSave, campaignOpponent]);
 
@@ -230,6 +248,15 @@ export const App: React.FC = () => {
           onBalanceTest={() => setScreen('balance')}
           onCampaign={handleStartCampaign}
           onDeckbuilder={handleStartDeckbuilder}
+          onTutorial={() => setScreen('tutorial')}
+        />
+      )}
+
+      {/* Tutorial */}
+      {screen === 'tutorial' && (
+        <Tutorial
+          onComplete={() => setScreen('menu')}
+          onSkip={() => setScreen('menu')}
         />
       )}
 
@@ -341,6 +368,8 @@ export const App: React.FC = () => {
           stats={campaignSave.planetStats[campaignOpponent]!}
           onContinue={handleCampaignContinue}
           onRetry={handleCampaignRetry}
+          reward={lastReward || undefined}
+          totalGold={campaignSave.gold || 0}
         />
       )}
     </div>

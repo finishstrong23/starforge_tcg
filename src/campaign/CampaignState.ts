@@ -6,7 +6,8 @@
  */
 
 import { Race } from '../types/Race';
-import { getCampaignEncounters } from './CampaignData';
+import { AIDifficulty } from '../ai/AIPlayer';
+import { getCampaignEncounters, PLANET_ENCOUNTERS } from './CampaignData';
 
 const STORAGE_KEY = 'starforge_campaign';
 
@@ -24,6 +25,15 @@ export interface PlanetStats {
   fastestWin: number;
   /** Has the player seen the lore? */
   loreRevealed: boolean;
+}
+
+/**
+ * Reward granted after a battle
+ */
+export interface BattleReward {
+  gold: number;
+  cardIds: string[];
+  firstWinBonus: boolean;
 }
 
 /**
@@ -46,6 +56,12 @@ export interface CampaignSave {
   startedAt: number;
   /** Timestamp of last activity */
   lastPlayedAt: number;
+  /** Gold currency earned from battles */
+  gold: number;
+  /** Card IDs the player has earned from rewards */
+  earnedCardIds: string[];
+  /** Number of card packs opened */
+  packsOpened: number;
 }
 
 /**
@@ -61,6 +77,9 @@ export function createNewCampaign(homeRace: Race): CampaignSave {
     currentEncounterIndex: 0,
     startedAt: Date.now(),
     lastPlayedAt: Date.now(),
+    gold: 0,
+    earnedCardIds: [],
+    packsOpened: 0,
   };
 }
 
@@ -158,8 +177,133 @@ export function recordBattleResult(
   }
 
   updated.planetStats[opponentRace] = existing;
+
+  // Ensure gold/earnedCardIds exist (backwards compatibility)
+  if (updated.gold === undefined) updated.gold = 0;
+  if (!updated.earnedCardIds) updated.earnedCardIds = [];
+  if (updated.packsOpened === undefined) updated.packsOpened = 0;
+
   saveCampaign(updated);
   return updated;
+}
+
+/**
+ * Calculate battle rewards based on outcome
+ */
+export function calculateBattleReward(
+  save: CampaignSave,
+  opponentRace: Race,
+  won: boolean,
+  playerHealthRemaining: number,
+  turnCount: number,
+): BattleReward {
+  if (!won) {
+    // Small consolation gold for losses
+    return { gold: 5, cardIds: [], firstWinBonus: false };
+  }
+
+  const encounter = PLANET_ENCOUNTERS[opponentRace];
+  const difficultyMultiplier = encounter.difficulty === AIDifficulty.HARD ? 2.0
+    : encounter.difficulty === AIDifficulty.MEDIUM ? 1.5 : 1.0;
+
+  // Base gold reward
+  let gold = Math.round(25 * difficultyMultiplier);
+
+  // Performance bonuses
+  if (playerHealthRemaining >= 20) gold += 10; // healthy win
+  if (turnCount <= 8) gold += 15; // fast win
+
+  // First win bonus
+  const stats = save.planetStats[opponentRace];
+  const isFirstWin = !stats || stats.wins === 0;
+  if (isFirstWin) gold += 50;
+
+  // Card reward: earn 1-2 random cards from defeated race's expansion pool
+  const cardIds: string[] = [];
+  const numCards = isFirstWin ? 2 : (Math.random() < 0.4 ? 1 : 0);
+  if (numCards > 0) {
+    // Generate deterministic but varied card IDs for the opponent race
+    const racePrefix = getRacePrefix(opponentRace);
+    if (racePrefix) {
+      for (let i = 0; i < numCards; i++) {
+        // Pick expansion cards: exp_{prefix}_r1 through exp_{prefix}_r5 (rares)
+        const cardNum = Math.floor(Math.random() * 5) + 1;
+        const cardId = `exp_${racePrefix}_r${cardNum}`;
+        if (!save.earnedCardIds?.includes(cardId)) {
+          cardIds.push(cardId);
+        }
+      }
+    }
+  }
+
+  return { gold, cardIds, firstWinBonus: isFirstWin };
+}
+
+function getRacePrefix(race: Race): string | null {
+  const prefixes: Partial<Record<Race, string>> = {
+    [Race.COGSMITHS]: 'cog',
+    [Race.LUMINAR]: 'lum',
+    [Race.PYROCLAST]: 'pyro',
+    [Race.VOIDBORN]: 'void',
+    [Race.BIOTITANS]: 'bio',
+    [Race.CRYSTALLINE]: 'crys',
+    [Race.PHANTOM_CORSAIRS]: 'pc',
+    [Race.HIVEMIND]: 'hive',
+    [Race.ASTROMANCERS]: 'astro',
+    [Race.CHRONOBOUND]: 'chrono',
+  };
+  return prefixes[race] || null;
+}
+
+/**
+ * Apply rewards to campaign save
+ */
+export function applyRewards(save: CampaignSave, reward: BattleReward): CampaignSave {
+  const updated = { ...save };
+  if (updated.gold === undefined) updated.gold = 0;
+  if (!updated.earnedCardIds) updated.earnedCardIds = [];
+
+  updated.gold += reward.gold;
+  for (const id of reward.cardIds) {
+    if (!updated.earnedCardIds.includes(id)) {
+      updated.earnedCardIds.push(id);
+    }
+  }
+  saveCampaign(updated);
+  return updated;
+}
+
+/**
+ * Open a card pack (costs 100 gold, grants 3 random expansion cards)
+ */
+export function openCardPack(save: CampaignSave): { save: CampaignSave; newCards: string[] } | null {
+  const PACK_COST = 100;
+  if ((save.gold || 0) < PACK_COST) return null;
+
+  const updated = { ...save };
+  updated.gold = (updated.gold || 0) - PACK_COST;
+  if (!updated.earnedCardIds) updated.earnedCardIds = [];
+  updated.packsOpened = (updated.packsOpened || 0) + 1;
+
+  const newCards: string[] = [];
+  const racePrefixes = ['cog', 'lum', 'pyro', 'void', 'bio', 'crys', 'pc', 'hive', 'astro', 'chrono'];
+
+  for (let i = 0; i < 3; i++) {
+    const prefix = racePrefixes[Math.floor(Math.random() * racePrefixes.length)];
+    // Mix of rares (r1-r5) and epics (e1-e3)
+    const isEpic = Math.random() < 0.3;
+    const num = isEpic
+      ? Math.floor(Math.random() * 3) + 1
+      : Math.floor(Math.random() * 5) + 1;
+    const cardId = `exp_${prefix}_${isEpic ? 'e' : 'r'}${num}`;
+    if (!updated.earnedCardIds.includes(cardId)) {
+      updated.earnedCardIds.push(cardId);
+    }
+    newCards.push(cardId);
+  }
+
+  saveCampaign(updated);
+  return { save: updated, newCards };
 }
 
 /**

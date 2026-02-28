@@ -13,7 +13,8 @@
 import React, { useState, useEffect } from 'react';
 import { Race, RaceData } from '../../types/Race';
 import { PLANET_ENCOUNTERS } from '../../campaign/CampaignData';
-import type { PlanetStats } from '../../campaign/CampaignState';
+import type { PlanetStats, BattleReward } from '../../campaign/CampaignState';
+import { SoundManager } from '../../audio';
 import backgroundImg from '../../assets/background.png';
 
 interface PostBattleProps {
@@ -29,6 +30,10 @@ interface PostBattleProps {
   stats: PlanetStats;
   onContinue: () => void;
   onRetry: () => void;
+  /** Rewards earned from this battle */
+  reward?: BattleReward;
+  /** Player's total gold after rewards */
+  totalGold?: number;
 }
 
 export const PostBattle: React.FC<PostBattleProps> = ({
@@ -41,6 +46,8 @@ export const PostBattle: React.FC<PostBattleProps> = ({
   stats,
   onContinue,
   onRetry,
+  reward,
+  totalGold,
 }) => {
   const encounter = PLANET_ENCOUNTERS[opponentRace];
   const [phase, setPhase] = useState(0); // 0=result, 1=stats, 2=lore, 3=unlock
@@ -147,6 +154,46 @@ export const PostBattle: React.FC<PostBattleProps> = ({
             <div style={styles.achievementBadge}>NEW HEALTH RECORD</div>
           )}
         </div>
+
+        {/* Battle Rewards */}
+        {reward && (
+          <div style={{
+            ...styles.rewardBox,
+            opacity: phase >= 1 ? 1 : 0,
+            transform: phase >= 1 ? 'translateY(0)' : 'translateY(10px)',
+          }}>
+            <div style={styles.rewardTitle}>REWARDS</div>
+            <div style={styles.rewardGrid}>
+              <div style={styles.rewardItem}>
+                <span style={{ fontSize: '24px' }}>&#x1FA99;</span>
+                <span style={styles.rewardValue}>+{reward.gold}</span>
+                <span style={styles.rewardLabel}>Gold</span>
+              </div>
+              {reward.cardIds.length > 0 && (
+                <div style={styles.rewardItem}>
+                  <span style={{ fontSize: '24px' }}>&#x1F0CF;</span>
+                  <span style={styles.rewardValue}>+{reward.cardIds.length}</span>
+                  <span style={styles.rewardLabel}>{reward.cardIds.length === 1 ? 'Card' : 'Cards'}</span>
+                </div>
+              )}
+              {reward.firstWinBonus && (
+                <div style={{ ...styles.achievementBadge, background: 'linear-gradient(135deg, #00cc88 0%, #00aa66 100%)' }}>
+                  FIRST WIN BONUS +50g
+                </div>
+              )}
+            </div>
+            {totalGold !== undefined && (
+              <div style={{ fontSize: '12px', color: '#888', textAlign: 'center', marginTop: '8px' }}>
+                Total Gold: <span style={{ color: '#ffcc00', fontWeight: 'bold' }}>{totalGold}</span>
+                {totalGold >= 100 && (
+                  <span style={{ color: '#00ff88', marginLeft: '8px' }}>
+                    (Card pack available!)
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Lore Reveal — shown on EVERY encounter, win or loss */}
         {firstEncounter && (
@@ -404,6 +451,48 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     letterSpacing: '2px',
     boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+  },
+  rewardBox: {
+    width: '100%',
+    padding: '18px',
+    background: 'linear-gradient(135deg, rgba(40, 30, 10, 0.9) 0%, rgba(30, 20, 5, 0.9) 100%)',
+    borderRadius: '12px',
+    border: '1px solid #ffcc0033',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '10px',
+    transition: 'all 0.5s ease',
+  },
+  rewardTitle: {
+    fontSize: '11px',
+    color: '#ffcc00',
+    letterSpacing: '3px',
+    fontWeight: 'bold',
+  },
+  rewardGrid: {
+    display: 'flex',
+    gap: '30px',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  rewardItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '4px',
+  },
+  rewardValue: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: '#ffcc00',
+  },
+  rewardLabel: {
+    fontSize: '10px',
+    color: '#888',
+    textTransform: 'uppercase',
+    letterSpacing: '1px',
   },
   continueButton: {
     background: 'rgba(255, 255, 255, 0.1)',

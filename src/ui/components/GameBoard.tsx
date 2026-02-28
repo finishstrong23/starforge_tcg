@@ -10,8 +10,9 @@
  * - Attack animations between combatants
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useGame } from '../context/GameContext';
+import { SoundManager } from '../../audio';
 import { Card } from './Card';
 import { HeroPortrait } from './HeroPortrait';
 import { CrystalBar } from './CrystalBar';
@@ -20,6 +21,7 @@ import { GameOverlay } from './GameOverlay';
 import { TurnTimer } from './TurnTimer';
 import { CombatLog } from './CombatLog';
 import { AttackAnimation } from './AttackAnimation';
+import { VFXOverlay } from './VFXOverlay';
 import { getHeroById } from '../../heroes';
 import backgroundImg from '../../assets/background.png';
 
@@ -58,6 +60,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     combatLog,
     currentAnimation,
     onAnimationComplete,
+    vfxEvents,
+    dismissVFX,
   } = useGame();
 
   // Timer callback - auto end turn when time runs out
@@ -111,6 +115,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
 
   return (
     <div style={styles.container}>
+      {/* VFX Overlay - floating damage/heal numbers, death bursts, spell rings */}
+      <VFXOverlay events={vfxEvents} onEventDone={dismissVFX} />
+
       {/* Attack Animation Overlay */}
       <AttackAnimation
         animation={currentAnimation}
@@ -293,11 +300,42 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
         Turn {turnNumber}
       </div>
 
+      {/* Sound toggle */}
+      <SoundToggle />
+
       {/* Back button */}
       <button style={styles.backButton} onClick={onBackToMenu}>
         {'\u2715'}
       </button>
     </div>
+  );
+};
+
+const SoundToggle: React.FC = () => {
+  const [muted, setMuted] = useState(SoundManager.muted);
+  return (
+    <button
+      style={{
+        position: 'absolute',
+        top: '10px',
+        right: '50px',
+        background: 'rgba(0,0,0,0.5)',
+        border: '1px solid #444',
+        borderRadius: '6px',
+        padding: '4px 10px',
+        color: muted ? '#ff4444' : '#00ff88',
+        fontSize: '16px',
+        cursor: 'pointer',
+        zIndex: 100,
+      }}
+      onClick={() => {
+        const on = SoundManager.toggle();
+        setMuted(!on);
+      }}
+      title={muted ? 'Unmute' : 'Mute'}
+    >
+      {muted ? '\u{1F507}' : '\u{1F50A}'}
+    </button>
   );
 };
 

@@ -670,6 +670,8 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     combatLog,
     currentAnimation,
     onAnimationComplete,
+    vfxEvents: [],
+    dismissVFX: () => {},
   };
 
   return (

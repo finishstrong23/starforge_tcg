@@ -29,6 +29,8 @@ import {
   initializeFullDatabase,
   globalCardDatabase,
 } from '../../index';
+import { SoundManager } from '../../audio';
+import type { VFXEvent } from '../components/VFXOverlay';
 
 type TargetingMode = 'none' | 'attack' | 'spell' | 'heropower';
 
@@ -77,6 +79,10 @@ interface GameContextValue {
   // Attack animation
   currentAnimation: AttackAnimationData | null;
   onAnimationComplete: () => void;
+
+  // VFX
+  vfxEvents: VFXEvent[];
+  dismissVFX: (id: number) => void;
 }
 
 export const GameContext = createContext<GameContextValue | null>(null);
@@ -199,6 +205,17 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const [combatLog, setCombatLog] = useState<CombatLogEntry[]>([]);
   const logIdRef = useRef(0);
 
+  // VFX state
+  const [vfxEvents, setVfxEvents] = useState<VFXEvent[]>([]);
+  const vfxIdRef = useRef(0);
+  const emitVFX = useCallback((type: VFXEvent['type'], targetId: string, value?: number, label?: string) => {
+    const event: VFXEvent = { id: vfxIdRef.current++, type, targetId, value, label, createdAt: Date.now() };
+    setVfxEvents(prev => [...prev, event]);
+  }, []);
+  const dismissVFX = useCallback((id: number) => {
+    setVfxEvents(prev => prev.filter(e => e.id !== id));
+  }, []);
+
   // Attack animation state
   const [currentAnimation, setCurrentAnimation] = useState<AttackAnimationData | null>(null);
   const pendingAttackRef = useRef<{ attacker: CardInstance; targetId: string } | null>(null);
@@ -264,6 +281,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const data = event.data as TurnEventData;
         const turnPlayer = data.playerId === 'player' ? 'Your' : "Opponent's";
         addLogEntry(`--- ${turnPlayer} Turn ${data.turnNumber} ---`, 'turn', isPlayer, event.turn);
+        if (data.playerId === 'player') SoundManager.play('turnStart');
         break;
       }
       case GameEventType.CARD_PLAYED: {
@@ -271,6 +289,14 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const def = globalCardDatabase.getCard(data.cardDefinitionId);
         const name = def?.name || data.cardDefinitionId;
         addLogEntry(`${who} played ${name}`, 'play', isPlayer, event.turn);
+        if (def?.rarity === 'LEGENDARY') {
+          SoundManager.play('legendaryPlay');
+        } else if (def?.type === CardType.SPELL) {
+          SoundManager.play('spellCast');
+          if (data.cardInstanceId) emitVFX('spell', data.cardInstanceId);
+        } else {
+          SoundManager.play('cardPlay');
+        }
         break;
       }
       case GameEventType.ATTACK_DECLARED: {
@@ -280,6 +306,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const defenderName = isHeroTarget ? 'Hero' : getCardName(data.defenderId);
         const attacker = data.attackerOwnerId === 'player' ? 'Your' : "Opponent's";
         addLogEntry(`${attacker} ${attackerName} attacks ${defenderName}`, 'attack', data.attackerOwnerId === 'player', event.turn);
+        SoundManager.play('attack');
         // Queue animation for opponent attacks
         if (data.attackerOwnerId === 'opponent') {
           queueAiAttackRef.current?.(data);
@@ -288,9 +315,13 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       }
       case GameEventType.DAMAGE_DEALT: {
         const data = event.data as DamageEventData;
+        if (data.amount > 0) {
+          emitVFX('damage', data.targetId, data.amount);
+        }
         if (data.targetType === 'hero') {
           const targetHero = data.targetId === 'hero_player' ? 'Your Hero' : "Opponent's Hero";
           addLogEntry(`${targetHero} takes ${data.amount} damage`, 'damage', data.targetId === 'hero_opponent', event.turn);
+          SoundManager.play('heroDamage');
         }
         break;
       }
@@ -300,6 +331,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const name = def?.name || data.cardDefinitionId;
         const owner = data.playerId === 'player' ? 'Your' : "Opponent's";
         addLogEntry(`${owner} ${name} was destroyed`, 'death', data.playerId !== 'player', event.turn);
+        if (data.cardInstanceId) emitVFX('death', data.cardInstanceId);
+        SoundManager.play('minionDeath');
         break;
       }
       case GameEventType.HEALING_DONE: {
@@ -309,15 +342,19 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             ? (data.targetId === 'hero_player' ? 'Your Hero' : "Opponent's Hero")
             : getCardName(data.targetId);
           addLogEntry(`${targetName} healed for ${data.actualHealing}`, 'heal', data.targetId.includes('player'), event.turn);
+          emitVFX('heal', data.targetId, data.actualHealing);
+          SoundManager.play('heal');
         }
         break;
       }
       case GameEventType.HERO_POWER_USED: {
         addLogEntry(`${who} used Hero Power`, 'hero_power', isPlayer, event.turn);
+        SoundManager.play('heroPower');
         break;
       }
       case GameEventType.BARRIER_BROKEN: {
         addLogEntry(`Barrier broken!`, 'keyword', isPlayer, event.turn);
+        SoundManager.play('barrierBreak');
         break;
       }
     }
@@ -725,6 +762,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     if (state.activePlayerId !== 'player') return;
 
     console.log('Player ending turn');
+    SoundManager.play('turnEnd');
 
     engineRef.current.processAction({
       type: ActionType.END_TURN,
@@ -755,6 +793,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     if (!engineRef.current || !canStarforge(card)) return;
 
     console.log('STARFORGE ASCENSION:', card.definitionId);
+    SoundManager.play('starforge');
+    emitVFX('starforge', card.instanceId);
 
     engineRef.current.processAction({
       type: ActionType.ACTIVATE_STARFORGE,
@@ -814,6 +854,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     combatLog,
     currentAnimation,
     onAnimationComplete,
+    vfxEvents,
+    dismissVFX,
   };
 
   return (

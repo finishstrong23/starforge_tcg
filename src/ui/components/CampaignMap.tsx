@@ -78,6 +78,10 @@ export const CampaignMap: React.FC<CampaignMapProps> = ({
             <span style={{ color: '#aaa', fontWeight: 'bold', fontSize: '20px' }}>{save.totalGamesPlayed}</span>
             <span style={{ color: '#888' }}>Battles</span>
           </div>
+          <div style={styles.statItem}>
+            <span style={{ color: '#ffcc00', fontWeight: 'bold', fontSize: '20px' }}>{save.gold || 0}</span>
+            <span style={{ color: '#888' }}>Gold</span>
+          </div>
           <div style={styles.progressBarContainer}>
             <div style={{ ...styles.progressBar, width: `${progress}%` }} />
             <span style={styles.progressLabel}>{progress}% Conquered</span>

@@ -2,7 +2,8 @@
  * STARFORGE TCG - Game Over Overlay Component
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { SoundManager } from '../../audio';
 
 interface GameOverlayProps {
   winnerId?: string;
@@ -18,6 +19,14 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
 }) => {
   const isVictory = winnerId === 'player';
   const isDraw = !winnerId;
+
+  useEffect(() => {
+    if (isVictory) {
+      SoundManager.play('gameWin');
+    } else if (!isDraw) {
+      SoundManager.play('gameLose');
+    }
+  }, [isVictory, isDraw]);
 
   return (
     <div style={styles.overlay}>

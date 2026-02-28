@@ -14,9 +14,10 @@ interface MainMenuProps {
   onBalanceTest?: () => void;
   onCampaign?: () => void;
   onDeckbuilder?: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
+  onTutorial?: () => void;
 }
 
-export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder }) => {
+export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder, onTutorial }) => {
   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
   const [logoLoaded, setLogoLoaded] = useState(true);
@@ -182,25 +183,45 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, o
           )}
         </div>
 
-        {/* Balance Test Button */}
-        {onBalanceTest && (
-          <button
-            style={{
-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-              border: 'none',
-              borderRadius: '12px',
-              padding: '16px 50px',
-              fontSize: '20px',
-              fontWeight: 'bold',
-              color: '#000',
-              cursor: 'pointer',
-              boxShadow: '0 4px 15px rgba(245, 158, 11, 0.4)',
-            }}
-            onClick={onBalanceTest}
-          >
-            ⚖️ AI Balance Tester
-          </button>
-        )}
+        {/* Secondary buttons */}
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {onTutorial && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #00cc88 0%, #00aa66 100%)',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '12px 30px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(0, 204, 136, 0.3)',
+              }}
+              onClick={onTutorial}
+            >
+              How to Play
+            </button>
+          )}
+          {onBalanceTest && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '12px 30px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#000',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(245, 158, 11, 0.3)',
+              }}
+              onClick={onBalanceTest}
+            >
+              Balance Tester
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
