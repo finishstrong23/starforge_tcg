@@ -1,29 +1,23 @@
 /**
- * STARFORGE TCG - Attack Animation
+ * STARFORGE TCG - Professional Attack Animation
  *
- * Shows a visual slash/projectile animation from attacker to defender.
- * Uses CSS keyframe animations injected via a <style> tag.
- *
- * The animation:
- * 1. Highlights the attacker with a lunge
- * 2. Sends a projectile/slash from attacker to defender
- * 3. Shows an impact burst on the defender
+ * Multi-phase combat animation with:
+ * - Attacker wind-up glow and lunge
+ * - Energy projectile with particle trail
+ * - Impact burst with expanding shockwave rings
+ * - Floating damage numbers with bounce
+ * - Screen flash on impact
+ * - Defender shake on hit
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 
 export interface AttackAnimationData {
-  /** Unique ID for this animation */
   id: string;
-  /** Instance ID of the attacking card (or hero ID) */
   attackerId: string;
-  /** Instance ID of the defending card (or hero ID) */
   defenderId: string;
-  /** Damage dealt by attacker */
   damage: number;
-  /** Counter-damage dealt to attacker (0 for hero targets) */
   counterDamage: number;
-  /** Whether attacker is the player */
   isPlayerAttack: boolean;
 }
 
@@ -32,16 +26,26 @@ interface AttackAnimationProps {
   onComplete: () => void;
 }
 
-// Total animation duration in ms
-const ANIMATION_DURATION = 600;
+const ANIMATION_DURATION = 700;
+
+// Generate trail particle positions along the path
+function generateTrailParticles(count: number): { offset: number; spread: number; size: number; opacity: number }[] {
+  return Array.from({ length: count }, (_, i) => ({
+    offset: (i / count) * 0.85,
+    spread: (Math.sin(i * 2.7) * 0.5 + 0.5) * 8 - 4,
+    size: 1.5 + Math.sin(i * 1.3) * 1,
+    opacity: 0.3 + (i / count) * 0.4,
+  }));
+}
 
 export const AttackAnimation: React.FC<AttackAnimationProps> = ({ animation, onComplete }) => {
-  const [phase, setPhase] = useState<'idle' | 'slash' | 'impact'>('idle');
+  const [phase, setPhase] = useState<'idle' | 'windup' | 'slash' | 'impact'>('idle');
   const [positions, setPositions] = useState<{
     attackerX: number; attackerY: number;
     defenderX: number; defenderY: number;
   } | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const trailParticles = useMemo(() => generateTrailParticles(8), []);
 
   useEffect(() => {
     if (!animation) {
@@ -50,12 +54,10 @@ export const AttackAnimation: React.FC<AttackAnimationProps> = ({ animation, onC
       return;
     }
 
-    // Find DOM elements for attacker and defender
     const attackerEl = document.querySelector(`[data-card-id="${animation.attackerId}"]`) as HTMLElement | null;
     const defenderEl = document.querySelector(`[data-card-id="${animation.defenderId}"]`) as HTMLElement | null;
 
     if (!attackerEl || !defenderEl) {
-      // Elements not found — skip animation
       onComplete();
       return;
     }
@@ -70,20 +72,28 @@ export const AttackAnimation: React.FC<AttackAnimationProps> = ({ animation, onC
       defenderY: defenderRect.top + defenderRect.height / 2,
     });
 
-    // Phase 1: Slash projectile
-    setPhase('slash');
+    // Phase 1: Wind-up (brief glow on attacker)
+    setPhase('windup');
 
-    // Phase 2: Impact after projectile reaches target
     timeoutRef.current = setTimeout(() => {
-      setPhase('impact');
+      // Phase 2: Slash projectile
+      setPhase('slash');
 
-      // Complete after impact
       timeoutRef.current = setTimeout(() => {
-        setPhase('idle');
-        setPositions(null);
-        onComplete();
+        // Phase 3: Impact
+        setPhase('impact');
+
+        // Add shake to defender element
+        defenderEl.style.animation = 'shake 0.3s ease-out';
+        setTimeout(() => { defenderEl.style.animation = ''; }, 300);
+
+        timeoutRef.current = setTimeout(() => {
+          setPhase('idle');
+          setPositions(null);
+          onComplete();
+        }, ANIMATION_DURATION * 0.45);
       }, ANIMATION_DURATION * 0.4);
-    }, ANIMATION_DURATION * 0.5);
+    }, ANIMATION_DURATION * 0.12);
 
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -95,89 +105,195 @@ export const AttackAnimation: React.FC<AttackAnimationProps> = ({ animation, onC
   const dx = positions.defenderX - positions.attackerX;
   const dy = positions.defenderY - positions.attackerY;
   const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+  const distance = Math.sqrt(dx * dx + dy * dy);
 
   return (
     <div style={styles.overlay}>
-      {/* Inject keyframe animations */}
       <style>{`
-        @keyframes sf-slash-travel {
+        @keyframes sf-windup-glow {
+          0% { box-shadow: 0 0 0 transparent; }
+          100% { box-shadow: 0 0 20px #ff8800, 0 0 40px #ff6600, 0 0 60px rgba(255, 100, 0, 0.3); }
+        }
+        @keyframes sf-projectile-travel {
           0% {
-            transform: translate(${positions.attackerX}px, ${positions.attackerY}px) rotate(${angle}deg) scale(0.5);
-            opacity: 1;
+            transform: translate(${positions.attackerX}px, ${positions.attackerY}px) rotate(${angle}deg) scale(0.3);
+            opacity: 0;
           }
-          80% {
-            transform: translate(${positions.defenderX}px, ${positions.defenderY}px) rotate(${angle}deg) scale(1.2);
+          10% {
+            opacity: 1;
+            transform: translate(${positions.attackerX}px, ${positions.attackerY}px) rotate(${angle}deg) scale(1);
+          }
+          85% {
+            transform: translate(${positions.defenderX}px, ${positions.defenderY}px) rotate(${angle}deg) scale(1.1);
             opacity: 1;
           }
           100% {
-            transform: translate(${positions.defenderX}px, ${positions.defenderY}px) rotate(${angle}deg) scale(0.8);
+            transform: translate(${positions.defenderX}px, ${positions.defenderY}px) rotate(${angle}deg) scale(0.5);
             opacity: 0;
           }
         }
-        @keyframes sf-impact-burst {
-          0% { transform: translate(-50%, -50%) scale(0.3); opacity: 1; }
-          50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.8; }
-          100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+        @keyframes sf-trail-particle {
+          0% { opacity: 0.6; transform: translate(0, 0) scale(1); }
+          100% { opacity: 0; transform: translate(${-dx * 0.05}px, ${-dy * 0.05}px) scale(0); }
         }
-        @keyframes sf-damage-float {
-          0% { transform: translate(-50%, 0) scale(1); opacity: 1; }
-          100% { transform: translate(-50%, -40px) scale(1.3); opacity: 0; }
+        @keyframes sf-impact-ring {
+          0% { transform: translate(-50%, -50%) scale(0.2); opacity: 0.8; border-width: 3px; }
+          60% { opacity: 0.4; }
+          100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; border-width: 0.5px; }
+        }
+        @keyframes sf-impact-flash {
+          0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.9; }
+          100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+        }
+        @keyframes sf-impact-spark {
+          0% { opacity: 1; transform: translate(0, 0) scale(1); }
+          100% { opacity: 0; transform: translate(var(--spark-dx), var(--spark-dy)) scale(0); }
+        }
+        @keyframes sf-damage-pop {
+          0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+          20% { transform: translate(-50%, -10px) scale(1.3); opacity: 1; }
+          40% { transform: translate(-50%, -25px) scale(1); }
+          100% { transform: translate(-50%, -45px) scale(0.9); opacity: 0; }
+        }
+        @keyframes sf-screen-flash {
+          0% { opacity: 0.15; }
+          100% { opacity: 0; }
         }
         @keyframes sf-attacker-lunge {
           0% { transform: translate(0, 0); }
-          40% { transform: translate(${dx * 0.08}px, ${dy * 0.08}px); }
+          30% { transform: translate(${dx * 0.06}px, ${dy * 0.06}px); }
           100% { transform: translate(0, 0); }
         }
       `}</style>
 
-      {/* Slash projectile */}
-      {phase === 'slash' && (
-        <div
-          style={{
-            ...styles.slashProjectile,
-            animation: `sf-slash-travel ${ANIMATION_DURATION * 0.5}ms ease-out forwards`,
-          }}
-        >
-          {'\u2694\uFE0F'}
-        </div>
+      {/* Screen flash on impact */}
+      {phase === 'impact' && (
+        <div style={{
+          ...styles.screenFlash,
+          animation: `sf-screen-flash ${ANIMATION_DURATION * 0.2}ms ease-out forwards`,
+        }} />
       )}
 
-      {/* Impact burst on defender */}
-      {phase === 'impact' && (
+      {/* Energy projectile */}
+      {phase === 'slash' && (
         <>
+          {/* Main projectile */}
           <div
             style={{
-              ...styles.impactBurst,
-              left: positions.defenderX,
-              top: positions.defenderY,
-              animation: `sf-impact-burst ${ANIMATION_DURATION * 0.4}ms ease-out forwards`,
+              ...styles.projectile,
+              animation: `sf-projectile-travel ${ANIMATION_DURATION * 0.4}ms ease-in forwards`,
             }}
-          />
+          >
+            {/* Inner energy core */}
+            <div style={styles.projectileCore} />
+            {/* Outer glow */}
+            <div style={styles.projectileGlow} />
+          </div>
 
-          {/* Damage number floating up from defender */}
-          {animation.damage > 0 && (
-            <div
-              style={{
-                ...styles.damageNumber,
+          {/* Trail particles along path */}
+          {trailParticles.map((p, i) => {
+            const px = positions.attackerX + dx * p.offset;
+            const py = positions.attackerY + dy * p.offset + p.spread;
+            return (
+              <div key={`trail${i}`} style={{
+                position: 'fixed',
+                left: px,
+                top: py,
+                width: `${p.size * 2}px`,
+                height: `${p.size * 2}px`,
+                borderRadius: '50%',
+                background: i % 2 === 0
+                  ? 'radial-gradient(circle, #ffaa44 0%, #ff6600 50%, transparent 100%)'
+                  : 'radial-gradient(circle, #ffcc88 0%, #ff8844 50%, transparent 100%)',
+                opacity: 0,
+                animation: `sf-trail-particle ${ANIMATION_DURATION * 0.3}ms ease-out ${i * 25}ms forwards`,
+                pointerEvents: 'none',
+                zIndex: 901,
+              }} />
+            );
+          })}
+        </>
+      )}
+
+      {/* Impact effects on defender */}
+      {phase === 'impact' && (
+        <>
+          {/* Central flash */}
+          <div style={{
+            position: 'fixed',
+            left: positions.defenderX,
+            top: positions.defenderY,
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255,220,100,0.9) 0%, rgba(255,120,0,0.6) 30%, transparent 70%)',
+            animation: `sf-impact-flash ${ANIMATION_DURATION * 0.3}ms ease-out forwards`,
+            pointerEvents: 'none',
+            zIndex: 902,
+          }} />
+
+          {/* Shockwave ring 1 */}
+          <div style={{
+            ...styles.impactRing,
+            left: positions.defenderX,
+            top: positions.defenderY,
+            borderColor: '#ff8800',
+            animation: `sf-impact-ring ${ANIMATION_DURATION * 0.4}ms ease-out forwards`,
+          }} />
+
+          {/* Shockwave ring 2 (delayed) */}
+          <div style={{
+            ...styles.impactRing,
+            left: positions.defenderX,
+            top: positions.defenderY,
+            borderColor: '#ff6600',
+            animation: `sf-impact-ring ${ANIMATION_DURATION * 0.4}ms ease-out 60ms forwards`,
+            opacity: 0,
+          }} />
+
+          {/* Impact sparks */}
+          {Array.from({ length: 6 }, (_, i) => {
+            const sparkAngle = (i / 6) * Math.PI * 2 + Math.sin(i * 1.7) * 0.5;
+            const sparkDist = 25 + Math.sin(i * 2.3) * 15;
+            return (
+              <div key={`spark${i}`} style={{
+                position: 'fixed',
                 left: positions.defenderX,
-                top: positions.defenderY - 20,
-                animation: `sf-damage-float ${ANIMATION_DURATION * 0.5}ms ease-out forwards`,
-              }}
-            >
+                top: positions.defenderY,
+                width: '3px',
+                height: '3px',
+                borderRadius: '50%',
+                background: i % 3 === 0 ? '#ffdd88' : i % 3 === 1 ? '#ff8844' : '#ffaa44',
+                animation: `sf-impact-spark ${ANIMATION_DURATION * 0.35}ms ease-out ${i * 20}ms forwards`,
+                pointerEvents: 'none',
+                zIndex: 903,
+                '--spark-dx': `${Math.cos(sparkAngle) * sparkDist}px`,
+                '--spark-dy': `${Math.sin(sparkAngle) * sparkDist}px`,
+              } as React.CSSProperties} />
+            );
+          })}
+
+          {/* Damage number (defender) */}
+          {animation.damage > 0 && (
+            <div style={{
+              ...styles.damageNumber,
+              left: positions.defenderX,
+              top: positions.defenderY - 15,
+              animation: `sf-damage-pop ${ANIMATION_DURATION * 0.55}ms ease-out forwards`,
+            }}>
               -{animation.damage}
             </div>
           )}
 
-          {/* Counter-damage number floating up from attacker */}
+          {/* Counter-damage number (attacker) */}
           {animation.counterDamage > 0 && (
-            <div
-              style={{
-                ...styles.damageNumber,
-                left: positions.attackerX,
-                top: positions.attackerY - 20,
-                animation: `sf-damage-float ${ANIMATION_DURATION * 0.5}ms ease-out forwards`,
-              }}
-            >
+            <div style={{
+              ...styles.damageNumber,
+              left: positions.attackerX,
+              top: positions.attackerY - 15,
+              animation: `sf-damage-pop ${ANIMATION_DURATION * 0.55}ms ease-out 100ms forwards`,
+              opacity: 0,
+            }}>
               -{animation.counterDamage}
             </div>
           )}
@@ -197,34 +313,68 @@ const styles: { [key: string]: React.CSSProperties } = {
     pointerEvents: 'none',
     zIndex: 900,
   },
-  slashProjectile: {
+  screenFlash: {
     position: 'fixed',
     top: 0,
     left: 0,
-    fontSize: '28px',
-    filter: 'drop-shadow(0 0 8px #ff6600) drop-shadow(0 0 16px #ff4400)',
+    width: '100%',
+    height: '100%',
+    background: 'radial-gradient(circle at 50% 50%, rgba(255, 150, 50, 0.2) 0%, rgba(255, 100, 0, 0.05) 50%, transparent 80%)',
+    pointerEvents: 'none',
+    zIndex: 899,
+  },
+  projectile: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '24px',
+    height: '24px',
+    marginLeft: '-12px',
+    marginTop: '-12px',
     pointerEvents: 'none',
     zIndex: 901,
     willChange: 'transform, opacity',
   },
-  impactBurst: {
-    position: 'fixed',
-    width: '60px',
-    height: '60px',
+  projectileCore: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '8px',
+    height: '8px',
     borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(255,102,0,0.9) 0%, rgba(255,60,0,0.5) 40%, transparent 70%)',
-    boxShadow: '0 0 20px rgba(255,80,0,0.6), 0 0 40px rgba(255,60,0,0.3)',
+    background: 'radial-gradient(circle, #ffffff 0%, #ffcc44 40%, #ff8800 100%)',
+    boxShadow: '0 0 6px #ffcc44, 0 0 12px #ff8800',
+  },
+  projectileGlow: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '24px',
+    height: '24px',
+    borderRadius: '50%',
+    background: 'radial-gradient(circle, rgba(255,170,50,0.5) 0%, rgba(255,100,0,0.2) 40%, transparent 70%)',
+  },
+  impactRing: {
+    position: 'fixed',
+    width: '50px',
+    height: '50px',
+    borderRadius: '50%',
+    border: '2px solid #ff8800',
+    background: 'transparent',
     pointerEvents: 'none',
-    zIndex: 901,
+    zIndex: 902,
   },
   damageNumber: {
     position: 'fixed',
-    fontSize: '24px',
+    fontSize: '28px',
     fontWeight: 'bold',
     color: '#ff4444',
-    textShadow: '0 0 6px #ff0000, 0 0 12px #cc0000, 2px 2px 0 #000',
+    textShadow: '0 0 8px #ff0000, 0 0 16px #cc0000, 2px 2px 0 #000, -1px -1px 0 #000',
     pointerEvents: 'none',
-    zIndex: 902,
-    fontFamily: 'monospace',
+    zIndex: 905,
+    fontFamily: "'Segoe UI', sans-serif",
+    letterSpacing: '-1px',
   },
 };

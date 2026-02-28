@@ -2,9 +2,9 @@
 
 :root {
   /* Colors */
-  --color-bg-dark: #0a0a1a;
-  --color-bg-medium: #1a1a2e;
-  --color-bg-light: #252540;
+  --color-bg-dark: #060612;
+  --color-bg-medium: #12122a;
+  --color-bg-light: #1e1e3a;
   --color-board: #1e3a5f;
   --color-board-light: #2d4a6f;
 
@@ -34,10 +34,14 @@
   --color-text: #ffffff;
   --color-text-dim: #aaaaaa;
 
+  /* Gold accent (UI frames, borders) */
+  --color-gold: #c89b3c;
+  --color-gold-light: #f0d060;
+
   /* Glow effects */
-  --glow-playable: 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 30px #00ff88;
-  --glow-attack: 0 0 10px #ff6600, 0 0 20px #ff6600, 0 0 30px #ff6600;
-  --glow-target: 0 0 10px #ff0066, 0 0 20px #ff0066;
+  --glow-playable: 0 0 8px #00ff88, 0 0 16px #00ff88, 0 0 28px rgba(0, 255, 136, 0.4);
+  --glow-attack: 0 0 8px #ff6600, 0 0 16px #ff6600, 0 0 28px rgba(255, 102, 0, 0.4);
+  --glow-target: 0 0 8px #ff0066, 0 0 16px #ff0066;
 
   /* Spacing */
   --card-width: 90px;
@@ -60,6 +64,8 @@ html, body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: var(--color-text);
   background: var(--color-bg-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
@@ -79,7 +85,8 @@ html, body {
   flex-direction: column;
 }
 
-/* Animations */
+/* ─── Animations ─────────────────────────────────────────────── */
+
 @keyframes pulse-glow {
   0%, 100% {
     filter: brightness(1);
@@ -91,8 +98,10 @@ html, body {
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  20% { transform: translateX(-4px) rotate(-0.5deg); }
+  40% { transform: translateX(4px) rotate(0.5deg); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
 }
 
 @keyframes float {
@@ -100,12 +109,13 @@ html, body {
   50% { transform: translateY(-5px); }
 }
 
+/* Card playability glows with smooth pulsing */
 @keyframes glow-pulse {
   0%, 100% {
     box-shadow: var(--glow-playable);
   }
   50% {
-    box-shadow: 0 0 15px #00ff88, 0 0 30px #00ff88, 0 0 45px #00ff88;
+    box-shadow: 0 0 12px #00ff88, 0 0 24px #00ff88, 0 0 40px rgba(0, 255, 136, 0.5);
   }
 }
 
@@ -114,7 +124,7 @@ html, body {
     box-shadow: var(--glow-attack);
   }
   50% {
-    box-shadow: 0 0 15px #ff6600, 0 0 30px #ff6600, 0 0 45px #ff6600;
+    box-shadow: 0 0 12px #ff6600, 0 0 24px #ff6600, 0 0 40px rgba(255, 102, 0, 0.5);
   }
 }
 
@@ -148,10 +158,61 @@ html, body {
   }
 }
 
-/* Scrollbar styling */
+/* ─── Card animations ────────────────────────────────────────── */
+
+/* Card hover lift effect */
+@keyframes card-hover-lift {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-8px) scale(1.05); }
+}
+
+/* Card play from hand to board */
+@keyframes card-play {
+  0% { transform: scale(1); opacity: 1; }
+  30% { transform: scale(1.15); opacity: 1; }
+  60% { transform: scale(0.95); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Card draw into hand */
+@keyframes card-draw {
+  0% { transform: translateY(-20px) scale(0.8) rotate(-5deg); opacity: 0; }
+  60% { transform: translateY(3px) scale(1.05) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Subtle idle breathing for cards on board */
+@keyframes card-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1px); }
+}
+
+/* Target highlight pulse */
+@keyframes target-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px #ff0066, 0 0 16px #ff0066;
+  }
+  50% {
+    box-shadow: 0 0 12px #ff0066, 0 0 24px #ff0066, 0 0 36px rgba(255, 0, 102, 0.4);
+  }
+}
+
+.target-glow {
+  animation: target-pulse 1s ease-in-out infinite;
+}
+
+/* ─── Button animations ──────────────────────────────────────── */
+
+@keyframes button-shine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ─── Scrollbar styling ──────────────────────────────────────── */
+
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -160,9 +221,16 @@ html, body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--color-bg-light);
-  border-radius: 4px;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-board);
+}
+
+/* ─── Selection styling ──────────────────────────────────────── */
+
+::selection {
+  background: rgba(0, 170, 255, 0.3);
+  color: #ffffff;
 }

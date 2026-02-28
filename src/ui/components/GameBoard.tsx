@@ -22,8 +22,9 @@ import { TurnTimer } from './TurnTimer';
 import { CombatLog } from './CombatLog';
 import { AttackAnimation } from './AttackAnimation';
 import { VFXOverlay } from './VFXOverlay';
+import { CardBack } from './CardBack';
+import { BoardBackground } from './BoardBackground';
 import { getHeroById } from '../../heroes';
-import backgroundImg from '../../assets/background.png';
 
 interface GameBoardProps {
   onBackToMenu: () => void;
@@ -115,6 +116,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
 
   return (
     <div style={styles.container}>
+      {/* Animated starfield background */}
+      <BoardBackground />
+
       {/* VFX Overlay - floating damage/heal numbers, death bursts, spell rings */}
       <VFXOverlay events={vfxEvents} onEventDone={dismissVFX} />
 
@@ -150,7 +154,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
         <div style={styles.opponentHand}>
           {opponentState.hand.map((_, index) => (
             <div key={index} style={styles.cardBack}>
-              <div style={styles.cardBackDesign}>{'\u2605'}</div>
+              <CardBack width={50} height={70} />
             </div>
           ))}
         </div>
@@ -347,7 +351,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#060612',
   },
   loading: {
     width: '100%',
@@ -404,16 +408,10 @@ const styles: { [key: string]: React.CSSProperties } = {
   cardBack: {
     width: '50px',
     height: '70px',
-    background: 'linear-gradient(135deg, #2a2a4a 0%, #1a1a3a 100%)',
-    border: '2px solid #444466',
     borderRadius: '6px',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  cardBackDesign: {
-    fontSize: '20px',
-    color: '#666688',
   },
   opponentInfo: {
     display: 'flex',
