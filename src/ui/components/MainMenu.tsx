@@ -15,9 +15,11 @@ interface MainMenuProps {
   onCampaign?: () => void;
   onDeckbuilder?: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
   onTutorial?: () => void;
+  onSettings?: () => void;
+  onStats?: () => void;
 }
 
-export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder, onTutorial }) => {
+export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder, onTutorial, onSettings, onStats }) => {
   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
   const [logoLoaded, setLogoLoaded] = useState(true);
@@ -201,6 +203,42 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, o
               onClick={onTutorial}
             >
               How to Play
+            </button>
+          )}
+          {onStats && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #00aaff 0%, #0088cc 100%)',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '12px 30px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(0, 170, 255, 0.3)',
+              }}
+              onClick={onStats}
+            >
+              Stats
+            </button>
+          )}
+          {onSettings && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #777799 0%, #555577 100%)',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '12px 30px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(100, 100, 150, 0.3)',
+              }}
+              onClick={onSettings}
+            >
+              Settings
             </button>
           )}
           {onBalanceTest && (

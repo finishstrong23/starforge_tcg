@@ -5,9 +5,11 @@
  * Players pick their race, then connect via PeerJS.
  */
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { Race, RaceData } from '../../types/Race';
 import { MultiplayerManager } from '../network/MultiplayerManager';
+import { loadPvPProfile, getRankTitle } from '../../stats/PvPRating';
+import type { PvPProfile } from '../../stats/PvPRating';
 
 type LobbyPhase = 'choose' | 'creating' | 'waiting' | 'joining' | 'ready';
 
@@ -29,6 +31,8 @@ export const Lobby: React.FC<LobbyProps> = ({ onGameReady, onBack }) => {
   const [error, setError] = useState('');
   const [statusText, setStatusText] = useState('');
   const managerRef = useRef<MultiplayerManager | null>(null);
+  const [pvpProfile] = useState<PvPProfile>(loadPvPProfile);
+  const rank = useMemo(() => getRankTitle(pvpProfile.rating), [pvpProfile.rating]);
 
   const availableRaces = [
     Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN, Race.BIOTITANS,
@@ -212,6 +216,66 @@ export const Lobby: React.FC<LobbyProps> = ({ onGameReady, onBack }) => {
           </div>
         </div>
 
+        {/* Player Rating */}
+        <div style={styles.ratingBox}>
+          <div style={styles.ratingRow}>
+            <div>
+              <div style={{ fontSize: '12px', color: '#666688', letterSpacing: '1px', marginBottom: '4px' }}>
+                RATING
+              </div>
+              <div style={{ fontSize: '32px', fontWeight: 'bold', color: rank.color }}>
+                {pvpProfile.rating}
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: 'bold', color: rank.color }}>
+                {rank.title}
+              </div>
+            </div>
+            <div style={styles.ratingStats}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffffff' }}>{pvpProfile.totalGames}</div>
+                <div style={{ fontSize: '10px', color: '#666688' }}>GAMES</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#00ff88' }}>{pvpProfile.wins}</div>
+                <div style={{ fontSize: '10px', color: '#666688' }}>WINS</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#ff4444' }}>{pvpProfile.losses}</div>
+                <div style={{ fontSize: '10px', color: '#666688' }}>LOSSES</div>
+              </div>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#ffcc00' }}>{pvpProfile.bestWinStreak}</div>
+                <div style={{ fontSize: '10px', color: '#666688' }}>BEST</div>
+              </div>
+            </div>
+          </div>
+          {/* Recent matches */}
+          {pvpProfile.matchHistory.length > 0 && (
+            <div style={{ marginTop: '10px', borderTop: '1px solid #333355', paddingTop: '8px' }}>
+              <div style={{ fontSize: '11px', color: '#666688', marginBottom: '6px' }}>RECENT MATCHES</div>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                {pvpProfile.matchHistory.slice(0, 10).map((m, i) => (
+                  <div key={i} style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '4px',
+                    background: m.won ? '#00ff88' : '#ff4444',
+                    opacity: 0.8,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    color: '#000',
+                  }}>
+                    {m.won ? 'W' : 'L'}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {error && <div style={styles.error}>{error}</div>}
 
         {/* Create / Join */}
@@ -331,6 +395,23 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '13px',
     color: '#ffcc00',
     fontWeight: 'bold',
+  },
+  ratingBox: {
+    width: '100%',
+    maxWidth: '400px',
+    background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%)',
+    border: '1px solid #333366',
+    borderRadius: '14px',
+    padding: '16px 20px',
+  },
+  ratingRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  ratingStats: {
+    display: 'flex',
+    gap: '16px',
   },
   actionSection: {
     width: '100%',

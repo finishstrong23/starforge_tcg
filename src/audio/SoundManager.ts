@@ -75,6 +75,15 @@ class SoundManagerClass {
     }
   }
 
+  get musicVolume(): number { return this._musicVolume; }
+
+  set musicVolume(value: number) {
+    this._musicVolume = Math.max(0, Math.min(1, value));
+    if (this.musicGain && !this._muted) {
+      this.musicGain.gain.value = this._musicVolume;
+    }
+  }
+
   toggle(): boolean {
     this.muted = !this._muted;
     return !this._muted;

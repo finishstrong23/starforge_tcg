@@ -20,6 +20,9 @@ import type {
   SummonEffectData,
   GrantKeywordData,
   GenericEffectData,
+  TransformData,
+  ModifyCostData,
+  GainCrystalsData,
 } from '../types/Effects';
 import { CardZone, hasKeyword } from '../types/Card';
 import type { CardInstance } from '../types/Card';
@@ -136,6 +139,66 @@ export class EffectResolver {
 
       case EffectType.RETURN_TO_HAND:
         this.executeReturnToHand(targets, context);
+        break;
+
+      case EffectType.DEBUFF:
+        this.executeDebuff(targets, effect.data as BuffEffectData, context);
+        break;
+
+      case EffectType.SET_STATS:
+        this.executeSetStats(targets, effect.data as BuffEffectData, context);
+        break;
+
+      case EffectType.BANISH:
+        this.executeBanish(targets, context);
+        break;
+
+      case EffectType.COPY:
+        this.executeCopy(targets, context);
+        break;
+
+      case EffectType.STEAL:
+        this.executeSteal(targets, context);
+        break;
+
+      case EffectType.REMOVE_KEYWORD:
+        this.executeRemoveKeyword(targets, effect.data as GrantKeywordData, context);
+        break;
+
+      case EffectType.DISCARD:
+        this.executeDiscard(effect.data as GenericEffectData, context);
+        break;
+
+      case EffectType.SHUFFLE_INTO_DECK:
+        this.executeShuffleIntoDeck(targets, context);
+        break;
+
+      case EffectType.DESTROY_CRYSTALS:
+        this.executeDestroyCrystals(effect.data as GainCrystalsData, context);
+        break;
+
+      case EffectType.REFRESH_CRYSTALS:
+        this.executeRefreshCrystals(effect.data as GainCrystalsData, context);
+        break;
+
+      case EffectType.MODIFY_COST:
+        this.executeModifyCost(effect.data as ModifyCostData, context);
+        break;
+
+      case EffectType.ADD_TO_HAND:
+        this.executeAddToHand(effect.data as SummonEffectData, context);
+        break;
+
+      case EffectType.TRANSFORM:
+        this.executeTransform(targets, effect.data as TransformData, context);
+        break;
+
+      case EffectType.CONDITIONAL:
+        this.executeConditional(effect, context);
+        break;
+
+      case EffectType.REPEAT:
+        this.executeRepeat(effect, context);
         break;
 
       default:
@@ -498,6 +561,411 @@ export class EffectResolver {
         card.summonedThisTurn = false;
         card.attacksMadeThisTurn = 0;
       }
+    }
+  }
+
+  /**
+   * DEBUFF: Reduce attack and/or health of targets (negative buff)
+   */
+  private executeDebuff(targets: string[], data: BuffEffectData, _context: EffectContext): void {
+    for (const targetId of targets) {
+      if (targetId.startsWith('hero_')) continue;
+
+      const card = this.board.getCard(targetId);
+      if (!card || card.zone !== CardZone.BOARD) continue;
+
+      // data.attack and data.health are the debuff amounts (positive values mean reduction)
+      if (data.attack && card.currentAttack !== undefined) {
+        card.currentAttack = Math.max(0, card.currentAttack - Math.abs(data.attack));
+      }
+      if (data.health && card.currentHealth !== undefined && card.maxHealth !== undefined) {
+        card.maxHealth = Math.max(1, card.maxHealth - Math.abs(data.health));
+        card.currentHealth = Math.min(card.currentHealth, card.maxHealth);
+      }
+    }
+  }
+
+  /**
+   * SET_STATS: Set attack and/or health to specific values
+   */
+  private executeSetStats(targets: string[], data: BuffEffectData, _context: EffectContext): void {
+    for (const targetId of targets) {
+      if (targetId.startsWith('hero_')) continue;
+
+      const card = this.board.getCard(targetId);
+      if (!card || card.zone !== CardZone.BOARD) continue;
+
+      if (data.attack !== undefined && card.currentAttack !== undefined) {
+        card.currentAttack = data.attack;
+      }
+      if (data.health !== undefined && card.currentHealth !== undefined && card.maxHealth !== undefined) {
+        card.maxHealth = data.health;
+        card.currentHealth = Math.min(card.currentHealth, data.health);
+      }
+    }
+  }
+
+  /**
+   * BANISH: Remove a card from the game entirely (move to BANISHED zone)
+   */
+  private executeBanish(targets: string[], _context: EffectContext): void {
+    for (const targetId of targets) {
+      if (targetId.startsWith('hero_')) continue;
+
+      const card = this.board.getCard(targetId);
+      if (!card) continue;
+
+      this.board.moveCard(
+        targetId,
+        card.controllerId,
+        card.ownerId,
+        CardZone.BANISHED
+      );
+    }
+  }
+
+  /**
+   * COPY: Create a copy of a target card and add it to the source player's hand
+   */
+  private executeCopy(targets: string[], context: EffectContext): void {
+    for (const targetId of targets) {
+      if (targetId.startsWith('hero_')) continue;
+
+      const card = this.board.getCard(targetId);
+      if (!card) continue;
+
+      if (this.board.isHandFull(context.sourceOwnerId)) break;
+
+      const def = globalCardDatabase.getCard(card.definitionId);
+      if (!def) continue;
+
+      const copy: CardInstance = {
+        instanceId: `copy_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        definitionId: card.definitionId,
+        ownerId: context.sourceOwnerId,
+        controllerId: context.sourceOwnerId,
+        zone: CardZone.HAND,
+        currentCost: def.cost,
+        currentAttack: def.attack,
+        currentHealth: def.health,
+        maxHealth: def.health,
+        keywords: def.keywords ? [...def.keywords] : [],
+        enchantments: [],
+        temporaryBuffs: [],
+        permanentBuffs: [],
+        isSilenced: false,
+        hasBarrier: false,
+        isCloaked: false,
+        isForged: false,
+        isEchoInstance: false,
+        hasAttackedThisTurn: false,
+        attacksMadeThisTurn: 0,
+        summonedThisTurn: false,
+      };
+
+      this.board.registerCard(copy);
+      this.board.moveCardDirectToBoard(context.sourceOwnerId, copy.instanceId);
+      // Move from board to hand
+      this.board.moveCard(copy.instanceId, context.sourceOwnerId, context.sourceOwnerId, CardZone.HAND);
+    }
+  }
+
+  /**
+   * STEAL: Take control of an enemy minion
+   */
+  private executeSteal(targets: string[], context: EffectContext): void {
+    for (const targetId of targets) {
+      if (targetId.startsWith('hero_')) continue;
+
+      const card = this.board.getCard(targetId);
+      if (!card || card.zone !== CardZone.BOARD) continue;
+
+      // Only steal enemy minions
+      if (card.controllerId === context.sourceOwnerId) continue;
+
+      if (!this.board.hasBoardSpace(context.sourceOwnerId)) break;
+
+      const previousOwner = card.controllerId;
+      this.board.moveCard(targetId, previousOwner, context.sourceOwnerId, CardZone.BOARD);
+      card.controllerId = context.sourceOwnerId;
+    }
+  }
+
+  /**
+   * REMOVE_KEYWORD: Remove specific keywords from target minions
+   */
+  private executeRemoveKeyword(targets: string[], data: GrantKeywordData, _context: EffectContext): void {
+    for (const targetId of targets) {
+      if (targetId.startsWith('hero_')) continue;
+
+      const card = this.board.getCard(targetId);
+      if (!card || card.zone !== CardZone.BOARD) continue;
+
+      if (data.keywords && data.keywords.length > 0) {
+        // Remove specific keywords
+        for (const kwToRemove of data.keywords) {
+          card.keywords = card.keywords.filter(kw => kw.keyword !== kwToRemove.keyword);
+        }
+      } else {
+        // No specific keywords = remove all (like Silence but without the silenced flag)
+        card.keywords = [];
+        card.hasBarrier = false;
+        card.isCloaked = false;
+      }
+    }
+  }
+
+  /**
+   * DISCARD: Remove cards from the source player's hand randomly
+   */
+  private executeDiscard(data: GenericEffectData, context: EffectContext): void {
+    const count = data.value || 1;
+    const hand = this.board.getHandCards(context.sourceOwnerId);
+    const toDiscard = Math.min(count, hand.length);
+
+    for (let i = 0; i < toDiscard; i++) {
+      const remaining = this.board.getHandCards(context.sourceOwnerId);
+      if (remaining.length === 0) break;
+
+      const idx = Math.floor(Math.random() * remaining.length);
+      const card = remaining[idx];
+      this.board.moveCard(
+        card.instanceId,
+        context.sourceOwnerId,
+        context.sourceOwnerId,
+        CardZone.GRAVEYARD
+      );
+    }
+  }
+
+  /**
+   * SHUFFLE_INTO_DECK: Move cards from board/hand into the deck and shuffle
+   */
+  private executeShuffleIntoDeck(targets: string[], context: EffectContext): void {
+    for (const targetId of targets) {
+      if (targetId.startsWith('hero_')) continue;
+
+      const card = this.board.getCard(targetId);
+      if (!card) continue;
+
+      // Reset stats to base
+      const def = globalCardDatabase.getCard(card.definitionId);
+      if (def) {
+        card.currentCost = def.cost;
+        card.currentAttack = def.attack;
+        card.currentHealth = def.health;
+        card.maxHealth = def.health;
+        card.keywords = def.keywords ? [...def.keywords] : [];
+        card.isSilenced = false;
+        card.hasBarrier = false;
+        card.isCloaked = false;
+      }
+
+      this.board.moveCard(
+        targetId,
+        card.controllerId,
+        card.ownerId,
+        CardZone.DECK
+      );
+    }
+
+    // Shuffle the decks of affected players
+    this.board.shuffleDeck(context.sourceOwnerId);
+    const opponentId = this.stateManager.getOpponentId(context.sourceOwnerId);
+    this.board.shuffleDeck(opponentId);
+  }
+
+  /**
+   * DESTROY_CRYSTALS: Destroy opponent's mana crystals
+   */
+  private executeDestroyCrystals(data: GainCrystalsData, context: EffectContext): void {
+    const amount = data.amount || 1;
+    const targetPlayerId = this.stateManager.getOpponentId(context.sourceOwnerId);
+    const player = this.stateManager.getPlayer(targetPlayerId);
+    player.crystals.maximum = Math.max(0, player.crystals.maximum - amount);
+    player.crystals.current = Math.min(player.crystals.current, player.crystals.maximum);
+  }
+
+  /**
+   * REFRESH_CRYSTALS: Restore spent mana crystals
+   */
+  private executeRefreshCrystals(data: GainCrystalsData, context: EffectContext): void {
+    const amount = data.amount || 10; // Default refreshes all
+    const player = this.stateManager.getPlayer(context.sourceOwnerId);
+    player.crystals.current = Math.min(player.crystals.current + amount, player.crystals.maximum);
+  }
+
+  /**
+   * MODIFY_COST: Change the cost of cards in hand or deck
+   */
+  private executeModifyCost(data: ModifyCostData, context: EffectContext): void {
+    const amount = data.amount || 0;
+    let cards: CardInstance[] = [];
+
+    if (data.targetType === 'HAND') {
+      cards = this.board.getHandCards(context.sourceOwnerId);
+    } else if (data.targetType === 'DECK') {
+      cards = this.board.getCardsInZone(context.sourceOwnerId, CardZone.DECK);
+    } else if (data.targetType === 'SPECIFIC' && data.cardId) {
+      const card = this.board.getCard(data.cardId);
+      if (card) cards = [card];
+    }
+
+    for (const card of cards) {
+      card.currentCost = Math.max(0, card.currentCost + amount);
+    }
+  }
+
+  /**
+   * ADD_TO_HAND: Create a specific card and add to hand
+   */
+  private executeAddToHand(data: SummonEffectData, context: EffectContext): void {
+    const count = data.count || 1;
+    const cardDefId = data.cardId;
+
+    for (let i = 0; i < count; i++) {
+      if (this.board.isHandFull(context.sourceOwnerId)) break;
+
+      const def = globalCardDatabase.getCard(cardDefId);
+      if (!def) continue;
+
+      const instance: CardInstance = {
+        instanceId: `added_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        definitionId: cardDefId,
+        ownerId: context.sourceOwnerId,
+        controllerId: context.sourceOwnerId,
+        zone: CardZone.HAND,
+        currentCost: def.cost,
+        currentAttack: def.attack,
+        currentHealth: def.health,
+        maxHealth: def.health,
+        keywords: def.keywords ? [...def.keywords] : [],
+        enchantments: [],
+        temporaryBuffs: [],
+        permanentBuffs: [],
+        isSilenced: false,
+        hasBarrier: false,
+        isCloaked: false,
+        isForged: false,
+        isEchoInstance: false,
+        hasAttackedThisTurn: false,
+        attacksMadeThisTurn: 0,
+        summonedThisTurn: false,
+      };
+
+      this.board.registerCard(instance);
+      // Register then move to hand zone
+      this.board.moveCardDirectToBoard(context.sourceOwnerId, instance.instanceId);
+      this.board.moveCard(instance.instanceId, context.sourceOwnerId, context.sourceOwnerId, CardZone.HAND);
+    }
+  }
+
+  /**
+   * TRANSFORM: Replace a minion on the board with a different card
+   */
+  private executeTransform(targets: string[], data: TransformData, context: EffectContext): void {
+    const newDefId = data.targetCardId;
+    const newDef = globalCardDatabase.getCard(newDefId);
+    if (!newDef) return;
+
+    for (const targetId of targets) {
+      if (targetId.startsWith('hero_')) continue;
+
+      const card = this.board.getCard(targetId);
+      if (!card || card.zone !== CardZone.BOARD) continue;
+
+      // Transform in-place: update the card's definition and reset stats
+      card.definitionId = newDefId;
+      card.currentCost = newDef.cost;
+      card.currentAttack = newDef.attack;
+      card.currentHealth = newDef.health;
+      card.maxHealth = newDef.health;
+      card.keywords = newDef.keywords ? [...newDef.keywords] : [];
+      card.enchantments = [];
+      card.temporaryBuffs = [];
+      card.permanentBuffs = [];
+      card.isSilenced = false;
+      card.hasBarrier = false;
+      card.isCloaked = false;
+      card.isForged = false;
+    }
+  }
+
+  /**
+   * CONDITIONAL: Check a condition, then execute sub-effects if true
+   */
+  private executeConditional(effect: Effect, context: EffectContext): void {
+    if (!effect.condition) return;
+
+    const conditionMet = this.evaluateCondition(effect.condition, context);
+    if (!conditionMet) return;
+
+    // The sub-effects are stored in data.value as an array, or the effect itself acts as a wrapper
+    const data = effect.data as any;
+    if (data.effects && Array.isArray(data.effects)) {
+      this.resolveEffects(data.effects, context);
+    }
+  }
+
+  /**
+   * REPEAT: Execute an effect multiple times
+   */
+  private executeRepeat(effect: Effect, context: EffectContext): void {
+    const data = effect.data as any;
+    const count = data.value || 2;
+    const subEffects = data.effects as Effect[] | undefined;
+
+    if (!subEffects || !Array.isArray(subEffects)) return;
+
+    for (let i = 0; i < count; i++) {
+      this.resolveEffects(subEffects, context);
+    }
+  }
+
+  /**
+   * Evaluate a condition for CONDITIONAL effects
+   */
+  private evaluateCondition(condition: import('../types/Effects').EffectCondition, context: EffectContext): boolean {
+    const player = this.stateManager.getPlayer(context.sourceOwnerId);
+    const opponentId = this.stateManager.getOpponentId(context.sourceOwnerId);
+    const opponent = this.stateManager.getPlayer(opponentId);
+
+    let actual: number;
+
+    switch (condition.type) {
+      case 'PLAYER_HEALTH':
+        actual = player.hero.currentHealth;
+        break;
+      case 'ENEMY_HEALTH':
+        actual = opponent.hero.currentHealth;
+        break;
+      case 'HAND_SIZE':
+        actual = this.board.getHandCount(context.sourceOwnerId);
+        break;
+      case 'BOARD_COUNT':
+        actual = this.board.getBoardCount(context.sourceOwnerId);
+        break;
+      case 'CRYSTAL_COUNT':
+        actual = player.crystals.current;
+        break;
+      case 'DECK_SIZE':
+        actual = this.board.getDeckCount(context.sourceOwnerId);
+        break;
+      default:
+        return true; // Unknown condition type — allow execution
+    }
+
+    const target = typeof condition.value === 'number' ? condition.value : 0;
+    const comp = condition.comparator || 'GREATER_OR_EQUAL';
+
+    switch (comp) {
+      case 'EQUALS': return actual === target;
+      case 'NOT_EQUALS': return actual !== target;
+      case 'GREATER_THAN': return actual > target;
+      case 'LESS_THAN': return actual < target;
+      case 'GREATER_OR_EQUAL': return actual >= target;
+      case 'LESS_OR_EQUAL': return actual <= target;
+      default: return true;
     }
   }
 }

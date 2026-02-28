@@ -17,6 +17,9 @@ import { PostBattle } from './components/PostBattle';
 import { CampaignGame } from './components/CampaignGame';
 import { DeckBuilder } from './components/DeckBuilder';
 import { Tutorial } from './components/Tutorial';
+import { Settings } from './components/Settings';
+import { StatsScreen } from './components/StatsScreen';
+import { recordGameResult } from '../stats/GameStats';
 import type { CampaignBattleResult } from './components/CampaignGame';
 import { GameProvider } from './context/GameContext';
 import { PvPGameProvider } from './context/PvPGameContext';
@@ -48,7 +51,9 @@ type GameScreen =
   | 'campaign-prebattle'
   | 'campaign-deckbuilder'
   | 'campaign-battle'
-  | 'campaign-results';
+  | 'campaign-results'
+  | 'settings'
+  | 'stats';
 
 export const App: React.FC = () => {
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -199,6 +204,9 @@ export const App: React.FC = () => {
     // Apply rewards to save
     const saveWithRewards = applyRewards(updatedSave, reward);
 
+    // Record global stats
+    recordGameResult(campaignSave.homeRace, campaignOpponent, result.won, result.turnCount, 'campaign');
+
     const newUnlock = result.won && !previouslyUnlocked;
 
     setCampaignSave(saveWithRewards);
@@ -249,6 +257,8 @@ export const App: React.FC = () => {
           onCampaign={handleStartCampaign}
           onDeckbuilder={handleStartDeckbuilder}
           onTutorial={() => setScreen('tutorial')}
+          onSettings={() => setScreen('settings')}
+          onStats={() => setScreen('stats')}
         />
       )}
 
@@ -258,6 +268,16 @@ export const App: React.FC = () => {
           onComplete={() => setScreen('menu')}
           onSkip={() => setScreen('menu')}
         />
+      )}
+
+      {/* Settings */}
+      {screen === 'settings' && (
+        <Settings onBack={() => setScreen('menu')} />
+      )}
+
+      {/* Stats */}
+      {screen === 'stats' && (
+        <StatsScreen onBack={() => setScreen('menu')} />
       )}
 
       {/* Balance Tester */}
