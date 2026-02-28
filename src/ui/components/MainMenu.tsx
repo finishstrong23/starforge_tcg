@@ -23,9 +23,13 @@ interface MainMenuProps {
   onPacks?: () => void;
   onAchievements?: () => void;
   onDaily?: () => void;
+  onTournament?: () => void;
+  onReplays?: () => void;
+  onLeaderboard?: () => void;
+  onMetaDashboard?: () => void;
 }
 
-export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder, onTutorial, onSettings, onStats, onCollection, onCrafting, onBattlePass, onPacks, onAchievements, onDaily }) => {
+export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder, onTutorial, onSettings, onStats, onCollection, onCrafting, onBattlePass, onPacks, onAchievements, onDaily, onTournament, onReplays, onLeaderboard, onMetaDashboard }) => {
   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
   const [logoLoaded, setLogoLoaded] = useState(true);
@@ -302,6 +306,83 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, o
               onClick={onDaily}
             >
               Daily Quests
+            </button>
+          )}
+        </div>
+
+        {/* Competitive */}
+        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {onTournament && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #ffcc00 0%, #ff8800 50%, #ff4400 100%)',
+                border: '2px solid #ffdd44',
+                borderRadius: '10px',
+                padding: '14px 28px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#000',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(255, 204, 0, 0.4)',
+                letterSpacing: '1px',
+              }}
+              onClick={onTournament}
+            >
+              Tournament
+            </button>
+          )}
+          {onLeaderboard && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #ffaa00 0%, #cc8800 100%)',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '14px 28px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#000',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(255, 170, 0, 0.3)',
+              }}
+              onClick={onLeaderboard}
+            >
+              Leaderboard
+            </button>
+          )}
+          {onReplays && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #00ccff 0%, #0088cc 100%)',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '14px 28px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(0, 204, 255, 0.3)',
+              }}
+              onClick={onReplays}
+            >
+              Replays
+            </button>
+          )}
+          {onMetaDashboard && (
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #ff8800 0%, #cc5500 100%)',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '14px 28px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(255, 136, 0, 0.3)',
+              }}
+              onClick={onMetaDashboard}
+            >
+              Meta Dashboard
             </button>
           )}
         </div>

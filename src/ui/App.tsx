@@ -25,6 +25,10 @@ import { CraftingScreen } from './components/CraftingScreen';
 import { BattlePassScreen } from './components/BattlePassScreen';
 import { AchievementsScreen } from './components/AchievementsScreen';
 import { DailyPanel } from './components/DailyPanel';
+import { TournamentScreen } from './components/TournamentScreen';
+import { ReplayViewer } from './components/ReplayViewer';
+import { LeaderboardScreen } from './components/LeaderboardScreen';
+import { MetaDashboard } from './components/MetaDashboard';
 import { ScreenTransition } from './components/ScreenTransition';
 import { recordGameResult } from '../stats/GameStats';
 import type { CampaignBattleResult } from './components/CampaignGame';
@@ -65,7 +69,11 @@ type GameScreen =
   | 'crafting'
   | 'battlepass'
   | 'packs'
-  | 'achievements';
+  | 'achievements'
+  | 'tournament'
+  | 'replays'
+  | 'leaderboard'
+  | 'meta-dashboard';
 
 export const App: React.FC = () => {
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -280,6 +288,10 @@ export const App: React.FC = () => {
           onPacks={() => setScreen('packs')}
           onAchievements={() => setScreen('achievements')}
           onDaily={() => setShowDailyPanel(true)}
+          onTournament={() => setScreen('tournament')}
+          onReplays={() => setScreen('replays')}
+          onLeaderboard={() => setScreen('leaderboard')}
+          onMetaDashboard={() => setScreen('meta-dashboard')}
         />
       )}
 
@@ -446,6 +458,45 @@ export const App: React.FC = () => {
       {screen === 'achievements' && (
         <ScreenTransition screenKey="achievements">
           <AchievementsScreen onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Tournament */}
+      {screen === 'tournament' && (
+        <ScreenTransition screenKey="tournament">
+          <TournamentScreen
+            onBack={() => setScreen('menu')}
+            onStartMatch={(opponentRace, difficulty) => {
+              const diffMap: Record<number, AIDifficulty> = {
+                1: AIDifficulty.EASY,
+                2: AIDifficulty.MEDIUM,
+                3: AIDifficulty.HARD,
+              };
+              setGameConfig({ playerRace: Race.COGSMITHS, aiDifficulty: diffMap[difficulty] || AIDifficulty.MEDIUM });
+              setScreen('game');
+            }}
+          />
+        </ScreenTransition>
+      )}
+
+      {/* Replay Viewer */}
+      {screen === 'replays' && (
+        <ScreenTransition screenKey="replays">
+          <ReplayViewer onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Leaderboard */}
+      {screen === 'leaderboard' && (
+        <ScreenTransition screenKey="leaderboard">
+          <LeaderboardScreen onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Meta Dashboard */}
+      {screen === 'meta-dashboard' && (
+        <ScreenTransition screenKey="meta-dashboard">
+          <MetaDashboard onBack={() => setScreen('menu')} />
         </ScreenTransition>
       )}
 
