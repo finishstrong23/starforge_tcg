@@ -1,5 +1,10 @@
 /**
  * STARFORGE TCG - Main Menu Component
+ *
+ * Clean Hearthstone-inspired layout:
+ * - Central play area with mode selection
+ * - Bottom navigation bar for collection/shop/progression
+ * - Minimal, elegant, not cluttered
  */
 
 import React, { useState } from 'react';
@@ -29,587 +34,439 @@ interface MainMenuProps {
   onMetaDashboard?: () => void;
 }
 
-export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder, onTutorial, onSettings, onStats, onCollection, onCrafting, onBattlePass, onPacks, onAchievements, onDaily, onTournament, onReplays, onLeaderboard, onMetaDashboard }) => {
+type MenuView = 'main' | 'play';
+
+export const MainMenu: React.FC<MainMenuProps> = (props) => {
+  const {
+    onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder,
+    onTutorial, onSettings, onStats, onCollection, onCrafting,
+    onBattlePass, onPacks, onAchievements, onDaily,
+    onTournament, onReplays, onLeaderboard, onMetaDashboard,
+  } = props;
+
+  const [view, setView] = useState<MenuView>('main');
   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
   const [logoLoaded, setLogoLoaded] = useState(true);
 
   const availableRaces = [
-    Race.COGSMITHS,
-    Race.LUMINAR,
-    Race.PYROCLAST,
-    Race.VOIDBORN,
-    Race.BIOTITANS,
-    Race.PHANTOM_CORSAIRS,
-    Race.CRYSTALLINE,
-    Race.HIVEMIND,
-    Race.ASTROMANCERS,
-    Race.CHRONOBOUND,
+    Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN,
+    Race.BIOTITANS, Race.PHANTOM_CORSAIRS, Race.CRYSTALLINE,
+    Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND,
   ];
 
   const difficulties = [
-    { value: AIDifficulty.EASY, label: 'Easy', description: 'Random plays, forgiving mistakes' },
-    { value: AIDifficulty.MEDIUM, label: 'Medium', description: 'Basic strategy, some optimization' },
-    { value: AIDifficulty.HARD, label: 'Hard', description: 'Smart decisions, threat evaluation' },
+    { value: AIDifficulty.EASY, label: 'Easy' },
+    { value: AIDifficulty.MEDIUM, label: 'Medium' },
+    { value: AIDifficulty.HARD, label: 'Hard' },
   ];
 
-  const handleStartGame = () => {
-    onStartGame(selectedRace, selectedDifficulty);
-  };
+  // ── Play Mode Selection ──
+  if (view === 'play') {
+    return (
+      <div style={s.container}>
+        <div style={s.playView}>
+          <h2 style={s.playTitle}>Select Race & Difficulty</h2>
 
-  return (
-    <div style={styles.container}>
-      <div style={styles.content}>
-        {/* Logo / Title */}
-        <div style={styles.titleContainer}>
-          {logoLoaded ? (
-            <img
-              src={logoImg}
-              alt="STARFORGE"
-              style={styles.logo}
-              onLoad={(e) => {
-                const img = e.currentTarget;
-                if (img.naturalWidth <= 1) setLogoLoaded(false);
-              }}
-              onError={() => setLogoLoaded(false)}
-            />
-          ) : (
-            <h1 style={styles.title}>STARFORGE</h1>
-          )}
-          <p style={styles.subtitle}>Trading Card Game</p>
-        </div>
-
-        {/* Race Selection */}
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>Choose Your Planet</h2>
-          <div style={styles.raceGrid}>
+          {/* Race Grid */}
+          <div style={s.raceGrid}>
             {availableRaces.map((race) => {
-              const raceInfo = RaceData[race];
-              const isSelected = selectedRace === race;
+              const info = RaceData[race];
+              const sel = selectedRace === race;
               return (
                 <button
                   key={race}
                   style={{
-                    ...styles.raceCard,
-                    ...(isSelected ? styles.raceCardSelected : {}),
+                    ...s.raceCard,
+                    borderColor: sel ? '#00ff88' : '#2a2a44',
+                    boxShadow: sel ? '0 0 12px rgba(0,255,136,0.3)' : 'none',
+                    background: sel ? 'rgba(0,255,136,0.08)' : 'rgba(15,15,30,0.8)',
                   }}
                   onClick={() => setSelectedRace(race)}
                 >
-                  <div style={styles.raceName}>{raceInfo.name}</div>
-                  <div style={styles.racePlanet}>{raceInfo.planet}</div>
-                  <div style={styles.raceMechanic}>{raceInfo.playstyle}</div>
-                  <div style={styles.raceTheme}>{raceInfo.theme}</div>
+                  <div style={{ color: sel ? '#00ff88' : '#ccc', fontWeight: 'bold', fontSize: '13px' }}>
+                    {info.name}
+                  </div>
+                  <div style={{ color: '#666', fontSize: '10px' }}>{info.playstyle}</div>
                 </button>
               );
             })}
           </div>
-        </div>
 
-        {/* Difficulty Selection */}
-        <div style={styles.section}>
-          <h2 style={styles.sectionTitle}>AI Difficulty</h2>
-          <div style={styles.difficultyGrid}>
-            {difficulties.map((diff) => {
-              const isSelected = selectedDifficulty === diff.value;
-              return (
-                <button
-                  key={diff.value}
-                  style={{
-                    ...styles.difficultyCard,
-                    ...(isSelected ? styles.difficultyCardSelected : {}),
-                  }}
-                  onClick={() => setSelectedDifficulty(diff.value)}
-                >
-                  <div style={styles.difficultyLabel}>{diff.label}</div>
-                  <div style={styles.difficultyDesc}>{diff.description}</div>
-                </button>
-              );
-            })}
+          {/* Difficulty */}
+          <div style={s.diffRow}>
+            {difficulties.map((d) => (
+              <button
+                key={d.value}
+                style={{
+                  ...s.diffBtn,
+                  borderColor: selectedDifficulty === d.value ? '#ff6600' : '#2a2a44',
+                  color: selectedDifficulty === d.value ? '#ff6600' : '#888',
+                }}
+                onClick={() => setSelectedDifficulty(d.value)}
+              >
+                {d.label}
+              </button>
+            ))}
           </div>
+
+          {/* Action Buttons */}
+          <div style={s.playActions}>
+            <button style={s.goBtn} onClick={() => onStartGame(selectedRace, selectedDifficulty)}>
+              Quick Play
+            </button>
+            {onDeckbuilder && (
+              <button style={s.buildBtn} onClick={() => onDeckbuilder(selectedRace, selectedDifficulty)}>
+                Build Deck & Play
+              </button>
+            )}
+          </div>
+
+          <button style={s.backLink} onClick={() => setView('main')}>
+            Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main View ──
+  return (
+    <div style={s.container}>
+      {/* Top bar: settings & info */}
+      <div style={s.topBar}>
+        {onDaily && <button style={s.topBtn} onClick={onDaily}>Quests</button>}
+        {onSettings && <button style={s.topBtn} onClick={onSettings}>Settings</button>}
+        {onTutorial && <button style={s.topBtn} onClick={onTutorial}>How to Play</button>}
+      </div>
+
+      {/* Center: Logo + Play Modes */}
+      <div style={s.center}>
+        {/* Logo */}
+        <div style={s.logoArea}>
+          {logoLoaded ? (
+            <img
+              src={logoImg}
+              alt="STARFORGE"
+              style={s.logo}
+              onLoad={(e) => { if (e.currentTarget.naturalWidth <= 1) setLogoLoaded(false); }}
+              onError={() => setLogoLoaded(false)}
+            />
+          ) : (
+            <h1 style={s.titleText}>STARFORGE</h1>
+          )}
+          <p style={s.tagline}>Trading Card Game</p>
         </div>
 
-        {/* Story Mode Button — Primary CTA */}
-        {onCampaign && (
-          <button
-            style={{
-              background: 'linear-gradient(135deg, #ff6600 0%, #ff4400 50%, #cc3300 100%)',
-              border: '2px solid #ff8844',
-              borderRadius: '14px',
-              padding: '20px 60px',
-              fontSize: '26px',
-              fontWeight: 'bold',
-              color: '#ffffff',
-              cursor: 'pointer',
-              boxShadow: '0 4px 25px rgba(255, 102, 0, 0.5), 0 0 40px rgba(255, 68, 0, 0.2)',
-              letterSpacing: '3px',
-              marginTop: '10px',
-            }}
-            onClick={onCampaign}
-          >
-            STORY MODE
+        {/* Primary Play Buttons - vertical stack */}
+        <div style={s.modeStack}>
+          {onCampaign && (
+            <button style={s.modeBtn} onClick={onCampaign}>
+              <span style={s.modeBtnIcon}>&#x2694;</span>
+              <span style={s.modeBtnLabel}>Story Mode</span>
+            </button>
+          )}
+          <button style={{ ...s.modeBtn, ...s.modeBtnAlt }} onClick={() => setView('play')}>
+            <span style={s.modeBtnIcon}>&#x269B;</span>
+            <span style={s.modeBtnLabel}>Quick Play</span>
+          </button>
+          {onTournament && (
+            <button style={{ ...s.modeBtn, ...s.modeBtnTourney }} onClick={onTournament}>
+              <span style={s.modeBtnIcon}>&#x2605;</span>
+              <span style={s.modeBtnLabel}>Tournament</span>
+            </button>
+          )}
+          {onPlayFriend && (
+            <button style={{ ...s.modeBtn, ...s.modeBtnFriend }} onClick={onPlayFriend}>
+              <span style={s.modeBtnIcon}>&#x2699;</span>
+              <span style={s.modeBtnLabel}>Play vs Friend</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Nav Bar */}
+      <div style={s.bottomBar}>
+        {onCollection && (
+          <button style={s.navBtn} onClick={onCollection}>
+            <div style={s.navIcon}>&#x1F0CF;</div>
+            <div style={s.navLabel}>Collection</div>
           </button>
         )}
-
-        {/* Quick Play Buttons */}
-        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '10px' }}>
-          <button style={styles.startButton} onClick={handleStartGame}>
-            Quick Play vs AI
+        {onPacks && (
+          <button style={s.navBtn} onClick={onPacks}>
+            <div style={s.navIcon}>&#x1F381;</div>
+            <div style={s.navLabel}>Shop</div>
           </button>
-
-          {onDeckbuilder && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #9933ff 0%, #7722cc 100%)',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '18px 50px',
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(153, 51, 255, 0.4)',
-              }}
-              onClick={() => onDeckbuilder(selectedRace, selectedDifficulty)}
-            >
-              Build Deck
-            </button>
-          )}
-
-          {onPlayFriend && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #4488ff 0%, #3366dd 100%)',
-                border: 'none',
-                borderRadius: '12px',
-                padding: '18px 50px',
-                fontSize: '24px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(68, 136, 255, 0.4)',
-              }}
-              onClick={onPlayFriend}
-            >
-              Play vs Friend
-            </button>
-          )}
-        </div>
-
-        {/* Progression & Collection */}
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          {onPacks && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #ffaa00 0%, #ff8800 100%)',
-                border: '2px solid #ffcc44',
-                borderRadius: '10px',
-                padding: '14px 28px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#000',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(255, 170, 0, 0.4)',
-                letterSpacing: '1px',
-              }}
-              onClick={onPacks}
-            >
-              Open Packs
-            </button>
-          )}
-          {onCollection && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #cc66ff 0%, #9933cc 100%)',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '14px 28px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(204, 102, 255, 0.3)',
-              }}
-              onClick={onCollection}
-            >
-              Collection
-            </button>
-          )}
-          {onCrafting && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #00ccff 0%, #0099cc 100%)',
-                border: '2px solid #44ddff',
-                borderRadius: '10px',
-                padding: '14px 28px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(0, 204, 255, 0.4)',
-                letterSpacing: '1px',
-              }}
-              onClick={onCrafting}
-            >
-              Crafting
-            </button>
-          )}
-          {onBattlePass && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #ff4488 0%, #cc2266 50%, #aa0044 100%)',
-                border: '2px solid #ff66aa',
-                borderRadius: '10px',
-                padding: '14px 28px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(255, 68, 136, 0.4)',
-                letterSpacing: '1px',
-              }}
-              onClick={onBattlePass}
-            >
-              Battle Pass
-            </button>
-          )}
-          {onAchievements && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #ffcc00 0%, #ddaa00 100%)',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '14px 28px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#000',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(255, 204, 0, 0.3)',
-              }}
-              onClick={onAchievements}
-            >
-              Achievements
-            </button>
-          )}
-          {onDaily && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #44ddff 0%, #0099cc 100%)',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '14px 28px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(68, 221, 255, 0.3)',
-              }}
-              onClick={onDaily}
-            >
-              Daily Quests
-            </button>
-          )}
-        </div>
-
-        {/* Competitive */}
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          {onTournament && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #ffcc00 0%, #ff8800 50%, #ff4400 100%)',
-                border: '2px solid #ffdd44',
-                borderRadius: '10px',
-                padding: '14px 28px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#000',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(255, 204, 0, 0.4)',
-                letterSpacing: '1px',
-              }}
-              onClick={onTournament}
-            >
-              Tournament
-            </button>
-          )}
-          {onLeaderboard && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #ffaa00 0%, #cc8800 100%)',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '14px 28px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#000',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(255, 170, 0, 0.3)',
-              }}
-              onClick={onLeaderboard}
-            >
-              Leaderboard
-            </button>
-          )}
-          {onReplays && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #00ccff 0%, #0088cc 100%)',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '14px 28px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(0, 204, 255, 0.3)',
-              }}
-              onClick={onReplays}
-            >
-              Replays
-            </button>
-          )}
-          {onMetaDashboard && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #ff8800 0%, #cc5500 100%)',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '14px 28px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(255, 136, 0, 0.3)',
-              }}
-              onClick={onMetaDashboard}
-            >
-              Meta Dashboard
-            </button>
-          )}
-        </div>
-
-        {/* Secondary buttons */}
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          {onTutorial && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #00cc88 0%, #00aa66 100%)',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '12px 30px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(0, 204, 136, 0.3)',
-              }}
-              onClick={onTutorial}
-            >
-              How to Play
-            </button>
-          )}
-          {onStats && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #00aaff 0%, #0088cc 100%)',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '12px 30px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(0, 170, 255, 0.3)',
-              }}
-              onClick={onStats}
-            >
-              Stats
-            </button>
-          )}
-          {onSettings && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #777799 0%, #555577 100%)',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '12px 30px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(100, 100, 150, 0.3)',
-              }}
-              onClick={onSettings}
-            >
-              Settings
-            </button>
-          )}
-          {onBalanceTest && (
-            <button
-              style={{
-                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '12px 30px',
-                fontSize: '16px',
-                fontWeight: 'bold',
-                color: '#000',
-                cursor: 'pointer',
-                boxShadow: '0 4px 15px rgba(245, 158, 11, 0.3)',
-              }}
-              onClick={onBalanceTest}
-            >
-              Balance Tester
-            </button>
-          )}
-        </div>
+        )}
+        {onCrafting && (
+          <button style={s.navBtn} onClick={onCrafting}>
+            <div style={s.navIcon}>&#x2728;</div>
+            <div style={s.navLabel}>Craft</div>
+          </button>
+        )}
+        {onBattlePass && (
+          <button style={s.navBtn} onClick={onBattlePass}>
+            <div style={s.navIcon}>&#x1F525;</div>
+            <div style={s.navLabel}>Battle Pass</div>
+          </button>
+        )}
+        {onAchievements && (
+          <button style={s.navBtn} onClick={onAchievements}>
+            <div style={s.navIcon}>&#x1F3C6;</div>
+            <div style={s.navLabel}>Achieve</div>
+          </button>
+        )}
+        {onLeaderboard && (
+          <button style={s.navBtn} onClick={onLeaderboard}>
+            <div style={s.navIcon}>&#x1F4CA;</div>
+            <div style={s.navLabel}>Ladder</div>
+          </button>
+        )}
+        {onReplays && (
+          <button style={s.navBtn} onClick={onReplays}>
+            <div style={s.navIcon}>&#x1F3AC;</div>
+            <div style={s.navLabel}>Replays</div>
+          </button>
+        )}
+        {onMetaDashboard && (
+          <button style={s.navBtn} onClick={onMetaDashboard}>
+            <div style={s.navIcon}>&#x1F4C8;</div>
+            <div style={s.navLabel}>Meta</div>
+          </button>
+        )}
+        {onStats && (
+          <button style={s.navBtn} onClick={onStats}>
+            <div style={s.navIcon}>&#x1F4CB;</div>
+            <div style={s.navLabel}>Stats</div>
+          </button>
+        )}
       </div>
     </div>
   );
 };
 
-const styles: { [key: string]: React.CSSProperties } = {
+// ── Styles ──
+
+const s: Record<string, React.CSSProperties> = {
   container: {
     width: '100%',
     height: '100%',
     display: 'flex',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    padding: '20px',
-    overflowY: 'auto',
     flexDirection: 'column',
     background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    position: 'relative',
   },
-  content: {
-    maxWidth: '900px',
-    width: '100%',
+
+  // Top bar
+  topBar: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '8px',
+    padding: '12px 16px',
+    position: 'relative',
+    zIndex: 10,
+  },
+  topBtn: {
+    background: 'rgba(255,255,255,0.08)',
+    border: '1px solid rgba(255,255,255,0.15)',
+    borderRadius: '6px',
+    padding: '6px 14px',
+    color: '#aaa',
+    fontSize: '12px',
+    cursor: 'pointer',
+  },
+
+  // Center area
+  center: {
+    flex: 1,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '30px',
-    paddingTop: '40px',
-    paddingBottom: '40px',
+    justifyContent: 'center',
+    gap: '32px',
+    padding: '0 20px',
   },
-  titleContainer: {
+  logoArea: {
     textAlign: 'center',
-    marginBottom: '20px',
-  },
-  title: {
-    fontSize: '64px',
-    fontWeight: 'bold',
-    color: '#00ff88',
-    textShadow: '0 0 20px #00ff88, 0 0 40px #00ff88',
-    letterSpacing: '8px',
-    margin: 0,
   },
   logo: {
-    maxWidth: '400px',
+    maxWidth: '320px',
     width: '100%',
     height: 'auto',
-    filter: 'drop-shadow(0 0 20px rgba(0, 255, 136, 0.5))',
+    filter: 'drop-shadow(0 0 20px rgba(0,255,136,0.4))',
   },
-  subtitle: {
-    fontSize: '24px',
-    color: '#aaaaaa',
-    marginTop: '10px',
+  titleText: {
+    fontSize: '52px',
+    fontWeight: 'bold',
+    color: '#00ff88',
+    textShadow: '0 0 30px rgba(0,255,136,0.5)',
+    letterSpacing: '6px',
+    margin: 0,
   },
-  section: {
+  tagline: {
+    fontSize: '16px',
+    color: '#667788',
+    marginTop: '6px',
+    letterSpacing: '4px',
+  },
+
+  // Mode stack
+  modeStack: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
     width: '100%',
+    maxWidth: '320px',
+  },
+  modeBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '14px 24px',
+    borderRadius: '10px',
+    border: 'none',
+    cursor: 'pointer',
+    background: 'linear-gradient(135deg, #ff6600 0%, #cc4400 100%)',
+    color: '#fff',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    boxShadow: '0 4px 16px rgba(255,102,0,0.3)',
+    transition: 'transform 0.15s',
+  },
+  modeBtnAlt: {
+    background: 'linear-gradient(135deg, #00cc66 0%, #009944 100%)',
+    boxShadow: '0 4px 16px rgba(0,204,102,0.3)',
+  },
+  modeBtnTourney: {
+    background: 'linear-gradient(135deg, #ffcc00 0%, #dd9900 100%)',
+    color: '#000',
+    boxShadow: '0 4px 16px rgba(255,204,0,0.3)',
+  },
+  modeBtnFriend: {
+    background: 'linear-gradient(135deg, #4488ff 0%, #2266cc 100%)',
+    boxShadow: '0 4px 16px rgba(68,136,255,0.3)',
+  },
+  modeBtnIcon: {
+    fontSize: '20px',
+    width: '28px',
+    textAlign: 'center',
+  },
+  modeBtnLabel: {
+    flex: 1,
+  },
+
+  // Bottom nav bar
+  bottomBar: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '4px',
+    padding: '10px 8px 14px',
+    background: 'linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%)',
+    flexWrap: 'wrap',
+  },
+  navBtn: {
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '15px',
+    gap: '2px',
+    padding: '6px 10px',
+    borderRadius: '8px',
+    minWidth: '56px',
   },
-  sectionTitle: {
+  navIcon: {
     fontSize: '20px',
-    color: '#ffffff',
-    marginBottom: '10px',
+    lineHeight: '1',
+  },
+  navLabel: {
+    fontSize: '10px',
+    color: '#889',
+    letterSpacing: '0.5px',
+  },
+
+  // Play view
+  playView: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '20px',
+    padding: '20px',
+  },
+  playTitle: {
+    fontSize: '22px',
+    color: '#fff',
+    margin: 0,
+    letterSpacing: '1px',
   },
   raceGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-    gap: '15px',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+    gap: '8px',
     width: '100%',
+    maxWidth: '600px',
   },
   raceCard: {
-    background: 'linear-gradient(135deg, #1a1a2e 0%, #252540 100%)',
-    border: '2px solid #333355',
-    borderRadius: '12px',
-    padding: '15px',
+    padding: '10px',
+    borderRadius: '8px',
+    border: '2px solid #2a2a44',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    textAlign: 'left',
-    color: '#ffffff',
+    textAlign: 'center',
+    transition: 'all 0.15s',
   },
-  raceCardSelected: {
-    border: '2px solid #00ff88',
-    boxShadow: '0 0 15px rgba(0, 255, 136, 0.4)',
-    background: 'linear-gradient(135deg, #1a2a2e 0%, #203040 100%)',
-  },
-  raceName: {
-    fontSize: '18px',
-    fontWeight: 'bold',
-    color: '#00ff88',
-    marginBottom: '4px',
-  },
-  racePlanet: {
-    fontSize: '12px',
-    color: '#888888',
-    marginBottom: '8px',
-  },
-  raceMechanic: {
-    fontSize: '14px',
-    color: '#ffcc00',
-    fontWeight: 'bold',
-    marginBottom: '4px',
-  },
-  raceTheme: {
-    fontSize: '12px',
-    color: '#aaaaaa',
-    lineHeight: '1.3',
-  },
-  difficultyGrid: {
+  diffRow: {
     display: 'flex',
-    gap: '15px',
+    gap: '8px',
+  },
+  diffBtn: {
+    background: 'rgba(15,15,30,0.8)',
+    border: '2px solid #2a2a44',
+    borderRadius: '8px',
+    padding: '8px 20px',
+    color: '#888',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+  },
+  playActions: {
+    display: 'flex',
+    gap: '12px',
     flexWrap: 'wrap',
     justifyContent: 'center',
   },
-  difficultyCard: {
-    background: 'linear-gradient(135deg, #1a1a2e 0%, #252540 100%)',
-    border: '2px solid #333355',
-    borderRadius: '12px',
-    padding: '15px 25px',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    textAlign: 'center',
-    color: '#ffffff',
-    minWidth: '150px',
-  },
-  difficultyCardSelected: {
-    border: '2px solid #ff6600',
-    boxShadow: '0 0 15px rgba(255, 102, 0, 0.4)',
-    background: 'linear-gradient(135deg, #2a1a1e 0%, #402020 100%)',
-  },
-  difficultyLabel: {
+  goBtn: {
+    background: 'linear-gradient(135deg, #00cc66 0%, #00aa44 100%)',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '14px 40px',
     fontSize: '18px',
     fontWeight: 'bold',
-    color: '#ff6600',
-    marginBottom: '4px',
-  },
-  difficultyDesc: {
-    fontSize: '12px',
-    color: '#aaaaaa',
-  },
-  startButton: {
-    background: 'linear-gradient(135deg, #00cc66 0%, #00aa55 100%)',
-    border: 'none',
-    borderRadius: '12px',
-    padding: '18px 60px',
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#ffffff',
+    color: '#fff',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 4px 15px rgba(0, 204, 102, 0.4)',
-    marginTop: '20px',
+    boxShadow: '0 4px 16px rgba(0,204,102,0.4)',
+  },
+  buildBtn: {
+    background: 'linear-gradient(135deg, #9933ff 0%, #7722cc 100%)',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '14px 32px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    color: '#fff',
+    cursor: 'pointer',
+    boxShadow: '0 4px 16px rgba(153,51,255,0.3)',
+  },
+  backLink: {
+    background: 'transparent',
+    border: 'none',
+    color: '#667',
+    fontSize: '14px',
+    cursor: 'pointer',
+    padding: '8px 16px',
+    marginTop: '8px',
   },
 };

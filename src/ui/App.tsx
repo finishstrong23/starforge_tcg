@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { GameBoard } from './components/GameBoard';
 import { MainMenu } from './components/MainMenu';
 import { Lobby } from './components/Lobby';
@@ -330,13 +331,15 @@ export const App: React.FC = () => {
 
       {/* Quick Play */}
       {screen === 'game' && gameConfig && (
-        <GameProvider
-          playerRace={gameConfig.playerRace}
-          aiDifficulty={gameConfig.aiDifficulty}
-          customDeckCardIds={customDeckCardIds || undefined}
-        >
-          <GameBoard onBackToMenu={handleBackToMenu} />
-        </GameProvider>
+        <ErrorBoundary onReset={handleBackToMenu}>
+          <GameProvider
+            playerRace={gameConfig.playerRace}
+            aiDifficulty={gameConfig.aiDifficulty}
+            customDeckCardIds={customDeckCardIds || undefined}
+          >
+            <GameBoard onBackToMenu={handleBackToMenu} />
+          </GameProvider>
+        </ErrorBoundary>
       )}
 
       {/* PvP Lobby */}
@@ -349,15 +352,17 @@ export const App: React.FC = () => {
 
       {/* PvP Game */}
       {screen === 'pvp-game' && pvpConfig && (
-        <PvPGameProvider
-          role={pvpConfig.role}
-          manager={pvpConfig.manager}
-          myRace={pvpConfig.myRace}
-          opponentRace={pvpConfig.opponentRace}
-          onDisconnect={handlePvPDisconnect}
-        >
-          <GameBoard onBackToMenu={handlePvPDisconnect} />
-        </PvPGameProvider>
+        <ErrorBoundary onReset={handlePvPDisconnect}>
+          <PvPGameProvider
+            role={pvpConfig.role}
+            manager={pvpConfig.manager}
+            myRace={pvpConfig.myRace}
+            opponentRace={pvpConfig.opponentRace}
+            onDisconnect={handlePvPDisconnect}
+          >
+            <GameBoard onBackToMenu={handlePvPDisconnect} />
+          </PvPGameProvider>
+        </ErrorBoundary>
       )}
 
       {/* Campaign: Planet Selection (first time) */}
@@ -399,13 +404,15 @@ export const App: React.FC = () => {
 
       {/* Campaign: Battle */}
       {screen === 'campaign-battle' && campaignSave && campaignOpponent && (
-        <CampaignGame
-          playerRace={campaignSave.homeRace}
-          opponentRace={campaignOpponent}
-          difficulty={PLANET_ENCOUNTERS[campaignOpponent].difficulty}
-          onBattleEnd={handleCampaignBattleEnd}
-          customDeckCardIds={customDeckCardIds || undefined}
-        />
+        <ErrorBoundary onReset={handleCampaignBackToMenu}>
+          <CampaignGame
+            playerRace={campaignSave.homeRace}
+            opponentRace={campaignOpponent}
+            difficulty={PLANET_ENCOUNTERS[campaignOpponent].difficulty}
+            onBattleEnd={handleCampaignBattleEnd}
+            customDeckCardIds={customDeckCardIds || undefined}
+          />
+        </ErrorBoundary>
       )}
 
       {/* Campaign: Post-Battle Results */}
