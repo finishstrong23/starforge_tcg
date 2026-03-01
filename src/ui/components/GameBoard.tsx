@@ -95,7 +95,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
 
   // Look up hero power info for tooltips
   const playerHeroDef = useMemo(() =>
-    getHeroById(playerState?.hero.definitionId || ''), [playerState?.hero.definitionId]);
+    getHeroById(playerState?.hero?.definitionId || ''), [playerState?.hero?.definitionId]);
 
   // ── Card flight trigger ──
   const triggerCardFlight = useCallback((card: any) => {
@@ -294,8 +294,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
               armor={playerState.hero.armor}
               heroPowerUsed={playerState.hero.heroPowerUsedThisTurn}
               canUseHeroPower={isPlayerTurn && !playerState.hero.heroPowerUsedThisTurn && playerState.crystals.current >= 2}
-              heroPowerName={playerHeroDef?.heroPower.name}
-              heroPowerDescription={playerHeroDef?.heroPower.description}
+              heroPowerName={playerHeroDef?.heroPower?.name}
+              heroPowerDescription={playerHeroDef?.heroPower?.description}
               onHeroPowerClick={() => useHeroPower()}
               isValidTarget={validTargets.includes('hero_player')}
               onClick={() => onTargetClick('hero_player')}

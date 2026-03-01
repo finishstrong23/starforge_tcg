@@ -166,7 +166,9 @@ export class GameBoard {
    */
   getBoardCards(playerId: string): CardInstance[] {
     const zones = this.getPlayerZones(playerId);
-    return zones.board.cards.map((id) => this.getCardOrThrow(id));
+    return zones.board.cards
+      .map((id) => this.cardRegistry.get(id))
+      .filter((c): c is CardInstance => c !== undefined);
   }
 
   /**
@@ -174,7 +176,9 @@ export class GameBoard {
    */
   getHandCards(playerId: string): CardInstance[] {
     const zones = this.getPlayerZones(playerId);
-    return zones.hand.cards.map((id) => this.getCardOrThrow(id));
+    return zones.hand.cards
+      .map((id) => this.cardRegistry.get(id))
+      .filter((c): c is CardInstance => c !== undefined);
   }
 
   /**
@@ -342,7 +346,9 @@ export class GameBoard {
   getCardsInZone(playerId: string, zone: CardZone): CardInstance[] {
     const zones = this.getPlayerZones(playerId);
     const zoneObj = this.getZone(zones, zone);
-    return zoneObj.toArray().map((id) => this.getCardOrThrow(id));
+    return zoneObj.toArray()
+      .map((id) => this.cardRegistry.get(id))
+      .filter((c): c is CardInstance => c !== undefined);
   }
 
   /**

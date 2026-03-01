@@ -433,69 +433,78 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   useEffect(() => {
     console.log('Initializing game...');
 
-    // Clear previous database and reinitialize
-    globalCardDatabase.clear();
-    if (customDeckCardIds) {
-      initializeFullDatabase();
-    } else {
-      initializeSampleDatabase();
-    }
-
-    // Create player deck — use custom deck if provided, otherwise auto-generate
-    const playerDeck = customDeckCardIds
-      ? createCustomGameDeck(customDeckCardIds, playerRace, 'player')
-      : createSampleDeck(playerRace, 'player');
-
-    // Create AI deck — use forced race for campaign, random otherwise
-    const allRaces = [Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.BIOTITANS, Race.CRYSTALLINE,
-                      Race.VOIDBORN, Race.PHANTOM_CORSAIRS, Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND];
-    const aiRace = forcedOpponentRace || allRaces.filter(r => r !== playerRace)[Math.floor(Math.random() * (allRaces.length - 1))];
-    const aiDeck = createSampleDeck(aiRace, 'opponent');
-
-    // Create game engine
-    const engine = new GameEngine();
-    engine.initializeGame(
-      {
-        id: 'player',
-        name: 'Player',
-        race: playerRace,
-        heroId: playerDeck.heroId,
-        deck: playerDeck.cards,
-      },
-      {
-        id: 'opponent',
-        name: 'AI Opponent',
-        race: aiRace,
-        heroId: aiDeck.heroId,
-        deck: aiDeck.cards,
+    try {
+      // Clear previous database and reinitialize
+      globalCardDatabase.clear();
+      if (customDeckCardIds) {
+        initializeFullDatabase();
+      } else {
+        initializeSampleDatabase();
       }
-    );
 
-    // Start the game
-    engine.startGame();
-    console.log('Game started, active player:', engine.getState().activePlayerId);
+      // Create player deck — use custom deck if provided, otherwise auto-generate
+      const playerDeck = customDeckCardIds
+        ? createCustomGameDeck(customDeckCardIds, playerRace, 'player')
+        : createSampleDeck(playerRace, 'player');
 
-    // Create AI player with small delay so attacks are visible
-    const ai = createAIPlayer('opponent', aiDifficulty);
-    ai.setThinkingDelay(300);
+      // Create AI deck — use forced race for campaign, random otherwise
+      const allRaces = [Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.BIOTITANS, Race.CRYSTALLINE,
+                        Race.VOIDBORN, Race.PHANTOM_CORSAIRS, Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND];
+      const aiRace = forcedOpponentRace || allRaces.filter(r => r !== playerRace)[Math.floor(Math.random() * (allRaces.length - 1))];
+      const aiDeck = createSampleDeck(aiRace, 'opponent');
 
-    engineRef.current = engine;
-    aiRef.current = ai;
+      // Create game engine
+      const engine = new GameEngine();
+      engine.initializeGame(
+        {
+          id: 'player',
+          name: 'Player',
+          race: playerRace,
+          heroId: playerDeck.heroId,
+          deck: playerDeck.cards,
+        },
+        {
+          id: 'opponent',
+          name: 'AI Opponent',
+          race: aiRace,
+          heroId: aiDeck.heroId,
+          deck: aiDeck.cards,
+        }
+      );
 
-    // Subscribe to game events (use refs for stable callbacks)
-    const events = engine.getEvents();
-    const subscription = events.subscribe((event) => {
-      console.log('Game event:', event.type);
-      handleGameEventForLogRef.current(event);
+      // Start the game
+      engine.startGame();
+      console.log('Game started, active player:', engine.getState().activePlayerId);
+
+      // Create AI player with small delay so attacks are visible
+      const ai = createAIPlayer('opponent', aiDifficulty);
+      ai.setThinkingDelay(300);
+
+      engineRef.current = engine;
+      aiRef.current = ai;
+
+      // Subscribe to game events (use refs for stable callbacks)
+      const events = engine.getEvents();
+      const subscription = events.subscribe((event) => {
+        try {
+          handleGameEventForLogRef.current(event);
+        } catch (e) {
+          console.error('Error handling game event:', e);
+        }
+        forceUpdateRef.current();
+      });
+
+      // Initial update
       forceUpdateRef.current();
-    });
 
-    // Initial update
-    forceUpdateRef.current();
-
-    return () => {
-      subscription.unsubscribe();
-    };
+      return () => {
+        subscription.unsubscribe();
+      };
+    } catch (err) {
+      console.error('Game initialization failed:', err);
+      // Engine stays null — GameBoard will show loading state
+      return undefined;
+    }
     // Only re-init when game config props change (callbacks accessed via stable refs)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerRace, aiDifficulty, forcedOpponentRace]);
@@ -512,8 +521,13 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   // Get cards from zones — depends on updateCounter to refresh after engine state changes
   const getCardsFromZone = useCallback((playerId: string, zone: CardZone): CardInstance[] => {
     if (!engineRef.current) return [];
-    const board = engineRef.current.getStateManager().getBoard();
-    return board.getCardsInZone(playerId, zone);
+    try {
+      const board = engineRef.current.getStateManager().getBoard();
+      return board.getCardsInZone(playerId, zone);
+    } catch (e) {
+      console.error(`Error reading ${zone} for ${playerId}:`, e);
+      return [];
+    }
   }, [updateCounter]); // Re-run when counter changes
 
   const playerHand = getCardsFromZone('player', CardZone.HAND);
@@ -699,7 +713,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
 
     // Check if hero power requires a target
     const heroDef = getHeroById(playerState.hero.definitionId);
-    if (heroDef?.heroPower.requiresTarget && !targetId) {
+    if (heroDef?.heroPower?.requiresTarget && !targetId) {
       // Enter hero power targeting mode
       setPendingHeroPower(true);
       setTargetingMode('heropower');
@@ -795,14 +809,18 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   // STARFORGE: Check if a minion can be Starforged
   const canStarforge = useCallback((card: CardInstance): boolean => {
     if (!isPlayerTurn || !engineRef.current) return false;
-    const targets = engineRef.current.getStarforgeTargets('player');
-    return targets.some(t => t.instanceId === card.instanceId);
+    try {
+      const targets = engineRef.current.getStarforgeTargets('player');
+      return targets.some(t => t.instanceId === card.instanceId);
+    } catch { return false; }
   }, [isPlayerTurn, updateCounter]);
 
   // STARFORGE: Get all eligible targets
   const starforgeTargets = useMemo((): CardInstance[] => {
     if (!isPlayerTurn || !engineRef.current) return [];
-    return engineRef.current.getStarforgeTargets('player');
+    try {
+      return engineRef.current.getStarforgeTargets('player');
+    } catch { return []; }
   }, [isPlayerTurn, updateCounter]);
 
   // STARFORGE: Activate Starforge on a legendary minion
