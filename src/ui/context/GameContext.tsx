@@ -13,7 +13,7 @@ import { GamePhase, GameStatus, ActionType } from '../../types/Game';
 import type { GameState } from '../../types/Game';
 import { CardZone, CardType } from '../../types/Card';
 import type { CardInstance } from '../../types/Card';
-import { canAffordCard, hasBoardSpace } from '../../types/Player';
+import { canAffordCard } from '../../types/Player';
 import type { PlayerState } from '../../types/Player';
 import { Race } from '../../types/Race';
 import { TargetType } from '../../types/Effects';
@@ -47,6 +47,11 @@ interface GameContextValue {
   playerHand: CardInstance[];
   playerBoard: CardInstance[];
   opponentBoard: CardInstance[];
+
+  // Zone counts (from Board zones, the actual source of truth)
+  opponentHandCount: number;
+  playerDeckCount: number;
+  opponentDeckCount: number;
 
   // Selection state
   selectedCard: CardInstance | null;
@@ -534,6 +539,11 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const playerBoard = getCardsFromZone('player', CardZone.BOARD);
   const opponentBoard = getCardsFromZone('opponent', CardZone.BOARD);
 
+  // Zone counts from Board (actual source of truth — PlayerState arrays are never updated)
+  const opponentHandCount = engineRef.current?.getStateManager().getBoard().getHandCount('opponent') ?? 0;
+  const playerDeckCount = engineRef.current?.getStateManager().getBoard().getDeckCount('player') ?? 0;
+  const opponentDeckCount = engineRef.current?.getStateManager().getBoard().getDeckCount('opponent') ?? 0;
+
   // AI Turn Logic - runs only when activePlayerId changes (not on every state change)
   useEffect(() => {
     if (activePlayerId !== 'opponent') return;
@@ -567,17 +577,19 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     runAI();
   }, [activePlayerId]); // Only trigger when the active player changes
 
-  // Can play card check
+  // Can play card check (uses Board zones for board space, not stale PlayerState)
   const canPlayCard = useCallback((card: CardInstance): boolean => {
     if (!isPlayerTurn || !playerState) return false;
     if (!canAffordCard(playerState, card.currentCost)) return false;
-    // Minions need board space
+    // Minions and structures need board space — check the actual Board zones
     const def = globalCardDatabase.getCard(card.definitionId);
     if (def?.type === CardType.MINION || def?.type === CardType.STRUCTURE) {
-      if (!hasBoardSpace(playerState)) return false;
+      if (!engineRef.current) return false;
+      const board = engineRef.current.getStateManager().getBoard();
+      if (!board.hasBoardSpace('player')) return false;
     }
     return true;
-  }, [isPlayerTurn, playerState]);
+  }, [isPlayerTurn, playerState, updateCounter]);
 
   // Can attack check
   const canAttack = useCallback((minion: CardInstance): boolean => {
@@ -869,6 +881,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     playerHand,
     playerBoard,
     opponentBoard,
+    opponentHandCount,
+    playerDeckCount,
+    opponentDeckCount,
     selectedCard,
     validTargets,
     attackingMinion,

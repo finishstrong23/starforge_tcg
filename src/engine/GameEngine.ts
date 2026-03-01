@@ -27,7 +27,7 @@ import type {
 } from '../types/Game';
 import { CardZone, CardType, CardRarity, hasKeyword } from '../types/Card';
 import type { CardInstance } from '../types/Card';
-import { canAffordCard, hasBoardSpace } from '../types/Player';
+import { canAffordCard } from '../types/Player';
 import type { PlayerState } from '../types/Player';
 import { CombatKeyword, TriggerKeyword } from '../types/Keywords';
 import { GameStateManager, PlayerSetup } from '../game/GameState';
@@ -209,10 +209,10 @@ export class GameEngine {
       return { valid: false, error: 'Not enough crystals' };
     }
 
-    // Check board space for minions
+    // Check board space for minions and structures (use Board zones, not stale PlayerState)
     const definition = this.cardDatabase.getCard(card.definitionId);
-    if (definition?.type === CardType.MINION) {
-      if (!hasBoardSpace(player)) {
+    if (definition?.type === CardType.MINION || definition?.type === CardType.STRUCTURE) {
+      if (!board.hasBoardSpace(action.playerId)) {
         return { valid: false, error: 'Board is full' };
       }
     }
@@ -275,7 +275,7 @@ export class GameEngine {
     } as CardEventData);
 
     // Handle based on card type
-    if (definition.type === CardType.MINION) {
+    if (definition.type === CardType.MINION || definition.type === CardType.STRUCTURE) {
       // Move to board
       board.moveCard(
         data.cardInstanceId,

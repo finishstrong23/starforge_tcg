@@ -13,7 +13,7 @@ import { GamePhase, GameStatus, ActionType } from '../../types/Game';
 import type { GameAction } from '../../types/Game';
 import { CardZone, CardType, hasKeyword } from '../../types/Card';
 import type { CardInstance } from '../../types/Card';
-import { canAffordCard, hasBoardSpace } from '../../types/Player';
+import { canAffordCard } from '../../types/Player';
 import type { PlayerState } from '../../types/Player';
 import { CombatKeyword } from '../../types/Keywords';
 import { Race } from '../../types/Race';
@@ -411,16 +411,21 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     revealedCards: [],
   } : null;
 
-  // --- Can play card check ---
+  // --- Can play card check (uses Board zones for space, not stale PlayerState) ---
   const canPlayCard = useCallback((card: CardInstance): boolean => {
     if (!isPlayerTurn || !playerState) return false;
     if (!canAffordCard(playerState, card.currentCost)) return false;
     const def = globalCardDatabase.getCard(card.definitionId);
     if (def?.type === CardType.MINION || def?.type === CardType.STRUCTURE) {
-      if (!hasBoardSpace(playerState)) return false;
+      if (role === 'host' && engineRef.current) {
+        const board = engineRef.current.getStateManager().getBoard();
+        if (!board.hasBoardSpace(myPlayerId)) return false;
+      } else if (playerBoard.length >= 7) {
+        return false;
+      }
     }
     return true;
-  }, [isPlayerTurn, playerState]);
+  }, [isPlayerTurn, playerState, role, myPlayerId, playerBoard.length]);
 
   // --- Can attack check ---
   const canAttack = useCallback((minion: CardInstance): boolean => {
@@ -640,6 +645,22 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
   const displayWinnerId = winnerId === myPlayerId ? 'player' : winnerId ? 'opponent' : undefined;
   const displayGameState = gameState ? { ...gameState, winnerId: displayWinnerId } : null;
 
+  // Zone counts from Board (actual source of truth)
+  let opponentHandCount = 0;
+  let playerDeckCount = 0;
+  let opponentDeckCount = 0;
+  if (role === 'host' && engineRef.current) {
+    const board = engineRef.current.getStateManager().getBoard();
+    opponentHandCount = board.getHandCount(oppPlayerId);
+    playerDeckCount = board.getDeckCount(myPlayerId);
+    opponentDeckCount = board.getDeckCount(oppPlayerId);
+  } else if (guestView) {
+    opponentHandCount = guestView.opponentHandSize ?? 0;
+    // Guest doesn't have Board access — use PlayerState arrays as best available
+    playerDeckCount = guestView.myState?.deck?.length ?? 0;
+    opponentDeckCount = guestView.opponentState?.deck?.length ?? 0;
+  }
+
   const value = {
     gameState: displayGameState as any,
     playerState,
@@ -650,6 +671,9 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     playerHand,
     playerBoard,
     opponentBoard,
+    opponentHandCount,
+    playerDeckCount,
+    opponentDeckCount,
     selectedCard,
     validTargets,
     attackingMinion,

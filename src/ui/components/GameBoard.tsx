@@ -47,6 +47,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     playerHand,
     playerBoard,
     opponentBoard,
+    opponentHandCount,
+    playerDeckCount,
+    opponentDeckCount,
     selectedCard,
     validTargets,
     attackingMinion,
@@ -216,9 +219,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
 
       {/* Opponent Area */}
       <div style={styles.opponentArea}>
-        {/* Opponent Hand (face down) */}
+        {/* Opponent Hand (face down) — use actual Board zone count */}
         <div style={styles.opponentHand}>
-          {opponentState.hand.map((_, index) => (
+          {Array.from({ length: opponentHandCount }, (_, index) => (
             <div key={index} style={styles.cardBack}>
               <CardBack width={50} height={70} />
             </div>
@@ -233,7 +236,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
             isOpponent
           />
           <div style={styles.deckCount}>
-            Deck: {opponentState.deck.length}
+            Deck: {opponentDeckCount}
           </div>
         </div>
       </div>
@@ -369,7 +372,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
             overloaded={playerState.crystals.overloaded}
           />
           <div style={styles.deckCount}>
-            Deck: {playerState.deck.length}
+            Deck: {playerDeckCount}
           </div>
         </div>
 

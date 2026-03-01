@@ -19,7 +19,7 @@ import type {
 } from '../types/Game';
 import { CardZone, CardType, hasKeyword, getEffectiveAttack } from '../types/Card';
 import type { CardInstance } from '../types/Card';
-import { canAffordCard, hasBoardSpace } from '../types/Player';
+import { canAffordCard } from '../types/Player';
 import type { PlayerState } from '../types/Player';
 import { CombatKeyword, TriggerKeyword } from '../types/Keywords';
 import type { Keyword } from '../types/Keywords';
@@ -930,10 +930,10 @@ export class AIPlayer {
       if (!canAffordCard(player, card.currentCost)) return false;
       const def = globalCardDatabase.getCard(card.definitionId);
       const isMinion = card.currentAttack !== undefined;
-      const isStructure = card.currentHealth !== undefined && card.currentAttack === undefined;
       const isSpell = def?.type === CardType.SPELL;
-      // Minions need board space
-      if (isMinion && !hasBoardSpace(player)) return false;
+      // Minions and structures need board space — use actual Board zones
+      if (isMinion && !board.hasBoardSpace(this.playerId)) return false;
+      if (def?.type === CardType.STRUCTURE && !board.hasBoardSpace(this.playerId)) return false;
       // Spells with effects are now playable
       if (isSpell && (!def?.effects || def.effects.length === 0)) return false;
       return true;
