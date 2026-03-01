@@ -335,7 +335,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
               />
             )}
             {/* Emote Wheel */}
-            <div style={{ position: 'absolute', bottom: '-30px', left: '50%', transform: 'translateX(-50%)' }}>
+            <div style={{ position: 'absolute', bottom: '-24px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
               <EmoteWheel onEmote={handleEmote} />
             </div>
           </div>
@@ -420,8 +420,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
                 setIsDragOver(false);
               }}
               style={{
-                transform: `rotate(${(index - playerHand.length / 2) * 3}deg)`,
-                marginLeft: index > 0 ? '-20px' : '0',
+                transform: `rotate(${(index - playerHand.length / 2) * 2.5}deg)`,
+                marginLeft: index > 0 ? 'max(-20px, -2.5vw)' : '0',
               }}
             />
           ))}
@@ -470,7 +470,7 @@ const SoundToggle: React.FC = () => {
       style={{
         position: 'absolute',
         top: '10px',
-        right: '50px',
+        right: '62px',
         background: 'rgba(0,0,0,0.5)',
         border: '1px solid #444',
         borderRadius: '6px',
@@ -479,6 +479,11 @@ const SoundToggle: React.FC = () => {
         fontSize: '16px',
         cursor: 'pointer',
         zIndex: 100,
+        minWidth: '36px',
+        minHeight: '36px',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
       onClick={() => {
         const on = SoundManager.toggle();
@@ -554,8 +559,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     gap: '5px',
   },
   cardBack: {
-    width: '50px',
-    height: '70px',
+    width: 'var(--opponent-card-w, 50px)',
+    height: 'var(--opponent-card-h, 70px)',
     borderRadius: '6px',
     display: 'flex',
     justifyContent: 'center',
@@ -583,19 +588,19 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '10px',
-    minHeight: '130px',
+    gap: 'var(--board-gap, 10px)',
+    minHeight: 'var(--board-row-min-h, 130px)',
     flexWrap: 'wrap' as const,
   },
   minionsRow: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: '8px',
+    gap: 'var(--board-gap, 8px)',
     width: '100%',
-    maxWidth: '500px',
-    minHeight: '130px',
-    padding: '10px',
+    maxWidth: 'var(--minion-row-max-w, 500px)',
+    minHeight: 'var(--board-row-min-h, 130px)',
+    padding: 'var(--board-gap, 10px)',
     background: 'rgba(0, 0, 0, 0.2)',
     borderRadius: '10px',
     border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -613,7 +618,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    padding: '10px 20px',
+    padding: '8px 10px',
     background: 'linear-gradient(0deg, rgba(20, 20, 40, 0.9) 0%, transparent 100%)',
     position: 'relative',
   },
@@ -648,17 +653,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'absolute',
     top: '10px',
     right: '10px',
-    width: '48px',
-    height: '48px',
+    width: '44px',
+    height: '44px',
     background: 'rgba(0, 0, 0, 0.5)',
     border: '1px solid #444',
     borderRadius: '50%',
     color: '#888',
-    fontSize: '20px',
+    fontSize: '18px',
     cursor: 'pointer',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 100,
   },
   starforgeButton: {
     position: 'absolute',
@@ -690,8 +696,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     animation: 'card-flight 0.5s ease-out forwards',
   },
   flightCard: {
-    width: '130px',
-    height: '80px',
+    width: 'var(--flight-card-w, 130px)',
+    height: 'var(--flight-card-h, 80px)',
     borderRadius: '10px',
     background: 'linear-gradient(135deg, #2a2a4a 0%, #1a1a3a 100%)',
     border: '3px solid #00ff88',

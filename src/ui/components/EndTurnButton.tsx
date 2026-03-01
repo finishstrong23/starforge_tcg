@@ -34,11 +34,11 @@ export const EndTurnButton: React.FC = () => {
 const styles: { [key: string]: React.CSSProperties } = {
   button: {
     position: 'absolute',
-    right: '20px',
+    right: '10px',
     bottom: '50%',
     transform: 'translateY(50%)',
-    width: '100px',
-    height: '100px',
+    width: 'var(--end-turn-size, 100px)',
+    height: 'var(--end-turn-size, 100px)',
     borderRadius: '50%',
     border: 'none',
     cursor: 'pointer',
@@ -60,7 +60,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'not-allowed',
   },
   buttonText: {
-    fontSize: '14px',
+    fontSize: 'var(--end-turn-font, 14px)',
     fontWeight: 'bold',
     color: '#ffffff',
     textAlign: 'center',

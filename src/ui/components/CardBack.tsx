@@ -22,7 +22,8 @@ export const CardBack: React.FC<CardBackProps> = ({ width = 50, height = 70 }) =
   const innerPad = 3;
 
   return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}
+    <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="xMidYMid meet"
       style={{ borderRadius: '6px', display: 'block' }}>
       <defs>
         {/* Deep background */}

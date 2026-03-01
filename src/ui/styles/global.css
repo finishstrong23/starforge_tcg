@@ -48,6 +48,27 @@
   --card-height: 130px;
   --card-hand-width: 100px;
   --card-hand-height: 145px;
+
+  /* Hero portrait */
+  --hero-width: 80px;
+  --hero-height: 100px;
+  --hero-face-size: 74px;
+  --hero-power-size: 50px;
+
+  /* End turn button */
+  --end-turn-size: 100px;
+  --end-turn-font: 14px;
+
+  /* Board layout */
+  --opponent-card-w: 50px;
+  --opponent-card-h: 70px;
+  --minion-row-max-w: 500px;
+  --board-row-min-h: 130px;
+  --board-gap: 10px;
+
+  /* Flight card */
+  --flight-card-w: 130px;
+  --flight-card-h: 80px;
 }
 
 /* Reset */
@@ -289,6 +310,23 @@ html, body {
     --card-height: 110px;
     --card-hand-width: 85px;
     --card-hand-height: 125px;
+
+    --hero-width: 72px;
+    --hero-height: 90px;
+    --hero-face-size: 66px;
+    --hero-power-size: 44px;
+
+    --end-turn-size: 85px;
+    --end-turn-font: 13px;
+
+    --opponent-card-w: 44px;
+    --opponent-card-h: 62px;
+    --minion-row-max-w: 420px;
+    --board-row-min-h: 110px;
+    --board-gap: 8px;
+
+    --flight-card-w: 110px;
+    --flight-card-h: 65px;
   }
 }
 
@@ -299,6 +337,23 @@ html, body {
     --card-height: 90px;
     --card-hand-width: 70px;
     --card-hand-height: 100px;
+
+    --hero-width: 60px;
+    --hero-height: 76px;
+    --hero-face-size: 54px;
+    --hero-power-size: 40px;
+
+    --end-turn-size: 70px;
+    --end-turn-font: 12px;
+
+    --opponent-card-w: 36px;
+    --opponent-card-h: 52px;
+    --minion-row-max-w: 90vw;
+    --board-row-min-h: 95px;
+    --board-gap: 6px;
+
+    --flight-card-w: 90px;
+    --flight-card-h: 55px;
   }
 
   /* Make buttons touch-friendly (min 44px tap targets) */
@@ -320,6 +375,23 @@ html, body {
     --card-height: 80px;
     --card-hand-width: 62px;
     --card-hand-height: 90px;
+
+    --hero-width: 52px;
+    --hero-height: 66px;
+    --hero-face-size: 46px;
+    --hero-power-size: 36px;
+
+    --end-turn-size: 60px;
+    --end-turn-font: 11px;
+
+    --opponent-card-w: 30px;
+    --opponent-card-h: 44px;
+    --minion-row-max-w: 92vw;
+    --board-row-min-h: 85px;
+    --board-gap: 4px;
+
+    --flight-card-w: 75px;
+    --flight-card-h: 45px;
   }
 
   body {
@@ -360,6 +432,30 @@ html, body {
     --card-height: 80px;
     --card-hand-width: 62px;
     --card-hand-height: 90px;
+
+    --hero-width: 50px;
+    --hero-height: 64px;
+    --hero-face-size: 44px;
+    --hero-power-size: 34px;
+
+    --end-turn-size: 56px;
+    --end-turn-font: 10px;
+
+    --opponent-card-w: 28px;
+    --opponent-card-h: 40px;
+    --minion-row-max-w: 60vw;
+    --board-row-min-h: 75px;
+    --board-gap: 4px;
+
+    --flight-card-w: 70px;
+    --flight-card-h: 42px;
+  }
+}
+
+/* Wider landscape phones (enough height but narrow) */
+@media (max-width: 900px) and (orientation: landscape) {
+  :root {
+    --minion-row-max-w: 55vw;
   }
 }
 

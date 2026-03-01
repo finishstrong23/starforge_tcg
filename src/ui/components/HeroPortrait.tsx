@@ -35,7 +35,7 @@ const HeroFace: React.FC<{ isOpponent: boolean; size: number }> = ({ isOpponent,
   if (isOpponent) {
     // Dark lord / antagonist portrait
     return (
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <svg width="100%" height="100%" viewBox={`0 0 ${size} ${size}`} preserveAspectRatio="xMidYMid meet">
         <defs>
           <radialGradient id="hp_opp_bg" cx="0.5" cy="0.4" r="0.6">
             <stop offset="0%" stopColor="#2a1030" />
@@ -87,7 +87,7 @@ const HeroFace: React.FC<{ isOpponent: boolean; size: number }> = ({ isOpponent,
 
   // Player hero — helmeted warrior
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <svg width="100%" height="100%" viewBox={`0 0 ${size} ${size}`} preserveAspectRatio="xMidYMid meet">
       <defs>
         <radialGradient id="hp_pl_bg" cx="0.5" cy="0.4" r="0.6">
           <stop offset="0%" stopColor="#102040" />
@@ -290,8 +290,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   heroFrame: {
     position: 'relative',
-    width: '80px',
-    height: '100px',
+    width: 'var(--hero-width, 80px)',
+    height: 'var(--hero-height, 100px)',
     background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a20 100%)',
     border: '3px solid #556688',
     borderRadius: '10px',
@@ -378,8 +378,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   heroPowerButton: {
     position: 'relative',
-    width: '50px',
-    height: '50px',
+    width: 'var(--hero-power-size, 50px)',
+    height: 'var(--hero-power-size, 50px)',
     background: 'linear-gradient(135deg, #222244 0%, #1a1a33 100%)',
     border: '2px solid #444466',
     borderRadius: '50%',
