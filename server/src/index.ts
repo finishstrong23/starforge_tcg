@@ -10,9 +10,11 @@ import socialRoutes from './routes/social';
 import analyticsRoutes from './routes/analytics';
 import questRoutes from './routes/quests';
 import arenaRoutes from './routes/arena';
+import rankedRoutes from './routes/ranked';
 import { MatchmakingService } from './services/MatchmakingService';
 import * as GameStateService from './services/GameStateService';
 import { GameWebSocketServer } from './services/WebSocketServer';
+import * as RankedLadder from './services/RankedLadderService';
 
 const app = express();
 const server = createServer(app);
@@ -50,6 +52,7 @@ app.use('/api/social', socialRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/quests', questRoutes);
 app.use('/api/arena', arenaRoutes);
+app.use('/api/ranked', rankedRoutes);
 
 // Server stats endpoint
 app.get('/api/stats', (_req, res) => {

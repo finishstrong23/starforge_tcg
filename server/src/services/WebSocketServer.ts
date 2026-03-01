@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config/env';
 import { AuthPayload } from '../middleware/auth';
 import * as GameStateService from './GameStateService';
+import * as RankedLadder from './RankedLadderService';
 
 interface PlayerConnection {
   ws: WebSocket;
@@ -30,10 +31,13 @@ interface ServerMessage {
   data: unknown;
 }
 
+const DISCONNECT_TIMEOUT_MS = 60_000; // 60 seconds to reconnect before forfeit
+
 export class GameWebSocketServer {
   private wss: WSServer;
   private connections = new Map<string, PlayerConnection>();
   private spectators = new Map<string, Set<WebSocket>>();
+  private disconnectTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
   constructor(server: Server) {
     this.wss = new WSServer({ server, path: '/ws' });
@@ -75,9 +79,24 @@ export class GameWebSocketServer {
     const activeGame = GameStateService.getPlayerGame(user.userId);
     if (activeGame) {
       conn.gameId = activeGame.id;
+
+      // Clear any disconnect forfeit timer
+      const timer = this.disconnectTimers.get(user.userId);
+      if (timer) {
+        clearTimeout(timer);
+        this.disconnectTimers.delete(user.userId);
+      }
+
+      // Notify opponent of reconnection
+      const opponentId = activeGame.player1Id === user.userId ? activeGame.player2Id : activeGame.player1Id;
+      this.sendToPlayer(opponentId, {
+        type: 'GAME_STATE',
+        data: { event: 'opponent_reconnected' },
+      });
+
       this.send(ws, {
         type: 'GAME_STATE',
-        data: { gameId: activeGame.id, state: activeGame.state, turnNumber: activeGame.turnNumber },
+        data: { gameId: activeGame.id, state: activeGame.state, turnNumber: activeGame.turnNumber, reconnected: true },
       });
     }
 
@@ -92,10 +111,12 @@ export class GameWebSocketServer {
 
     ws.on('close', () => {
       this.connections.delete(user.userId);
+      this.handleDisconnect(user.userId);
     });
 
     ws.on('error', () => {
       this.connections.delete(user.userId);
+      this.handleDisconnect(user.userId);
     });
   }
 
@@ -152,6 +173,41 @@ export class GameWebSocketServer {
     if (action.type === 'END_TURN') {
       GameStateService.updateGameState(conn.gameId, game.state, opponentId);
     }
+
+    // If CONCEDE, end the game with opponent as winner
+    if (action.type === 'CONCEDE') {
+      this.notifyGameOver(conn.gameId, opponentId);
+      GameStateService.endGame(conn.gameId, opponentId, 0, 0).catch(err =>
+        console.error('Failed to end game after concede:', err)
+      );
+    }
+  }
+
+  private handleDisconnect(userId: string): void {
+    const game = GameStateService.getPlayerGame(userId);
+    if (!game) return;
+
+    const opponentId = game.player1Id === userId ? game.player2Id : game.player1Id;
+
+    // Notify opponent
+    this.sendToPlayer(opponentId, {
+      type: 'GAME_STATE',
+      data: { event: 'opponent_disconnected', reconnectTimeoutMs: DISCONNECT_TIMEOUT_MS },
+    });
+
+    // Start a forfeit timer — if the player doesn't reconnect in time, they lose
+    const timer = setTimeout(() => {
+      this.disconnectTimers.delete(userId);
+      // Check if player is still disconnected
+      if (!this.connections.has(userId)) {
+        this.notifyGameOver(game.id, opponentId);
+        GameStateService.endGame(game.id, opponentId, 0, 0).catch(err =>
+          console.error('Failed to end game after disconnect timeout:', err)
+        );
+      }
+    }, DISCONNECT_TIMEOUT_MS);
+
+    this.disconnectTimers.set(userId, timer);
   }
 
   private handleReconnect(conn: PlayerConnection, gameId: string): void {
@@ -214,18 +270,53 @@ export class GameWebSocketServer {
     if (conn2) conn2.gameId = gameId;
   }
 
-  notifyGameOver(gameId: string, winnerId: string | null): void {
+  async notifyGameOver(gameId: string, winnerId: string | null): Promise<void> {
     const game = GameStateService.getActiveGame(gameId);
     if (!game) return;
 
-    const msg: ServerMessage = {
+    // Process rank changes based on game mode
+    let rankChanges: { player1: RankedLadder.RankChange; player2: RankedLadder.RankChange } | null = null;
+    let mmrChanges: { mmrDelta1: number; mmrDelta2: number } | null = null;
+
+    try {
+      if (game.mode === 'ranked') {
+        rankChanges = await RankedLadder.processRankedResult(
+          game.player1Id, game.player2Id, winnerId, 'ranked'
+        );
+      } else if (game.mode === 'casual') {
+        mmrChanges = await RankedLadder.processCasualResult(
+          game.player1Id, game.player2Id, winnerId
+        );
+      }
+    } catch (err) {
+      console.error('Failed to process rank changes:', err);
+    }
+
+    // Send personalized game-over messages with rank info
+    this.sendToPlayer(game.player1Id, {
+      type: 'GAME_OVER',
+      data: {
+        gameId,
+        winnerId,
+        rankChange: rankChanges?.player1 ?? null,
+        mmrDelta: mmrChanges?.mmrDelta1 ?? rankChanges?.player1?.mmrDelta ?? 0,
+      },
+    });
+
+    this.sendToPlayer(game.player2Id, {
+      type: 'GAME_OVER',
+      data: {
+        gameId,
+        winnerId,
+        rankChange: rankChanges?.player2 ?? null,
+        mmrDelta: mmrChanges?.mmrDelta2 ?? rankChanges?.player2?.mmrDelta ?? 0,
+      },
+    });
+
+    this.broadcastToSpectators(gameId, {
       type: 'GAME_OVER',
       data: { gameId, winnerId },
-    };
-
-    this.sendToPlayer(game.player1Id, msg);
-    this.sendToPlayer(game.player2Id, msg);
-    this.broadcastToSpectators(gameId, msg);
+    });
 
     // Clean up spectators
     this.spectators.delete(gameId);

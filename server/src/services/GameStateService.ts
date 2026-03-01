@@ -93,6 +93,38 @@ export function getActiveGameCount(): number {
   return activeGames.size;
 }
 
+export interface SpectatableGame {
+  id: string;
+  mode: GameMode;
+  turnNumber: number;
+  durationMs: number;
+  player1Id: string;
+  player2Id: string;
+}
+
+export function getSpectatableGames(): SpectatableGame[] {
+  const now = Date.now();
+  const games: SpectatableGame[] = [];
+
+  for (const [, game] of activeGames) {
+    // Only allow spectating ranked and casual games that are past turn 2
+    if ((game.mode === 'ranked' || game.mode === 'casual') && game.turnNumber > 2) {
+      games.push({
+        id: game.id,
+        mode: game.mode,
+        turnNumber: game.turnNumber,
+        durationMs: now - game.createdAt,
+        player1Id: game.player1Id,
+        player2Id: game.player2Id,
+      });
+    }
+  }
+
+  // Sort by duration (longest games first — more interesting to watch)
+  games.sort((a, b) => b.durationMs - a.durationMs);
+  return games.slice(0, 20);
+}
+
 export async function getGameHistory(playerId: string, limit = 20, offset = 0): Promise<GameRecord[]> {
   const result = await query(
     `SELECT * FROM game_records

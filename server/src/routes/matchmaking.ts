@@ -2,6 +2,7 @@ import { Router, Response } from 'express';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 import { MatchmakingService } from '../services/MatchmakingService';
 import { GameMode } from '../models/Game';
+import { getPlayerMmr } from '../services/RankedLadderService';
 
 const VALID_MODES: GameMode[] = ['ranked', 'casual', 'arena'];
 
@@ -22,8 +23,7 @@ export function createMatchmakingRoutes(matchmaking: MatchmakingService): Router
         return;
       }
 
-      // TODO: Fetch actual MMR from database
-      const mmr = 1000;
+      const mmr = await getPlayerMmr(req.user!.userId);
 
       matchmaking.enqueue({
         playerId: req.user!.userId,
@@ -51,11 +51,16 @@ export function createMatchmakingRoutes(matchmaking: MatchmakingService): Router
   });
 
   router.get('/status', authenticateToken, async (req: AuthRequest, res: Response) => {
-    const mode = (req.query.mode as GameMode) || 'ranked';
-    res.json({
-      queueSize: matchmaking.getQueueSize(mode),
-      estimatedWait: matchmaking.getEstimatedWait(mode, 1000),
-    });
+    try {
+      const mode = (req.query.mode as GameMode) || 'ranked';
+      const mmr = await getPlayerMmr(req.user!.userId);
+      res.json({
+        queueSize: matchmaking.getQueueSize(mode),
+        estimatedWait: matchmaking.getEstimatedWait(mode, mmr),
+      });
+    } catch {
+      res.status(500).json({ error: 'Failed to fetch queue status' });
+    }
   });
 
   return router;

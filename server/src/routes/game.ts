@@ -34,4 +34,14 @@ router.get('/stats', (_req: AuthRequest, res: Response) => {
   });
 });
 
+// GET /api/games/spectatable — list games available for spectating
+router.get('/spectatable', authenticateToken, async (_req: AuthRequest, res: Response) => {
+  try {
+    const games = GameStateService.getSpectatableGames();
+    res.json({ games });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch spectatable games' });
+  }
+});
+
 export default router;
