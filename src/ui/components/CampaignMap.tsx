@@ -10,6 +10,7 @@ import { Race, RaceData } from '../../types/Race';
 import { PLANET_ENCOUNTERS, getCampaignEncounters } from '../../campaign/CampaignData';
 import type { CampaignSave } from '../../campaign/CampaignState';
 import { getNextEncounter, getCampaignProgress, isCampaignComplete } from '../../campaign/CampaignState';
+import { hapticTap } from '../capacitor';
 import backgroundImg from '../../assets/background.png';
 import logoImg from '../../assets/logo.png';
 
@@ -131,9 +132,11 @@ export const CampaignMap: React.FC<CampaignMapProps> = ({
                   cursor: canPlay ? 'pointer' : 'default',
                   animation: isNext ? 'pulse 2s infinite' : 'none',
                 }}
-                onClick={() => canPlay && onSelectPlanet(encounter.race)}
+                onClick={() => { if (canPlay) { hapticTap(); onSelectPlanet(encounter.race); } }}
                 onMouseEnter={() => setHoveredPlanet(encounter.race)}
                 onMouseLeave={() => setHoveredPlanet(null)}
+                onTouchStart={() => setHoveredPlanet(encounter.race)}
+                onTouchEnd={() => setHoveredPlanet(null)}
                 disabled={!canPlay}
               >
                 {/* Planet icon */}
@@ -210,10 +213,11 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'flex-start',
     alignItems: 'center',
     flexDirection: 'column',
-    padding: '20px',
+    padding: '16px',
     overflowY: 'auto',
+    WebkitOverflowScrolling: 'touch',
     background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
-  },
+  } as React.CSSProperties,
   content: {
     maxWidth: '900px',
     width: '100%',
@@ -342,8 +346,8 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
-    padding: '14px 18px',
+    gap: '12px',
+    padding: '14px 16px',
     background: 'linear-gradient(135deg, #12122a 0%, #1a1a35 100%)',
     border: '2px solid #222244',
     borderRadius: '12px',
@@ -351,7 +355,9 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'all 0.2s ease',
     position: 'relative',
     textAlign: 'left',
-  },
+    minHeight: '56px',
+    flexWrap: 'wrap',
+  } as React.CSSProperties,
   planetIcon: {
     fontSize: '32px',
     width: '48px',

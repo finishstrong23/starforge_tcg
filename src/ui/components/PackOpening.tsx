@@ -13,6 +13,7 @@ import React, { useState, useCallback } from 'react';
 import { PACK_TYPES, openPack, loadPackState, type PackResult, type PackType, type PackState } from '../../progression/CardPacks';
 import { loadDailyState, spendGold as spendDailyGold, saveDailyState } from '../../progression/DailyQuests';
 import { CardArt } from './CardArt';
+import { hapticTap, hapticImpact, hapticHeavy } from '../capacitor';
 import type { Race } from '../../types/Race';
 
 interface PackOpeningProps {
@@ -30,6 +31,7 @@ export const PackOpening: React.FC<PackOpeningProps> = ({ onBack }) => {
 
   const handleBuyPack = useCallback((packType: PackType) => {
     if (gold < packType.cost) return;
+    hapticImpact();
     const dailyState = loadDailyState();
     const updated = spendDailyGold(dailyState, packType.cost);
     if (!updated) return;
@@ -52,6 +54,14 @@ export const PackOpening: React.FC<PackOpeningProps> = ({ onBack }) => {
   const handleRevealNext = useCallback(() => {
     if (!result) return;
     if (revealIndex < result.cards.length - 1) {
+      const nextCard = result.cards[revealIndex + 1];
+      if (nextCard?.rarity === 'LEGENDARY') {
+        hapticHeavy();
+      } else if (nextCard?.rarity === 'EPIC') {
+        hapticImpact();
+      } else {
+        hapticTap();
+      }
       setRevealIndex(prev => prev + 1);
     }
   }, [result, revealIndex]);
@@ -246,7 +256,7 @@ export const PackOpening: React.FC<PackOpeningProps> = ({ onBack }) => {
                 {gold >= 100 ? 'Open Another' : 'Back to Shop'}
               </button>
             ) : (
-              <span style={styles.hintText}>Click to reveal next card</span>
+              <span style={styles.hintText}>Tap to reveal next card</span>
             )}
           </div>
 
@@ -265,7 +275,8 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column', alignItems: 'center',
     background: 'linear-gradient(135deg, #060612 0%, #0c0c22 100%)',
     overflow: 'auto', padding: '20px',
-  },
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   header: {
     width: '100%', maxWidth: '800px', display: 'flex',
     justifyContent: 'space-between', alignItems: 'center',
@@ -294,8 +305,8 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center', maxWidth: '800px',
   },
   packCard: {
-    width: '220px', background: 'linear-gradient(135deg, #12122e 0%, #0a0a1e 100%)',
-    border: '2px solid', borderRadius: '16px', padding: '20px',
+    width: '220px', maxWidth: '45vw', background: 'linear-gradient(135deg, #12122e 0%, #0a0a1e 100%)',
+    border: '2px solid', borderRadius: '16px', padding: '16px',
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
   },
   packVisual: {
@@ -336,11 +347,11 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center',
   },
   revealCard: {
-    width: '120px', height: '160px', borderRadius: '10px',
+    width: '100px', height: '140px', borderRadius: '10px',
     border: '2px solid #333355',
     background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a20 100%)',
     display: 'flex', flexDirection: 'column', alignItems: 'center',
-    justifyContent: 'center', gap: '4px', padding: '8px',
+    justifyContent: 'center', gap: '4px', padding: '6px',
     position: 'relative', overflow: 'hidden',
     transition: 'border-color 0.3s ease',
   },

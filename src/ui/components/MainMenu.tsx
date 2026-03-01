@@ -10,6 +10,7 @@
 import React, { useState } from 'react';
 import { Race, RaceData } from '../../types/Race';
 import { AIDifficulty } from '../../ai/AIPlayer';
+import { hapticTap } from '../capacitor';
 import backgroundImg from '../../assets/background.png';
 import logoImg from '../../assets/logo.png';
 
@@ -112,11 +113,11 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
 
           {/* Action Buttons */}
           <div style={s.playActions}>
-            <button style={s.goBtn} onClick={() => onStartGame(selectedRace, selectedDifficulty)}>
+            <button style={s.goBtn} onClick={() => { hapticTap(); onStartGame(selectedRace, selectedDifficulty); }}>
               Quick Play
             </button>
             {onDeckbuilder && (
-              <button style={s.buildBtn} onClick={() => onDeckbuilder(selectedRace, selectedDifficulty)}>
+              <button style={s.buildBtn} onClick={() => { hapticTap(); onDeckbuilder(selectedRace, selectedDifficulty); }}>
                 Build Deck & Play
               </button>
             )}
@@ -161,23 +162,23 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
         {/* Primary Play Buttons - vertical stack */}
         <div style={s.modeStack}>
           {onCampaign && (
-            <button style={s.modeBtn} onClick={onCampaign}>
+            <button style={s.modeBtn} onClick={() => { hapticTap(); onCampaign(); }}>
               <span style={s.modeBtnIcon}>&#x2694;</span>
               <span style={s.modeBtnLabel}>Story Mode</span>
             </button>
           )}
-          <button style={{ ...s.modeBtn, ...s.modeBtnAlt }} onClick={() => setView('play')}>
+          <button style={{ ...s.modeBtn, ...s.modeBtnAlt }} onClick={() => { hapticTap(); setView('play'); }}>
             <span style={s.modeBtnIcon}>&#x269B;</span>
             <span style={s.modeBtnLabel}>Quick Play</span>
           </button>
           {onTournament && (
-            <button style={{ ...s.modeBtn, ...s.modeBtnTourney }} onClick={onTournament}>
+            <button style={{ ...s.modeBtn, ...s.modeBtnTourney }} onClick={() => { hapticTap(); onTournament(); }}>
               <span style={s.modeBtnIcon}>&#x2605;</span>
               <span style={s.modeBtnLabel}>Tournament</span>
             </button>
           )}
           {onPlayFriend && (
-            <button style={{ ...s.modeBtn, ...s.modeBtnFriend }} onClick={onPlayFriend}>
+            <button style={{ ...s.modeBtn, ...s.modeBtnFriend }} onClick={() => { hapticTap(); onPlayFriend(); }}>
               <span style={s.modeBtnIcon}>&#x2699;</span>
               <span style={s.modeBtnLabel}>Play vs Friend</span>
             </button>
@@ -256,6 +257,7 @@ const s: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     position: 'relative',
+    overflow: 'hidden',
   },
 
   // Top bar
@@ -287,6 +289,8 @@ const s: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     gap: '32px',
     padding: '0 20px',
+    overflowY: 'auto',
+    minHeight: 0,
   },
   logoArea: {
     textAlign: 'center',
@@ -365,7 +369,10 @@ const s: Record<string, React.CSSProperties> = {
     padding: '10px 8px 14px',
     background: 'linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%)',
     flexWrap: 'wrap',
-  },
+    overflowX: 'auto',
+    WebkitOverflowScrolling: 'touch',
+    flexShrink: 0,
+  } as React.CSSProperties,
   navBtn: {
     background: 'transparent',
     border: 'none',
@@ -398,6 +405,8 @@ const s: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     gap: '20px',
     padding: '20px',
+    overflowY: 'auto',
+    minHeight: 0,
   },
   playTitle: {
     fontSize: '22px',

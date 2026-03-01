@@ -15,6 +15,7 @@ import { CardRarity } from '../../types/Card';
 import type { CardDefinition } from '../../types/Card';
 import { CardArt } from './CardArt';
 import { SoundManager } from '../../audio';
+import { hapticTap, hapticImpact } from '../capacitor';
 import {
   loadCraftingState,
   getAllCollectibleCards,
@@ -86,6 +87,7 @@ export const CraftingScreen: React.FC<CraftingScreenProps> = ({ onBack }) => {
   const handleCraft = useCallback((card: CardDefinition) => {
     const result = craftCard(craftingState, card.id, card.rarity);
     if (result) {
+      hapticImpact();
       setCraftingState(result);
       setCraftEffect('craft');
       SoundManager.play('craft' as any);
@@ -98,6 +100,7 @@ export const CraftingScreen: React.FC<CraftingScreenProps> = ({ onBack }) => {
   const handleDisenchant = useCallback((card: CardDefinition) => {
     const result = disenchantCard(craftingState, card.id, card.rarity);
     if (result) {
+      hapticTap();
       setCraftingState(result);
       setCraftEffect('disenchant');
       SoundManager.play('disenchant' as any);

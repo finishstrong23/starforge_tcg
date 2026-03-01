@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { SoundManager } from '../../audio';
+import { hapticTap } from '../capacitor';
 import {
   loadBattlePass,
   saveBattlePass,
@@ -32,6 +33,7 @@ export const BattlePassScreen: React.FC<BattlePassScreenProps> = ({ onBack }) =>
   const handleClaimFree = useCallback((level: number) => {
     const result = claimFreeReward(state, level);
     if (result) {
+      hapticTap();
       setState(result);
       SoundManager.play('craft' as any);
     }
@@ -40,6 +42,7 @@ export const BattlePassScreen: React.FC<BattlePassScreenProps> = ({ onBack }) =>
   const handleClaimPremium = useCallback((level: number) => {
     const result = claimPremiumReward(state, level);
     if (result) {
+      hapticTap();
       setState(result);
       SoundManager.play('craft' as any);
     }
@@ -291,8 +294,8 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
     padding: '12px 20px', background: 'linear-gradient(90deg, rgba(255,204,0,0.08), rgba(255,170,0,0.04))',
     borderTop: '1px solid rgba(255,204,0,0.2)', borderBottom: '1px solid rgba(255,204,0,0.2)',
-    flexShrink: 0,
-  },
+    flexShrink: 0, flexWrap: 'wrap', gap: '8px',
+  } as React.CSSProperties,
   premiumText: { fontSize: '13px', color: '#cccccc', flex: 1 },
   premiumBtn: {
     background: 'linear-gradient(135deg, #ffcc00, #ffaa00)',
@@ -311,11 +314,14 @@ const styles: Record<string, React.CSSProperties> = {
   trackScroll: {
     display: 'flex', overflowX: 'auto', overflowY: 'hidden',
     gap: '2px', padding: '0 20px', height: '100%',
-  },
+    WebkitOverflowScrolling: 'touch',
+    scrollSnapType: 'x proximity',
+  } as React.CSSProperties,
   tierColumn: {
     display: 'flex', flexDirection: 'column', alignItems: 'center',
     gap: '4px', minWidth: '80px', flexShrink: 0, transition: 'opacity 0.3s',
-  },
+    scrollSnapAlign: 'center',
+  } as React.CSSProperties,
   tierCurrent: {
     background: 'rgba(0,255,136,0.03)', borderRadius: '8px',
     border: '1px solid rgba(0,255,136,0.2)',

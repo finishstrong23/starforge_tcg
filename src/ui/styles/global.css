@@ -489,3 +489,232 @@ html, body {
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* ═══ Keyboard Avoidance ═════════════════════════════════════════ */
+
+/* Shift content above the soft keyboard on mobile */
+.keyboard-aware {
+  padding-bottom: var(--keyboard-height, 0px);
+  transition: padding-bottom 0.2s ease;
+}
+
+/* ═══ Phase 3: Mobile-Responsive Screens ═════════════════════════ */
+
+/* --- Scrollable full-screen panel base --- */
+.mobile-screen {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --- Game overlays (mulligan, game over) --- */
+@media (max-width: 480px) {
+  .mulligan-card {
+    width: 90px !important;
+    padding: 6px !important;
+  }
+  .mulligan-card .card-art-area {
+    width: 80px;
+    height: 52px;
+  }
+  .mulligan-title {
+    font-size: 20px !important;
+  }
+  .game-over-content {
+    padding: 24px 20px !important;
+  }
+  .game-over-title {
+    font-size: 36px !important;
+    letter-spacing: 4px !important;
+  }
+  .game-over-icon svg {
+    width: 70px !important;
+    height: 70px !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .mulligan-card {
+    width: 100px !important;
+    padding: 8px !important;
+  }
+  .mulligan-title {
+    font-size: 22px !important;
+  }
+  .game-over-content {
+    padding: 30px 30px !important;
+  }
+  .game-over-title {
+    font-size: 42px !important;
+    letter-spacing: 6px !important;
+  }
+}
+
+/* --- Combat log collapses on small screens --- */
+@media (max-width: 768px) {
+  .combat-log {
+    width: 200px !important;
+    top: 40px !important;
+    left: 4px !important;
+  }
+  .combat-log .log-body {
+    max-height: 140px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .combat-log {
+    width: 160px !important;
+    top: 36px !important;
+    left: 2px !important;
+  }
+  .combat-log .log-body {
+    max-height: 100px !important;
+  }
+  .combat-log .entry-text {
+    font-size: 9px !important;
+  }
+}
+
+/* --- Turn timer scales down --- */
+@media (max-width: 480px) {
+  .turn-timer .timer-box {
+    padding: 6px 12px !important;
+    min-width: 100px !important;
+  }
+  .turn-timer .time-text {
+    font-size: 22px !important;
+  }
+}
+
+/* --- Full-screen menu/panel responsive --- */
+.screen-container {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .screen-container {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .screen-container {
+    padding: 8px;
+  }
+}
+
+/* --- Card grid responsive (Collection, Crafting) --- */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 4px;
+  }
+}
+
+/* --- Filter bar responsive (Collection, Crafting) --- */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+@media (max-width: 480px) {
+  .filter-bar {
+    gap: 4px;
+  }
+  .filter-bar button,
+  .filter-bar select,
+  .filter-bar input {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    min-height: 36px;
+  }
+}
+
+/* --- Stats / achievement grids --- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+/* --- Leaderboard/table responsive --- */
+.responsive-table {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --- Modal/panel responsive (Daily, Settings) --- */
+.modal-panel {
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 480px) {
+  .modal-panel {
+    max-width: 95vw;
+    max-height: 90vh;
+    border-radius: 12px !important;
+  }
+}
+
+/* --- Campaign map planet touch targets --- */
+@media (hover: none) and (pointer: coarse) {
+  .planet-node {
+    min-width: 56px;
+    min-height: 56px;
+  }
+}
+
+/* --- Battle pass tier track horizontal scroll --- */
+.tier-track {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  gap: 8px;
+  padding-bottom: 8px;
+}
+
+.tier-track > * {
+  scroll-snap-align: center;
+  flex-shrink: 0;
+}
+
+/* --- Meta dashboard matchup matrix scroll --- */
+@media (max-width: 768px) {
+  .matchup-matrix {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

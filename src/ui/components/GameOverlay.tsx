@@ -10,6 +10,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { SoundManager } from '../../audio';
+import { hapticHeavy, hapticTap } from '../capacitor';
 
 interface GameOverlayProps {
   winnerId?: string;
@@ -148,6 +149,7 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
   const particles = useMemo(() => generateParticles(20, isVictory || isDraw), [isVictory, isDraw]);
 
   useEffect(() => {
+    hapticHeavy();
     if (isVictory) {
       SoundManager.play('gameWin');
     } else if (!isDraw) {
@@ -207,13 +209,13 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
       ))}
 
       {/* Content card */}
-      <div style={{
+      <div className="game-over-content" style={{
         ...styles.content,
         borderColor: accentColor + '44',
         animation: 'go-content-fade 0.6s ease-out forwards',
       }}>
         {/* Title */}
-        <div style={{
+        <div className="game-over-title" style={{
           ...styles.title,
           color: titleColor,
           textShadow: `0 0 30px ${titleColor}, 0 0 60px ${titleColor}66`,
@@ -236,7 +238,7 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
         </div>
 
         {/* SVG Icon */}
-        <div style={{
+        <div className="game-over-icon" style={{
           ...styles.iconContainer,
           animation: 'go-icon-bounce 0.7s ease-out 0.4s forwards',
           opacity: 0,
@@ -251,7 +253,7 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
           borderColor: titleColor,
           animation: 'go-content-fade 0.6s ease-out 0.6s forwards, go-button-glow 2s ease-in-out 1.2s infinite',
           opacity: 0,
-        }} onClick={onPlayAgain}>
+        }} onClick={() => { hapticTap(); onPlayAgain(); }}>
           {isCampaign ? 'Continue' : 'Play Again'}
         </button>
       </div>

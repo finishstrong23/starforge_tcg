@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useRef, useCallback, useMemo } from 'react';
+import { hapticTap } from '../capacitor';
 import { Race, RaceData } from '../../types/Race';
 import { MultiplayerManager } from '../network/MultiplayerManager';
 import { loadPvPProfile, getRankTitle } from '../../stats/PvPRating';
@@ -45,6 +46,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onGameReady, onBack }) => {
   }, []);
 
   const handleCreateGame = useCallback(async () => {
+    hapticTap();
     setError('');
     setPhase('creating');
     setStatusText('Creating room...');
@@ -90,6 +92,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onGameReady, onBack }) => {
       return;
     }
 
+    hapticTap();
     setError('');
     setPhase('joining');
     setStatusText('Connecting...');
@@ -186,7 +189,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onGameReady, onBack }) => {
 
   // Main lobby: pick race + create or join
   return (
-    <div style={styles.container}>
+    <div className="keyboard-aware" style={styles.container}>
       <div style={styles.content}>
         <h1 style={styles.title}>STARFORGE</h1>
         <p style={styles.subtitle}>Play vs Friend</p>
@@ -324,7 +327,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '20px',
     overflowY: 'auto',
     flexDirection: 'column',
-  },
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   content: {
     maxWidth: '900px',
     width: '100%',
@@ -334,6 +338,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     gap: '25px',
     paddingTop: '30px',
     paddingBottom: '40px',
+    overflowX: 'auto',
   },
   title: {
     fontSize: '56px',
@@ -432,6 +437,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#ffffff',
     cursor: 'pointer',
     boxShadow: '0 4px 15px rgba(0, 204, 102, 0.4)',
+    minHeight: '44px',
   },
   divider: {
     display: 'flex',
@@ -467,6 +473,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     letterSpacing: '4px',
     outline: 'none',
     fontFamily: 'monospace',
+    minHeight: '44px',
   },
   joinButton: {
     background: 'linear-gradient(135deg, #4488ff 0%, #3366dd 100%)',
@@ -479,6 +486,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     boxShadow: '0 4px 15px rgba(68, 136, 255, 0.3)',
     whiteSpace: 'nowrap',
+    minHeight: '44px',
   },
   codeBox: {
     display: 'flex',
@@ -542,6 +550,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#ff6666',
     fontSize: '16px',
     cursor: 'pointer',
+    minHeight: '44px',
   },
   backButton: {
     background: 'transparent',
@@ -552,5 +561,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
     cursor: 'pointer',
     marginTop: '10px',
+    minHeight: '44px',
   },
 };

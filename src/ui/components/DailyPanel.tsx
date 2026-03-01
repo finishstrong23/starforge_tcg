@@ -11,6 +11,7 @@
 import React, { useState, useCallback } from 'react';
 import type { DailyState, DailyQuest } from '../../progression/DailyQuests';
 import { claimLoginReward, claimQuestReward, loadDailyState, saveDailyState } from '../../progression/DailyQuests';
+import { hapticTap } from '../capacitor';
 
 interface DailyPanelProps {
   onClose: () => void;
@@ -22,6 +23,7 @@ export const DailyPanel: React.FC<DailyPanelProps> = ({ onClose }) => {
 
   const handleClaimLogin = useCallback(() => {
     if (state.loginRewardClaimed) return;
+    hapticTap();
     setClaimAnim('login');
     const updated = claimLoginReward(state);
     saveDailyState(updated);
@@ -32,6 +34,7 @@ export const DailyPanel: React.FC<DailyPanelProps> = ({ onClose }) => {
   }, [state]);
 
   const handleClaimQuest = useCallback((questId: string) => {
+    hapticTap();
     setClaimAnim(questId);
     const updated = claimQuestReward(state, questId);
     saveDailyState(updated);
@@ -182,12 +185,13 @@ const styles: Record<string, React.CSSProperties> = {
     backdropFilter: 'blur(4px)',
   },
   panel: {
-    width: '380px', maxHeight: '90vh', overflow: 'auto',
+    width: '380px', maxWidth: '92vw', maxHeight: '90vh', overflow: 'auto',
+    WebkitOverflowScrolling: 'touch',
     background: 'linear-gradient(135deg, #12122e 0%, #0a0a1e 100%)',
     border: '2px solid #333366', borderRadius: '16px',
-    padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px',
+    padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px',
     boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-  },
+  } as React.CSSProperties,
   header: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
   },

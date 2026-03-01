@@ -9,6 +9,7 @@ import React, { useState, useEffect } from 'react';
 import { Race, RaceData } from '../../types/Race';
 import { PLANET_ENCOUNTERS } from '../../campaign/CampaignData';
 import type { PlanetStats } from '../../campaign/CampaignState';
+import { hapticTap } from '../capacitor';
 import backgroundImg from '../../assets/background.png';
 
 interface PreBattleProps {
@@ -146,7 +147,7 @@ export const PreBattle: React.FC<PreBattleProps> = ({
               opacity: ready ? 1 : 0.5,
               transform: ready ? 'scale(1)' : 'scale(0.95)',
             }}
-            onClick={onFight}
+            onClick={() => { hapticTap(); onFight(); }}
             disabled={!ready}
           >
             ENGAGE
@@ -163,11 +164,12 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100%',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     padding: '20px',
     overflowY: 'auto',
+    WebkitOverflowScrolling: 'touch',
     background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
-  },
+  } as React.CSSProperties,
   content: {
     maxWidth: '700px',
     width: '100%',
@@ -293,13 +295,14 @@ const styles: Record<string, React.CSSProperties> = {
   fightButton: {
     border: 'none',
     borderRadius: '12px',
-    padding: '18px 80px',
-    fontSize: '24px',
+    padding: '18px 60px',
+    fontSize: '22px',
     fontWeight: 'bold',
     color: '#000000',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     letterSpacing: '4px',
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+    minHeight: '56px',
   },
 };

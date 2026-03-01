@@ -15,6 +15,7 @@ import { Race, RaceData } from '../../types/Race';
 import { PLANET_ENCOUNTERS } from '../../campaign/CampaignData';
 import type { PlanetStats, BattleReward } from '../../campaign/CampaignState';
 import { SoundManager } from '../../audio';
+import { hapticTap, hapticHeavy } from '../capacitor';
 import backgroundImg from '../../assets/background.png';
 
 interface PostBattleProps {
@@ -282,11 +283,12 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100%',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     padding: '20px',
     overflowY: 'auto',
+    WebkitOverflowScrolling: 'touch',
     background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
-  },
+  } as React.CSSProperties,
   content: {
     maxWidth: '650px',
     width: '100%',

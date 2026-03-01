@@ -17,6 +17,7 @@ import {
   saveAchievements,
 } from '../../progression/Achievements';
 import { loadDailyState, addGold, saveDailyState } from '../../progression/DailyQuests';
+import { hapticTap } from '../capacitor';
 
 interface AchievementsScreenProps {
   onBack: () => void;
@@ -38,6 +39,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ onBack }
   const grouped = getAchievementsByCategory(state);
 
   const handleClaim = useCallback((achievementId: string) => {
+    hapticTap();
     const { state: newState, goldReward } = claimAchievementReward(state, achievementId);
     saveAchievements(newState);
     setState(newState);
@@ -194,8 +196,9 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%', height: '100%', display: 'flex',
     flexDirection: 'column', alignItems: 'center',
     background: 'linear-gradient(135deg, #060612 0%, #0c0c22 100%)',
-    overflow: 'auto', padding: '20px',
-  },
+    overflow: 'auto', padding: '16px',
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   header: {
     width: '100%', maxWidth: '700px', display: 'flex',
     justifyContent: 'space-between', alignItems: 'center',
@@ -230,9 +233,9 @@ const styles: Record<string, React.CSSProperties> = {
   tab: {
     flex: 1, padding: '10px', border: 'none',
     borderBottom: '3px solid', borderRadius: '8px 8px 0 0',
-    background: 'transparent', fontSize: '14px',
-    fontWeight: 'bold', cursor: 'pointer',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+    background: 'transparent', fontSize: '13px',
+    fontWeight: 'bold', cursor: 'pointer', minHeight: '44px',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
   },
   unclaimedBadge: {
     background: '#ff4444', color: '#fff', fontSize: '10px',

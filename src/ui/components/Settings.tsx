@@ -8,6 +8,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { SoundManager } from '../../audio/SoundManager';
+import { hapticTap } from '../capacitor';
 import backgroundImg from '../../assets/background.png';
 
 const SETTINGS_KEY = 'starforge_settings';
@@ -71,6 +72,7 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
   }, []);
 
   const updateSetting = useCallback(<K extends keyof GameSettings>(key: K, value: GameSettings[K]) => {
+    hapticTap();
     setSettings(prev => {
       const next = { ...prev, [key]: value };
       saveSettings(next);
@@ -252,8 +254,9 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'flex-start',
     padding: '40px 20px',
     overflowY: 'auto',
+    WebkitOverflowScrolling: 'touch',
     background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
-  },
+  } as React.CSSProperties,
   content: {
     maxWidth: '600px',
     width: '100%',
@@ -293,13 +296,14 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: '16px',
-  },
+    gap: '12px',
+    flexWrap: 'wrap',
+  } as React.CSSProperties,
   label: {
     fontSize: '15px',
     color: '#ccccdd',
     fontWeight: 'bold',
-    minWidth: '140px',
+    minWidth: '100px',
   },
   toggleButton: {
     padding: '6px 20px',
@@ -320,9 +324,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
   slider: {
     flex: 1,
-    height: '6px',
+    height: '8px',
     cursor: 'pointer',
     accentColor: '#00ff88',
+    minHeight: '44px',
   },
   sliderValue: {
     fontSize: '13px',

@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { hapticTap } from '../capacitor';
 import { Race, RaceData } from '../../types/Race';
 import {
   type TournamentTier,
@@ -43,6 +44,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ onBack, onSt
     const config = TOURNAMENT_CONFIGS[selectedTier];
     if (gold < config.entryFee) return;
 
+    hapticTap();
     const result = startTournament(selectedTier, selectedRace, gold);
     if (result) {
       const currentDaily = loadDailyState();
@@ -61,6 +63,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ onBack, onSt
     const opponent = getCurrentOpponent(state.activeRun);
     if (!opponent) return;
 
+    hapticTap();
     const config = TOURNAMENT_CONFIGS[state.activeRun.tier];
     const difficulty = config.difficulties[Math.min(state.activeRun.currentRound, 2)];
     onStartMatch(opponent.race, difficulty);
@@ -292,10 +295,12 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%', height: '100%', overflowY: 'auto', padding: '20px',
     background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)',
     display: 'flex', justifyContent: 'center',
-  },
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   content: {
     maxWidth: '1000px', width: '100%', display: 'flex', flexDirection: 'column',
     alignItems: 'center', gap: '24px', paddingTop: '20px', paddingBottom: '40px',
+    overflowX: 'auto',
   },
   header: { textAlign: 'center' },
   title: {
@@ -332,12 +337,14 @@ const styles: Record<string, React.CSSProperties> = {
   raceButton: {
     background: '#1a1a2e', border: '2px solid #333355', borderRadius: '8px',
     padding: '8px 16px', color: '#fff', cursor: 'pointer', fontSize: '13px',
+    minHeight: '44px',
   },
   enterButton: {
     background: 'linear-gradient(135deg, #ffcc00 0%, #ff8800 100%)',
     border: 'none', borderRadius: '12px', padding: '16px 48px',
     fontSize: '20px', fontWeight: 'bold', color: '#000', cursor: 'pointer',
     boxShadow: '0 4px 20px rgba(255,204,0,0.4)',
+    minHeight: '44px',
   },
   historyToggle: {
     background: 'transparent', border: '1px solid #555', borderRadius: '8px',
@@ -357,12 +364,14 @@ const styles: Record<string, React.CSSProperties> = {
   backButton: {
     background: '#333', border: 'none', borderRadius: '8px',
     padding: '10px 30px', color: '#fff', cursor: 'pointer', fontSize: '14px',
+    minHeight: '44px',
   },
   // Bracket styles
   bracketContainer: {
     display: 'flex', gap: '32px', justifyContent: 'center', alignItems: 'center',
     width: '100%', overflowX: 'auto', padding: '16px 0',
-  },
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   bracketRound: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' },
   roundLabel: { color: '#888', fontSize: '12px', fontWeight: 'bold', letterSpacing: '1px' },
   bracketMatchColumn: {
@@ -390,6 +399,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: 'none', borderRadius: '12px', padding: '14px 48px',
     fontSize: '20px', fontWeight: 'bold', color: '#fff', cursor: 'pointer',
     marginTop: '20px', boxShadow: '0 4px 20px rgba(255,0,0,0.4)',
+    minHeight: '44px',
   },
   buttonRow: { display: 'flex', gap: '12px' },
   forfeitButton: {

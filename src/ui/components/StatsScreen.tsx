@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { hapticTap } from '../capacitor';
 import { Race, RaceData } from '../../types/Race';
 import { loadStats, resetStats } from '../../stats/GameStats';
 import type { GlobalStats } from '../../stats/GameStats';
@@ -107,7 +108,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({ onBack }) => {
             </div>
 
             {/* Stats grid */}
-            <div style={styles.statsGrid}>
+            <div className="stat-grid" style={styles.statsGrid}>
               <StatCard label="Games Played" value={stats.totalGames} />
               <StatCard label="Wins" value={stats.totalWins} color="#00ff88" />
               <StatCard label="Losses" value={stats.totalLosses} color="#ff4444" />
@@ -321,13 +322,15 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '40px 20px',
     overflowY: 'auto',
     background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
-  },
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   content: {
     maxWidth: '700px',
     width: '100%',
     display: 'flex',
     flexDirection: 'column',
     gap: '20px',
+    overflowX: 'auto',
   },
   title: {
     fontSize: '36px',
@@ -356,6 +359,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 'bold',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
+    minHeight: '44px',
   },
   tabActive: {
     background: '#222255',
@@ -551,6 +555,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '14px',
     fontWeight: 'bold',
     cursor: 'pointer',
+    minHeight: '44px',
   },
   backButton: {
     background: 'linear-gradient(135deg, #00cc66 0%, #00aa55 100%)',
@@ -562,5 +567,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 'bold',
     cursor: 'pointer',
     boxShadow: '0 4px 15px rgba(0, 204, 102, 0.3)',
+    minHeight: '44px',
   },
 };

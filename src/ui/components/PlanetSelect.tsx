@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { Race, RaceData } from '../../types/Race';
 import { STARTER_PLANETS, STARTER_DESCRIPTIONS, PLANET_ENCOUNTERS } from '../../campaign/CampaignData';
+import { hapticTap, hapticImpact } from '../capacitor';
 import backgroundImg from '../../assets/background.png';
 import logoImg from '../../assets/logo.png';
 
@@ -22,6 +23,7 @@ export const PlanetSelect: React.FC<PlanetSelectProps> = ({ onSelect }) => {
 
   const handleConfirm = () => {
     if (!selectedRace) return;
+    hapticImpact();
     setConfirmed(true);
     setTimeout(() => onSelect(selectedRace), 600);
   };
@@ -70,9 +72,11 @@ export const PlanetSelect: React.FC<PlanetSelectProps> = ({ onSelect }) => {
                   transform: isSelected ? 'scale(1.02)' : 'scale(1)',
                   opacity: confirmed && !isSelected ? 0.3 : 1,
                 }}
-                onClick={() => setSelectedRace(race)}
+                onClick={() => { hapticTap(); setSelectedRace(race); }}
                 onMouseEnter={() => setHoveredRace(race)}
                 onMouseLeave={() => setHoveredRace(null)}
+                onTouchStart={() => setHoveredRace(race)}
+                onTouchEnd={() => setHoveredRace(null)}
               >
                 {/* Planet icon & name */}
                 <div style={styles.planetHeader}>
@@ -144,11 +148,12 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100%',
     display: 'flex',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     padding: '20px',
     overflowY: 'auto',
+    WebkitOverflowScrolling: 'touch',
     background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
-  },
+  } as React.CSSProperties,
   content: {
     maxWidth: '900px',
     width: '100%',

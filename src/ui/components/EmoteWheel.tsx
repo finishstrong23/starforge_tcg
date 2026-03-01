@@ -10,6 +10,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { SoundManager } from '../../audio';
+import { hapticTap } from '../capacitor';
 
 export interface Emote {
   id: string;
@@ -89,6 +90,7 @@ export const EmoteWheel: React.FC<EmoteWheelProps> = ({ onEmote }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSelect = useCallback((emote: Emote) => {
+    hapticTap();
     onEmote(emote);
     setIsOpen(false);
     SoundManager.play('emote' as any);

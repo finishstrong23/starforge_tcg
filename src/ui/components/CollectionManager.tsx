@@ -16,6 +16,7 @@ import type { CardDefinition } from '../../types/Card';
 import { ALL_SAMPLE_CARDS, getCollectibleSampleCards } from '../../data/SampleCards';
 import { ALL_EXPANSION_CARDS } from '../../data/ExpansionCards';
 import { CardArt } from './CardArt';
+import { hapticTap } from '../capacitor';
 
 interface CollectionManagerProps {
   onBack: () => void;
@@ -276,23 +277,26 @@ const styles: Record<string, React.CSSProperties> = {
   },
   searchInput: {
     background: '#12122e', border: '1px solid #333355',
-    borderRadius: '8px', padding: '8px 14px', color: '#ffffff',
+    borderRadius: '8px', padding: '10px 14px', color: '#ffffff',
     fontSize: '14px', outline: 'none', width: '100%',
+    minHeight: '44px',
   },
   filterRow: {
     display: 'flex', gap: '4px', flexWrap: 'wrap',
-  },
+    overflowX: 'auto', WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   filterBtn: {
     background: '#12122e', border: '1px solid #222244',
-    borderRadius: '6px', padding: '4px 10px', color: '#888899',
+    borderRadius: '6px', padding: '6px 10px', color: '#888899',
     fontSize: '11px', cursor: 'pointer', whiteSpace: 'nowrap',
+    minHeight: '36px',
   },
   filterBtnActive: {
     borderColor: '#00ccff', color: '#00ccff',
     background: 'rgba(0,204,255,0.08)',
   },
   costBtn: {
-    width: '30px', height: '28px', borderRadius: '6px',
+    width: '36px', height: '36px', borderRadius: '6px',
     background: '#12122e', border: '1px solid #222244',
     color: '#888899', fontSize: '13px', fontWeight: 'bold',
     cursor: 'pointer', display: 'flex',
@@ -306,9 +310,10 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '0 20px 8px', fontSize: '12px', color: '#666688', flexShrink: 0,
   },
   cardGrid: {
-    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+    display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
     gap: '8px', padding: '0 20px 20px', overflowY: 'auto', flex: 1,
-  },
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   cardItem: {
     background: 'rgba(255,255,255,0.02)', border: '1px solid #1a1a33',
     borderRadius: '8px', padding: '8px', cursor: 'pointer',
@@ -345,9 +350,10 @@ const styles: Record<string, React.CSSProperties> = {
     backdropFilter: 'blur(4px)',
   },
   detailCard: {
-    width: '280px', background: 'linear-gradient(135deg, #12122e, #0a0a1e)',
+    width: '280px', maxWidth: '90vw', background: 'linear-gradient(135deg, #12122e, #0a0a1e)',
     border: '2px solid #c89b3c', borderRadius: '16px', padding: '20px',
     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
+    maxHeight: '85vh', overflowY: 'auto',
   },
   detailName: {
     fontSize: '18px', fontWeight: 'bold', color: '#ffffff', textAlign: 'center',

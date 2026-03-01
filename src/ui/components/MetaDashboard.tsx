@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { hapticTap } from '../capacitor';
 import { Race, RaceData } from '../../types/Race';
 import { loadStats, type GlobalStats, type RaceRecord } from '../../stats/GameStats';
 import { loadPvPProfile, getRankTitle, type PvPProfile, type PvPMatch } from '../../stats/PvPRating';
@@ -423,10 +424,12 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%', height: '100%', overflowY: 'auto', padding: '20px',
     background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)',
     display: 'flex', justifyContent: 'center',
-  },
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   content: {
     maxWidth: '1000px', width: '100%', display: 'flex', flexDirection: 'column',
     alignItems: 'center', gap: '20px', paddingTop: '20px', paddingBottom: '40px',
+    overflowX: 'auto',
   },
   header: { textAlign: 'center' },
   title: {
@@ -438,15 +441,20 @@ const styles: Record<string, React.CSSProperties> = {
   tabBtn: {
     border: '1px solid #333', borderRadius: '8px', padding: '8px 18px',
     cursor: 'pointer', fontSize: '13px', fontWeight: 'bold',
+    minHeight: '44px',
   },
   backButton: {
     background: '#333', border: 'none', borderRadius: '8px',
     padding: '10px 30px', color: '#fff', cursor: 'pointer', fontSize: '14px',
+    minHeight: '44px',
   },
   emptyText: { color: '#666', textAlign: 'center', padding: '30px' },
 
   // Matrix
-  matrixContainer: { width: '100%', overflowX: 'auto' },
+  matrixContainer: {
+    width: '100%', overflowX: 'auto',
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   matrixNote: { color: '#888', fontSize: '12px', textAlign: 'center', marginBottom: '12px' },
   matrix: { display: 'flex', flexDirection: 'column', gap: '1px', minWidth: '600px' },
   matrixRow: { display: 'flex', gap: '1px' },
@@ -476,8 +484,9 @@ const styles: Record<string, React.CSSProperties> = {
   // Race Breakdown
   raceList: {
     width: '100%', background: '#0d0d1a', borderRadius: '12px',
-    border: '1px solid #222', overflow: 'hidden',
-  },
+    border: '1px solid #222', overflowX: 'auto',
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   raceListHeader: {
     display: 'flex', padding: '10px 16px', background: '#151528',
     color: '#666', fontSize: '12px', fontWeight: 'bold',

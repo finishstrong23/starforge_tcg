@@ -11,6 +11,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import type { CardInstance } from '../../types/Card';
 import { CardArt } from './CardArt';
 import { globalCardDatabase } from '../../cards/CardDatabase';
+import { hapticTap, hapticImpact } from '../capacitor';
 import type { Race } from '../../types/Race';
 
 interface MulliganOverlayProps {
@@ -41,6 +42,7 @@ export const MulliganOverlay: React.FC<MulliganOverlayProps> = ({
 
   const toggleCard = useCallback((index: number) => {
     if (confirmed) return;
+    hapticTap();
     setSelected(prev => {
       const next = new Set(prev);
       if (next.has(index)) {
@@ -54,6 +56,7 @@ export const MulliganOverlay: React.FC<MulliganOverlayProps> = ({
 
   const handleConfirm = useCallback(() => {
     if (confirmed) return;
+    hapticImpact();
     setConfirmed(true);
     // Indices NOT in selected set are kept
     const keepIndices: number[] = [];
@@ -79,9 +82,9 @@ export const MulliganOverlay: React.FC<MulliganOverlayProps> = ({
       `}</style>
 
       <div style={styles.content}>
-        <h2 style={styles.title}>Choose Your Starting Hand</h2>
+        <h2 className="mulligan-title" style={styles.title}>Choose Your Starting Hand</h2>
         <p style={styles.subtitle}>
-          Click cards to replace them. Keep the rest.
+          Tap cards to replace them. Keep the rest.
         </p>
 
         {/* Timer */}
@@ -100,6 +103,7 @@ export const MulliganOverlay: React.FC<MulliganOverlayProps> = ({
             return (
               <div
                 key={card.instanceId}
+                className="mulligan-card"
                 style={{
                   ...styles.mulliganCard,
                   animation: `mulligan-card-enter 0.4s ease-out ${i * 0.1}s both`,

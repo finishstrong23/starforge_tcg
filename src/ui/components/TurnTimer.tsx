@@ -69,9 +69,9 @@ export const TurnTimer: React.FC<TurnTimerProps> = ({
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.timerBox}>
-        <div style={styles.timeText}>
+    <div className="turn-timer" style={styles.container}>
+      <div className="timer-box" style={styles.timerBox}>
+        <div className="time-text" style={styles.timeText}>
           <span style={{ color }}>{isPlayerTurn ? timeLeft : '--'}</span>
         </div>
         <div style={styles.progressBar}>

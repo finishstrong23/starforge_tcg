@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { hapticTap } from '../capacitor';
 import { RaceData } from '../../types/Race';
 import {
   type GameReplay,
@@ -53,6 +54,7 @@ export const ReplayViewer: React.FC<ReplayViewerProps> = ({ onBack }) => {
   // Playback controls
   const startPlayback = useCallback(() => {
     if (!selectedReplay) return;
+    hapticTap();
     setIsPlaying(true);
   }, [selectedReplay]);
 
@@ -322,10 +324,12 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%', height: '100%', overflowY: 'auto', padding: '20px',
     background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)',
     display: 'flex', justifyContent: 'center',
-  },
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   content: {
     maxWidth: '900px', width: '100%', display: 'flex', flexDirection: 'column',
     alignItems: 'center', gap: '20px', paddingTop: '20px', paddingBottom: '40px',
+    overflowX: 'auto',
   },
   header: { textAlign: 'center' },
   title: {
@@ -344,7 +348,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   filterBtn: {
     border: '1px solid #333', borderRadius: '6px', padding: '6px 14px',
-    cursor: 'pointer', fontSize: '13px',
+    cursor: 'pointer', fontSize: '13px', minHeight: '44px',
   },
   replayList: {
     width: '100%', display: 'flex', flexDirection: 'column', gap: '8px',
@@ -366,6 +370,7 @@ const styles: Record<string, React.CSSProperties> = {
   backButton: {
     background: '#333', border: 'none', borderRadius: '8px',
     padding: '10px 30px', color: '#fff', cursor: 'pointer', fontSize: '14px',
+    minHeight: '44px',
   },
   // Playback
   controlBar: {
@@ -374,7 +379,7 @@ const styles: Record<string, React.CSSProperties> = {
   controlBtn: {
     background: '#1a1a2e', border: '1px solid #444', borderRadius: '6px',
     padding: '8px 14px', color: '#fff', cursor: 'pointer', fontSize: '16px',
-    minWidth: '40px',
+    minWidth: '40px', minHeight: '44px',
   },
   speedControl: { display: 'flex', gap: '4px', marginLeft: '16px' },
   speedBtn: {
@@ -397,7 +402,8 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%', maxHeight: '300px', overflowY: 'auto',
     background: '#0a0a14', borderRadius: '10px', border: '1px solid #222',
     padding: '8px 0',
-  },
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   summaryRow: { display: 'flex', gap: '24px' },
   summaryCard: {
     background: '#1a1a2e', borderRadius: '10px', padding: '16px 24px',

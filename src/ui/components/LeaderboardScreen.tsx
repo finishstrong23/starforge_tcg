@@ -7,6 +7,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { hapticTap } from '../capacitor';
 import { Race, RaceData } from '../../types/Race';
 import { loadPvPProfile, getRankTitle, getSeasonInfo, type PvPProfile, type SeasonArchive } from '../../stats/PvPRating';
 import { loadStats, type GlobalStats } from '../../stats/GameStats';
@@ -165,40 +166,42 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ onBack }) 
 // ── Sub Components ──
 
 const LeaderboardTable: React.FC<{ entries: LeaderboardEntry[] }> = ({ entries }) => (
-  <div style={styles.table}>
-    <div style={styles.tableHeader}>
-      <span style={{ width: '50px' }}>#</span>
-      <span style={{ flex: 1 }}>Player</span>
-      <span style={{ width: '80px' }}>Race</span>
-      <span style={{ width: '70px' }}>Rating</span>
-      <span style={{ width: '80px' }}>W/L</span>
+  <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' } as React.CSSProperties}>
+    <div style={styles.table}>
+      <div style={styles.tableHeader}>
+        <span style={{ width: '50px' }}>#</span>
+        <span style={{ flex: 1 }}>Player</span>
+        <span style={{ width: '80px' }}>Race</span>
+        <span style={{ width: '70px' }}>Rating</span>
+        <span style={{ width: '80px' }}>W/L</span>
+      </div>
+      {entries.slice(0, 25).map(entry => {
+        const rank = getRankTitle(entry.rating);
+        return (
+          <div key={entry.rank} style={{
+            ...styles.tableRow,
+            background: entry.isPlayer ? 'rgba(0,255,136,0.1)' : 'transparent',
+            borderLeft: entry.isPlayer ? '3px solid #00ff88' : '3px solid transparent',
+          }}>
+            <span style={{ width: '50px', color: entry.rank <= 3 ? '#ffcc00' : '#888', fontWeight: entry.rank <= 3 ? 'bold' : 'normal' }}>
+              {entry.rank <= 3 ? ['', '\u2605', '\u2606', '\u2727'][entry.rank] : entry.rank}
+            </span>
+            <span style={{ flex: 1, color: entry.isPlayer ? '#00ff88' : '#fff', fontWeight: entry.isPlayer ? 'bold' : 'normal' }}>
+              {entry.name}
+            </span>
+            <span style={{ width: '80px', color: '#aaa', fontSize: '12px' }}>
+              {RaceData[entry.race].name.slice(0, 8)}
+            </span>
+            <span style={{ width: '70px', color: rank.color, fontWeight: 'bold' }}>
+              {entry.rating}
+            </span>
+            <span style={{ width: '80px', color: '#888', fontSize: '13px' }}>
+              {entry.wins}/{entry.losses}
+            </span>
+          </div>
+        );
+      })}
     </div>
-    {entries.slice(0, 25).map(entry => {
-      const rank = getRankTitle(entry.rating);
-      return (
-        <div key={entry.rank} style={{
-          ...styles.tableRow,
-          background: entry.isPlayer ? 'rgba(0,255,136,0.1)' : 'transparent',
-          borderLeft: entry.isPlayer ? '3px solid #00ff88' : '3px solid transparent',
-        }}>
-          <span style={{ width: '50px', color: entry.rank <= 3 ? '#ffcc00' : '#888', fontWeight: entry.rank <= 3 ? 'bold' : 'normal' }}>
-            {entry.rank <= 3 ? ['', '\u2605', '\u2606', '\u2727'][entry.rank] : entry.rank}
-          </span>
-          <span style={{ flex: 1, color: entry.isPlayer ? '#00ff88' : '#fff', fontWeight: entry.isPlayer ? 'bold' : 'normal' }}>
-            {entry.name}
-          </span>
-          <span style={{ width: '80px', color: '#aaa', fontSize: '12px' }}>
-            {RaceData[entry.race].name.slice(0, 8)}
-          </span>
-          <span style={{ width: '70px', color: rank.color, fontWeight: 'bold' }}>
-            {entry.rating}
-          </span>
-          <span style={{ width: '80px', color: '#888', fontSize: '13px' }}>
-            {entry.wins}/{entry.losses}
-          </span>
-        </div>
-      );
-    })}
   </div>
 );
 
@@ -298,10 +301,12 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%', height: '100%', overflowY: 'auto', padding: '20px',
     background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)',
     display: 'flex', justifyContent: 'center',
-  },
+    WebkitOverflowScrolling: 'touch',
+  } as React.CSSProperties,
   content: {
     maxWidth: '900px', width: '100%', display: 'flex', flexDirection: 'column',
     alignItems: 'center', gap: '20px', paddingTop: '20px', paddingBottom: '40px',
+    overflowX: 'auto',
   },
   header: { textAlign: 'center' },
   title: {
@@ -326,6 +331,7 @@ const styles: Record<string, React.CSSProperties> = {
   tabBtn: {
     border: '1px solid #333', borderRadius: '8px', padding: '8px 20px',
     cursor: 'pointer', fontSize: '14px', fontWeight: 'bold',
+    minHeight: '44px',
   },
   table: {
     width: '100%', background: '#0d0d1a', borderRadius: '12px',
@@ -374,5 +380,6 @@ const styles: Record<string, React.CSSProperties> = {
   backButton: {
     background: '#333', border: 'none', borderRadius: '8px',
     padding: '10px 30px', color: '#fff', cursor: 'pointer', fontSize: '14px',
+    minHeight: '44px',
   },
 };

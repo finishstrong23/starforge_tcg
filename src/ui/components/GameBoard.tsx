@@ -198,7 +198,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     : null;
 
   return (
-    <div style={styles.container}>
+    <div className="game-board" style={styles.container}>
       {/* Animated starfield background */}
       <BoardBackground />
 

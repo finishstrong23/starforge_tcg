@@ -58,7 +58,7 @@ export const CombatLog: React.FC<CombatLogProps> = ({ entries }) => {
   const visibleEntries = entries.slice(-30);
 
   return (
-    <div style={styles.container}>
+    <div className="combat-log" style={styles.container}>
       {/* Header / Toggle */}
       <div
         style={styles.header}
@@ -72,7 +72,7 @@ export const CombatLog: React.FC<CombatLogProps> = ({ entries }) => {
 
       {/* Log entries */}
       {isExpanded && (
-        <div style={styles.logBody} ref={scrollRef}>
+        <div className="log-body" style={styles.logBody} ref={scrollRef}>
           {visibleEntries.length === 0 ? (
             <div style={styles.emptyLog}>No actions yet...</div>
           ) : (
@@ -85,7 +85,7 @@ export const CombatLog: React.FC<CombatLogProps> = ({ entries }) => {
                 }}
               >
                 <span style={styles.entryIcon}>{TYPE_ICONS[entry.type]}</span>
-                <span style={{
+                <span className="entry-text" style={{
                   ...styles.entryText,
                   color: entry.type === 'turn' ? '#888899' : '#ccccdd',
                 }}>
