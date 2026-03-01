@@ -22,16 +22,16 @@ This roadmap transforms StarForge from a working prototype into a polished, comp
 - **Visual polish** — card art, VFX, attack animations, hero intros
 
 ### What's Missing (Critical Gaps)
-- **No backend server** — everything is client-side, trivially cheatable
-- **No accounts/auth** — no persistent identity or cross-device progress
-- **No matchmaking** — PvP is "share a room code" only
-- **No real economy** — packs/crafting/currency are local-only
-- **No anti-cheat** — P2P networking means clients can fabricate game state
-- **No analytics** — no data on player behavior, balance, retention
+- ~~**No backend server**~~ **DONE** — Express server with auth, WebSocket game server, matchmaking
+- ~~**No accounts/auth**~~ **DONE** — JWT auth with registration, login, refresh tokens, player profiles
+- ~~**No matchmaking**~~ **DONE** — MMR-based matchmaking service with expanding range
+- **No real economy** — packs/crafting/currency are local-only (payment processing needed)
+- ~~**No anti-cheat**~~ **DONE** — Server-authoritative WebSocket game server validates actions
+- ~~**No analytics**~~ **DONE** — Client SDK + server ingestion + balance/retention dashboards
 - **No monetization infrastructure** — no payment processing, no storefront
 - **No content pipeline** — card data lives in a TypeScript file, no CMS
 - **Limited testing** — engine tests exist, but no E2E, no load testing
-- **No CI/CD** — no automated build/test/deploy pipeline
+- ~~**No CI/CD**~~ **DONE** — GitHub Actions pipeline for lint, test, build
 
 ---
 
@@ -39,22 +39,23 @@ This roadmap transforms StarForge from a working prototype into a polished, comp
 *"You can't compete without infrastructure."*
 
 ### 0.1 Backend & Auth
-- [ ] Set up backend service (Node.js/Express or edge functions via Supabase/Firebase)
-- [ ] User authentication (email/password + OAuth: Google, Apple, Discord)
-- [ ] Player profiles with persistent state (collection, decks, rank, currency)
-- [ ] Server-side game state validation (prevent client-side cheating)
-- [ ] Database schema design (PostgreSQL or Firestore)
+- [x] Set up backend service (Node.js/Express with TypeScript)
+- [x] User authentication (email/password with JWT + refresh tokens)
+- [x] Player profiles with persistent state (collection, decks, rank, currency)
+- [x] Server-side game state validation (WebSocket game server)
+- [x] Database schema design (PostgreSQL with migrations)
+- [ ] OAuth providers (Google, Apple, Discord)
 
 ### 0.2 CI/CD & DevOps
-- [ ] GitHub Actions pipeline: lint, test, build on every PR
+- [x] GitHub Actions pipeline: lint, test, build on every PR
 - [ ] Automated deployment (Vercel/Netlify for web, Fastlane for mobile)
 - [ ] Environment management (dev, staging, production)
 - [ ] Error tracking (Sentry) and logging
 
 ### 0.3 Analytics Foundation
-- [ ] Event tracking SDK integration (Mixpanel, Amplitude, or PostHog)
-- [ ] Core funnel metrics: install > tutorial > first game > day-1 retention > day-7 retention
-- [ ] Game balance telemetry: win rates by faction, card play rates, game length distribution
+- [x] Event tracking SDK (custom client-side with batch upload)
+- [x] Core funnel metrics: screen views, tutorial completion, game starts
+- [x] Game balance telemetry: win rates by faction, card play rates, game length distribution
 - [ ] A/B testing framework for tuning rewards and progression
 
 ---

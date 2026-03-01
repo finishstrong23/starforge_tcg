@@ -16,11 +16,13 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import backgroundImg from '../../assets/background.png';
+import { KeywordGlossary } from './KeywordGlossary';
 
 interface TutorialStep {
   title: string;
   text: string;
   highlight?: 'hand' | 'board' | 'hero' | 'mana' | 'endturn' | 'none';
+  tip?: string;
 }
 
 const TUTORIAL_STEPS: TutorialStep[] = [
@@ -28,51 +30,73 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     title: 'Welcome to Starforge TCG!',
     text: 'You are a commander leading one of 10 galactic races in card combat. Let\'s learn the basics!',
     highlight: 'none',
+    tip: 'This tutorial takes about 3 minutes. You can skip at any time.',
   },
   {
     title: 'Mana Crystals',
     text: 'Each turn you gain a mana crystal (up to 10). Cards cost mana to play — shown by the blue number in the top-left of each card. You start with 1 crystal on turn 1, 2 on turn 2, and so on.',
     highlight: 'mana',
+    tip: 'Plan ahead! Save cheap cards for early turns and expensive ones for later.',
   },
   {
     title: 'Playing Cards',
     text: 'Click a card in your hand that has a green glow to play it. Minions go onto the battlefield. Spells take effect immediately. You can play as many cards as your mana allows each turn.',
     highlight: 'hand',
+    tip: 'Cards with a green glow are playable. Grey means you can\'t afford them yet.',
   },
   {
     title: 'Attacking',
     text: 'Minions you play can\'t attack the turn they arrive (they need a turn to "wake up"), unless they have SWIFT or BLITZ. When ready, click your minion (orange glow), then click an enemy to attack.',
     highlight: 'board',
+    tip: 'Orange glow = ready to attack. No glow = sleeping or already attacked.',
   },
   {
     title: 'Combat',
     text: 'When minions fight, they deal their Attack to each other simultaneously. If a minion\'s Health reaches 0, it\'s destroyed. You can also attack the enemy Hero directly!',
     highlight: 'board',
+    tip: 'Trade efficiently! A 3/2 can kill a 2/3, but both die if they fight.',
   },
   {
     title: 'Keywords',
     text: 'Cards can have special abilities:\n• GUARDIAN — enemies must attack this first\n• BARRIER — blocks the first hit\n• SWIFT — can attack immediately\n• DRAIN — heals your hero for damage dealt\n• LETHAL — destroys any minion it damages\n• DEPLOY — triggers an effect when played\n\nHover over cards to see keyword details!',
     highlight: 'none',
+    tip: 'StarForge has 21 keywords! Open the Glossary anytime for a full reference.',
+  },
+  {
+    title: 'Advanced Keywords',
+    text: 'StarForge has 11 original keywords not found in other card games:\n• PHASE — immune to spells and hero powers\n• IMMOLATE — deals AoE damage on death\n• SALVAGE — draws a card on death\n• ADAPT — choose 1 of 3 random bonuses\n• RESONATE — triggers when you cast spells\n• SWARM — grows with your board presence',
+    highlight: 'none',
+    tip: 'Each race specializes in certain keywords. Experiment to find combos!',
   },
   {
     title: 'Hero Power',
     text: 'Your hero has a unique ability that costs 2 mana. Click your hero portrait to use it. Each race has a different hero power — experiment to find your favorite!',
     highlight: 'hero',
+    tip: 'Use your hero power every turn if you have spare mana!',
   },
   {
     title: 'Ending Your Turn',
-    text: 'When you\'re done playing cards and attacking, click "End Turn". Your opponent will then take their turn. You have 30 seconds per turn.',
+    text: 'When you\'re done playing cards and attacking, click "End Turn". Your opponent will then take their turn. You have 75 seconds per turn in ranked mode.',
     highlight: 'endturn',
+    tip: 'Don\'t rush! Think about your plays before ending your turn.',
   },
   {
     title: 'Starforge Ascension',
     text: 'Legendary minions on your board can be STARFORGED when their condition is met. This doubles their stats, grants BARRIER, a bonus keyword, and BLITZ — but costs ALL your current mana and your next turn\'s mana too. Use it wisely for a game-winning play!',
     highlight: 'none',
+    tip: 'Starforging is the ultimate power play. Time it for maximum impact!',
   },
   {
-    title: 'Winning the Game',
-    text: 'Reduce the enemy Hero\'s Health to 0 to win! Each hero starts with 30 health. Build your strategy around your race\'s strengths — aggressive, control, combo, or midrange. Good luck, Commander!',
+    title: 'The 10 Galactic Races',
+    text: 'Each race plays differently:\n• Pyroclast — aggressive burn damage\n• Verdani — healing and growth\n• Mechara — token swarms\n• Voidborn — control and disruption\n• Celestari — spells and combos\n• Nethari — stealth and assassins\n• Draconid — big dragons\n• Hivemind — death triggers and bombs\n• Crystari — shields and defense\n• Aetherian — tempo and adaptation',
+    highlight: 'none',
+    tip: 'Try all 10 races to find your playstyle!',
+  },
+  {
+    title: 'Ready for Battle!',
+    text: 'You know the basics! Start with a practice game against an Easy AI, then try Ranked when you\'re ready.\n\nRemember:\n• Complete daily quests for gold rewards\n• Open card packs to build your collection\n• Craft specific cards with Stardust\n• Climb the ranked ladder to Legend!',
     highlight: 'hero',
+    tip: 'Your first 3 days give extra free cards. Play daily to maximize rewards!',
   },
 ];
 
@@ -84,6 +108,7 @@ interface TutorialProps {
 export const Tutorial: React.FC<TutorialProps> = ({ onComplete, onSkip }) => {
   const [step, setStep] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+  const [showGlossary, setShowGlossary] = useState(false);
 
   const currentStep = TUTORIAL_STEPS[step];
   const isLast = step === TUTORIAL_STEPS.length - 1;
@@ -123,6 +148,10 @@ export const Tutorial: React.FC<TutorialProps> = ({ onComplete, onSkip }) => {
 
   // Highlight area indicator
   const highlightStyle = getHighlightStyle(currentStep.highlight);
+
+  if (showGlossary) {
+    return <KeywordGlossary onClose={() => setShowGlossary(false)} />;
+  }
 
   return (
     <div style={styles.container}>
@@ -167,11 +196,23 @@ export const Tutorial: React.FC<TutorialProps> = ({ onComplete, onSkip }) => {
           ))}
         </div>
 
+        {/* Pro tip */}
+        {currentStep.tip && (
+          <div style={styles.tipBox}>
+            <span style={styles.tipLabel}>Tip:</span> {currentStep.tip}
+          </div>
+        )}
+
         {/* Navigation */}
         <div style={styles.buttons}>
-          <button style={styles.skipButton} onClick={onSkip}>
-            Skip Tutorial
-          </button>
+          <div style={styles.leftButtons}>
+            <button style={styles.skipButton} onClick={onSkip}>
+              Skip Tutorial
+            </button>
+            <button style={styles.glossaryButton} onClick={() => setShowGlossary(true)}>
+              Glossary
+            </button>
+          </div>
           <div style={styles.navButtons}>
             {step > 0 && (
               <button style={styles.prevButton} onClick={prevStep}>
@@ -284,10 +325,29 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: '24px',
     minHeight: '80px',
   },
+  tipBox: {
+    background: '#0a0a2a',
+    border: '1px solid #333355',
+    borderLeft: '3px solid #ffaa00',
+    borderRadius: '6px',
+    padding: '8px 14px',
+    marginBottom: '16px',
+    fontSize: '13px',
+    color: '#aabb99',
+    lineHeight: '1.5',
+  },
+  tipLabel: {
+    color: '#ffaa00',
+    fontWeight: 'bold',
+  },
   buttons: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  leftButtons: {
+    display: 'flex',
+    gap: '8px',
   },
   skipButton: {
     background: 'transparent',
@@ -295,6 +355,15 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '8px',
     padding: '8px 16px',
     color: '#666',
+    fontSize: '13px',
+    cursor: 'pointer',
+  },
+  glossaryButton: {
+    background: 'transparent',
+    border: '1px solid #333366',
+    borderRadius: '8px',
+    padding: '8px 16px',
+    color: '#4488ff',
     fontSize: '13px',
     cursor: 'pointer',
   },

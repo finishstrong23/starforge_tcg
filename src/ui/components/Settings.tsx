@@ -13,6 +13,9 @@ import backgroundImg from '../../assets/background.png';
 
 const SETTINGS_KEY = 'starforge_settings';
 
+export type ColorblindMode = 'none' | 'deuteranopia' | 'protanopia' | 'tritanopia';
+export type TextSize = 'small' | 'medium' | 'large';
+
 export interface GameSettings {
   sfxVolume: number;
   musicVolume: number;
@@ -22,6 +25,13 @@ export interface GameSettings {
   confirmAttacks: boolean;
   showKeywordTooltips: boolean;
   screenShake: boolean;
+  // Accessibility
+  colorblindMode: ColorblindMode;
+  reducedMotion: boolean;
+  textSize: TextSize;
+  highContrast: boolean;
+  keyboardNavigation: boolean;
+  screenReaderHints: boolean;
 }
 
 const DEFAULT_SETTINGS: GameSettings = {
@@ -33,6 +43,13 @@ const DEFAULT_SETTINGS: GameSettings = {
   confirmAttacks: false,
   showKeywordTooltips: true,
   screenShake: true,
+  // Accessibility defaults
+  colorblindMode: 'none',
+  reducedMotion: false,
+  textSize: 'medium',
+  highContrast: false,
+  keyboardNavigation: false,
+  screenReaderHints: false,
 };
 
 export function loadSettings(): GameSettings {
@@ -227,6 +244,120 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
               onClick={() => updateSetting('screenShake', !settings.screenShake)}
             >
               {settings.screenShake ? 'On' : 'Off'}
+            </button>
+          </div>
+        </div>
+
+        {/* Accessibility Section */}
+        <div style={styles.section}>
+          <h2 style={styles.sectionTitle}>Accessibility</h2>
+
+          {/* Colorblind Mode */}
+          <div style={styles.row}>
+            <span style={styles.label}>Colorblind Mode</span>
+            <div style={styles.buttonGroup}>
+              {([
+                { value: 'none', label: 'Off' },
+                { value: 'deuteranopia', label: 'Deutan' },
+                { value: 'protanopia', label: 'Protan' },
+                { value: 'tritanopia', label: 'Tritan' },
+              ] as const).map(opt => (
+                <button
+                  key={opt.value}
+                  style={{
+                    ...styles.optionButton,
+                    ...(settings.colorblindMode === opt.value ? styles.optionButtonActive : {}),
+                  }}
+                  onClick={() => updateSetting('colorblindMode', opt.value)}
+                  aria-pressed={settings.colorblindMode === opt.value}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Reduced Motion */}
+          <div style={styles.row}>
+            <span style={styles.label}>Reduced Motion</span>
+            <button
+              style={{
+                ...styles.toggleButton,
+                background: settings.reducedMotion ? '#335533' : '#333355',
+                borderColor: settings.reducedMotion ? '#44ff44' : '#666688',
+              }}
+              onClick={() => updateSetting('reducedMotion', !settings.reducedMotion)}
+              aria-pressed={settings.reducedMotion}
+            >
+              {settings.reducedMotion ? 'On' : 'Off'}
+            </button>
+          </div>
+
+          {/* Text Size */}
+          <div style={styles.row}>
+            <span style={styles.label}>Text Size</span>
+            <div style={styles.buttonGroup}>
+              {(['small', 'medium', 'large'] as const).map(size => (
+                <button
+                  key={size}
+                  style={{
+                    ...styles.optionButton,
+                    ...(settings.textSize === size ? styles.optionButtonActive : {}),
+                  }}
+                  onClick={() => updateSetting('textSize', size)}
+                  aria-pressed={settings.textSize === size}
+                >
+                  {size.charAt(0).toUpperCase() + size.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* High Contrast */}
+          <div style={styles.row}>
+            <span style={styles.label}>High Contrast</span>
+            <button
+              style={{
+                ...styles.toggleButton,
+                background: settings.highContrast ? '#335533' : '#333355',
+                borderColor: settings.highContrast ? '#44ff44' : '#666688',
+              }}
+              onClick={() => updateSetting('highContrast', !settings.highContrast)}
+              aria-pressed={settings.highContrast}
+            >
+              {settings.highContrast ? 'On' : 'Off'}
+            </button>
+          </div>
+
+          {/* Keyboard Navigation */}
+          <div style={styles.row}>
+            <span style={styles.label}>Keyboard Navigation</span>
+            <button
+              style={{
+                ...styles.toggleButton,
+                background: settings.keyboardNavigation ? '#335533' : '#333355',
+                borderColor: settings.keyboardNavigation ? '#44ff44' : '#666688',
+              }}
+              onClick={() => updateSetting('keyboardNavigation', !settings.keyboardNavigation)}
+              aria-pressed={settings.keyboardNavigation}
+            >
+              {settings.keyboardNavigation ? 'On' : 'Off'}
+            </button>
+          </div>
+
+          {/* Screen Reader Hints */}
+          <div style={styles.row}>
+            <span style={styles.label}>Screen Reader Hints</span>
+            <button
+              style={{
+                ...styles.toggleButton,
+                background: settings.screenReaderHints ? '#335533' : '#333355',
+                borderColor: settings.screenReaderHints ? '#44ff44' : '#666688',
+              }}
+              onClick={() => updateSetting('screenReaderHints', !settings.screenReaderHints)}
+              aria-pressed={settings.screenReaderHints}
+            >
+              {settings.screenReaderHints ? 'On' : 'Off'}
             </button>
           </div>
         </div>
