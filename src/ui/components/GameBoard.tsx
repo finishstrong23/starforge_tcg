@@ -29,6 +29,7 @@ import { CardArt } from './CardArt';
 import { HeroIntro } from './HeroIntro';
 import { getHeroById } from '../../heroes';
 import { globalCardDatabase } from '../../cards/CardDatabase';
+import { hapticTap, hapticImpact } from '../capacitor';
 import type { Race } from '../../types/Race';
 
 interface GameBoardProps {
@@ -166,14 +167,17 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
 
   const handleCardClick = (card: any) => {
     if (card.zone === 'HAND' && canPlayCard(card)) {
+      hapticTap();
       triggerCardFlight(card);
       selectCard(card);
     } else if (card.zone === 'BOARD' && card.controllerId === 'player') {
+      hapticTap();
       selectCard(card);
     }
   };
 
   const onTargetClick = (targetId: string) => {
+    hapticImpact();
     handleTargetClick(targetId);
   };
 
@@ -369,6 +373,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
                     style={styles.starforgeButton}
                     onClick={(e) => {
                       e.stopPropagation();
+                      hapticImpact();
                       activateStarforge(card);
                     }}
                     title={`STARFORGE: Spend ALL mana + lose next turn's mana. 2x stats, BARRIER, bonus keyword, immediate attack, silence immunity.`}

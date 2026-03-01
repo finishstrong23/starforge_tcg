@@ -4,9 +4,15 @@
 
 import React from 'react';
 import { useGame } from '../context/GameContext';
+import { hapticTap } from '../capacitor';
 
 export const EndTurnButton: React.FC = () => {
   const { isPlayerTurn, endTurn } = useGame();
+
+  const handleEndTurn = () => {
+    hapticTap();
+    endTurn();
+  };
 
   return (
     <button
@@ -14,7 +20,7 @@ export const EndTurnButton: React.FC = () => {
         ...styles.button,
         ...(isPlayerTurn ? styles.buttonActive : styles.buttonDisabled),
       }}
-      onClick={endTurn}
+      onClick={handleEndTurn}
       disabled={!isPlayerTurn}
     >
       <div style={styles.buttonText}>
