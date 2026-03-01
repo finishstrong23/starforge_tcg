@@ -271,6 +271,9 @@ export class CombatResolver {
     let lethalTriggered = false;
     let drainHealing = 0;
 
+    // Capture barrier state before combat modifies it
+    const defenderHadBarrier = defender.hasBarrier;
+
     // Apply damage to defender
     const { died: defDied, barrierBroken: defBarrier, lethal: defLethal } = this.applyDamageToMinion(
       defender,
@@ -295,9 +298,9 @@ export class CombatResolver {
       if (atkLethal) lethalTriggered = true;
     }
 
-    // Handle DRAIN on attacker
+    // Handle DRAIN on attacker — no healing if barrier absorbed the hit
     if (hasKeyword(attacker, CombatKeyword.DRAIN) && attackerDamage > 0) {
-      const actualDamageDealt = defender.hasBarrier ? 0 : attackerDamage;
+      const actualDamageDealt = defenderHadBarrier ? 0 : attackerDamage;
       if (actualDamageDealt > 0) {
         drainHealing = this.gameState.healHero(attackingPlayerId, actualDamageDealt);
       }
