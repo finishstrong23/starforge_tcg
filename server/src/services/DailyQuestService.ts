@@ -52,6 +52,13 @@ const WEEKLY_QUEST: QuestTemplate = {
   type: 'weekly_wins', description: 'Win {target} games this week', target: 15, gold: 200, xp: 500,
 };
 
+// Starter deck races awarded on days 1, 2, 3 of a new account
+const STARTER_DECK_GIFTS = [
+  'pyroclast',   // Day 1
+  'verdani',     // Day 2
+  'mechara',     // Day 3
+];
+
 const FIRST_WIN_GOLD = 25;
 const FIRST_WIN_XP = 50;
 
@@ -305,4 +312,182 @@ function rowToQuest(row: any): Quest {
     canReroll: row.can_reroll,
     assignedAt: row.assigned_at,
   };
+}
+
+// ── Weekly Challenge ─────────────────────────────────────────────────
+
+function getWeekStart(): Date {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday
+  const monday = new Date(now);
+  monday.setDate(diff);
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+}
+
+export interface WeeklyChallenge {
+  id: number;
+  questType: string;
+  questDescription: string;
+  targetValue: number;
+  currentValue: number;
+  rewardGold: number;
+  rewardXp: number;
+  isCompleted: boolean;
+  weekStart: Date;
+}
+
+export async function getWeeklyChallenge(playerId: string): Promise<WeeklyChallenge> {
+  const weekStart = getWeekStart();
+
+  const result = await query(
+    `SELECT * FROM daily_quests
+     WHERE player_id = $1 AND quest_type = 'weekly_wins' AND assigned_at >= $2
+     ORDER BY id DESC LIMIT 1`,
+    [playerId, weekStart]
+  );
+
+  if (result.rows.length > 0) {
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      questType: row.quest_type,
+      questDescription: row.quest_description,
+      targetValue: row.target_value,
+      currentValue: row.current_value,
+      rewardGold: row.reward_gold,
+      rewardXp: row.reward_xp,
+      isCompleted: row.is_completed,
+      weekStart,
+    };
+  }
+
+  // Create the weekly challenge
+  const description = WEEKLY_QUEST.description.replace('{target}', WEEKLY_QUEST.target.toString());
+  const inserted = await query(
+    `INSERT INTO daily_quests (player_id, quest_type, quest_description, target_value, reward_gold, reward_xp, assigned_at, can_reroll)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, false)
+     RETURNING *`,
+    [playerId, WEEKLY_QUEST.type, description, WEEKLY_QUEST.target, WEEKLY_QUEST.gold, WEEKLY_QUEST.xp, weekStart]
+  );
+
+  const row = inserted.rows[0];
+  return {
+    id: row.id,
+    questType: row.quest_type,
+    questDescription: row.quest_description,
+    targetValue: row.target_value,
+    currentValue: row.current_value,
+    rewardGold: row.reward_gold,
+    rewardXp: row.reward_xp,
+    isCompleted: row.is_completed,
+    weekStart,
+  };
+}
+
+export async function updateWeeklyProgress(
+  playerId: string,
+  amount: number
+): Promise<{ completed: boolean; reward: { gold: number; xp: number } | null }> {
+  const challenge = await getWeeklyChallenge(playerId);
+
+  if (challenge.isCompleted) {
+    return { completed: true, reward: null };
+  }
+
+  const newValue = Math.min(challenge.currentValue + amount, challenge.targetValue);
+  const isNowComplete = newValue >= challenge.targetValue;
+
+  await query(
+    `UPDATE daily_quests SET current_value = $1, is_completed = $2,
+     completed_at = CASE WHEN $2 THEN NOW() ELSE NULL END
+     WHERE id = $3`,
+    [newValue, isNowComplete, challenge.id]
+  );
+
+  if (isNowComplete) {
+    await AuthService.addCurrency(playerId, { gold: challenge.rewardGold });
+    await AuthService.addXp(playerId, challenge.rewardXp);
+    return { completed: true, reward: { gold: challenge.rewardGold, xp: challenge.rewardXp } };
+  }
+
+  return { completed: false, reward: null };
+}
+
+// ── New Player Starter Deck Gifts ────────────────────────────────────
+
+export interface StarterDeckGift {
+  day: number;       // 1, 2, or 3
+  race: string;
+  claimed: boolean;
+  available: boolean; // true if this gift can be claimed now
+}
+
+export async function getStarterDeckGifts(playerId: string): Promise<StarterDeckGift[]> {
+  // Determine account age in days
+  const playerResult = await query(
+    'SELECT created_at FROM players WHERE id = $1',
+    [playerId]
+  );
+
+  if (playerResult.rows.length === 0) return [];
+
+  const createdAt = new Date(playerResult.rows[0].created_at);
+  const now = new Date();
+  const accountAgeDays = Math.floor((now.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+
+  // Check which gifts have been claimed
+  const claimedResult = await query(
+    `SELECT event_data->>'day' as day FROM analytics_events
+     WHERE player_id = $1 AND event_type = 'starter_deck_claimed'`,
+    [playerId]
+  );
+  const claimedDays = new Set(claimedResult.rows.map(r => parseInt(r.day)));
+
+  return STARTER_DECK_GIFTS.map((race, idx) => {
+    const day = idx + 1;
+    return {
+      day,
+      race,
+      claimed: claimedDays.has(day),
+      available: !claimedDays.has(day) && accountAgeDays >= idx, // Day 1 = day 0 age, Day 2 = day 1 age, etc.
+    };
+  });
+}
+
+export async function claimStarterDeckGift(
+  playerId: string,
+  day: number
+): Promise<{ race: string; deckId: string }> {
+  if (day < 1 || day > STARTER_DECK_GIFTS.length) {
+    throw new Error('Invalid starter deck day');
+  }
+
+  const gifts = await getStarterDeckGifts(playerId);
+  const gift = gifts.find(g => g.day === day);
+
+  if (!gift) throw new Error('Gift not found');
+  if (gift.claimed) throw new Error('Already claimed this starter deck');
+  if (!gift.available) throw new Error('This starter deck is not yet available');
+
+  const race = STARTER_DECK_GIFTS[day - 1];
+  const deckId = `starter_${race}_${playerId}`;
+
+  // Record the claim
+  await query(
+    `INSERT INTO analytics_events (player_id, event_type, event_data, server_timestamp)
+     VALUES ($1, 'starter_deck_claimed', $2, NOW())`,
+    [playerId, JSON.stringify({ day, race })]
+  );
+
+  // Grant the deck to the player
+  await query(
+    `INSERT INTO player_decks (id, player_id, name, race, card_ids, is_active, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, '[]', false, NOW(), NOW())
+     ON CONFLICT (id) DO NOTHING`,
+    [deckId, playerId, `Starter ${race.charAt(0).toUpperCase() + race.slice(1)}`, race]
+  );
+
+  return { race, deckId };
 }

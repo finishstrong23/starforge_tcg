@@ -61,4 +61,36 @@ router.post('/first-win', authenticateToken, async (req: AuthRequest, res: Respo
   }
 });
 
+// Get weekly challenge
+router.get('/weekly', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    const challenge = await DailyQuestService.getWeeklyChallenge(req.user!.userId);
+    res.json(challenge);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch weekly challenge' });
+  }
+});
+
+// Get starter deck gifts status
+router.get('/starter-decks', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    const gifts = await DailyQuestService.getStarterDeckGifts(req.user!.userId);
+    res.json(gifts);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch starter deck gifts' });
+  }
+});
+
+// Claim a starter deck gift
+router.post('/starter-decks/:day/claim', authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    const day = parseInt(req.params.day);
+    const result = await DailyQuestService.claimStarterDeckGift(req.user!.userId, day);
+    res.json(result);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Failed to claim starter deck';
+    res.status(400).json({ error: message });
+  }
+});
+
 export default router;

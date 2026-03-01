@@ -15,6 +15,11 @@ import { RankTier } from '../models/Player';
  *   Legend          (MMR-based, no stars)
  *
  * Win streaks (3+ consecutive wins) give a bonus star in Bronze/Silver/Gold.
+ *
+ * Apprentice ranks:
+ *   All of Bronze (10→1) is the "Apprentice" zone — players never lose stars
+ *   on a loss. This gives new players a safe space to learn the game before
+ *   entering competitive Silver+ tiers.
  */
 
 // ── Tier ordering & configuration ──────────────────────────────────
@@ -25,15 +30,16 @@ interface TierConfig {
   maxDivision: number;      // highest numbered division (lowest rank within tier)
   starsPerDivision: number; // stars needed to advance one division
   winStreakBonus: boolean;   // do win streaks grant bonus stars?
+  apprentice: boolean;       // apprentice tier — players never lose stars on loss
 }
 
 const TIER_CONFIG: Record<RankTier, TierConfig> = {
-  bronze:  { maxDivision: 10, starsPerDivision: 3, winStreakBonus: true },
-  silver:  { maxDivision: 10, starsPerDivision: 3, winStreakBonus: true },
-  gold:    { maxDivision: 10, starsPerDivision: 3, winStreakBonus: true },
-  diamond: { maxDivision: 10, starsPerDivision: 3, winStreakBonus: false },
-  master:  { maxDivision: 5,  starsPerDivision: 4, winStreakBonus: false },
-  legend:  { maxDivision: 1,  starsPerDivision: 0, winStreakBonus: false },
+  bronze:  { maxDivision: 10, starsPerDivision: 3, winStreakBonus: true,  apprentice: true },
+  silver:  { maxDivision: 10, starsPerDivision: 3, winStreakBonus: true,  apprentice: false },
+  gold:    { maxDivision: 10, starsPerDivision: 3, winStreakBonus: true,  apprentice: false },
+  diamond: { maxDivision: 10, starsPerDivision: 3, winStreakBonus: false, apprentice: false },
+  master:  { maxDivision: 5,  starsPerDivision: 4, winStreakBonus: false, apprentice: false },
+  legend:  { maxDivision: 1,  starsPerDivision: 0, winStreakBonus: false, apprentice: false },
 };
 
 // Rank floors — players can never drop below these checkpoints
@@ -333,13 +339,15 @@ export async function processRankedResult(
       const bonus = TIER_CONFIG[r1.tier].winStreakBonus && newStreak1 >= 3 ? 1 : 0;
       starChange1 = 1 + bonus;
       p1WinStreak = bonus > 0;
-      starChange2 = r2.tier === 'legend' ? 0 : -1;
+      // Apprentice ranks (Bronze) never lose stars
+      starChange2 = r2.tier === 'legend' ? 0 : TIER_CONFIG[r2.tier].apprentice ? 0 : -1;
     } else if (p2Won && !isDraw) {
       const newStreak2 = streak2 + 1;
       const bonus = TIER_CONFIG[r2.tier].winStreakBonus && newStreak2 >= 3 ? 1 : 0;
       starChange2 = 1 + bonus;
       p2WinStreak = bonus > 0;
-      starChange1 = r1.tier === 'legend' ? 0 : -1;
+      // Apprentice ranks (Bronze) never lose stars
+      starChange1 = r1.tier === 'legend' ? 0 : TIER_CONFIG[r1.tier].apprentice ? 0 : -1;
     }
   }
 
@@ -690,6 +698,13 @@ export function formatRank(tier: RankTier, division: number, legendRank?: number
   }
   const tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
   return `${tierName} ${division}`;
+}
+
+/**
+ * Check if a given tier is an apprentice (no star loss) tier.
+ */
+export function isApprenticeTier(tier: RankTier): boolean {
+  return TIER_CONFIG[tier].apprentice;
 }
 
 /**

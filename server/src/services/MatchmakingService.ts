@@ -5,16 +5,25 @@ const MMR_RANGE_BASE = 100;
 const MMR_RANGE_EXPAND_PER_SEC = 5;
 const MAX_MMR_RANGE = 500;
 const QUEUE_CHECK_INTERVAL = 1000;
+const BOT_BACKFILL_WAIT_SEC = 30; // After 30 seconds, match with a bot
+
+const BOT_RACES = [
+  'pyroclast', 'verdani', 'mechara', 'voidborn', 'celestari',
+  'nethari', 'draconid', 'hivemind', 'crystari', 'aetherian',
+];
 
 type MatchFoundCallback = (ticket1: MatchmakingTicket, ticket2: MatchmakingTicket, gameId: string) => void;
+type BotMatchCallback = (ticket: MatchmakingTicket, botTicket: MatchmakingTicket, gameId: string) => void;
 
 export class MatchmakingService {
   private queues: Map<GameMode, MatchmakingTicket[]> = new Map();
   private onMatchFound: MatchFoundCallback;
+  private onBotMatch: BotMatchCallback | null = null;
   private intervalId: ReturnType<typeof setInterval> | null = null;
 
-  constructor(onMatchFound: MatchFoundCallback) {
+  constructor(onMatchFound: MatchFoundCallback, onBotMatch?: BotMatchCallback) {
     this.onMatchFound = onMatchFound;
+    this.onBotMatch = onBotMatch || null;
     this.queues.set('ranked', []);
     this.queues.set('casual', []);
     this.queues.set('arena', []);
@@ -116,6 +125,37 @@ export class MatchmakingService {
       const matchedArr = Array.from(matched).sort((a, b) => b - a);
       for (const idx of matchedArr) {
         queue.splice(idx, 1);
+      }
+
+      // Bot backfill: match long-waiting players against a bot
+      if (this.onBotMatch) {
+        const botBackfill: number[] = [];
+        for (let i = 0; i < queue.length; i++) {
+          if (matched.has(i)) continue;
+          const waitSec = (now - queue[i].queuedAt) / 1000;
+          if (waitSec >= BOT_BACKFILL_WAIT_SEC) {
+            botBackfill.push(i);
+          }
+        }
+
+        // Match each long-waiting player with a bot (reverse order for safe removal)
+        for (const idx of botBackfill.reverse()) {
+          const ticket = queue[idx];
+          const botRace = BOT_RACES[Math.floor(Math.random() * BOT_RACES.length)];
+          const botTicket: MatchmakingTicket = {
+            playerId: `bot_${uuidv4()}`,
+            mode: ticket.mode,
+            mmr: ticket.mmr + Math.floor(Math.random() * 100) - 50, // +-50 MMR
+            deckId: `bot_deck_${botRace}`,
+            race: botRace,
+            queuedAt: now,
+            expandRange: 0,
+          };
+
+          const gameId = uuidv4();
+          queue.splice(idx, 1);
+          this.onBotMatch(ticket, botTicket, gameId);
+        }
       }
     }
   }
