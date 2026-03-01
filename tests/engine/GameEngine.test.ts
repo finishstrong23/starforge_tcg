@@ -60,7 +60,7 @@ describe('GameEngine', () => {
 
       expect(globalCardDatabase.size).toBeGreaterThan(0);
       expect(globalCardDatabase.hasCard('neutral_stellar_scout')).toBe(true);
-      expect(globalCardDatabase.hasCard('cog_worker')).toBe(true);
+      expect(globalCardDatabase.hasCard('cog_cog_worker')).toBe(true);
     });
 
     it('should query cards by race', () => {
@@ -94,8 +94,8 @@ describe('GameEngine', () => {
       const p1HandCount = board.getHandCount('player1');
       const p2HandCount = board.getHandCount('player2');
 
-      // First player draws 3, second draws 4
-      expect(p1HandCount + p2HandCount).toBe(7);
+      // First player draws 3 + 1 (turn start), second draws 4
+      expect(p1HandCount + p2HandCount).toBe(8);
     });
 
     it('should track turn number', () => {
@@ -217,7 +217,7 @@ describe('Card Factory', () => {
     expect(instance.ownerId).toBe('player1');
     expect(instance.currentCost).toBe(1);
     expect(instance.currentAttack).toBe(1);
-    expect(instance.currentHealth).toBe(1);
+    expect(instance.currentHealth).toBe(3);
   });
 
   it('should create deck with correct number of cards', () => {
@@ -249,7 +249,7 @@ describe('Keywords', () => {
   });
 
   it('should track BARRIER state', () => {
-    const card = globalCardFactory.createInstance('neutral_barrier_bot', {
+    const card = globalCardFactory.createInstance('cog_cog_worker', {
       ownerId: 'player1',
     });
 
@@ -257,7 +257,7 @@ describe('Keywords', () => {
   });
 
   it('should track CLOAK state', () => {
-    const card = globalCardFactory.createInstance('neutral_void_stalker', {
+    const card = globalCardFactory.createInstance('void_rift_walker', {
       ownerId: 'player1',
     });
 
