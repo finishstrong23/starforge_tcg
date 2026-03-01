@@ -122,9 +122,10 @@ export class DeathProcessor {
       return result;
     }
 
-    // Process each death
+    // Phase 1: Move ALL dead cards to graveyard and emit events FIRST.
+    // This prevents reentrancy issues where EffectResolver calls processDeaths()
+    // after each LAST_WORDS effect, which would re-collect minions still on the board.
     for (const death of result.deaths) {
-      // Move card to graveyard
       this.board.moveCard(
         death.cardInstanceId,
         death.ownerId,
@@ -132,7 +133,6 @@ export class DeathProcessor {
         CardZone.GRAVEYARD
       );
 
-      // Emit death event
       this.emitEvent(GameEventType.CARD_DESTROYED, death.ownerId, {
         cardInstanceId: death.cardInstanceId,
         cardDefinitionId: death.cardDefinitionId,
@@ -141,7 +141,10 @@ export class DeathProcessor {
         toZone: CardZone.GRAVEYARD,
         position: death.position,
       } as CardEventData);
+    }
 
+    // Phase 2: Process death triggers (LAST_WORDS, SALVAGE, IMMOLATE)
+    for (const death of result.deaths) {
       // Process LAST_WORDS — look up definition effects and execute them
       if (this.hasKeywordInList(death.keywords, TriggerKeyword.LAST_WORDS)) {
         const cardDef = globalCardDatabase.getCard(death.cardDefinitionId);
