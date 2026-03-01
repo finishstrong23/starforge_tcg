@@ -64,3 +64,13 @@ CREATE INDEX idx_crafting_log_player ON crafting_log(player_id, created_at DESC)
 ALTER TABLE players ADD CONSTRAINT chk_gold_nonneg CHECK (gold >= 0);
 ALTER TABLE players ADD CONSTRAINT chk_stardust_nonneg CHECK (stardust >= 0);
 ALTER TABLE players ADD CONSTRAINT chk_gems_nonneg CHECK (nebula_gems >= 0);
+
+-- Fix battle_pass_progress.claimed_tiers default to use proper JSON structure
+-- (original migration 001 set default to '[]', but service expects {free:[], premium:[]})
+ALTER TABLE battle_pass_progress
+  ALTER COLUMN claimed_tiers SET DEFAULT '{"free":[],"premium":[]}'::jsonb;
+
+-- Update any existing rows with old format
+UPDATE battle_pass_progress
+  SET claimed_tiers = '{"free":[],"premium":[]}'::jsonb
+  WHERE claimed_tiers = '[]'::jsonb OR claimed_tiers IS NULL;

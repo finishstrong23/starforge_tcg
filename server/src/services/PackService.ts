@@ -11,7 +11,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { query, withTransaction } from '../config/database';
-import * as EconomyService from './EconomyService';
 
 // ── Pack Type Definitions ──────────────────────────────────────
 
@@ -30,6 +29,10 @@ export interface PackCard {
   name: string;
   rarity: string;
   race: string;
+  manaCost: number;
+  attack: number | null;
+  health: number | null;
+  cardType: string;
   isNew: boolean;
 }
 
@@ -128,7 +131,7 @@ export async function purchasePack(
 
     // 3. Get collectible card pool from DB
     const cardPool = await client.query(
-      `SELECT id, name, rarity, race FROM cards WHERE is_collectible = true`
+      `SELECT id, name, rarity, race, mana_cost, attack, health, card_type FROM cards WHERE is_collectible = true`
     );
 
     if (cardPool.rows.length === 0) {
@@ -149,7 +152,6 @@ export async function purchasePack(
     const needsPity = packsSinceLegendary >= PITY_TIMER - 1;
     const cards: PackCard[] = [];
     let gotLegendary = false;
-    const pityTriggered = false;
 
     const pool = cardPool.rows;
     const byRarity = new Map<string, typeof pool>();
@@ -159,7 +161,7 @@ export async function purchasePack(
       byRarity.get(r)!.push(card);
     }
 
-    let pityUsed = false;
+    let pityTriggered = false;
     for (let i = 0; i < packType.cardCount; i++) {
       let rarity: string;
 
@@ -169,7 +171,7 @@ export async function purchasePack(
       } else if (i === packType.cardCount - 1 && needsPity && !gotLegendary) {
         // Last card: pity timer forces legendary
         rarity = 'legendary';
-        pityUsed = true;
+        pityTriggered = true;
       } else {
         rarity = rollRarity(packType.weights);
       }
@@ -198,6 +200,10 @@ export async function purchasePack(
         name: card.name,
         rarity: card.rarity,
         race: card.race,
+        manaCost: card.mana_cost,
+        attack: card.attack,
+        health: card.health,
+        cardType: card.card_type,
         isNew,
       });
 
@@ -220,7 +226,7 @@ export async function purchasePack(
     await client.query(
       `INSERT INTO pack_openings (id, player_id, pack_type, cost, pity_triggered, opened_at)
        VALUES ($1, $2, $3, $4, $5, NOW())`,
-      [packId, playerId, packType.id, packType.cost, pityUsed]
+      [packId, playerId, packType.id, packType.cost, pityTriggered]
     );
 
     // Record individual cards
@@ -246,9 +252,157 @@ export async function purchasePack(
       packId,
       packType: packType.id,
       cards,
-      pityTriggered: pityUsed,
+      pityTriggered: pityTriggered,
       goldSpent: packType.cost,
       newGoldBalance,
+    };
+  });
+}
+
+/**
+ * Open a free pack (from battle pass, arena rewards, etc.) — no gold cost.
+ * Still respects pity timer and duplicate protection.
+ */
+export async function openFreePack(
+  playerId: string,
+  packTypeId: string,
+  source: string,
+): Promise<PackResult> {
+  const packType = PACK_TYPES.find(p => p.id === packTypeId);
+  if (!packType) throw new Error('Invalid pack type');
+
+  const packId = uuidv4();
+
+  return withTransaction(async (client) => {
+    // No gold deduction — this is a free pack
+
+    // Get pity state
+    const pityResult = await client.query(
+      'SELECT total_opened, packs_since_legendary FROM pack_state WHERE player_id = $1',
+      [playerId]
+    );
+
+    let totalOpened = 0;
+    let packsSinceLegendary = 0;
+    if (pityResult.rows.length > 0) {
+      totalOpened = pityResult.rows[0].total_opened;
+      packsSinceLegendary = pityResult.rows[0].packs_since_legendary;
+    }
+
+    // Get collectible card pool
+    const cardPool = await client.query(
+      'SELECT id, name, rarity, race, mana_cost, attack, health, card_type FROM cards WHERE is_collectible = true'
+    );
+
+    if (cardPool.rows.length === 0) {
+      throw new Error('Card pool is empty');
+    }
+
+    // Get player's collection
+    const collectionResult = await client.query(
+      'SELECT card_id, count FROM player_collections WHERE player_id = $1 AND is_golden = false',
+      [playerId]
+    );
+    const owned = new Map<string, number>();
+    for (const row of collectionResult.rows) {
+      owned.set(row.card_id, row.count);
+    }
+
+    // Roll cards
+    const needsPity = packsSinceLegendary >= PITY_TIMER - 1;
+    const cards: PackCard[] = [];
+    let gotLegendary = false;
+
+    const pool = cardPool.rows;
+    const byRarity = new Map<string, typeof pool>();
+    for (const card of pool) {
+      const r = card.rarity.toLowerCase();
+      if (!byRarity.has(r)) byRarity.set(r, []);
+      byRarity.get(r)!.push(card);
+    }
+
+    let pityTriggered = false;
+    for (let i = 0; i < packType.cardCount; i++) {
+      let rarity: string;
+
+      if (i === 0) {
+        rarity = packType.guaranteedRarity;
+      } else if (i === packType.cardCount - 1 && needsPity && !gotLegendary) {
+        rarity = 'legendary';
+        pityTriggered = true;
+      } else {
+        rarity = rollRarity(packType.weights);
+      }
+
+      if (rarity === 'legendary') gotLegendary = true;
+
+      let candidates = byRarity.get(rarity) || [];
+      if (rarity === 'legendary' && candidates.length > 0) {
+        const filtered = candidates.filter(c => (owned.get(c.id) || 0) < 2);
+        if (filtered.length > 0) candidates = filtered;
+      }
+      if (candidates.length === 0) candidates = pool;
+
+      const card = candidates[Math.floor(Math.random() * candidates.length)];
+      const isNew = !owned.has(card.id);
+
+      cards.push({
+        cardId: card.id,
+        name: card.name,
+        rarity: card.rarity,
+        race: card.race,
+        manaCost: card.mana_cost,
+        attack: card.attack,
+        health: card.health,
+        cardType: card.card_type,
+        isNew,
+      });
+
+      owned.set(card.id, (owned.get(card.id) || 0) + 1);
+    }
+
+    // Add cards to collection
+    for (const card of cards) {
+      await client.query(
+        `INSERT INTO player_collections (player_id, card_id, count, is_golden)
+         VALUES ($1, $2, 1, false)
+         ON CONFLICT (player_id, card_id, is_golden)
+         DO UPDATE SET count = player_collections.count + 1`,
+        [playerId, card.cardId]
+      );
+    }
+
+    // Record pack opening (cost = 0 for free packs)
+    await client.query(
+      `INSERT INTO pack_openings (id, player_id, pack_type, cost, pity_triggered, opened_at)
+       VALUES ($1, $2, $3, 0, $4, NOW())`,
+      [packId, playerId, packType.id, pityTriggered]
+    );
+
+    for (const card of cards) {
+      await client.query(
+        'INSERT INTO pack_cards (pack_opening_id, card_id, rarity, is_new) VALUES ($1, $2, $3, $4)',
+        [packId, card.cardId, card.rarity, card.isNew]
+      );
+    }
+
+    // Update pity state
+    const newPacksSinceLegendary = gotLegendary ? 0 : packsSinceLegendary + 1;
+    await client.query(
+      `INSERT INTO pack_state (player_id, total_opened, packs_since_legendary)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (player_id)
+       DO UPDATE SET total_opened = $2, packs_since_legendary = $3`,
+      [playerId, totalOpened + 1, newPacksSinceLegendary]
+    );
+
+    return {
+      packId,
+      packType: packType.id,
+      cards,
+      pityTriggered,
+      goldSpent: 0,
+      newGoldBalance: -1, // Not applicable for free packs
     };
   });
 }

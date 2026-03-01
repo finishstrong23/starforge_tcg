@@ -15,12 +15,14 @@ import { query, withTransaction } from '../config/database';
 export const DUST_VALUES = {
   DISENCHANT: {
     common: 5,
+    uncommon: 10,
     rare: 20,
     epic: 100,
     legendary: 400,
   } as Record<string, number>,
   CRAFT: {
     common: 40,
+    uncommon: 60,
     rare: 100,
     epic: 400,
     legendary: 1600,
@@ -103,7 +105,8 @@ export async function craftCard(playerId: string, cardId: string): Promise<Craft
     // 2. Check duplicate protection for legendaries (max 2)
     if (rarity === 'legendary') {
       const ownedResult = await client.query(
-        `SELECT count FROM player_collections WHERE player_id = $1 AND card_id = $2 AND is_golden = false`,
+        `SELECT count FROM player_collections WHERE player_id = $1 AND card_id = $2 AND is_golden = false
+         FOR UPDATE`,
         [playerId, cardId]
       );
       if (ownedResult.rows.length > 0 && ownedResult.rows[0].count >= 2) {
@@ -160,11 +163,12 @@ export async function craftCard(playerId: string, cardId: string): Promise<Craft
 /** Disenchant one copy of a card. Gains stardust. */
 export async function disenchantCard(playerId: string, cardId: string): Promise<DisenchantResult> {
   return withTransaction(async (client) => {
-    // 1. Check player owns this card
+    // 1. Check player owns this card (lock row to prevent concurrent disenchant race)
     const collResult = await client.query(
       `SELECT pc.count, c.rarity FROM player_collections pc
        JOIN cards c ON pc.card_id = c.id
-       WHERE pc.player_id = $1 AND pc.card_id = $2 AND pc.is_golden = false`,
+       WHERE pc.player_id = $1 AND pc.card_id = $2 AND pc.is_golden = false
+       FOR UPDATE OF pc`,
       [playerId, cardId]
     );
 

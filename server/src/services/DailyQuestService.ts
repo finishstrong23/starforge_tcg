@@ -1,5 +1,6 @@
 import { query, withTransaction } from '../config/database';
 import * as AuthService from './AuthService';
+import * as EconomyService from './EconomyService';
 
 export interface Quest {
   id: number;
@@ -206,10 +207,10 @@ export async function updateQuestProgress(
     }
   }
 
-  // Grant rewards
+  // Grant rewards with full audit trail
   if (totalGold > 0 || totalXp > 0) {
     if (totalGold > 0) {
-      await AuthService.addCurrency(playerId, { gold: totalGold });
+      await EconomyService.grantCurrency(playerId, { gold: totalGold }, 'quest_reward');
     }
     if (totalXp > 0) {
       await AuthService.addXp(playerId, totalXp);
@@ -240,7 +241,7 @@ export async function claimFirstWinBonus(playerId: string): Promise<{ gold: numb
     [playerId]
   );
 
-  await AuthService.addCurrency(playerId, { gold: FIRST_WIN_GOLD });
+  await EconomyService.grantCurrency(playerId, { gold: FIRST_WIN_GOLD }, 'first_win_bonus');
   await AuthService.addXp(playerId, FIRST_WIN_XP);
 
   return { gold: FIRST_WIN_GOLD, xp: FIRST_WIN_XP };
@@ -278,7 +279,7 @@ export async function claimLoginStreakReward(playerId: string): Promise<{ gold: 
     throw new Error('No login streak reward available');
   }
 
-  await AuthService.addCurrency(playerId, { gold: claimableReward.gold });
+  await EconomyService.grantCurrency(playerId, { gold: claimableReward.gold }, 'login_streak_reward');
   await AuthService.addXp(playerId, claimableReward.xp);
 
   return claimableReward;
@@ -407,7 +408,7 @@ export async function updateWeeklyProgress(
   );
 
   if (isNowComplete) {
-    await AuthService.addCurrency(playerId, { gold: challenge.rewardGold });
+    await EconomyService.grantCurrency(playerId, { gold: challenge.rewardGold }, 'weekly_challenge');
     await AuthService.addXp(playerId, challenge.rewardXp);
     return { completed: true, reward: { gold: challenge.rewardGold, xp: challenge.rewardXp } };
   }

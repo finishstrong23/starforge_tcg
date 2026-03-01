@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { query } from '../config/database';
-import * as AuthService from './AuthService';
+import * as EconomyService from './EconomyService';
 
 const ARENA_ENTRY_GOLD = 150;
 const PICKS_PER_DRAFT = 30;
@@ -68,14 +68,8 @@ export async function startArenaRun(playerId: string): Promise<{ run: ArenaRun; 
     throw new Error('You already have an active arena run');
   }
 
-  // Check if player can afford entry
-  const player = await query('SELECT gold FROM players WHERE id = $1', [playerId]);
-  if (player.rows[0].gold < ARENA_ENTRY_GOLD) {
-    throw new Error(`Need ${ARENA_ENTRY_GOLD} gold to enter Arena`);
-  }
-
-  // Deduct entry fee
-  await AuthService.addCurrency(playerId, { gold: -ARENA_ENTRY_GOLD });
+  // Deduct entry fee atomically (fails if insufficient gold)
+  await EconomyService.spendGold(playerId, ARENA_ENTRY_GOLD, 'arena_entry');
 
   // Create run
   const runId = uuidv4();
@@ -201,10 +195,12 @@ export async function claimArenaRewards(playerId: string): Promise<ArenaRewards>
   const row = result.rows[0];
   const rewards = ARENA_REWARDS[row.wins] || ARENA_REWARDS[0];
 
-  await AuthService.addCurrency(playerId, {
-    gold: rewards.gold,
-    stardust: rewards.stardust,
-  });
+  await EconomyService.grantCurrency(
+    playerId,
+    { gold: rewards.gold, stardust: rewards.stardust },
+    'arena_reward',
+    row.id,
+  );
 
   await query('UPDATE arena_runs SET rewards_claimed = true WHERE id = $1', [row.id]);
 

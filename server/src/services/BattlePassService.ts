@@ -10,7 +10,6 @@
  */
 
 import { query, withTransaction } from '../config/database';
-import * as EconomyService from './EconomyService';
 import * as PackService from './PackService';
 
 // ── Constants ───────────────────────────────────────────────────
@@ -51,7 +50,7 @@ export interface BattlePassProgress {
 export interface ClaimResult {
   reward: BattlePassReward;
   grantedCurrency?: { gold?: number; stardust?: number };
-  grantedPack?: string; // pack type ID if pack was auto-opened
+  grantedPack?: { packType: string; cards: PackService.PackCard[] };
 }
 
 // ── XP Values ───────────────────────────────────────────────────
@@ -210,48 +209,53 @@ export async function getProgress(playerId: string): Promise<BattlePassProgress>
 export async function addXP(
   playerId: string,
   amount: number,
-  source: string,
+  _source: string,
 ): Promise<{ level: number; xp: number; levelsGained: number }> {
   const seasonId = getCurrentSeasonId();
 
-  // Ensure row exists
-  await query(
-    `INSERT INTO battle_pass_progress (player_id, season_id, tier, xp, is_premium, claimed_tiers)
-     VALUES ($1, $2, 1, 0, false, '{"free":[],"premium":[]}')
-     ON CONFLICT (player_id, season_id) DO NOTHING`,
-    [playerId, seasonId]
-  );
+  return withTransaction(async (client) => {
+    // Ensure row exists
+    await client.query(
+      `INSERT INTO battle_pass_progress (player_id, season_id, tier, xp, is_premium, claimed_tiers)
+       VALUES ($1, $2, 1, 0, false, '{"free":[],"premium":[]}')
+       ON CONFLICT (player_id, season_id) DO NOTHING`,
+      [playerId, seasonId]
+    );
 
-  const result = await query(
-    'SELECT tier, xp FROM battle_pass_progress WHERE player_id = $1 AND season_id = $2',
-    [playerId, seasonId]
-  );
+    // Lock the row to prevent concurrent XP updates
+    const result = await client.query(
+      `SELECT tier, xp FROM battle_pass_progress
+       WHERE player_id = $1 AND season_id = $2
+       FOR UPDATE`,
+      [playerId, seasonId]
+    );
 
-  let level = result.rows[0].tier;
-  let xp = result.rows[0].xp + amount;
-  const startLevel = level;
+    let level = result.rows[0].tier;
+    let xp = result.rows[0].xp + amount;
+    const startLevel = level;
 
-  // Level up loop
-  while (level < MAX_LEVEL) {
-    const needed = xpForLevel(level);
-    if (xp >= needed) {
-      xp -= needed;
-      level++;
-    } else {
-      break;
+    // Level up loop
+    while (level < MAX_LEVEL) {
+      const needed = xpForLevel(level);
+      if (xp >= needed) {
+        xp -= needed;
+        level++;
+      } else {
+        break;
+      }
     }
-  }
 
-  if (level >= MAX_LEVEL) {
-    level = MAX_LEVEL;
-  }
+    if (level >= MAX_LEVEL) {
+      level = MAX_LEVEL;
+    }
 
-  await query(
-    'UPDATE battle_pass_progress SET tier = $1, xp = $2 WHERE player_id = $3 AND season_id = $4',
-    [level, xp, playerId, seasonId]
-  );
+    await client.query(
+      'UPDATE battle_pass_progress SET tier = $1, xp = $2 WHERE player_id = $3 AND season_id = $4',
+      [level, xp, playerId, seasonId]
+    );
 
-  return { level, xp, levelsGained: level - startLevel };
+    return { level, xp, levelsGained: level - startLevel };
+  });
 }
 
 /** Claim a battle pass reward (free or premium track) */
@@ -264,7 +268,9 @@ export async function claimReward(
 
   return withTransaction(async (client) => {
     const result = await client.query(
-      'SELECT tier, is_premium, claimed_tiers FROM battle_pass_progress WHERE player_id = $1 AND season_id = $2',
+      `SELECT tier, is_premium, claimed_tiers FROM battle_pass_progress
+       WHERE player_id = $1 AND season_id = $2
+       FOR UPDATE`,
       [playerId, seasonId]
     );
 
@@ -326,14 +332,17 @@ export async function claimReward(
       );
       claimResult.grantedCurrency = { stardust: reward.amount };
     } else if (reward.type.startsWith('pack_')) {
-      // Pack rewards: record as a redeemable pack credit
-      // Map pack_standard -> standard, etc.
-      const packType = reward.type.replace('pack_', '');
-      claimResult.grantedPack = packType;
-      // Note: The client can then call purchasePack with cost=0, or we track pack credits
-      // For simplicity, grant the pack's gold value equivalent as a pack credit
-      // Actually, just add a pack_credits field or grant the pack directly
-      // For now: grant the pack contents via PackService in the route handler
+      // Pack rewards: open a free pack immediately and grant cards
+      const packTypeId = reward.type.replace('pack_', '');
+      const packResult = await PackService.openFreePack(
+        playerId,
+        packTypeId,
+        `battlepass_${track}_${level}`,
+      );
+      claimResult.grantedPack = {
+        packType: packTypeId,
+        cards: packResult.cards,
+      };
     } else if (reward.type === 'card_back' || reward.type === 'title') {
       // Cosmetic rewards — store in player achievements/cosmetics
       await client.query(

@@ -4,7 +4,7 @@
  * API endpoints for currency, packs, crafting, and battle pass.
  */
 
-import { Router, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 import * as EconomyService from '../services/EconomyService';
 import * as PackService from '../services/PackService';
@@ -12,6 +12,15 @@ import * as CraftingService from '../services/CraftingService';
 import * as BattlePassService from '../services/BattlePassService';
 
 const router = Router();
+
+// Maximum XP that can be granted per request (prevents abuse)
+const MAX_XP_PER_REQUEST = 200;
+
+// Valid XP sources that the server will accept
+const VALID_XP_SOURCES = new Set([
+  'game_played', 'game_won', 'quest_completed', 'daily_login',
+  'pvp_win', 'campaign_win', 'fast_win',
+]);
 
 // ── Currency ────────────────────────────────────────────────────
 
@@ -29,8 +38,8 @@ router.get('/balance', authenticateToken, async (req: AuthRequest, res: Response
 /** GET /api/economy/transactions — Get transaction history */
 router.get('/transactions', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const limit = parseInt(req.query.limit as string) || 50;
-    const offset = parseInt(req.query.offset as string) || 0;
+    const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 50, 1), 100);
+    const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
     const history = await EconomyService.getTransactionHistory(req.user!.userId, limit, offset);
     res.json({ transactions: history });
   } catch (err) {
@@ -42,7 +51,7 @@ router.get('/transactions', authenticateToken, async (req: AuthRequest, res: Res
 // ── Packs ───────────────────────────────────────────────────────
 
 /** GET /api/economy/packs/types — Get available pack types */
-router.get('/packs/types', (_req: AuthRequest, res: Response) => {
+router.get('/packs/types', (_req: Request, res: Response) => {
   res.json({ packs: PackService.getPackTypes() });
 });
 
@@ -61,7 +70,7 @@ router.get('/packs/state', authenticateToken, async (req: AuthRequest, res: Resp
 router.post('/packs/purchase', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { packTypeId } = req.body;
-    if (!packTypeId) {
+    if (!packTypeId || typeof packTypeId !== 'string') {
       res.status(400).json({ error: 'packTypeId is required' });
       return;
     }
@@ -70,7 +79,7 @@ router.post('/packs/purchase', authenticateToken, async (req: AuthRequest, res: 
     res.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to purchase pack';
-    const status = message.includes('Insufficient') ? 400 : message.includes('Invalid') ? 400 : 500;
+    const status = message.includes('Insufficient') || message.includes('Invalid') ? 400 : 500;
     res.status(status).json({ error: message });
   }
 });
@@ -78,7 +87,7 @@ router.post('/packs/purchase', authenticateToken, async (req: AuthRequest, res: 
 /** GET /api/economy/packs/history — Get pack opening history */
 router.get('/packs/history', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const limit = parseInt(req.query.limit as string) || 20;
+    const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 20, 1), 100);
     const history = await PackService.getPackHistory(req.user!.userId, limit);
     res.json({ history });
   } catch (err) {
@@ -101,7 +110,7 @@ router.get('/crafting/collection', authenticateToken, async (req: AuthRequest, r
 });
 
 /** GET /api/economy/crafting/dust-values — Get dust value tables */
-router.get('/crafting/dust-values', (_req: AuthRequest, res: Response) => {
+router.get('/crafting/dust-values', (_req: Request, res: Response) => {
   res.json(CraftingService.getDustValues());
 });
 
@@ -109,7 +118,7 @@ router.get('/crafting/dust-values', (_req: AuthRequest, res: Response) => {
 router.post('/crafting/craft', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { cardId } = req.body;
-    if (!cardId) {
+    if (!cardId || typeof cardId !== 'string') {
       res.status(400).json({ error: 'cardId is required' });
       return;
     }
@@ -128,7 +137,7 @@ router.post('/crafting/craft', authenticateToken, async (req: AuthRequest, res: 
 router.post('/crafting/disenchant', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { cardId } = req.body;
-    if (!cardId) {
+    if (!cardId || typeof cardId !== 'string') {
       res.status(400).json({ error: 'cardId is required' });
       return;
     }
@@ -145,7 +154,8 @@ router.post('/crafting/disenchant', authenticateToken, async (req: AuthRequest, 
 /** POST /api/economy/crafting/disenchant-extras — Bulk disenchant duplicates */
 router.post('/crafting/disenchant-extras', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
-    const maxCopies = parseInt(req.body.maxCopies) || 2;
+    // Clamp to minimum 1 to prevent disenchanting entire collection
+    const maxCopies = Math.max(parseInt(req.body.maxCopies) || 2, 1);
     const result = await CraftingService.disenchantExtras(req.user!.userId, maxCopies);
     res.json(result);
   } catch (err) {
@@ -167,16 +177,36 @@ router.get('/battlepass/progress', authenticateToken, async (req: AuthRequest, r
   }
 });
 
-/** POST /api/economy/battlepass/add-xp — Add XP (called by game server after matches) */
+/**
+ * POST /api/economy/battlepass/add-xp — Add XP from game events.
+ *
+ * Security: XP amount is capped per request and source must be a valid game event.
+ * This endpoint should be called by the game server after match completion.
+ * The cap prevents clients from granting themselves unlimited XP.
+ */
 router.post('/battlepass/add-xp', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { amount, source } = req.body;
-    if (!amount || amount <= 0) {
-      res.status(400).json({ error: 'Valid amount is required' });
+    const xpAmount = parseInt(amount);
+
+    if (!xpAmount || xpAmount <= 0) {
+      res.status(400).json({ error: 'Valid positive amount is required' });
       return;
     }
 
-    const result = await BattlePassService.addXP(req.user!.userId, amount, source || 'manual');
+    // Cap XP to prevent abuse
+    if (xpAmount > MAX_XP_PER_REQUEST) {
+      res.status(400).json({ error: `XP amount cannot exceed ${MAX_XP_PER_REQUEST}` });
+      return;
+    }
+
+    // Validate source
+    if (!source || !VALID_XP_SOURCES.has(source)) {
+      res.status(400).json({ error: 'Invalid XP source' });
+      return;
+    }
+
+    const result = await BattlePassService.addXP(req.user!.userId, xpAmount, source);
     res.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to add XP';
@@ -188,8 +218,10 @@ router.post('/battlepass/add-xp', authenticateToken, async (req: AuthRequest, re
 router.post('/battlepass/claim', authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const { level, track } = req.body;
-    if (!level || !track) {
-      res.status(400).json({ error: 'level and track (free/premium) are required' });
+    const tierLevel = parseInt(level);
+
+    if (!tierLevel || tierLevel < 1 || tierLevel > 50) {
+      res.status(400).json({ error: 'level must be between 1 and 50' });
       return;
     }
 
@@ -198,15 +230,7 @@ router.post('/battlepass/claim', authenticateToken, async (req: AuthRequest, res
       return;
     }
 
-    const result = await BattlePassService.claimReward(req.user!.userId, level, track);
-
-    // If the reward was a pack, auto-open it for the player (free pack from battle pass)
-    if (result.grantedPack) {
-      // Grant the pack directly by purchasing with 0 cost isn't clean
-      // Instead, open the pack through a special free-pack path
-      // For now, return the pack type so the client can open it
-    }
-
+    const result = await BattlePassService.claimReward(req.user!.userId, tierLevel, track);
     res.json(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Failed to claim reward';
@@ -230,7 +254,7 @@ router.post('/battlepass/upgrade-premium', authenticateToken, async (req: AuthRe
 });
 
 /** GET /api/economy/battlepass/tiers — Get tier definitions */
-router.get('/battlepass/tiers', (_req: AuthRequest, res: Response) => {
+router.get('/battlepass/tiers', (_req: Request, res: Response) => {
   res.json({
     tiers: BattlePassService.getTiers(),
     premiumCost: BattlePassService.getPremiumCost(),
