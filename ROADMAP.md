@@ -96,24 +96,24 @@ This roadmap transforms StarForge from a working prototype into a polished, comp
 *"Free-to-play done right — generous but sustainable."*
 
 ### 2.1 Currency System
-- [ ] **Gold** (soft currency): earned from quests, wins, achievements
-- [ ] **Stardust** (crafting currency): earned from disenchanting duplicate/unwanted cards
-- [ ] **Nebula Gems** (premium currency): purchased with real money
-- [ ] Clear exchange rates: 100 Gold = 1 pack, crafting costs by rarity
+- [x] **Gold** (soft currency): earned from quests, wins, achievements
+- [x] **Stardust** (crafting currency): earned from disenchanting duplicate/unwanted cards
+- [x] **Nebula Gems** (premium currency): purchased with real money
+- [x] Clear exchange rates: 100 Gold = 1 pack, crafting costs by rarity
 
 ### 2.2 Card Acquisition
-- [ ] Booster packs (5 cards, guaranteed 1 rare or better) — purchasable with Gold or Gems
-- [ ] Duplicate protection (no more than 2 of the same Legendary)
-- [ ] Crafting system: disenchant cards into Stardust, craft specific cards you want
-- [ ] Pity timer: guaranteed Legendary within every 40 packs
+- [x] Booster packs (5 cards, guaranteed 1 rare or better) — purchasable with Gold or Gems
+- [x] Duplicate protection (no more than 2 of the same Legendary)
+- [x] Crafting system: disenchant cards into Stardust, craft specific cards you want
+- [x] Pity timer: guaranteed Legendary within every 40 packs
 - [ ] Starter bundles for new players (high value, one-time purchase)
 
 ### 2.3 Monetization
-- [ ] Battle Pass (free + premium track, ~60 tiers per season)
+- [x] Battle Pass (free + premium track, ~60 tiers per season)
 - [ ] Cosmetic shop: card backs, hero skins, board themes, emotes
 - [ ] Pre-built deck bundles (great for new players who want to compete immediately)
 - [ ] Season pass / expansion pre-order with bonus cosmetics
-- [ ] **No pay-to-win**: cosmetics and acceleration only, never exclusive gameplay content
+- [x] **No pay-to-win**: cosmetics and acceleration only, never exclusive gameplay content
 
 ### 2.4 Payment Infrastructure
 - [ ] Stripe integration (web)

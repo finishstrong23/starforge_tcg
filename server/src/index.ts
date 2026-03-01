@@ -11,6 +11,7 @@ import analyticsRoutes from './routes/analytics';
 import questRoutes from './routes/quests';
 import arenaRoutes from './routes/arena';
 import rankedRoutes from './routes/ranked';
+import economyRoutes from './routes/economy';
 import { MatchmakingService } from './services/MatchmakingService';
 import * as GameStateService from './services/GameStateService';
 import { GameWebSocketServer } from './services/WebSocketServer';
@@ -91,6 +92,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/quests', questRoutes);
 app.use('/api/arena', arenaRoutes);
 app.use('/api/ranked', rankedRoutes);
+app.use('/api/economy', economyRoutes);
 
 // Server stats endpoint
 app.get('/api/stats', (_req, res) => {
@@ -112,6 +114,7 @@ server.listen(config.port, () => {
   console.log(`Environment: ${config.nodeEnv}`);
   console.log(`WebSocket endpoint: ws://localhost:${config.port}/ws`);
   console.log(`Server-authoritative game engine: ACTIVE`);
+  console.log(`Economy services: currency, packs, crafting, battle pass ACTIVE`);
 });
 
 // Graceful shutdown
