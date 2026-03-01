@@ -11,6 +11,7 @@ interface TurnTimerProps {
   turnNumber: number;
   onTimeUp: () => void;
   maxTime?: number; // seconds
+  paused?: boolean; // pause countdown (e.g. during hero intro)
 }
 
 export const TurnTimer: React.FC<TurnTimerProps> = ({
@@ -18,17 +19,20 @@ export const TurnTimer: React.FC<TurnTimerProps> = ({
   turnNumber,
   onTimeUp,
   maxTime = 30,
+  paused = false,
 }) => {
   const [timeLeft, setTimeLeft] = useState(maxTime);
 
+  // Reset timer when turn changes
   useEffect(() => {
-    console.log('[TurnTimer] Effect triggered - turn:', turnNumber, 'isPlayerTurn:', isPlayerTurn);
-
-    // Reset timer when turn changes
     setTimeLeft(maxTime);
+  }, [turnNumber, maxTime]);
 
-    if (!isPlayerTurn) {
-      // Don't start interval for opponent turn
+  useEffect(() => {
+    console.log('[TurnTimer] Effect triggered - turn:', turnNumber, 'isPlayerTurn:', isPlayerTurn, 'paused:', paused);
+
+    if (!isPlayerTurn || paused) {
+      // Don't start interval for opponent turn or while paused
       return;
     }
 
@@ -51,7 +55,7 @@ export const TurnTimer: React.FC<TurnTimerProps> = ({
       console.log('[TurnTimer] Cleanup - clearing interval');
       clearInterval(interval);
     };
-  }, [turnNumber, isPlayerTurn, maxTime, onTimeUp]);
+  }, [turnNumber, isPlayerTurn, paused, maxTime, onTimeUp]);
 
   // Calculate percentage for progress bar
   const percentage = (timeLeft / maxTime) * 100;

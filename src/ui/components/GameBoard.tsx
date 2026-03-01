@@ -304,6 +304,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
             turnNumber={turnNumber}
             onTimeUp={handleTimeUp}
             maxTime={30}
+            paused={showIntro}
           />
         </div>
 
