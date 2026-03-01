@@ -123,24 +123,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     }, 1200 + Math.random() * 1500);
   }, []);
 
-  if (!gameState || !playerState || !opponentState) {
-    return (
-      <div style={styles.loading}>
-        <div style={styles.loadingText}>Loading game...</div>
-      </div>
-    );
-  }
-
-  const handleCardClick = (card: any) => {
-    if (card.zone === 'HAND' && canPlayCard(card)) {
-      triggerCardFlight(card);
-      selectCard(card);
-    } else if (card.zone === 'BOARD' && card.controllerId === 'player') {
-      selectCard(card);
-    }
-  };
-
   // ── Drag-and-drop handlers ──
+  // NOTE: These useCallback hooks MUST be before the early return below,
+  // otherwise React sees a different hook count between renders (error #310).
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
@@ -162,6 +147,23 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       selectCard(card);
     }
   }, [playerHand, canPlayCard, selectCard, triggerCardFlight]);
+
+  if (!gameState || !playerState || !opponentState) {
+    return (
+      <div style={styles.loading}>
+        <div style={styles.loadingText}>Loading game...</div>
+      </div>
+    );
+  }
+
+  const handleCardClick = (card: any) => {
+    if (card.zone === 'HAND' && canPlayCard(card)) {
+      triggerCardFlight(card);
+      selectCard(card);
+    } else if (card.zone === 'BOARD' && card.controllerId === 'player') {
+      selectCard(card);
+    }
+  };
 
   const onTargetClick = (targetId: string) => {
     handleTargetClick(targetId);
