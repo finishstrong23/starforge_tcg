@@ -1,6 +1,7 @@
 .vercel
 node_modules/
 dist/
+coverage/
 _balance_test.cjs
 
 # Capacitor native build artifacts

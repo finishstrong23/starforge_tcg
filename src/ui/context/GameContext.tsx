@@ -511,7 +511,6 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       return undefined;
     }
     // Only re-init when game config props change (callbacks accessed via stable refs)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [playerRace, aiDifficulty, forcedOpponentRace]);
 
   // Get current state from engine
