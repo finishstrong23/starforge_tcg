@@ -12,7 +12,11 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint src --ext .ts,.tsx",
     "dev": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "cap:sync": "vite build && capacitor sync",
+    "cap:android": "vite build && capacitor sync android && capacitor open android",
+    "cap:ios": "vite build && capacitor sync ios && capacitor open ios",
+    "cap:copy": "capacitor copy"
   },
   "keywords": [
     "tcg",
@@ -41,6 +45,14 @@
     "xlsx": "^0.18.5"
   },
   "dependencies": {
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/haptics": "^8.0.1",
+    "@capacitor/ios": "^8.1.0",
+    "@capacitor/keyboard": "^8.0.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.1",
     "peerjs": "^1.5.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
