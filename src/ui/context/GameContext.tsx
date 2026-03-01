@@ -229,10 +229,20 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const aiRef = useRef<AIPlayer | null>(null);
   const aiTurnInProgressRef = useRef(false);
 
-  // Force UI update
+  // Force UI update — batched via rAF to prevent "too many re-renders"
+  const rafPendingRef = useRef(false);
   const forceUpdate = useCallback(() => {
-    setUpdateCounter(c => c + 1);
+    if (rafPendingRef.current) return;
+    rafPendingRef.current = true;
+    requestAnimationFrame(() => {
+      rafPendingRef.current = false;
+      setUpdateCounter(c => c + 1);
+    });
   }, []);
+
+  // Refs for stable access inside effects (avoids dependency churn)
+  const forceUpdateRef = useRef(forceUpdate);
+  forceUpdateRef.current = forceUpdate;
 
   // Cancel targeting mode
   const cancelTargeting = useCallback(() => {
@@ -358,7 +368,11 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         break;
       }
     }
-  }, [getCardName, addLogEntry]);
+  }, [getCardName, addLogEntry, emitVFX]);
+
+  // Ref for stable access in init effect subscription
+  const handleGameEventForLogRef = useRef(handleGameEventForLog);
+  handleGameEventForLogRef.current = handleGameEventForLog;
 
   // Process next AI animation from queue
   const processAiAnimationQueue = useCallback(() => {
@@ -468,31 +482,34 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     engineRef.current = engine;
     aiRef.current = ai;
 
-    // Subscribe to game events
+    // Subscribe to game events (use refs for stable callbacks)
     const events = engine.getEvents();
     const subscription = events.subscribe((event) => {
       console.log('Game event:', event.type);
-      handleGameEventForLog(event);
-      forceUpdate();
+      handleGameEventForLogRef.current(event);
+      forceUpdateRef.current();
     });
 
     // Initial update
-    forceUpdate();
+    forceUpdateRef.current();
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [playerRace, aiDifficulty, forcedOpponentRace, forceUpdate, handleGameEventForLog]);
+    // Only re-init when game config props change (callbacks accessed via stable refs)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerRace, aiDifficulty, forcedOpponentRace]);
 
   // Get current state from engine
   const gameState = engineRef.current?.getState() || null;
   const playerState = gameState?.players.get('player') || null;
   const opponentState = gameState?.players.get('opponent') || null;
-  const isPlayerTurn = gameState?.activePlayerId === 'player' && gameState?.phase === GamePhase.MAIN;
+  const activePlayerId = gameState?.activePlayerId || null;
+  const isPlayerTurn = activePlayerId === 'player' && gameState?.phase === GamePhase.MAIN;
   const isGameOver = gameState?.status === GameStatus.FINISHED || gameState?.status === GameStatus.DRAW;
   const turnNumber = gameState?.turn || 0;
 
-  // Get cards from zones
+  // Get cards from zones — depends on updateCounter to refresh after engine state changes
   const getCardsFromZone = useCallback((playerId: string, zone: CardZone): CardInstance[] => {
     if (!engineRef.current) return [];
     const board = engineRef.current.getStateManager().getBoard();
@@ -503,13 +520,13 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const playerBoard = getCardsFromZone('player', CardZone.BOARD);
   const opponentBoard = getCardsFromZone('opponent', CardZone.BOARD);
 
-  // AI Turn Logic - runs when it becomes opponent's turn
+  // AI Turn Logic - runs only when activePlayerId changes (not on every state change)
   useEffect(() => {
+    if (activePlayerId !== 'opponent') return;
     if (!engineRef.current || !aiRef.current) return;
 
     const state = engineRef.current.getState();
     if (state.status !== GameStatus.ACTIVE) return;
-    if (state.activePlayerId !== 'opponent') return;
     if (aiTurnInProgressRef.current) return;
 
     console.log('AI turn starting...');
@@ -529,12 +546,12 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         console.error('AI turn error:', err);
       } finally {
         aiTurnInProgressRef.current = false;
-        forceUpdate();
+        forceUpdateRef.current();
       }
     };
 
     runAI();
-  }, [updateCounter, forceUpdate]); // Trigger on any state change
+  }, [activePlayerId]); // Only trigger when the active player changes
 
   // Can play card check
   const canPlayCard = useCallback((card: CardInstance): boolean => {
