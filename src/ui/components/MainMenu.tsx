@@ -33,6 +33,7 @@ interface MainMenuProps {
   onReplays?: () => void;
   onLeaderboard?: () => void;
   onMetaDashboard?: () => void;
+  onSpectate?: () => void;
 }
 
 type MenuView = 'main' | 'play';
@@ -42,7 +43,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
     onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder,
     onTutorial, onSettings, onStats, onCollection, onCrafting,
     onBattlePass, onPacks, onAchievements, onDaily,
-    onTournament, onReplays, onLeaderboard, onMetaDashboard,
+    onTournament, onReplays, onLeaderboard, onMetaDashboard, onSpectate,
   } = props;
 
   const [view, setView] = useState<MenuView>('main');
@@ -222,6 +223,12 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
           <button style={s.navBtn} onClick={onLeaderboard}>
             <div style={s.navIcon}>&#x1F4CA;</div>
             <div style={s.navLabel}>Ladder</div>
+          </button>
+        )}
+        {onSpectate && (
+          <button style={s.navBtn} onClick={onSpectate}>
+            <div style={s.navIcon}>&#x1F441;</div>
+            <div style={s.navLabel}>Spectate</div>
           </button>
         )}
         {onReplays && (

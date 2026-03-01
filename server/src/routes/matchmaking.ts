@@ -2,7 +2,7 @@ import { Router, Response } from 'express';
 import { authenticateToken, AuthRequest } from '../middleware/auth';
 import { MatchmakingService } from '../services/MatchmakingService';
 import { GameMode } from '../models/Game';
-import { getPlayerMmr } from '../services/RankedLadderService';
+import { getPlayerMmr, getPlayerRank } from '../services/RankedLadderService';
 
 const VALID_MODES: GameMode[] = ['ranked', 'casual', 'arena'];
 
@@ -24,6 +24,8 @@ export function createMatchmakingRoutes(matchmaking: MatchmakingService): Router
       }
 
       const mmr = await getPlayerMmr(req.user!.userId);
+      const rank = await getPlayerRank(req.user!.userId);
+      const rankTier = rank?.tier || 'bronze';
 
       matchmaking.enqueue({
         playerId: req.user!.userId,
@@ -33,6 +35,7 @@ export function createMatchmakingRoutes(matchmaking: MatchmakingService): Router
         race: race || 'unknown',
         queuedAt: Date.now(),
         expandRange: 0,
+        rankTier,
       });
 
       res.json({

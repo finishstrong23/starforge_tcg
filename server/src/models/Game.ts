@@ -27,6 +27,8 @@ export interface MatchmakingTicket {
   race: string;
   queuedAt: number;
   expandRange: number;
+  /** Player's current rank tier (for bot pairing in apprentice ranks) */
+  rankTier?: string;
 }
 
 export interface ActiveGame {

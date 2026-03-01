@@ -64,31 +64,31 @@ This roadmap transforms StarForge from a working prototype into a polished, comp
 *"Make the game worth playing every day."*
 
 ### 1.1 Server-Authoritative Multiplayer
-- [ ] Replace P2P with client-server architecture (WebSocket game server)
-- [ ] Server-side game engine execution (clients send actions, server resolves)
-- [ ] Reconnection handling (resume games after disconnect)
-- [ ] Anti-cheat: all RNG is server-side, state is authoritative
-- [ ] Spectator mode foundation
+- [x] Replace P2P with client-server architecture (WebSocket game server)
+- [x] Server-side game engine execution (clients send actions, server resolves)
+- [x] Reconnection handling (resume games after disconnect)
+- [x] Anti-cheat: all RNG is server-side, state is authoritative
+- [x] Spectator mode foundation (backend + frontend browse/watch UI)
 
 ### 1.2 Matchmaking & Ranked
-- [ ] MMR-based matchmaking (Elo or Glicko-2 rating system)
-- [ ] Ranked ladder with divisions (Bronze > Silver > Gold > Diamond > Master > Legend)
-- [ ] Casual queue (hidden MMR, no rank loss)
-- [ ] Queue times under 30 seconds (bots backfill if needed)
-- [ ] Seasonal resets with rewards based on peak rank
+- [x] MMR-based matchmaking (Elo or Glicko-2 rating system)
+- [x] Ranked ladder with divisions (Bronze > Silver > Gold > Diamond > Master > Legend)
+- [x] Casual queue (hidden MMR, no rank loss)
+- [x] Queue times under 30 seconds (bots backfill if needed)
+- [x] Seasonal resets with rewards based on peak rank
 
 ### 1.3 New Player Experience
-- [ ] Interactive tutorial (5-7 minutes, teaches core mechanics step-by-step)
-- [ ] Guided first-week experience: free starter deck per day for first 3 days
-- [ ] Bot opponents for ranks below Silver (smooth difficulty curve)
-- [ ] "Apprentice ranks" that can't lose stars (Bronze 10 through Bronze 1)
-- [ ] Tooltips and keyword glossary accessible in-game
+- [x] Interactive tutorial (5-7 minutes, teaches core mechanics step-by-step)
+- [x] Guided first-week experience: free starter deck per day for first 3 days
+- [x] Bot opponents for ranks below Silver (smooth difficulty curve)
+- [x] "Apprentice ranks" that can't lose stars (Bronze 10 through Bronze 1)
+- [x] Tooltips and keyword glossary accessible in-game
 
 ### 1.4 Daily Engagement Loop
-- [ ] 3 daily quests (reroll 1 per day), e.g. "Win 3 games as Pyroclast"
-- [ ] Weekly challenge with premium currency reward
-- [ ] First-win-of-the-day bonus (gold + XP)
-- [ ] Login streak bonuses (3-day, 7-day, 14-day, 30-day)
+- [x] 3 daily quests (reroll 1 per day), e.g. "Win 3 games as Pyroclast"
+- [x] Weekly challenge with premium currency reward
+- [x] First-win-of-the-day bonus (gold + XP)
+- [x] Login streak bonuses (3-day, 7-day, 14-day, 30-day)
 
 ---
 

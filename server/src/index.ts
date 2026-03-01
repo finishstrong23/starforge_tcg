@@ -15,6 +15,7 @@ import { MatchmakingService } from './services/MatchmakingService';
 import * as GameStateService from './services/GameStateService';
 import { GameWebSocketServer } from './services/WebSocketServer';
 import * as RankedLadder from './services/RankedLadderService';
+import * as ServerEngine from './services/ServerGameEngine';
 
 const app = express();
 const server = createServer(app);
@@ -29,19 +30,56 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
+// Initialize server-side game engine (loads card database)
+ServerEngine.initialize();
+
 // WebSocket server
 const wsServer = new GameWebSocketServer(server);
 
-// Matchmaking
-const matchmaking = new MatchmakingService((ticket1, ticket2, gameId) => {
-  const game = GameStateService.createGame(
-    ticket1.playerId,
-    ticket2.playerId,
-    ticket1.mode,
-    {} // Initial game state would be created by the engine
-  );
-  wsServer.notifyMatchFound(ticket1.playerId, ticket2.playerId, game.id);
-});
+// Matchmaking — creates server-authoritative games
+const matchmaking = new MatchmakingService(
+  (ticket1, ticket2, gameId) => {
+    // Create server-authoritative game with full engine
+    const initialState = ServerEngine.createServerGame(
+      gameId,
+      ticket1.playerId,
+      ticket2.playerId,
+      ticket1.race,
+      ticket2.race,
+      ticket1.mode
+    );
+
+    // Track in GameStateService for reconnection/lookup
+    GameStateService.createGame(
+      ticket1.playerId,
+      ticket2.playerId,
+      ticket1.mode,
+      initialState
+    );
+
+    wsServer.notifyMatchFound(ticket1.playerId, ticket2.playerId, gameId);
+  },
+  (ticket, botTicket, gameId) => {
+    // Bot match — same server-authoritative flow
+    const initialState = ServerEngine.createServerGame(
+      gameId,
+      ticket.playerId,
+      botTicket.playerId,
+      ticket.race,
+      botTicket.race,
+      ticket.mode
+    );
+
+    GameStateService.createGame(
+      ticket.playerId,
+      botTicket.playerId,
+      ticket.mode,
+      initialState
+    );
+
+    wsServer.notifyMatchFound(ticket.playerId, botTicket.playerId, gameId);
+  }
+);
 matchmaking.start();
 
 // API Routes
@@ -59,6 +97,7 @@ app.get('/api/stats', (_req, res) => {
   res.json({
     onlinePlayers: wsServer.getOnlineCount(),
     activeGames: GameStateService.getActiveGameCount(),
+    serverGames: ServerEngine.getActiveGameCount(),
     queueSizes: {
       ranked: matchmaking.getQueueSize('ranked'),
       casual: matchmaking.getQueueSize('casual'),
@@ -72,6 +111,7 @@ server.listen(config.port, () => {
   console.log(`StarForge TCG Server running on port ${config.port}`);
   console.log(`Environment: ${config.nodeEnv}`);
   console.log(`WebSocket endpoint: ws://localhost:${config.port}/ws`);
+  console.log(`Server-authoritative game engine: ACTIVE`);
 });
 
 // Graceful shutdown

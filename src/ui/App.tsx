@@ -30,6 +30,7 @@ import { TournamentScreen } from './components/TournamentScreen';
 import { ReplayViewer } from './components/ReplayViewer';
 import { LeaderboardScreen } from './components/LeaderboardScreen';
 import { MetaDashboard } from './components/MetaDashboard';
+import { SpectateScreen } from './components/SpectateScreen';
 import { ScreenTransition } from './components/ScreenTransition';
 import { recordGameResult } from '../stats/GameStats';
 import type { CampaignBattleResult } from './components/CampaignGame';
@@ -74,7 +75,8 @@ type GameScreen =
   | 'tournament'
   | 'replays'
   | 'leaderboard'
-  | 'meta-dashboard';
+  | 'meta-dashboard'
+  | 'spectate';
 
 export const App: React.FC = () => {
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -293,6 +295,7 @@ export const App: React.FC = () => {
           onReplays={() => setScreen('replays')}
           onLeaderboard={() => setScreen('leaderboard')}
           onMetaDashboard={() => setScreen('meta-dashboard')}
+          onSpectate={() => setScreen('spectate')}
         />
       )}
 
@@ -504,6 +507,13 @@ export const App: React.FC = () => {
       {screen === 'meta-dashboard' && (
         <ScreenTransition screenKey="meta-dashboard">
           <MetaDashboard onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Spectate Live Games */}
+      {screen === 'spectate' && (
+        <ScreenTransition screenKey="spectate">
+          <SpectateScreen onBack={() => setScreen('menu')} />
         </ScreenTransition>
       )}
 

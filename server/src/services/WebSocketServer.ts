@@ -5,6 +5,8 @@ import { config } from '../config/env';
 import { AuthPayload } from '../middleware/auth';
 import * as GameStateService from './GameStateService';
 import * as RankedLadder from './RankedLadderService';
+import * as ServerEngine from './ServerGameEngine';
+import type { ClientAction } from './ServerGameEngine';
 
 interface PlayerConnection {
   ws: WebSocket;
@@ -13,17 +15,10 @@ interface PlayerConnection {
   gameId?: string;
 }
 
-type GameAction =
-  | { type: 'PLAY_CARD'; cardId: string; targetId?: string; position?: number }
-  | { type: 'ATTACK'; attackerId: string; targetId: string }
-  | { type: 'END_TURN' }
-  | { type: 'CONCEDE' }
-  | { type: 'EMOTE'; emoteId: string };
-
 interface ClientMessage {
   type: 'ACTION' | 'RECONNECT' | 'SPECTATE';
   gameId?: string;
-  action?: GameAction;
+  action?: ClientAction;
 }
 
 interface ServerMessage {
@@ -94,9 +89,18 @@ export class GameWebSocketServer {
         data: { event: 'opponent_reconnected' },
       });
 
+      // Send authoritative game state from server engine
+      const engineState = ServerEngine.getGameState(activeGame.id);
+      const playerHand = ServerEngine.getPlayerHand(activeGame.id, user.userId);
       this.send(ws, {
         type: 'GAME_STATE',
-        data: { gameId: activeGame.id, state: activeGame.state, turnNumber: activeGame.turnNumber, reconnected: true },
+        data: {
+          gameId: activeGame.id,
+          state: engineState,
+          hand: playerHand,
+          turnNumber: activeGame.turnNumber,
+          reconnected: true,
+        },
       });
     }
 
@@ -134,52 +138,80 @@ export class GameWebSocketServer {
     }
   }
 
-  private handleGameAction(conn: PlayerConnection, action: GameAction): void {
+  private handleGameAction(conn: PlayerConnection, action: ClientAction): void {
     if (!conn.gameId) {
       this.send(conn.ws, { type: 'ERROR', data: { message: 'Not in a game' } });
       return;
     }
 
-    if (!GameStateService.isPlayerTurn(conn.gameId, conn.userId)) {
-      this.send(conn.ws, { type: 'ERROR', data: { message: 'Not your turn' } });
+    // Server-authoritative: process action through the game engine
+    const result = ServerEngine.processAction(conn.gameId, conn.userId, action);
+
+    if (!result.success) {
+      this.send(conn.ws, {
+        type: 'ERROR',
+        data: { message: result.error || 'Invalid action' },
+      });
       return;
     }
 
-    // Server-authoritative: validate and apply the action
     const game = GameStateService.getActiveGame(conn.gameId);
     if (!game) return;
 
-    // In production, the game engine would run server-side here
-    // For now, broadcast the action to both players for client-side resolution
     const opponentId = game.player1Id === conn.userId ? game.player2Id : game.player1Id;
 
-    this.sendToPlayer(conn.userId, {
-      type: 'ACTION_RESULT',
-      data: { action, valid: true },
-    });
-
-    this.sendToPlayer(opponentId, {
-      type: 'ACTION_RESULT',
-      data: { action, playerId: conn.userId },
-    });
-
-    // Broadcast to spectators
-    this.broadcastToSpectators(conn.gameId, {
-      type: 'ACTION_RESULT',
-      data: { action, playerId: conn.userId },
-    });
-
-    // If END_TURN, switch active player
-    if (action.type === 'END_TURN') {
-      GameStateService.updateGameState(conn.gameId, game.state, opponentId);
+    // Update GameStateService with new active player from engine
+    const activePlayer = ServerEngine.getActivePlayer(conn.gameId);
+    if (activePlayer && action.type === 'END_TURN') {
+      GameStateService.updateGameState(conn.gameId, result.gameState, activePlayer);
     }
 
-    // If CONCEDE, end the game with opponent as winner
+    // Send authoritative state to the acting player (with their hand)
+    this.sendToPlayer(conn.userId, {
+      type: 'ACTION_RESULT',
+      data: {
+        action: { type: action.type },
+        valid: true,
+        gameState: result.gameState,
+        hand: result.playerHands[conn.userId] || [],
+      },
+    });
+
+    // Send authoritative state to the opponent (with their hand)
+    this.sendToPlayer(opponentId, {
+      type: 'ACTION_RESULT',
+      data: {
+        action: { type: action.type, playerId: conn.userId },
+        gameState: result.gameState,
+        hand: result.playerHands[opponentId] || [],
+      },
+    });
+
+    // Broadcast to spectators (no hand info)
+    this.broadcastToSpectators(conn.gameId, {
+      type: 'ACTION_RESULT',
+      data: {
+        action: { type: action.type, playerId: conn.userId },
+        gameState: result.gameState,
+      },
+    });
+
+    // Handle game over
+    if (result.gameOver) {
+      this.notifyGameOver(conn.gameId, result.winnerId || null);
+      GameStateService.endGame(conn.gameId, result.winnerId || null, 0, 0).catch(err =>
+        console.error('Failed to end game:', err)
+      );
+      ServerEngine.removeGame(conn.gameId);
+    }
+
+    // Handle concede
     if (action.type === 'CONCEDE') {
       this.notifyGameOver(conn.gameId, opponentId);
       GameStateService.endGame(conn.gameId, opponentId, 0, 0).catch(err =>
         console.error('Failed to end game after concede:', err)
       );
+      ServerEngine.removeGame(conn.gameId);
     }
   }
 
@@ -204,6 +236,7 @@ export class GameWebSocketServer {
         GameStateService.endGame(game.id, opponentId, 0, 0).catch(err =>
           console.error('Failed to end game after disconnect timeout:', err)
         );
+        ServerEngine.removeGame(game.id);
       }
     }, DISCONNECT_TIMEOUT_MS);
 
@@ -223,9 +256,18 @@ export class GameWebSocketServer {
     }
 
     conn.gameId = gameId;
+
+    // Send authoritative state from the server engine
+    const engineState = ServerEngine.getGameState(gameId);
+    const playerHand = ServerEngine.getPlayerHand(gameId, conn.userId);
     this.send(conn.ws, {
       type: 'GAME_STATE',
-      data: { gameId, state: game.state, turnNumber: game.turnNumber },
+      data: {
+        gameId,
+        state: engineState,
+        hand: playerHand,
+        turnNumber: game.turnNumber,
+      },
     });
   }
 
@@ -245,22 +287,29 @@ export class GameWebSocketServer {
 
     ws.on('close', () => spectatorSet!.delete(ws));
 
+    // Send authoritative state from the server engine (no hand data for spectators)
+    const engineState = ServerEngine.getGameState(gameId);
     this.send(ws, {
       type: 'GAME_STATE',
-      data: { gameId, state: game.state, turnNumber: game.turnNumber, spectating: true },
+      data: { gameId, state: engineState, turnNumber: game.turnNumber, spectating: true },
     });
   }
 
   // Public methods for external use (matchmaking, etc.)
 
   notifyMatchFound(player1Id: string, player2Id: string, gameId: string): void {
+    // Send initial authoritative game state from the server engine
+    const gameState = ServerEngine.getGameState(gameId);
+    const p1Hand = ServerEngine.getPlayerHand(gameId, player1Id);
+    const p2Hand = ServerEngine.getPlayerHand(gameId, player2Id);
+
     this.sendToPlayer(player1Id, {
       type: 'MATCH_FOUND',
-      data: { gameId, opponentId: player2Id },
+      data: { gameId, opponentId: player2Id, gameState, hand: p1Hand },
     });
     this.sendToPlayer(player2Id, {
       type: 'MATCH_FOUND',
-      data: { gameId, opponentId: player1Id },
+      data: { gameId, opponentId: player1Id, gameState, hand: p2Hand },
     });
 
     // Set game IDs on connections

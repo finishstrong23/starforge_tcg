@@ -6,6 +6,11 @@ const MMR_RANGE_EXPAND_PER_SEC = 5;
 const MAX_MMR_RANGE = 500;
 const QUEUE_CHECK_INTERVAL = 1000;
 const BOT_BACKFILL_WAIT_SEC = 30; // After 30 seconds, match with a bot
+const APPRENTICE_BOT_WAIT_SEC = 3; // Bronze/Silver ranked players get bots quickly
+
+// Tiers where ranked players are primarily paired against bots for a smoother learning curve.
+// This gives new players safe practice before entering competitive Gold+ tiers.
+const BOT_PAIRING_TIERS = new Set(['bronze', 'silver']);
 
 const BOT_RACES = [
   'pyroclast', 'verdani', 'mechara', 'voidborn', 'celestari',
@@ -81,7 +86,7 @@ export class MatchmakingService {
   private processQueues(): void {
     const now = Date.now();
 
-    for (const [, queue] of this.queues) {
+    for (const [mode, queue] of this.queues) {
       // Update expand ranges based on wait time
       for (const ticket of queue) {
         const waitSec = (now - ticket.queuedAt) / 1000;
@@ -91,7 +96,52 @@ export class MatchmakingService {
         );
       }
 
-      // Try to find matches (greedy: best MMR match first)
+      // ── Apprentice bot pairing ──────────────────────────────────
+      // In ranked mode, Bronze and Silver players are matched against
+      // bots after a short wait (3s). This provides a smooth difficulty
+      // curve for new players while they learn the game. They can still
+      // match against other human apprentice players if one is found
+      // within that window.
+      if (this.onBotMatch && mode === 'ranked') {
+        const apprenticeBots: number[] = [];
+        for (let i = 0; i < queue.length; i++) {
+          const ticket = queue[i];
+          const tier = ticket.rankTier || 'bronze';
+          const waitSec = (now - ticket.queuedAt) / 1000;
+
+          if (BOT_PAIRING_TIERS.has(tier) && waitSec >= APPRENTICE_BOT_WAIT_SEC) {
+            apprenticeBots.push(i);
+          }
+        }
+
+        // Match apprentice players with appropriately-skilled bots
+        for (const idx of apprenticeBots.reverse()) {
+          const ticket = queue[idx];
+          const botRace = BOT_RACES[Math.floor(Math.random() * BOT_RACES.length)];
+
+          // Scale bot MMR based on player's rank tier for difficulty curve
+          const botMmrOffset = ticket.rankTier === 'bronze'
+            ? Math.floor(Math.random() * 50) - 75  // Easier bots for Bronze
+            : Math.floor(Math.random() * 80) - 40;  // Closer-matched bots for Silver
+
+          const botTicket: MatchmakingTicket = {
+            playerId: `bot_${uuidv4()}`,
+            mode: ticket.mode,
+            mmr: Math.max(500, ticket.mmr + botMmrOffset),
+            deckId: `bot_deck_${botRace}`,
+            race: botRace,
+            queuedAt: now,
+            expandRange: 0,
+            rankTier: ticket.rankTier,
+          };
+
+          const gameId = uuidv4();
+          queue.splice(idx, 1);
+          this.onBotMatch(ticket, botTicket, gameId);
+        }
+      }
+
+      // Try to find human vs human matches (greedy: best MMR match first)
       const matched = new Set<number>();
 
       for (let i = 0; i < queue.length; i++) {
@@ -127,7 +177,7 @@ export class MatchmakingService {
         queue.splice(idx, 1);
       }
 
-      // Bot backfill: match long-waiting players against a bot
+      // Bot backfill: match long-waiting players against a bot (Gold+ and casual)
       if (this.onBotMatch) {
         const botBackfill: number[] = [];
         for (let i = 0; i < queue.length; i++) {
