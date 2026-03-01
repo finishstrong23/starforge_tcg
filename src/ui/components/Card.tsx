@@ -11,7 +11,7 @@
  * - Buff/damage color coding on stats
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { hasKeyword } from '../../types/Card';
 import type { CardInstance } from '../../types/Card';
 import { CombatKeyword, OriginalKeyword, TriggerKeyword } from '../../types/Keywords';
@@ -118,7 +118,53 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [popupSide, setPopupSide] = useState<'above' | 'below'>('above');
+  const [popupAlign, setPopupAlign] = useState<'center' | 'left' | 'right'>('center');
+  const cardRef = useRef<HTMLDivElement>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isDraggable = isInHand && canPlay;
+
+  // Compute popup positioning when shown
+  const updatePopupPosition = useCallback(() => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    // Show below if too close to top
+    setPopupSide(rect.top < 260 ? 'below' : 'above');
+    // Align left/right if near screen edges
+    if (rect.left < 120) {
+      setPopupAlign('left');
+    } else if (window.innerWidth - rect.right < 120) {
+      setPopupAlign('right');
+    } else {
+      setPopupAlign('center');
+    }
+  }, []);
+
+  // Long-press for touch devices to show popup
+  const handleTouchStart = useCallback(() => {
+    longPressTimer.current = setTimeout(() => {
+      updatePopupPosition();
+      setIsHovered(true);
+    }, 400);
+  }, [updatePopupPosition]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+    // Dismiss popup after a short delay
+    if (isHovered) {
+      setTimeout(() => setIsHovered(false), 1500);
+    }
+  }, [isHovered]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    };
+  }, []);
   const definition = globalCardDatabase.getCard(card.definitionId);
   const isMinion = card.currentAttack !== undefined;
 
@@ -218,6 +264,7 @@ export const Card: React.FC<CardProps> = ({
 
   return (
     <div
+      ref={cardRef}
       style={{
         position: 'relative',
         display: 'inline-block',
@@ -237,8 +284,10 @@ export const Card: React.FC<CardProps> = ({
         setIsDragging(false);
         onDragEnd?.(e);
       }}
-      onMouseEnter={() => { if (!isDragging) setIsHovered(true); }}
+      onMouseEnter={() => { if (!isDragging) { updatePopupPosition(); setIsHovered(true); } }}
       onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Main Card */}
       <div
@@ -329,7 +378,12 @@ export const Card: React.FC<CardProps> = ({
 
       {/* Hover Popup - Large card with details */}
       {isHovered && (
-        <div style={styles.hoverPopup}>
+        <div style={{
+          ...styles.hoverPopup,
+          ...(popupSide === 'below' ? { top: '100%', bottom: 'auto', marginTop: '10px', marginBottom: 0 } : {}),
+          ...(popupAlign === 'left' ? { left: 0, transform: 'none' } : {}),
+          ...(popupAlign === 'right' ? { left: 'auto', right: 0, transform: 'none' } : {}),
+        }}>
           <div style={styles.popupHeader}>
             <span style={styles.popupCost}>{card.currentCost}</span>
             <span style={styles.popupName}>{definition?.name || 'Unknown'}</span>
@@ -417,8 +471,8 @@ export const Card: React.FC<CardProps> = ({
 const styles: { [key: string]: React.CSSProperties } = {
   card: {
     position: 'relative',
-    width: '90px',
-    height: '130px',
+    width: 'var(--card-width, 90px)',
+    height: 'var(--card-height, 130px)',
     background: 'linear-gradient(135deg, #2a2a4a 0%, #1a1a3a 100%)',
     borderRadius: '8px',
     display: 'flex',
@@ -428,12 +482,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     userSelect: 'none',
   },
   cardInHand: {
-    width: '100px',
-    height: '145px',
+    width: 'var(--card-hand-width, 100px)',
+    height: 'var(--card-hand-height, 145px)',
   },
   cardOnBoard: {
-    width: '85px',
-    height: '120px',
+    width: 'var(--card-width, 85px)',
+    height: 'var(--card-height, 120px)',
   },
   barrierOverlay: {
     position: 'absolute',
@@ -571,6 +625,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     left: '50%',
     transform: 'translateX(-50%)',
     width: '220px',
+    maxWidth: 'calc(100vw - 20px)',
     background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%)',
     border: '2px solid #ffcc00',
     borderRadius: '12px',

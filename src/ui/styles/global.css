@@ -316,10 +316,10 @@ html, body {
 /* Phone portrait (max 480px) */
 @media (max-width: 480px) {
   :root {
-    --card-width: 50px;
-    --card-height: 75px;
-    --card-hand-width: 58px;
-    --card-hand-height: 84px;
+    --card-width: 55px;
+    --card-height: 80px;
+    --card-hand-width: 62px;
+    --card-hand-height: 90px;
   }
 
   body {
@@ -360,6 +360,28 @@ html, body {
     --card-height: 80px;
     --card-hand-width: 62px;
     --card-hand-height: 90px;
+  }
+}
+
+/* ═══ DeckBuilder Mobile Layout ═════════════════════════════════ */
+
+/* Stack deck builder panels vertically on narrow screens */
+@media (max-width: 768px) {
+  .deckbuilder-body {
+    flex-direction: column !important;
+  }
+
+  .deckbuilder-pool {
+    border-right: none !important;
+    border-bottom: 1px solid #333355;
+    flex: 1 !important;
+    min-height: 0;
+  }
+
+  .deckbuilder-deck {
+    width: 100% !important;
+    max-height: 35vh;
+    flex-shrink: 0 !important;
   }
 }
 

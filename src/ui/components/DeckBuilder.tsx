@@ -204,9 +204,9 @@ export const DeckBuilder: React.FC<DeckBuilderProps> = ({
         </div>
       </div>
 
-      <div style={styles.body}>
+      <div style={styles.body} className="deckbuilder-body">
         {/* Left: Card Pool */}
-        <div style={styles.poolPanel}>
+        <div style={styles.poolPanel} className="deckbuilder-pool">
           {/* Tabs */}
           <div style={styles.tabs}>
             <button
@@ -342,7 +342,7 @@ export const DeckBuilder: React.FC<DeckBuilderProps> = ({
         </div>
 
         {/* Right: Current Deck */}
-        <div style={styles.deckPanel}>
+        <div style={styles.deckPanel} className="deckbuilder-deck">
           <h2 style={styles.deckTitle}>Your Deck</h2>
 
           {/* Mana Curve */}
@@ -424,10 +424,11 @@ const styles: { [key: string]: React.CSSProperties } = {
   header: {
     display: 'flex',
     alignItems: 'center',
-    gap: '20px',
-    padding: '15px 20px',
+    gap: '10px',
+    padding: '10px 15px',
     borderBottom: '1px solid #333355',
     flexShrink: 0,
+    flexWrap: 'wrap' as const,
   },
   backButton: {
     background: '#333',
@@ -534,7 +535,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     overflowY: 'auto',
     padding: '10px',
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
     gap: '8px',
     alignContent: 'start',
   },
