@@ -46,6 +46,8 @@ export interface HeroDefinition {
   heroPower: HeroPower;
   /** Flavor text / lore */
   flavorText: string;
+  /** Opening quote spoken at match start */
+  introQuote: string;
   /** Alternate hero skins (cosmetic) */
   skins?: string[];
 }

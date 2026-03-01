@@ -26,6 +26,7 @@ import { CardBack } from './CardBack';
 import { BoardBackground } from './BoardBackground';
 import { EmoteWheel, EmoteBubble, type Emote } from './EmoteWheel';
 import { CardArt } from './CardArt';
+import { HeroIntro } from './HeroIntro';
 import { getHeroById } from '../../heroes';
 import { globalCardDatabase } from '../../cards/CardDatabase';
 import type { Race } from '../../types/Race';
@@ -85,6 +86,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
   } | null>(null);
   const flightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Hero intro state ──
+  const [showIntro, setShowIntro] = useState(true);
+
   // ── Emote state ──
   const [playerEmote, setPlayerEmote] = useState<string | null>(null);
   const [opponentEmote, setOpponentEmote] = useState<string | null>(null);
@@ -96,9 +100,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     }
   }, [isPlayerTurn, endTurn]);
 
-  // Look up hero power info for tooltips
+  // Look up hero definitions for intro + tooltips
   const playerHeroDef = useMemo(() =>
     getHeroById(playerState?.hero?.definitionId || ''), [playerState?.hero?.definitionId]);
+  const opponentHeroDef = useMemo(() =>
+    getHeroById(opponentState?.hero?.definitionId || ''), [opponentState?.hero?.definitionId]);
+
+  const handleIntroComplete = useCallback(() => setShowIntro(false), []);
 
   // ── Card flight trigger ──
   const triggerCardFlight = useCallback((card: any) => {
@@ -189,6 +197,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     <div style={styles.container}>
       {/* Animated starfield background */}
       <BoardBackground />
+
+      {/* Hero Intro Overlay — dramatic entrance before match starts */}
+      {showIntro && playerHeroDef && opponentHeroDef && (
+        <HeroIntro
+          playerHero={playerHeroDef}
+          opponentHero={opponentHeroDef}
+          onComplete={handleIntroComplete}
+        />
+      )}
 
       {/* VFX Overlay - floating damage/heal numbers, death bursts, spell rings */}
       <VFXOverlay events={vfxEvents} onEventDone={dismissVFX} />

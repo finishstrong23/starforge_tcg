@@ -69,6 +69,7 @@ export const HERO_COGSMITHS: HeroDefinition = {
     TargetType.FRIENDLY_MINION
   ),
   flavorText: 'Every cog has its place. Every machine has its purpose.',
+  introQuote: 'All systems operational. Initiating combat protocols.',
 };
 
 /**
@@ -98,6 +99,7 @@ export const HERO_LUMINAR: HeroDefinition = {
     TargetType.ALL_CHARACTERS
   ),
   flavorText: 'The light of Solhaven burns eternal, a beacon against the void.',
+  introQuote: 'The light shall judge you. Prepare yourself.',
 };
 
 /**
@@ -127,6 +129,7 @@ export const HERO_PYROCLAST: HeroDefinition = {
     TargetType.ENEMY_HERO // Also allows enemy minions
   ),
   flavorText: 'Fire consumes all. Fire purifies all. Fire is all.',
+  introQuote: 'Let the flames decide who is worthy!',
 };
 
 /**
@@ -155,6 +158,7 @@ export const HERO_VOIDBORN: HeroDefinition = {
     false
   ),
   flavorText: 'The void whispers secrets that shatter minds and unmake worlds.',
+  introQuote: 'The abyss has already foreseen your defeat.',
 };
 
 /**
@@ -192,6 +196,7 @@ export const HERO_BIOTITANS: HeroDefinition = {
     TargetType.FRIENDLY_MINION
   ),
   flavorText: 'Nature bends to her will, and worlds bloom in her wake.',
+  introQuote: 'Primeva stirs. You stand on borrowed ground.',
 };
 
 /**
@@ -228,6 +233,7 @@ export const HERO_CRYSTALLINE: HeroDefinition = {
     false
   ),
   flavorText: 'Crystal channels power. Prismora channels infinity.',
+  introQuote: 'The crystals hum with anticipation. Shall we begin?',
 };
 
 /**
@@ -266,6 +272,7 @@ export const HERO_PHANTOM_CORSAIRS: HeroDefinition = {
     TargetType.ALL_CHARACTERS
   ),
   flavorText: 'A captain of shadows sails between stars, taking what the void provides.',
+  introQuote: "Dead men tell no tales... but ghosts? We never shut up.",
 };
 
 /**
@@ -294,6 +301,7 @@ export const HERO_HIVEMIND: HeroDefinition = {
     false
   ),
   flavorText: 'The swarm is one. The one is swarm. Resistance feeds the collective.',
+  introQuote: 'We are many. You are one. The math is simple.',
 };
 
 /**
@@ -322,6 +330,7 @@ export const HERO_ASTROMANCERS: HeroDefinition = {
     false
   ),
   flavorText: 'The stars reveal all paths. She walks the one that leads to victory.',
+  introQuote: 'I have seen the stars align. This will be... interesting.',
 };
 
 /**
@@ -350,6 +359,7 @@ export const HERO_CHRONOBOUND: HeroDefinition = {
     false
   ),
   flavorText: 'Time is not a river but an ocean. He swims where others drown.',
+  introQuote: "I've already won this battle. You just don't know it yet.",
 };
 
 /**
