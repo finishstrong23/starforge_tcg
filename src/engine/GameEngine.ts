@@ -29,7 +29,7 @@ import { CardZone, CardType, CardRarity, hasKeyword } from '../types/Card';
 import type { CardInstance } from '../types/Card';
 import { canAffordCard } from '../types/Player';
 import type { PlayerState } from '../types/Player';
-import { CombatKeyword, TriggerKeyword } from '../types/Keywords';
+import { CombatKeyword, TriggerKeyword, OriginalKeyword } from '../types/Keywords';
 import { GameStateManager, PlayerSetup } from '../game/GameState';
 import { CombatResolver } from '../combat/CombatResolver';
 import { DeathProcessor } from '../combat/DeathProcessor';
@@ -312,6 +312,15 @@ export class GameEngine {
       } as CardEventData);
 
       player.minionsSummoned++;
+
+      // UPGRADE: if the card has UPGRADE(X), auto-spend extra crystals for bonus
+      this.processUpgrade(card, definition, player, action.playerId);
+
+      // ECHO: create a copy in hand that vanishes at end of turn
+      this.processEchoCopy(card, action.playerId);
+
+      // SWARM: recalculate for board change
+      this.effectResolver.recalculateSwarm(action.playerId);
     } else if (definition.type === CardType.SPELL) {
       // Spells go to graveyard after resolving
       player.spellsCastThisTurn++;
@@ -336,10 +345,13 @@ export class GameEngine {
         action.playerId,
         CardZone.GRAVEYARD
       );
+
+      // RESONATE: fire ON_SPELL_CAST triggers on all friendly minions
+      this.processSpellCastTriggers(action.playerId);
     }
 
-    // Process deaths if any minions died
-    this.deathProcessor.processDeaths();
+    // Process deaths if any minions died + recalculate SWARM
+    this.processDeathsAndRecalculate();
 
     // Check game end
     this.checkGameEnd();
@@ -353,6 +365,25 @@ export class GameEngine {
   private processAttack(action: GameAction): ActionResult {
     const data = action.data as AttackData;
 
+    // Fire ON_ATTACK effects on the attacker before combat resolves
+    const attacker = this.stateManager.getCard(data.attackerId);
+    if (attacker && !attacker.isSilenced) {
+      const attackerDef = this.cardDatabase.getCard(attacker.definitionId);
+      if (attackerDef) {
+        const onAttackEffects = attackerDef.effects.filter(
+          (e: any) => e.trigger === EffectTrigger.ON_ATTACK
+        );
+        if (onAttackEffects.length > 0) {
+          this.effectResolver.resolveEffects(onAttackEffects, {
+            sourceCardId: attacker.instanceId,
+            sourceOwnerId: action.playerId,
+            targetId: data.defenderId,
+            triggerEvent: 'ON_ATTACK',
+          });
+        }
+      }
+    }
+
     const result = this.combatResolver.resolveAttack(
       data.attackerId,
       data.defenderId,
@@ -363,8 +394,8 @@ export class GameEngine {
       return { success: false, error: result.error, events: [] };
     }
 
-    // Process deaths
-    this.deathProcessor.processDeaths();
+    // Process deaths + recalculate SWARM
+    this.processDeathsAndRecalculate();
 
     // Check game end
     this.checkGameEnd();
@@ -399,8 +430,8 @@ export class GameEngine {
       });
     }
 
-    // Process deaths
-    this.deathProcessor.processDeaths();
+    // Process deaths + recalculate SWARM
+    this.processDeathsAndRecalculate();
 
     // Check game end
     this.checkGameEnd();
@@ -412,7 +443,19 @@ export class GameEngine {
    * Process end turn
    */
   private processEndTurn(action: GameAction): ActionResult {
+    // Fire ON_TURN_END effects before the turn actually ends
+    this.processTurnTriggers(action.playerId, EffectTrigger.ON_TURN_END);
+    this.processDeathsAndRecalculate();
+    this.checkGameEnd();
+
     this.stateManager.endTurn();
+
+    // Fire ON_TURN_START effects for the new active player
+    const newActivePlayer = this.stateManager.getActivePlayerId();
+    this.processTurnTriggers(newActivePlayer, EffectTrigger.ON_TURN_START);
+    this.processDeathsAndRecalculate();
+    this.checkGameEnd();
+
     return { success: true, events: [] };
   }
 
@@ -605,6 +648,152 @@ export class GameEngine {
     if (result.isOver) {
       this.stateManager.endGame(result.winnerId, result.reason);
     }
+  }
+
+  /**
+   * Process deaths and recalculate SWARM for both players
+   */
+  private processDeathsAndRecalculate(): void {
+    this.deathProcessor.processDeaths();
+    const state = this.stateManager.getState();
+    for (const playerId of state.players.keys()) {
+      this.effectResolver.recalculateSwarm(playerId);
+    }
+  }
+
+  // ─── TRIGGER PROCESSING ────────────────────────────────────────────
+
+  /**
+   * Scan the board for minions with a given trigger and fire their effects.
+   * Used for ON_TURN_START, ON_TURN_END, ON_SPELL_CAST, ON_HEAL, ON_ATTACK.
+   */
+  private processTurnTriggers(playerId: string, trigger: EffectTrigger): void {
+    const board = this.stateManager.getBoard();
+    const boardCards = board.getBoardCards(playerId);
+
+    for (const card of boardCards) {
+      if (card.isSilenced && !card.isForged) continue;
+
+      const definition = this.cardDatabase.getCard(card.definitionId);
+      if (!definition) continue;
+
+      const triggerEffects = definition.effects.filter(
+        (e: any) => e.trigger === trigger
+      );
+      if (triggerEffects.length > 0) {
+        this.effectResolver.resolveEffects(triggerEffects, {
+          sourceCardId: card.instanceId,
+          sourceOwnerId: playerId,
+          triggerEvent: trigger,
+        });
+      }
+    }
+  }
+
+  /**
+   * Process UPGRADE keyword: if the player has enough crystals, spend extra and fire bonus effects
+   */
+  private processUpgrade(card: CardInstance, definition: any, player: PlayerState, playerId: string): void {
+    if (!hasKeyword(card, OriginalKeyword.UPGRADE)) return;
+
+    // Find the UPGRADE keyword value (the extra cost)
+    const upgradeKw = card.keywords.find(k => k.keyword === OriginalKeyword.UPGRADE);
+    const upgradeCost = upgradeKw?.value ?? 0;
+    if (upgradeCost <= 0) return;
+
+    // Check if the player can afford the upgrade
+    if (player.crystals.current < upgradeCost) return;
+
+    // Spend the extra crystals
+    player.crystals.current -= upgradeCost;
+
+    // Fire ACTIVATED effects (the upgrade bonus)
+    const upgradeEffects = definition.effects.filter(
+      (e: any) => e.trigger === EffectTrigger.ACTIVATED
+    );
+    if (upgradeEffects.length > 0) {
+      this.effectResolver.resolveEffects(upgradeEffects, {
+        sourceCardId: card.instanceId,
+        sourceOwnerId: playerId,
+        triggerEvent: 'ACTIVATED',
+      });
+    }
+  }
+
+  /**
+   * Fire ON_SPELL_CAST triggers on all friendly minions (for RESONATE keyword)
+   */
+  private processSpellCastTriggers(playerId: string): void {
+    const board = this.stateManager.getBoard();
+    const boardCards = board.getBoardCards(playerId);
+
+    for (const card of boardCards) {
+      if (card.isSilenced && !card.isForged) continue;
+
+      const definition = this.cardDatabase.getCard(card.definitionId);
+      if (!definition) continue;
+
+      const spellTriggers = definition.effects.filter(
+        (e: any) => e.trigger === EffectTrigger.ON_SPELL_CAST
+      );
+      if (spellTriggers.length > 0) {
+        this.effectResolver.resolveEffects(spellTriggers, {
+          sourceCardId: card.instanceId,
+          sourceOwnerId: playerId,
+          triggerEvent: 'ON_SPELL_CAST',
+        });
+      }
+    }
+  }
+
+  /**
+   * Create an ECHO copy in hand when an ECHO card is played
+   */
+  private processEchoCopy(card: CardInstance, playerId: string): void {
+    if (!hasKeyword(card, OriginalKeyword.ECHO)) return;
+
+    const board = this.stateManager.getBoard();
+    if (board.isHandFull(playerId)) return;
+
+    const definition = this.cardDatabase.getCard(card.definitionId);
+    if (!definition) return;
+
+    const echoCopy: CardInstance = {
+      instanceId: `echo_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      definitionId: card.definitionId,
+      ownerId: playerId,
+      controllerId: playerId,
+      zone: CardZone.HAND,
+      currentCost: definition.cost,
+      currentAttack: definition.attack,
+      currentHealth: definition.health,
+      maxHealth: definition.health,
+      keywords: definition.keywords ? [...definition.keywords] : [],
+      enchantments: [],
+      temporaryBuffs: [],
+      permanentBuffs: [],
+      isSilenced: false,
+      hasBarrier: false,
+      isCloaked: false,
+      isForged: false,
+      isEchoInstance: true,
+      hasAttackedThisTurn: false,
+      attacksMadeThisTurn: 0,
+      summonedThisTurn: false,
+    };
+
+    board.registerCard(echoCopy);
+    const state = this.stateManager.getState();
+    (state.cards as Map<string, CardInstance>).set(echoCopy.instanceId, echoCopy);
+    const zones = board.getPlayerZones(playerId);
+    zones.hand.add(echoCopy.instanceId);
+    echoCopy.zone = CardZone.HAND;
+
+    this.emitEvent(GameEventType.ECHO_COPY_CREATED, playerId, {
+      cardInstanceId: echoCopy.instanceId,
+      cardDefinitionId: card.definitionId,
+      playerId,
+    } as CardEventData);
   }
 
   /**

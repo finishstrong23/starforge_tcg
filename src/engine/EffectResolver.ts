@@ -23,10 +23,13 @@ import type {
   TransformData,
   ModifyCostData,
   GainCrystalsData,
+  AdaptData,
+  ScryData,
 } from '../types/Effects';
 import { CardZone, hasKeyword } from '../types/Card';
 import type { CardInstance } from '../types/Card';
 import { CardType } from '../types/Card';
+import { OriginalKeyword, CombatKeyword, AdaptOption, AllAdaptOptions } from '../types/Keywords';
 import { GameStateManager } from '../game/GameState';
 import type { GameBoard } from '../game/Board';
 import { CombatResolver } from '../combat/CombatResolver';
@@ -201,6 +204,14 @@ export class EffectResolver {
         this.executeRepeat(effect, context);
         break;
 
+      case EffectType.ADAPT:
+        this.executeAdapt(targets, effect.data as AdaptData, context);
+        break;
+
+      case EffectType.SCRY:
+        this.executeScry(effect.data as ScryData, context);
+        break;
+
       default:
         // Unsupported effect type — skip gracefully
         console.log(`EffectResolver: unsupported effect type ${effect.type}`);
@@ -367,16 +378,19 @@ export class EffectResolver {
   }
 
   /**
-   * HEAL: Restore health to targets
+   * HEAL: Restore health to targets, then fire ILLUMINATE (ON_HEAL) triggers
    */
   private executeHeal(targets: string[], data: HealEffectData, context: EffectContext): void {
     const amount = typeof data.amount === 'number' ? data.amount : 0;
     if (amount <= 0) return;
 
+    let healingOccurred = false;
+
     for (const targetId of targets) {
       if (targetId.startsWith('hero_')) {
         const heroPlayerId = targetId.replace('hero_', '');
         this.stateManager.healHero(heroPlayerId, amount);
+        healingOccurred = true;
       } else {
         const card = this.board.getCard(targetId);
         if (card && card.zone === CardZone.BOARD) {
@@ -386,8 +400,14 @@ export class EffectResolver {
             context.sourceCardId,
             card.controllerId
           );
+          healingOccurred = true;
         }
       }
+    }
+
+    // ILLUMINATE: fire ON_HEAL triggers on friendly minions
+    if (healingOccurred) {
+      this.processIlluminateTriggers(context.sourceOwnerId);
     }
   }
 
@@ -919,6 +939,160 @@ export class EffectResolver {
 
     for (let i = 0; i < count; i++) {
       this.resolveEffects(subEffects, context);
+    }
+  }
+
+  // ─── ILLUMINATE (ON_HEAL) Triggers ─────────────────────────────────
+
+  /**
+   * Fire ON_HEAL triggers on all friendly minions with ILLUMINATE
+   */
+  private processIlluminateTriggers(playerId: string): void {
+    const boardCards = this.board.getBoardCards(playerId);
+
+    for (const card of boardCards) {
+      if (card.isSilenced && !card.isForged) continue;
+      if (!hasKeyword(card, OriginalKeyword.ILLUMINATE)) continue;
+
+      const definition = globalCardDatabase.getCard(card.definitionId);
+      if (!definition) continue;
+
+      const healTriggers = definition.effects.filter(
+        (e: any) => e.trigger === EffectTrigger.ON_HEAL
+      );
+      if (healTriggers.length > 0) {
+        this.resolveEffects(healTriggers, {
+          sourceCardId: card.instanceId,
+          sourceOwnerId: playerId,
+          triggerEvent: 'ON_HEAL',
+        });
+      }
+    }
+  }
+
+  // ─── ADAPT ────────────────────────────────────────────────────────
+
+  /**
+   * ADAPT: Choose 1 of 3 random bonuses and apply to the target.
+   * Without UI choice flow, auto-picks the first random option.
+   */
+  private executeAdapt(targets: string[], data: AdaptData, context: EffectContext): void {
+    const optionCount = data.optionCount || 3;
+
+    // Pick random options from the adapt pool
+    const available = [...AllAdaptOptions];
+    const options: AdaptOption[] = [];
+    for (let i = 0; i < optionCount && available.length > 0; i++) {
+      const idx = Math.floor(Math.random() * available.length);
+      options.push(available.splice(idx, 1)[0]);
+    }
+
+    if (options.length === 0) return;
+
+    // Auto-select first option (AI or engine picks randomly)
+    const chosen = options[0];
+
+    for (const targetId of targets) {
+      if (targetId.startsWith('hero_')) continue;
+
+      const card = this.board.getCard(targetId);
+      if (!card || card.zone !== CardZone.BOARD) continue;
+
+      this.applyAdaptOption(card, chosen);
+    }
+  }
+
+  /**
+   * Apply a chosen adapt option to a minion
+   */
+  private applyAdaptOption(card: CardInstance, option: AdaptOption): void {
+    switch (option) {
+      case AdaptOption.ATTACK_PLUS_3:
+        if (card.currentAttack !== undefined) card.currentAttack += 3;
+        break;
+      case AdaptOption.HEALTH_PLUS_3:
+        if (card.currentHealth !== undefined) card.currentHealth += 3;
+        if (card.maxHealth !== undefined) card.maxHealth += 3;
+        break;
+      case AdaptOption.GUARDIAN:
+        if (!hasKeyword(card, CombatKeyword.GUARDIAN)) {
+          card.keywords.push({ keyword: CombatKeyword.GUARDIAN });
+        }
+        break;
+      case AdaptOption.BARRIER:
+        if (!hasKeyword(card, CombatKeyword.BARRIER)) {
+          card.keywords.push({ keyword: CombatKeyword.BARRIER });
+          card.hasBarrier = true;
+        }
+        break;
+      case AdaptOption.SWIFT:
+        if (!hasKeyword(card, CombatKeyword.SWIFT)) {
+          card.keywords.push({ keyword: CombatKeyword.SWIFT });
+        }
+        break;
+      case AdaptOption.DRAIN:
+        if (!hasKeyword(card, CombatKeyword.DRAIN)) {
+          card.keywords.push({ keyword: CombatKeyword.DRAIN });
+        }
+        break;
+      case AdaptOption.LETHAL:
+        if (!hasKeyword(card, CombatKeyword.LETHAL)) {
+          card.keywords.push({ keyword: CombatKeyword.LETHAL });
+        }
+        break;
+    }
+  }
+
+  // ─── SCRY ─────────────────────────────────────────────────────────
+
+  /**
+   * SCRY: Look at the top X cards of the deck.
+   * Without UI, auto-keeps them in current order (no rearranging).
+   */
+  private executeScry(data: ScryData, context: EffectContext): void {
+    const count = data.count || 1;
+    const deckCards = this.board.getCardsInZone(context.sourceOwnerId, CardZone.DECK);
+
+    // Peek at the top `count` cards (just log for now; UI would display them)
+    const topCards = deckCards.slice(0, Math.min(count, deckCards.length));
+
+    // Emit SCRY_COMPLETED event so UI can display the cards
+    const state = this.stateManager.getState();
+    this.stateManager.getEvents().emit(
+      createEvent(GameEventType.SCRY_COMPLETED, state.id, state.turn, context.sourceOwnerId, {
+        cardIds: topCards.map(c => c.instanceId),
+        count: topCards.length,
+      })
+    );
+  }
+
+  // ─── SWARM ────────────────────────────────────────────────────────
+
+  /**
+   * Recalculate SWARM buffs for all minions on a player's board.
+   * SWARM gives +1/+1 for each other friendly minion.
+   */
+  recalculateSwarm(playerId: string): void {
+    const boardCards = this.board.getBoardCards(playerId);
+    const otherCount = boardCards.length - 1; // -1 for the swarm minion itself
+
+    for (const card of boardCards) {
+      if (card.isSilenced && !card.isForged) continue;
+      if (!hasKeyword(card, OriginalKeyword.SWARM)) continue;
+
+      const definition = globalCardDatabase.getCard(card.definitionId);
+      if (!definition) continue;
+
+      const baseAttack = definition.attack ?? 0;
+      const baseHealth = definition.health ?? 1;
+      const swarmBonus = Math.max(0, otherCount);
+
+      card.currentAttack = baseAttack + swarmBonus;
+      card.currentHealth = Math.min(
+        card.currentHealth ?? baseHealth,
+        baseHealth + swarmBonus
+      );
+      card.maxHealth = baseHealth + swarmBonus;
     }
   }
 
