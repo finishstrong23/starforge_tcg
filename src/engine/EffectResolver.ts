@@ -412,7 +412,8 @@ export class EffectResolver {
   }
 
   /**
-   * BUFF: Modify attack and/or health of targets
+   * BUFF: Modify attack and/or health of targets.
+   * Tracks buffs in StatBuff arrays for cleanup and UI display.
    */
   private executeBuff(targets: string[], data: BuffEffectData, context: EffectContext): void {
     for (const targetId of targets) {
@@ -421,15 +422,34 @@ export class EffectResolver {
       const card = this.board.getCard(targetId);
       if (!card || card.zone !== CardZone.BOARD) continue;
 
-      if (data.attack && card.currentAttack !== undefined) {
-        card.currentAttack += data.attack;
+      const attackMod = data.attack || 0;
+      const healthMod = data.health || 0;
+
+      // Track the buff for later cleanup / UI display
+      const buff = {
+        id: `buff_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        attackModifier: attackMod,
+        healthModifier: healthMod,
+        source: context.sourceCardId,
+        isTemporary: data.isTemporary || false,
+      };
+
+      if (data.isTemporary) {
+        card.temporaryBuffs.push(buff);
+      } else {
+        card.permanentBuffs.push(buff);
       }
-      if (data.health) {
+
+      // Apply to current stats
+      if (attackMod && card.currentAttack !== undefined) {
+        card.currentAttack += attackMod;
+      }
+      if (healthMod) {
         if (card.currentHealth !== undefined) {
-          card.currentHealth += data.health;
+          card.currentHealth += healthMod;
         }
         if (card.maxHealth !== undefined) {
-          card.maxHealth += data.health;
+          card.maxHealth += healthMod;
         }
       }
     }
@@ -939,6 +959,30 @@ export class EffectResolver {
 
     for (let i = 0; i < count; i++) {
       this.resolveEffects(subEffects, context);
+    }
+  }
+
+  // ─── Buff Cleanup ──────────────────────────────────────────────────
+
+  /**
+   * Clear all temporary buffs from a player's board minions.
+   * Called at end of turn to revert isTemporary buff effects.
+   */
+  clearTemporaryBuffs(playerId: string): void {
+    const boardCards = this.board.getBoardCards(playerId);
+    for (const card of boardCards) {
+      if (card.temporaryBuffs.length === 0) continue;
+
+      for (const buff of card.temporaryBuffs) {
+        if (card.currentAttack !== undefined) {
+          card.currentAttack = Math.max(0, card.currentAttack - buff.attackModifier);
+        }
+        if (card.maxHealth !== undefined && card.currentHealth !== undefined) {
+          card.maxHealth = Math.max(1, card.maxHealth - buff.healthModifier);
+          card.currentHealth = Math.min(card.currentHealth, card.maxHealth);
+        }
+      }
+      card.temporaryBuffs = [];
     }
   }
 

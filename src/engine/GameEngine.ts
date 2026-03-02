@@ -448,6 +448,9 @@ export class GameEngine {
     this.processDeathsAndRecalculate();
     this.checkGameEnd();
 
+    // Clear temporary buffs from the ending player's board
+    this.effectResolver.clearTemporaryBuffs(action.playerId);
+
     this.stateManager.endTurn();
 
     // Fire ON_TURN_START effects for the new active player

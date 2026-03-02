@@ -267,27 +267,41 @@ export const DefaultTargeting: TargetRequirements = {
 };
 
 /**
- * Calculate effective attack of a card instance
+ * Calculate effective attack of a card instance.
+ * Buffs are already applied to currentAttack by the EffectResolver;
+ * the buff arrays are for tracking, cleanup, and display only.
  */
 export function getEffectiveAttack(card: CardInstance): number {
   if (card.currentAttack === undefined) return 0;
-
-  let attack = card.currentAttack;
-
-  // Apply buffs
-  for (const buff of [...card.temporaryBuffs, ...card.permanentBuffs]) {
-    attack += buff.attackModifier;
-  }
-
-  return Math.max(0, attack);
+  return Math.max(0, card.currentAttack);
 }
 
 /**
- * Calculate effective health of a card instance
+ * Calculate effective health of a card instance.
  */
 export function getEffectiveHealth(card: CardInstance): number {
   if (card.currentHealth === undefined) return 0;
   return Math.max(0, card.currentHealth);
+}
+
+/**
+ * Get all active buffs on a card (for UI display)
+ */
+export function getActiveBuffs(card: CardInstance): StatBuff[] {
+  return [...card.permanentBuffs, ...card.temporaryBuffs];
+}
+
+/**
+ * Get total buff amounts (for UI display)
+ */
+export function getTotalBuffStats(card: CardInstance): { attack: number; health: number } {
+  let attack = 0;
+  let health = 0;
+  for (const buff of [...card.permanentBuffs, ...card.temporaryBuffs]) {
+    attack += buff.attackModifier;
+    health += buff.healthModifier;
+  }
+  return { attack, health };
 }
 
 /**

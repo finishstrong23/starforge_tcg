@@ -29,6 +29,8 @@ export {
   DefaultTargeting,
   getEffectiveAttack,
   getEffectiveHealth,
+  getActiveBuffs,
+  getTotalBuffStats,
   hasKeyword,
   canAttack,
 } from './Card';
