@@ -14,7 +14,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 
 export interface VFXEvent {
   id: number;
-  type: 'damage' | 'heal' | 'death' | 'spell' | 'starforge' | 'buff' | 'keyword';
+  type: 'damage' | 'heal' | 'death' | 'spell' | 'starforge' | 'buff' | 'keyword' | 'last_words';
   targetId: string;
   value?: number;
   label?: string;
@@ -104,6 +104,13 @@ function injectStyles() {
       20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
       40% { transform: translate(-50%, -50%) scale(1); }
       100% { opacity: 0; transform: translate(-50%, -60%) scale(0.9); }
+    }
+    @keyframes vfx-last-words {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      15% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      30% { transform: translate(-50%, -50%) scale(1); }
+      70% { opacity: 1; transform: translate(-50%, -55%) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -65%) scale(0.8); }
     }
   `;
   document.head.appendChild(style);
@@ -500,6 +507,37 @@ const KeywordFlash: React.FC<{
   );
 };
 
+const LastWordsFlash: React.FC<{
+  event: VFXEvent;
+  onDone: () => void;
+}> = ({ event, onDone }) => {
+  useEffect(() => {
+    const timer = setTimeout(onDone, 1200);
+    return () => clearTimeout(timer);
+  }, [onDone]);
+
+  return (
+    <div style={{
+      position: 'absolute',
+      top: '50%', left: '50%',
+      animation: 'vfx-last-words 1.2s ease-out forwards',
+      fontSize: '14px',
+      fontWeight: 'bold',
+      color: '#cc88ff',
+      textShadow: '0 0 10px #aa44ff, 0 0 20px #8822cc, 1px 1px 0 rgba(0,0,0,0.9)',
+      zIndex: 2001,
+      pointerEvents: 'none',
+      whiteSpace: 'nowrap',
+      background: 'rgba(20,0,40,0.6)',
+      padding: '4px 10px',
+      borderRadius: '4px',
+      border: '1px solid rgba(170,68,255,0.5)',
+    }}>
+      {'\uD83D\uDC80'} {event.label || 'LAST WORDS'}
+    </div>
+  );
+};
+
 export const VFXOverlay: React.FC<VFXOverlayProps> = ({ events, onEventDone }) => {
   useEffect(() => {
     injectStyles();
@@ -553,6 +591,7 @@ const VFXAnchor: React.FC<{ event: VFXEvent; onDone: () => void }> = ({ event, o
       {event.type === 'heal' && <FloatingNumber event={event} onDone={onDone} />}
       {event.type === 'buff' && <BuffShimmer event={event} onDone={onDone} />}
       {event.type === 'keyword' && <KeywordFlash event={event} onDone={onDone} />}
+      {event.type === 'last_words' && <LastWordsFlash event={event} onDone={onDone} />}
       {event.type === 'death' && <DeathBurst onDone={onDone} />}
       {event.type === 'spell' && <SpellRing onDone={onDone} />}
       {event.type === 'starforge' && <StarforgeGlow onDone={onDone} />}

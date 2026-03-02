@@ -12,7 +12,7 @@ import { GameStateManager } from '../game/GameState';
 import { GameBoard } from '../game/Board';
 import { EventEmitter } from '../events/EventEmitter';
 import { GameEventType, createEvent } from '../events/GameEvent';
-import type { CardEventData } from '../events/GameEvent';
+import type { CardEventData, LastWordsEventData } from '../events/GameEvent';
 import { EffectTrigger } from '../types/Effects';
 import type { Effect } from '../types/Effects';
 import { globalCardDatabase } from '../cards/CardDatabase';
@@ -152,6 +152,16 @@ export class DeathProcessor {
           (e: any) => e.trigger === EffectTrigger.ON_DEATH
         );
         result.triggeredEffects.push(...lastRitesEffects);
+
+        // Emit LAST_WORDS_TRIGGERED event for UI feedback
+        if (lastRitesEffects.length > 0) {
+          this.emitEvent(GameEventType.LAST_WORDS_TRIGGERED, death.ownerId, {
+            cardInstanceId: death.cardInstanceId,
+            cardDefinitionId: death.cardDefinitionId,
+            playerId: death.ownerId,
+            effectDescription: cardDef?.cardText || '',
+          } as LastWordsEventData);
+        }
 
         // Execute LAST_WORDS effects via the resolver
         if (this.effectResolver && lastRitesEffects.length > 0) {

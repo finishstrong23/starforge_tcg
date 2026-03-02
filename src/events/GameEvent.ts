@@ -81,6 +81,9 @@ export enum GameEventType {
   DISCOVER_COMPLETED = 'DISCOVER_COMPLETED',
   ECHO_COPY_CREATED = 'ECHO_COPY_CREATED',
   SCRY_COMPLETED = 'SCRY_COMPLETED',
+
+  // Death Trigger Events
+  LAST_WORDS_TRIGGERED = 'LAST_WORDS_TRIGGERED',
 }
 
 /**
@@ -119,6 +122,7 @@ export type EventData =
   | ChoiceEventData
   | StarforgeEventData
   | ZoneChangedData
+  | LastWordsEventData
   | GenericEventData;
 
 // Event Data Types
@@ -229,6 +233,13 @@ export interface ZoneChangedData {
   playerId: string;
   fromZone: CardZone;
   toZone: CardZone;
+}
+
+export interface LastWordsEventData {
+  cardInstanceId: string;
+  cardDefinitionId: string;
+  playerId: string;
+  effectDescription: string;
 }
 
 export interface GenericEventData {

@@ -20,7 +20,7 @@ import { Race } from '../../types/Race';
 import { TargetType } from '../../types/Effects';
 import { getHeroById } from '../../heroes';
 import { GameEventType } from '../../events/GameEvent';
-import type { GameEvent, CombatEventData, CardEventData, DamageEventData, HealEventData, TurnEventData } from '../../events/GameEvent';
+import type { GameEvent, CombatEventData, CardEventData, DamageEventData, HealEventData, TurnEventData, LastWordsEventData } from '../../events/GameEvent';
 import type { CombatLogEntry } from '../components/CombatLog';
 import type { AttackAnimationData } from '../components/AttackAnimation';
 import {
@@ -192,6 +192,15 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
       }
       case GameEventType.HERO_POWER_USED: {
         addLogEntry(`${who} used Hero Power`, 'hero_power', isPlayer, event.turn);
+        break;
+      }
+      case GameEventType.LAST_WORDS_TRIGGERED: {
+        const data = event.data as LastWordsEventData;
+        const def = globalCardDatabase.getCard(data.cardDefinitionId);
+        const name = def?.name || data.cardDefinitionId;
+        const owner = data.playerId === myPlayerId ? 'Your' : "Opponent's";
+        const lwText = data.effectDescription.match(/LAST WORDS:\s*(.*?)(?:\.|$)/i)?.[1] || 'effect triggered';
+        addLogEntry(`${owner} ${name}'s Last Words: ${lwText}`, 'effect', data.playerId !== myPlayerId, event.turn);
         break;
       }
     }

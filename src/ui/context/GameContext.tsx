@@ -19,7 +19,7 @@ import { Race } from '../../types/Race';
 import { TargetType } from '../../types/Effects';
 import { getHeroById } from '../../heroes';
 import { GameEventType } from '../../events/GameEvent';
-import type { GameEvent, CombatEventData, CardEventData, DamageEventData, HealEventData, TurnEventData } from '../../events/GameEvent';
+import type { GameEvent, CombatEventData, CardEventData, DamageEventData, HealEventData, TurnEventData, LastWordsEventData } from '../../events/GameEvent';
 import type { CombatLogEntry } from '../components/CombatLog';
 import type { AttackAnimationData } from '../components/AttackAnimation';
 import {
@@ -370,6 +370,17 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       case GameEventType.BARRIER_BROKEN: {
         addLogEntry(`Barrier broken!`, 'keyword', isPlayer, event.turn);
         SoundManager.play('barrierBreak');
+        break;
+      }
+      case GameEventType.LAST_WORDS_TRIGGERED: {
+        const data = event.data as LastWordsEventData;
+        const def = globalCardDatabase.getCard(data.cardDefinitionId);
+        const name = def?.name || data.cardDefinitionId;
+        const owner = data.playerId === 'player' ? 'Your' : "Opponent's";
+        // Extract the Last Words portion of the card text
+        const lwText = data.effectDescription.match(/LAST WORDS:\s*(.*?)(?:\.|$)/i)?.[1] || 'effect triggered';
+        addLogEntry(`${owner} ${name}'s Last Words: ${lwText}`, 'effect', data.playerId !== 'player', event.turn);
+        if (data.cardInstanceId) emitVFX('last_words', data.cardInstanceId, undefined, 'LAST WORDS');
         break;
       }
     }

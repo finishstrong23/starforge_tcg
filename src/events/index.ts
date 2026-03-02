@@ -28,6 +28,7 @@ export type {
   ChoiceEventData,
   StarforgeEventData,
   ZoneChangedData,
+  LastWordsEventData,
   GenericEventData,
 } from './GameEvent';
 
