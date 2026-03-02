@@ -1,7 +1,13 @@
 /**
- * STARFORGE TCG - Professional Procedural Card Art
+ * STARFORGE TCG - Card Art with Custom Image Support
  *
- * Generates rich, multi-layered SVG card illustrations with:
+ * Loads custom artwork from public/cards/{cardId}.png if available,
+ * otherwise falls back to procedural SVG generation.
+ *
+ * To add custom art: drop a PNG/JPG/WEBP into public/cards/ named
+ * after the card's definition ID (e.g. cogsmiths_gear_golem.png).
+ *
+ * Procedural fallback generates rich, multi-layered SVG card illustrations with:
  * - Deep background gradients with noise textures
  * - Race-specific layered compositions (8-20+ elements)
  * - Atmospheric lighting with multiple glow sources
@@ -11,8 +17,70 @@
  * - Forged overlay with cosmic energy effects
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Race } from '../../types/Race';
+
+// --- Custom image loading system ---
+
+/** Cache of image availability checks to avoid repeated network requests */
+const imageCache = new Map<string, string | null>();
+
+/** Supported image extensions, checked in order */
+const IMAGE_EXTENSIONS = ['png', 'webp', 'jpg'];
+
+/**
+ * Check if a custom card image exists in public/cards/.
+ * Returns the URL if found, null otherwise. Results are cached.
+ */
+function probeCardImage(cardId: string): Promise<string | null> {
+  const cached = imageCache.get(cardId);
+  if (cached !== undefined) return Promise.resolve(cached);
+
+  // Try each extension in order
+  return (async () => {
+    for (const ext of IMAGE_EXTENSIONS) {
+      const url = `./cards/${cardId}.${ext}`;
+      try {
+        const resp = await fetch(url, { method: 'HEAD' });
+        if (resp.ok) {
+          imageCache.set(cardId, url);
+          return url;
+        }
+      } catch {
+        // Network error — skip this extension
+      }
+    }
+    imageCache.set(cardId, null);
+    return null;
+  })();
+}
+
+/**
+ * Hook that returns the custom image URL for a card, or null if none exists.
+ */
+function useCardImage(cardId: string): string | null {
+  const cached = imageCache.get(cardId);
+  const [imageUrl, setImageUrl] = useState<string | null>(cached !== undefined ? cached : null);
+  const [checked, setChecked] = useState(cached !== undefined);
+
+  useEffect(() => {
+    if (imageCache.has(cardId)) {
+      setImageUrl(imageCache.get(cardId)!);
+      setChecked(true);
+      return;
+    }
+    let cancelled = false;
+    probeCardImage(cardId).then((url) => {
+      if (!cancelled) {
+        setImageUrl(url);
+        setChecked(true);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [cardId]);
+
+  return checked ? imageUrl : null;
+}
 
 // Rich race color palettes with deeper color ranges
 const RACE_PALETTES: Record<string, {
@@ -57,7 +125,50 @@ interface CardArtProps {
   isForged?: boolean;
 }
 
-export const CardArt: React.FC<CardArtProps> = ({
+/**
+ * CardArt - Main exported component.
+ * Checks for a custom image in public/cards/{cardId}.{png,webp,jpg}.
+ * If found, renders the image. Otherwise falls back to procedural SVG.
+ */
+export const CardArt: React.FC<CardArtProps> = (props) => {
+  const { cardId, width = 80, height = 50, isForged = false } = props;
+  const imageUrl = useCardImage(cardId);
+
+  if (imageUrl) {
+    return (
+      <div style={{ position: 'relative', width, height, borderRadius: '4px', overflow: 'hidden' }}>
+        <img
+          src={imageUrl}
+          alt={cardId}
+          width={width}
+          height={height}
+          style={{
+            display: 'block',
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            borderRadius: '4px',
+          }}
+        />
+        {isForged && (
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(135deg, rgba(255,170,0,0.3) 0%, rgba(160,60,255,0.25) 50%, rgba(255,170,0,0.3) 100%)',
+            border: '2px solid rgba(255,204,0,0.6)',
+            borderRadius: '4px',
+            pointerEvents: 'none',
+          }} />
+        )}
+      </div>
+    );
+  }
+
+  return <ProceduralCardArt {...props} />;
+};
+
+/** Procedural SVG fallback when no custom image is available */
+const ProceduralCardArt: React.FC<CardArtProps> = ({
   cardId,
   race,
   cardType,
