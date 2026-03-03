@@ -11,3 +11,7 @@ export { EndTurnButton } from './EndTurnButton';
 export { GameOverlay } from './GameOverlay';
 export { TurnTimer } from './TurnTimer';
 export { KeywordTooltip, KEYWORD_DESCRIPTIONS } from './KeywordTooltip';
+export { DungeonRun } from './DungeonRun';
+export { PuzzleMode } from './PuzzleMode';
+export { PostGameStats } from './PostGameStats';
+export { BoardVFXOverlay, useBoardVFX } from './BoardVFX';

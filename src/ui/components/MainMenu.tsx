@@ -34,6 +34,8 @@ interface MainMenuProps {
   onLeaderboard?: () => void;
   onMetaDashboard?: () => void;
   onSpectate?: () => void;
+  onDungeonRun?: () => void;
+  onPuzzles?: () => void;
 }
 
 type MenuView = 'main' | 'play';
@@ -44,6 +46,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
     onTutorial, onSettings, onStats, onCollection, onCrafting,
     onBattlePass, onPacks, onAchievements, onDaily,
     onTournament, onReplays, onLeaderboard, onMetaDashboard, onSpectate,
+    onDungeonRun, onPuzzles,
   } = props;
 
   const [view, setView] = useState<MenuView>('main');
@@ -176,6 +179,18 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
             <button style={{ ...s.modeBtn, ...s.modeBtnTourney }} onClick={() => { hapticTap(); onTournament(); }}>
               <span style={s.modeBtnIcon}>&#x2605;</span>
               <span style={s.modeBtnLabel}>Tournament</span>
+            </button>
+          )}
+          {onDungeonRun && (
+            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)', boxShadow: '0 4px 16px rgba(220,38,38,0.3)' }} onClick={() => { hapticTap(); onDungeonRun(); }}>
+              <span style={s.modeBtnIcon}>&#x1F3F0;</span>
+              <span style={s.modeBtnLabel}>Dungeon Run</span>
+            </button>
+          )}
+          {onPuzzles && (
+            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }} onClick={() => { hapticTap(); onPuzzles(); }}>
+              <span style={s.modeBtnIcon}>&#x1F9E9;</span>
+              <span style={s.modeBtnLabel}>Lethal Puzzles</span>
             </button>
           )}
           {onPlayFriend && (

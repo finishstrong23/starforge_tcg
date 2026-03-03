@@ -32,6 +32,8 @@ import { LeaderboardScreen } from './components/LeaderboardScreen';
 import { MetaDashboard } from './components/MetaDashboard';
 import { SpectateScreen } from './components/SpectateScreen';
 import { ScreenTransition } from './components/ScreenTransition';
+import { DungeonRun } from './components/DungeonRun';
+import { PuzzleMode } from './components/PuzzleMode';
 import { recordGameResult } from '../stats/GameStats';
 import type { CampaignBattleResult } from './components/CampaignGame';
 import { GameProvider } from './context/GameContext';
@@ -76,7 +78,9 @@ type GameScreen =
   | 'replays'
   | 'leaderboard'
   | 'meta-dashboard'
-  | 'spectate';
+  | 'spectate'
+  | 'dungeon-run'
+  | 'puzzles';
 
 export const App: React.FC = () => {
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -296,6 +300,8 @@ export const App: React.FC = () => {
           onLeaderboard={() => setScreen('leaderboard')}
           onMetaDashboard={() => setScreen('meta-dashboard')}
           onSpectate={() => setScreen('spectate')}
+          onDungeonRun={() => setScreen('dungeon-run')}
+          onPuzzles={() => setScreen('puzzles')}
         />
       )}
 
@@ -514,6 +520,20 @@ export const App: React.FC = () => {
       {screen === 'spectate' && (
         <ScreenTransition screenKey="spectate">
           <SpectateScreen onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Dungeon Run */}
+      {screen === 'dungeon-run' && (
+        <ScreenTransition screenKey="dungeon-run">
+          <DungeonRun onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Lethal Puzzles */}
+      {screen === 'puzzles' && (
+        <ScreenTransition screenKey="puzzles">
+          <PuzzleMode onBack={() => setScreen('menu')} />
         </ScreenTransition>
       )}
 
