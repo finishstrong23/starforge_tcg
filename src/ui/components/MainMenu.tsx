@@ -36,6 +36,8 @@ interface MainMenuProps {
   onSpectate?: () => void;
   onDungeonRun?: () => void;
   onPuzzles?: () => void;
+  onTagTeam?: () => void;
+  onFactionWars?: () => void;
 }
 
 type MenuView = 'main' | 'play';
@@ -46,7 +48,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
     onTutorial, onSettings, onStats, onCollection, onCrafting,
     onBattlePass, onPacks, onAchievements, onDaily,
     onTournament, onReplays, onLeaderboard, onMetaDashboard, onSpectate,
-    onDungeonRun, onPuzzles,
+    onDungeonRun, onPuzzles, onTagTeam, onFactionWars,
   } = props;
 
   const [view, setView] = useState<MenuView>('main');
@@ -191,6 +193,18 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
             <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }} onClick={() => { hapticTap(); onPuzzles(); }}>
               <span style={s.modeBtnIcon}>&#x1F9E9;</span>
               <span style={s.modeBtnLabel}>Lethal Puzzles</span>
+            </button>
+          )}
+          {onTagTeam && (
+            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)', boxShadow: '0 4px 16px rgba(14,165,233,0.3)' }} onClick={() => { hapticTap(); onTagTeam(); }}>
+              <span style={s.modeBtnIcon}>&#x1F91D;</span>
+              <span style={s.modeBtnLabel}>2v2 Tag Team</span>
+            </button>
+          )}
+          {onFactionWars && (
+            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #d97706 0%, #92400e 100%)', boxShadow: '0 4px 16px rgba(217,119,6,0.3)' }} onClick={() => { hapticTap(); onFactionWars(); }}>
+              <span style={s.modeBtnIcon}>&#x2694;</span>
+              <span style={s.modeBtnLabel}>Faction Wars</span>
             </button>
           )}
           {onPlayFriend && (

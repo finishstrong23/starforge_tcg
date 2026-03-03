@@ -34,6 +34,8 @@ import { SpectateScreen } from './components/SpectateScreen';
 import { ScreenTransition } from './components/ScreenTransition';
 import { DungeonRun } from './components/DungeonRun';
 import { PuzzleMode } from './components/PuzzleMode';
+import { TagTeamMode } from './components/TagTeamMode';
+import { FactionWarsScreen } from './components/FactionWarsScreen';
 import { recordGameResult } from '../stats/GameStats';
 import type { CampaignBattleResult } from './components/CampaignGame';
 import { GameProvider } from './context/GameContext';
@@ -80,7 +82,9 @@ type GameScreen =
   | 'meta-dashboard'
   | 'spectate'
   | 'dungeon-run'
-  | 'puzzles';
+  | 'puzzles'
+  | 'tag-team'
+  | 'faction-wars';
 
 export const App: React.FC = () => {
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -302,6 +306,8 @@ export const App: React.FC = () => {
           onSpectate={() => setScreen('spectate')}
           onDungeonRun={() => setScreen('dungeon-run')}
           onPuzzles={() => setScreen('puzzles')}
+          onTagTeam={() => setScreen('tag-team')}
+          onFactionWars={() => setScreen('faction-wars')}
         />
       )}
 
@@ -534,6 +540,20 @@ export const App: React.FC = () => {
       {screen === 'puzzles' && (
         <ScreenTransition screenKey="puzzles">
           <PuzzleMode onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* 2v2 Tag Team */}
+      {screen === 'tag-team' && (
+        <ScreenTransition screenKey="tag-team">
+          <TagTeamMode onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Faction Wars */}
+      {screen === 'faction-wars' && (
+        <ScreenTransition screenKey="faction-wars">
+          <FactionWarsScreen onBack={() => setScreen('menu')} />
         </ScreenTransition>
       )}
 

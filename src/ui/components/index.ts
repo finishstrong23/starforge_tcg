@@ -15,3 +15,7 @@ export { DungeonRun } from './DungeonRun';
 export { PuzzleMode } from './PuzzleMode';
 export { PostGameStats } from './PostGameStats';
 export { BoardVFXOverlay, useBoardVFX } from './BoardVFX';
+export { TagTeamMode } from './TagTeamMode';
+export { LegendaryCinematic, useLegendaryCinematic } from './LegendaryCinematic';
+export { FactionWarsScreen } from './FactionWarsScreen';
+export { BoardPet, PetSelector, firePetEvent } from './BoardPet';
