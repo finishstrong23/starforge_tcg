@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import boardImg from '../../assets/board.png';
+
+const boardImg = 'https://raw.githubusercontent.com/finishstrong23/starforge_tcg/claude/add-last-words-keyword-3xGpp/src/assets/board.png';
 
 export const BoardBackground: React.FC = () => {
   return (

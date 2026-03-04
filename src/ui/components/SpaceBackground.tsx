@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import backgroundImg from '../../assets/background.png';
+
+const backgroundImg = 'https://raw.githubusercontent.com/finishstrong23/starforge_tcg/claude/add-last-words-keyword-3xGpp/src/assets/background.png';
 
 export const SpaceBackground: React.FC = () => {
   return (
