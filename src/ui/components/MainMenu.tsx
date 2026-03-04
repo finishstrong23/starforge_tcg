@@ -153,9 +153,9 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
 
       {/* Center: Logo + Play Modes */}
       <div style={s.center}>
-        {/* Logo */}
+        {/* Logo — wide across the top */}
         <div style={s.logoArea}>
-          <StarforgeLogo width={550} />
+          <StarforgeLogo width="100%" />
         </div>
 
         {/* Primary Play Buttons - vertical stack */}
@@ -299,14 +299,16 @@ const s: Record<string, React.CSSProperties> = {
     zIndex: 10,
   },
   topBtn: {
-    background: 'rgba(255,255,255,0.08)',
-    border: '1px solid rgba(255,255,255,0.15)',
+    background: 'rgba(0,0,0,0.5)',
+    border: '1px solid rgba(255,255,255,0.2)',
     borderRadius: '8px',
     padding: '10px 16px',
     minHeight: '44px',
-    color: '#aaa',
+    color: '#ccc',
     fontSize: '13px',
     cursor: 'pointer',
+    backdropFilter: 'blur(8px)',
+    textShadow: '0 1px 4px rgba(0,0,0,0.8)',
   },
 
   // Center area
@@ -325,6 +327,9 @@ const s: Record<string, React.CSSProperties> = {
   },
   logoArea: {
     textAlign: 'center',
+    width: '100%',
+    maxWidth: '700px',
+    padding: '0 10px',
   },
 
   // Mode stack
@@ -405,8 +410,9 @@ const s: Record<string, React.CSSProperties> = {
   },
   navLabel: {
     fontSize: '11px',
-    color: '#889',
+    color: '#aab',
     letterSpacing: '0.5px',
+    textShadow: '0 1px 4px rgba(0,0,0,0.8)',
   },
 
   // Play view
@@ -428,6 +434,7 @@ const s: Record<string, React.CSSProperties> = {
     color: '#fff',
     margin: 0,
     letterSpacing: '1px',
+    textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5)',
   },
   raceGrid: {
     display: 'grid',
@@ -444,6 +451,7 @@ const s: Record<string, React.CSSProperties> = {
     textAlign: 'center',
     transition: 'all 0.15s',
     minHeight: '48px',
+    backdropFilter: 'blur(6px)',
   },
   diffRow: {
     display: 'flex',

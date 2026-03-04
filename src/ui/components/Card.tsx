@@ -118,6 +118,7 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [popupSide, setPopupSide] = useState<'above' | 'below'>('above');
   const [popupAlign, setPopupAlign] = useState<'center' | 'left' | 'right'>('center');
   const cardRef = useRef<HTMLDivElement>(null);
@@ -285,7 +286,7 @@ export const Card: React.FC<CardProps> = ({
         onDragEnd?.(e);
       }}
       onMouseEnter={() => { if (!isDragging) { updatePopupPosition(); setIsHovered(true); } }}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => { setIsHovered(false); }}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
@@ -302,7 +303,13 @@ export const Card: React.FC<CardProps> = ({
         className={glowClass}
         onClick={(e) => {
           e.stopPropagation();
-          onClick?.();
+          if (isInHand) {
+            // In hand: click to preview, NOT to play
+            setShowPreview(prev => !prev);
+          } else {
+            // On board or enemy: use normal click handler (select for attack, target, etc.)
+            onClick?.();
+          }
         }}
       >
         {/* Barrier overlay */}
@@ -376,8 +383,84 @@ export const Card: React.FC<CardProps> = ({
         )}
       </div>
 
+      {/* Full Card Preview Overlay (click in hand to see) */}
+      {showPreview && isInHand && (
+        <div
+          style={styles.previewOverlay}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowPreview(false);
+          }}
+        >
+          <div style={styles.previewCard} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.previewHeader}>
+              <span style={styles.previewCost}>{card.currentCost}</span>
+              <span style={styles.previewName}>{definition?.name || 'Unknown'}</span>
+            </div>
+
+            <div style={styles.previewArtArea}>
+              <CardArt
+                cardId={card.definitionId}
+                race={(definition as any)?.race as Race | undefined}
+                cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
+                cost={card.currentCost}
+                width={260}
+                height={140}
+                isForged={card.isForged}
+              />
+            </div>
+
+            {isMinion && (
+              <div style={styles.previewStats}>
+                <span style={{ fontSize: '22px', fontWeight: 'bold', color: '#ffcc00' }}>
+                  ⚔️ {currentAttack}
+                </span>
+                <span style={{ fontSize: '22px', fontWeight: 'bold', color: '#ff4444' }}>
+                  ❤️ {currentHealth}
+                </span>
+              </div>
+            )}
+
+            {showTribe && (
+              <div style={{ textAlign: 'center', fontSize: '14px', color: tribeColor, fontWeight: 'bold', marginBottom: '6px' }}>
+                ⬡ {tribe!.charAt(0) + tribe!.slice(1).toLowerCase()}
+              </div>
+            )}
+
+            <div style={{ textAlign: 'center', fontSize: '13px', color: rarityColor, marginBottom: '8px' }}>
+              {definition?.rarity}
+            </div>
+
+            {definition?.cardText && (
+              <div style={styles.previewText}>{definition.cardText}</div>
+            )}
+
+            {cardKeywords.length > 0 && (
+              <div style={styles.previewKeywords}>
+                {cardKeywords.map(kw => {
+                  const info = KEYWORD_DESCRIPTIONS[kw];
+                  return info ? (
+                    <div key={kw} style={{ marginBottom: '6px' }}>
+                      <span style={{ fontSize: '14px', color: '#ffcc00', fontWeight: 'bold' }}>{keywordIcons[kw]} {info.name}</span>
+                      <span style={{ display: 'block', fontSize: '12px', color: '#aaa', lineHeight: '1.4' }}>{info.description}</span>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+            )}
+
+            <button
+              style={styles.previewClose}
+              onClick={(e) => { e.stopPropagation(); setShowPreview(false); }}
+            >
+              Tap to close
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Hover Popup - Large card with details */}
-      {isHovered && (
+      {isHovered && !showPreview && (
         <div style={{
           ...styles.hoverPopup,
           ...(popupSide === 'below' ? { top: '100%', bottom: 'auto', marginTop: '10px', marginBottom: 0 } : {}),
@@ -482,8 +565,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     userSelect: 'none',
   },
   cardInHand: {
-    width: 'var(--card-hand-width, 100px)',
-    height: 'var(--card-hand-height, 145px)',
+    width: 'var(--card-hand-width, 120px)',
+    height: 'var(--card-hand-height, 170px)',
   },
   cardOnBoard: {
     width: 'var(--card-width, 85px)',
@@ -523,7 +606,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     textAlign: 'center',
   },
   cardName: {
-    fontSize: '9px',
+    fontSize: '10px',
     fontWeight: 'bold',
     color: '#ffffff',
     whiteSpace: 'nowrap',
@@ -617,6 +700,100 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 15,
     pointerEvents: 'none',
     whiteSpace: 'nowrap',
+  },
+  // Full card preview overlay
+  previewOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0, 0, 0, 0.85)',
+    zIndex: 2000,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backdropFilter: 'blur(4px)',
+    pointerEvents: 'auto',
+  },
+  previewCard: {
+    width: '300px',
+    maxWidth: '90vw',
+    maxHeight: '85vh',
+    background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%)',
+    border: '3px solid #ffcc00',
+    borderRadius: '16px',
+    padding: '20px',
+    overflowY: 'auto',
+    boxShadow: '0 0 40px rgba(255, 204, 0, 0.3), 0 20px 60px rgba(0, 0, 0, 0.8)',
+  },
+  previewHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    marginBottom: '12px',
+  },
+  previewCost: {
+    width: '40px',
+    height: '40px',
+    background: 'linear-gradient(135deg, #0066cc 0%, #0044aa 100%)',
+    border: '3px solid #88ccff',
+    borderRadius: '50%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: '22px',
+    fontWeight: 'bold',
+    color: '#ffffff',
+    flexShrink: 0,
+  },
+  previewName: {
+    fontSize: '20px',
+    fontWeight: 'bold',
+    color: '#ffffff',
+    flex: 1,
+  },
+  previewArtArea: {
+    textAlign: 'center',
+    padding: '12px 0',
+    background: 'linear-gradient(135deg, #252540 0%, #1a1a30 100%)',
+    borderRadius: '10px',
+    marginBottom: '12px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewStats: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '30px',
+    marginBottom: '8px',
+  },
+  previewText: {
+    fontSize: '15px',
+    color: '#cccccc',
+    textAlign: 'center',
+    padding: '12px',
+    background: 'rgba(0,0,0,0.3)',
+    borderRadius: '8px',
+    marginBottom: '10px',
+    lineHeight: '1.5',
+  },
+  previewKeywords: {
+    borderTop: '1px solid #444466',
+    paddingTop: '10px',
+    marginBottom: '10px',
+  },
+  previewClose: {
+    width: '100%',
+    padding: '10px',
+    background: 'rgba(255,255,255,0.08)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '8px',
+    color: '#888',
+    fontSize: '14px',
+    cursor: 'pointer',
+    textAlign: 'center',
   },
   // Hover popup styles
   hoverPopup: {

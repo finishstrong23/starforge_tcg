@@ -119,7 +119,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       cardType: def?.type || 'MINION',
     });
     if (flightTimerRef.current) clearTimeout(flightTimerRef.current);
-    flightTimerRef.current = setTimeout(() => setFlightCard(null), 500);
+    flightTimerRef.current = setTimeout(() => setFlightCard(null), 900);
   }, []);
 
   // ── Emote handler ──
@@ -153,7 +153,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     const card = playerHand.find(c => c.instanceId === cardId);
     if (card && canPlayCard(card)) {
       triggerCardFlight(card);
-      selectCard(card);
+      // Delay the actual card play so the flight animation is visible
+      setTimeout(() => {
+        selectCard(card);
+      }, 400);
     }
   }, [playerHand, canPlayCard, selectCard, triggerCardFlight]);
 
@@ -166,14 +169,12 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
   }
 
   const handleCardClick = (card: any) => {
-    if (card.zone === 'HAND' && canPlayCard(card)) {
-      hapticTap();
-      triggerCardFlight(card);
-      selectCard(card);
-    } else if (card.zone === 'BOARD' && card.controllerId === 'player') {
+    if (card.zone === 'BOARD' && card.controllerId === 'player') {
       hapticTap();
       selectCard(card);
     }
+    // Hand cards: click opens preview (handled in Card component),
+    // drag-and-drop plays the card
   };
 
   const onTargetClick = (targetId: string) => {
@@ -610,7 +611,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '10px 0',
   },
   playerArea: {
-    height: '22%',
+    height: '26%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -633,8 +634,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-end',
-    minHeight: '100px',
-    paddingBottom: '10px',
+    minHeight: '130px',
+    paddingBottom: '8px',
     maxWidth: '100%',
     overflowX: 'auto',
   },
@@ -690,7 +691,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     transform: 'translate(-50%, -50%)',
     zIndex: 800,
     pointerEvents: 'none',
-    animation: 'card-flight 0.5s ease-out forwards',
+    animation: 'card-flight 0.9s ease-out forwards',
   },
   flightCard: {
     width: 'var(--flight-card-w, 130px)',
