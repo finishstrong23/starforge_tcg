@@ -504,7 +504,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexDirection: 'column',
     position: 'relative',
     overflow: 'hidden',
-    background: '#060612',
+    background: 'transparent',
   },
   loading: {
     width: '100%',
@@ -551,7 +551,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '10px',
-    background: 'linear-gradient(180deg, rgba(20, 20, 40, 0.9) 0%, transparent 100%)',
+    background: 'linear-gradient(180deg, rgba(20, 20, 40, 0.5) 0%, transparent 100%)',
   },
   opponentHand: {
     display: 'flex',
@@ -578,10 +578,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexDirection: 'column',
     justifyContent: 'space-between',
     padding: '10px',
-    background: `
-      radial-gradient(ellipse at center, rgba(30, 60, 100, 0.4) 0%, transparent 70%),
-      linear-gradient(180deg, #0a1525 0%, #152035 50%, #0a1525 100%)
-    `,
+    background: 'transparent',
     position: 'relative',
   },
   boardRow: {
@@ -619,7 +616,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '8px 10px',
-    background: 'linear-gradient(0deg, rgba(20, 20, 40, 0.9) 0%, transparent 100%)',
+    background: 'linear-gradient(0deg, rgba(20, 20, 40, 0.5) 0%, transparent 100%)',
     position: 'relative',
   },
   playerInfo: {
