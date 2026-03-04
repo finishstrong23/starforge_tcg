@@ -320,6 +320,8 @@ const s: Record<string, React.CSSProperties> = {
     padding: '0 20px',
     overflowY: 'auto',
     minHeight: 0,
+    position: 'relative',
+    zIndex: 5,
   },
   logoArea: {
     textAlign: 'center',
@@ -381,6 +383,8 @@ const s: Record<string, React.CSSProperties> = {
     overflowX: 'auto',
     WebkitOverflowScrolling: 'touch',
     flexShrink: 0,
+    position: 'relative',
+    zIndex: 5,
   } as React.CSSProperties,
   navBtn: {
     background: 'transparent',
@@ -416,6 +420,8 @@ const s: Record<string, React.CSSProperties> = {
     padding: '20px',
     overflowY: 'auto',
     minHeight: 0,
+    position: 'relative',
+    zIndex: 5,
   },
   playTitle: {
     fontSize: '22px',
