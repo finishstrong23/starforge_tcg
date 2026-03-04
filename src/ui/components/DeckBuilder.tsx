@@ -26,6 +26,7 @@ import {
   getBalancedStarterDeck,
 } from '../../data';
 import type { PlayerCollection } from '../../data';
+import backgroundImg from '../../assets/background.png';
 
 interface DeckBuilderProps {
   playerRace: Race;
@@ -417,7 +418,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     color: '#ffffff',
     overflow: 'hidden',
   },

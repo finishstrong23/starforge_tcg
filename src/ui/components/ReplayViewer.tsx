@@ -18,6 +18,7 @@ import {
   getReplayStats,
   formatDuration,
 } from '../../progression/ReplaySystem';
+import backgroundImg from '../../assets/background.png';
 
 interface ReplayViewerProps {
   onBack: () => void;
@@ -322,7 +323,7 @@ const ActionLine: React.FC<{ action: ReplayAction; isCurrent: boolean }> = ({ ac
 const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', overflowY: 'auto', padding: '20px',
-    background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     display: 'flex', justifyContent: 'center',
     WebkitOverflowScrolling: 'touch',
   } as React.CSSProperties,

@@ -18,6 +18,7 @@ import {
 } from '../../progression/Achievements';
 import { loadDailyState, addGold, saveDailyState } from '../../progression/DailyQuests';
 import { hapticTap } from '../capacitor';
+import backgroundImg from '../../assets/background.png';
 
 interface AchievementsScreenProps {
   onBack: () => void;
@@ -195,7 +196,7 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', display: 'flex',
     flexDirection: 'column', alignItems: 'center',
-    background: 'linear-gradient(135deg, #060612 0%, #0c0c22 100%)',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     overflow: 'auto', padding: '16px',
     WebkitOverflowScrolling: 'touch',
   } as React.CSSProperties,

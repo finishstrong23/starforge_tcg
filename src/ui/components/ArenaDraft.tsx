@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import backgroundImg from '../../assets/background.png';
 
 interface ArenaCard {
   cardId: string;
@@ -214,7 +215,7 @@ const draftStyles: Record<string, React.CSSProperties> = {
   container: {
     position: 'fixed',
     top: 0, left: 0, right: 0, bottom: 0,
-    background: 'linear-gradient(180deg, #0a0a1a 0%, #1a1a3a 100%)',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     display: 'flex',
     flexDirection: 'column',
     color: '#ccccdd',

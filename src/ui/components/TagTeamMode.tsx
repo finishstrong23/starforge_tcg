@@ -29,6 +29,7 @@ import {
   type TagTeamMatchState,
   type TagTeamRecord,
 } from '../../tagteam';
+import backgroundImg from '../../assets/background.png';
 
 interface TagTeamModeProps {
   onBack: () => void;
@@ -369,7 +370,7 @@ const st: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     color: '#fff',
     padding: 20,
     overflowY: 'auto',

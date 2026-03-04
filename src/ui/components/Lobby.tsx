@@ -11,6 +11,7 @@ import { Race, RaceData } from '../../types/Race';
 import { MultiplayerManager } from '../network/MultiplayerManager';
 import { loadPvPProfile, getRankTitle } from '../../stats/PvPRating';
 import type { PvPProfile } from '../../stats/PvPRating';
+import backgroundImg from '../../assets/background.png';
 
 type LobbyPhase = 'choose' | 'creating' | 'waiting' | 'joining' | 'ready';
 
@@ -327,6 +328,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '20px',
     overflowY: 'auto',
     flexDirection: 'column',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     WebkitOverflowScrolling: 'touch',
   } as React.CSSProperties,
   content: {

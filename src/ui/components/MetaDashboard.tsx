@@ -11,6 +11,7 @@ import { Race, RaceData } from '../../types/Race';
 import { loadStats, type GlobalStats, type RaceRecord } from '../../stats/GameStats';
 import { loadPvPProfile, getRankTitle, type PvPProfile, type PvPMatch } from '../../stats/PvPRating';
 import { loadTournamentState } from '../../progression/TournamentMode';
+import backgroundImg from '../../assets/background.png';
 
 interface MetaDashboardProps {
   onBack: () => void;
@@ -422,7 +423,7 @@ const AnalysisView: React.FC<{ stats: GlobalStats; profile: PvPProfile }> = ({ s
 const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', overflowY: 'auto', padding: '20px',
-    background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     display: 'flex', justifyContent: 'center',
     WebkitOverflowScrolling: 'touch',
   } as React.CSSProperties,

@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { hapticTap } from '../capacitor';
+import backgroundImg from '../../assets/background.png';
 
 interface SpectateScreenProps {
   onBack: () => void;
@@ -388,7 +389,7 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%',
     height: '100%',
-    background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     color: '#e0e0e0',
     display: 'flex',
     flexDirection: 'column',

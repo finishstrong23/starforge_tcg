@@ -16,6 +16,7 @@ import type { CardDefinition } from '../../types/Card';
 import { CardArt } from './CardArt';
 import { SoundManager } from '../../audio';
 import { hapticTap, hapticImpact } from '../capacitor';
+import backgroundImg from '../../assets/background.png';
 import {
   loadCraftingState,
   getAllCollectibleCards,
@@ -370,7 +371,7 @@ export const CraftingScreen: React.FC<CraftingScreenProps> = ({ onBack }) => {
 const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', display: 'flex',
-    flexDirection: 'column', background: 'linear-gradient(135deg, #060612 0%, #0c0c22 100%)',
+    flexDirection: 'column', background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     overflow: 'hidden',
   },
   header: {

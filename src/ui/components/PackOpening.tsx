@@ -15,6 +15,7 @@ import { loadDailyState, spendGold as spendDailyGold, saveDailyState } from '../
 import { CardArt } from './CardArt';
 import { hapticTap, hapticImpact, hapticHeavy } from '../capacitor';
 import type { Race } from '../../types/Race';
+import backgroundImg from '../../assets/background.png';
 
 interface PackOpeningProps {
   onBack: () => void;
@@ -273,7 +274,7 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', display: 'flex',
     flexDirection: 'column', alignItems: 'center',
-    background: 'linear-gradient(135deg, #060612 0%, #0c0c22 100%)',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     overflow: 'auto', padding: '20px',
     WebkitOverflowScrolling: 'touch',
   } as React.CSSProperties,

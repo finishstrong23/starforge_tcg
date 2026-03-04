@@ -8,6 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { SoundManager } from '../../audio';
 import { hapticTap } from '../capacitor';
+import backgroundImg from '../../assets/background.png';
 import {
   loadBattlePass,
   saveBattlePass,
@@ -241,7 +242,7 @@ export const BattlePassScreen: React.FC<BattlePassScreenProps> = ({ onBack }) =>
 const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
-    background: 'linear-gradient(180deg, #060612 0%, #0a0a22 50%, #0e1028 100%)',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     overflow: 'hidden',
   },
   header: {

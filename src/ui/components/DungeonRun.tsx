@@ -29,6 +29,7 @@ import {
 } from '../../dungeon/DungeonState';
 import type { DungeonRunSave, DungeonRunRecord } from '../../dungeon/DungeonState';
 import type { DungeonBoss, DungeonRelic as RelicType, CardBundle } from '../../dungeon/DungeonData';
+import backgroundImg from '../../assets/background.png';
 
 interface DungeonRunProps {
   onBack: () => void;
@@ -550,7 +551,7 @@ const s: Record<string, React.CSSProperties> = {
   container: {
     width: '100%',
     height: '100%',
-    background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)',
+    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     color: '#fff',
     display: 'flex',
     flexDirection: 'column',

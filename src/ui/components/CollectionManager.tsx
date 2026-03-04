@@ -17,6 +17,7 @@ import { ALL_SAMPLE_CARDS, getCollectibleSampleCards } from '../../data/SampleCa
 import { ALL_EXPANSION_CARDS } from '../../data/ExpansionCards';
 import { CardArt } from './CardArt';
 import { hapticTap } from '../capacitor';
+import backgroundImg from '../../assets/background.png';
 
 interface CollectionManagerProps {
   onBack: () => void;
@@ -254,7 +255,7 @@ export const CollectionManager: React.FC<CollectionManagerProps> = ({ onBack }) 
 const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', display: 'flex',
-    flexDirection: 'column', background: 'linear-gradient(135deg, #060612 0%, #0c0c22 100%)',
+    flexDirection: 'column', background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
     overflow: 'hidden',
   },
   header: {
