@@ -1,0 +1,2757 @@
+diff --git a/src/ui/components/Card.tsx b/src/ui/components/Card.tsx
+index 9a77b2f..156d407 100644
+--- a/src/ui/components/Card.tsx
++++ b/src/ui/components/Card.tsx
+@@ -11,12 +11,14 @@
+  * - Buff/damage color coding on stats
+  */
+ 
+-import React, { useState } from 'react';
++import React, { useState, useRef, useCallback, useEffect } from 'react';
+ import { hasKeyword } from '../../types/Card';
+ import type { CardInstance } from '../../types/Card';
+ import { CombatKeyword, OriginalKeyword, TriggerKeyword } from '../../types/Keywords';
+ import { globalCardDatabase } from '../../cards/CardDatabase';
+ import { KEYWORD_DESCRIPTIONS } from './KeywordTooltip';
++import { CardArt } from './CardArt';
++import type { Race } from '../../types/Race';
+ 
+ // Card art mapping (emoji-based for now, can be replaced with actual images)
+ const CARD_ART: Record<string, string> = {
+@@ -95,6 +97,8 @@ interface CardProps {
+   isSelected?: boolean;
+   isValidTarget?: boolean;
+   onClick?: () => void;
++  onDragStart?: (e: React.DragEvent) => void;
++  onDragEnd?: (e: React.DragEvent) => void;
+   style?: React.CSSProperties;
+ }
+ 
+@@ -108,9 +112,60 @@ export const Card: React.FC<CardProps> = ({
+   isSelected = false,
+   isValidTarget = false,
+   onClick,
++  onDragStart,
++  onDragEnd,
+   style = {},
+ }) => {
+   const [isHovered, setIsHovered] = useState(false);
++  const [isDragging, setIsDragging] = useState(false);
++  const [showPreview, setShowPreview] = useState(false);
++  const [popupSide, setPopupSide] = useState<'above' | 'below'>('above');
++  const [popupAlign, setPopupAlign] = useState<'center' | 'left' | 'right'>('center');
++  const cardRef = useRef<HTMLDivElement>(null);
++  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
++  const isDraggable = isInHand && canPlay;
++
++  // Compute popup positioning when shown
++  const updatePopupPosition = useCallback(() => {
++    if (!cardRef.current) return;
++    const rect = cardRef.current.getBoundingClientRect();
++    // Show below if too close to top
++    setPopupSide(rect.top < 260 ? 'below' : 'above');
++    // Align left/right if near screen edges
++    if (rect.left < 120) {
++      setPopupAlign('left');
++    } else if (window.innerWidth - rect.right < 120) {
++      setPopupAlign('right');
++    } else {
++      setPopupAlign('center');
++    }
++  }, []);
++
++  // Long-press for touch devices to show popup
++  const handleTouchStart = useCallback(() => {
++    longPressTimer.current = setTimeout(() => {
++      updatePopupPosition();
++      setIsHovered(true);
++    }, 400);
++  }, [updatePopupPosition]);
++
++  const handleTouchEnd = useCallback(() => {
++    if (longPressTimer.current) {
++      clearTimeout(longPressTimer.current);
++      longPressTimer.current = null;
++    }
++    // Dismiss popup after a short delay
++    if (isHovered) {
++      setTimeout(() => setIsHovered(false), 1500);
++    }
++  }, [isHovered]);
++
++  // Cleanup timer on unmount
++  useEffect(() => {
++    return () => {
++      if (longPressTimer.current) clearTimeout(longPressTimer.current);
++    };
++  }, []);
+   const definition = globalCardDatabase.getCard(card.definitionId);
+   const isMinion = card.currentAttack !== undefined;
+ 
+@@ -169,7 +224,7 @@ export const Card: React.FC<CardProps> = ({
+   if (hasKeyword(card, CombatKeyword.CLOAK)) cardKeywords.push('CLOAK');
+   if (hasKeyword(card, CombatKeyword.DOUBLE_STRIKE)) cardKeywords.push('DOUBLE_STRIKE');
+   if (hasKeyword(card, TriggerKeyword.DEPLOY)) cardKeywords.push('DEPLOY');
+-  if (hasKeyword(card, TriggerKeyword.LAST_RITES)) cardKeywords.push('LAST_RITES');
++  if (hasKeyword(card, TriggerKeyword.LAST_WORDS)) cardKeywords.push('LAST_WORDS');
+   if (hasKeyword(card, OriginalKeyword.SALVAGE)) cardKeywords.push('SALVAGE');
+ 
+   const keywordIcons: Record<string, string> = {
+@@ -182,7 +237,7 @@ export const Card: React.FC<CardProps> = ({
+     CLOAK: '👻',
+     DOUBLE_STRIKE: '⚔️',
+     DEPLOY: '📥',
+-    LAST_RITES: '💀',
++    LAST_WORDS: '💀',
+     SALVAGE: '♻️',
+   };
+ 
+@@ -201,24 +256,70 @@ export const Card: React.FC<CardProps> = ({
+   // Barrier visual
+   const showBarrier = card.hasBarrier;
+ 
++  // STARFORGED visual — cosmic golden-purple glow with pulsing effect
++  const isForged = card.isForged;
++  if (isForged) {
++    borderColor = '#ffcc00';
++    boxShadow = '0 0 12px #ffcc00, 0 0 24px #ff8800, 0 0 40px #ff4400, 0 0 60px rgba(160, 60, 255, 0.4)';
++  }
++
+   return (
+     <div
+-      style={{ position: 'relative', display: 'inline-block' }}
+-      onMouseEnter={() => setIsHovered(true)}
+-      onMouseLeave={() => setIsHovered(false)}
++      ref={cardRef}
++      style={{
++        position: 'relative',
++        display: 'inline-block',
++        opacity: isDragging ? 0.4 : 1,
++        transition: 'opacity 0.15s ease',
++      }}
++      draggable={isDraggable}
++      onDragStart={(e) => {
++        if (!isDraggable) { e.preventDefault(); return; }
++        setIsDragging(true);
++        setIsHovered(false);
++        e.dataTransfer.effectAllowed = 'move';
++        e.dataTransfer.setData('text/plain', card.instanceId);
++        onDragStart?.(e);
++      }}
++      onDragEnd={(e) => {
++        setIsDragging(false);
++        onDragEnd?.(e);
++      }}
++      onMouseEnter={() => { if (!isDragging) { updatePopupPosition(); setIsHovered(true); } }}
++      onMouseLeave={() => { setIsHovered(false); }}
++      onTouchStart={handleTouchStart}
++      onTouchEnd={handleTouchEnd}
+     >
+       {/* Main Card */}
+       <div
+-        style={cardStyles}
++        style={{
++          ...cardStyles,
++          ...(isForged ? {
++            border: `3px solid #ffcc00`,
++            boxShadow: '0 0 12px #ffcc00, 0 0 24px #ff8800, 0 0 40px #ff4400, 0 0 60px rgba(160, 60, 255, 0.4)',
++            background: 'linear-gradient(135deg, #3a2800 0%, #1a0f2e 50%, #2a1a00 100%)',
++          } : {}),
++        }}
+         className={glowClass}
+         onClick={(e) => {
+           e.stopPropagation();
+-          onClick?.();
++          if (isInHand) {
++            // In hand: click to preview, NOT to play
++            setShowPreview(prev => !prev);
++          } else {
++            // On board or enemy: use normal click handler (select for attack, target, etc.)
++            onClick?.();
++          }
+         }}
+       >
+         {/* Barrier overlay */}
+         {showBarrier && <div style={styles.barrierOverlay} />}
+ 
++        {/* STARFORGED badge */}
++        {isForged && (
++          <div style={styles.forgedBadge}>STARFORGED</div>
++        )}
++
+         {/* Cost */}
+         <div style={styles.costBadge}>
+           {card.currentCost}
+@@ -243,7 +344,15 @@ export const Card: React.FC<CardProps> = ({
+           {card.isCloaked ? (
+             <div style={styles.cloakedOverlay}>👻</div>
+           ) : (
+-            <div style={styles.cardArtEmoji}>{cardArt}</div>
++            <CardArt
++              cardId={card.definitionId}
++              race={(definition as any)?.race as Race | undefined}
++              cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
++              cost={card.currentCost}
++              width={isInHand ? 92 : 77}
++              height={isInHand ? 55 : 45}
++              isForged={card.isForged}
++            />
+           )}
+         </div>
+ 
+@@ -274,15 +383,106 @@ export const Card: React.FC<CardProps> = ({
+         )}
+       </div>
+ 
++      {/* Full Card Preview Overlay (click in hand to see) */}
++      {showPreview && isInHand && (
++        <div
++          style={styles.previewOverlay}
++          onClick={(e) => {
++            e.stopPropagation();
++            setShowPreview(false);
++          }}
++        >
++          <div style={styles.previewCard} onClick={(e) => e.stopPropagation()}>
++            <div style={styles.previewHeader}>
++              <span style={styles.previewCost}>{card.currentCost}</span>
++              <span style={styles.previewName}>{definition?.name || 'Unknown'}</span>
++            </div>
++
++            <div style={styles.previewArtArea}>
++              <CardArt
++                cardId={card.definitionId}
++                race={(definition as any)?.race as Race | undefined}
++                cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
++                cost={card.currentCost}
++                width={260}
++                height={140}
++                isForged={card.isForged}
++              />
++            </div>
++
++            {isMinion && (
++              <div style={styles.previewStats}>
++                <span style={{ fontSize: '22px', fontWeight: 'bold', color: '#ffcc00' }}>
++                  ⚔️ {currentAttack}
++                </span>
++                <span style={{ fontSize: '22px', fontWeight: 'bold', color: '#ff4444' }}>
++                  ❤️ {currentHealth}
++                </span>
++              </div>
++            )}
++
++            {showTribe && (
++              <div style={{ textAlign: 'center', fontSize: '14px', color: tribeColor, fontWeight: 'bold', marginBottom: '6px' }}>
++                ⬡ {tribe!.charAt(0) + tribe!.slice(1).toLowerCase()}
++              </div>
++            )}
++
++            <div style={{ textAlign: 'center', fontSize: '13px', color: rarityColor, marginBottom: '8px' }}>
++              {definition?.rarity}
++            </div>
++
++            {definition?.cardText && (
++              <div style={styles.previewText}>{definition.cardText}</div>
++            )}
++
++            {cardKeywords.length > 0 && (
++              <div style={styles.previewKeywords}>
++                {cardKeywords.map(kw => {
++                  const info = KEYWORD_DESCRIPTIONS[kw];
++                  return info ? (
++                    <div key={kw} style={{ marginBottom: '6px' }}>
++                      <span style={{ fontSize: '14px', color: '#ffcc00', fontWeight: 'bold' }}>{keywordIcons[kw]} {info.name}</span>
++                      <span style={{ display: 'block', fontSize: '12px', color: '#aaa', lineHeight: '1.4' }}>{info.description}</span>
++                    </div>
++                  ) : null;
++                })}
++              </div>
++            )}
++
++            <button
++              style={styles.previewClose}
++              onClick={(e) => { e.stopPropagation(); setShowPreview(false); }}
++            >
++              Tap to close
++            </button>
++          </div>
++        </div>
++      )}
++
+       {/* Hover Popup - Large card with details */}
+-      {isHovered && (
+-        <div style={styles.hoverPopup}>
++      {isHovered && !showPreview && (
++        <div style={{
++          ...styles.hoverPopup,
++          ...(popupSide === 'below' ? { top: '100%', bottom: 'auto', marginTop: '10px', marginBottom: 0 } : {}),
++          ...(popupAlign === 'left' ? { left: 0, transform: 'none' } : {}),
++          ...(popupAlign === 'right' ? { left: 'auto', right: 0, transform: 'none' } : {}),
++        }}>
+           <div style={styles.popupHeader}>
+             <span style={styles.popupCost}>{card.currentCost}</span>
+             <span style={styles.popupName}>{definition?.name || 'Unknown'}</span>
+           </div>
+ 
+-          <div style={styles.popupArt}>{cardArt}</div>
++          <div style={styles.popupArt}>
++            <CardArt
++              cardId={card.definitionId}
++              race={(definition as any)?.race as Race | undefined}
++              cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
++              cost={card.currentCost}
++              width={196}
++              height={100}
++              isForged={card.isForged}
++            />
++          </div>
+ 
+           {isMinion && (
+             <div style={styles.popupStats}>
+@@ -306,6 +506,27 @@ export const Card: React.FC<CardProps> = ({
+             <span style={{ color: rarityColor }}>{definition?.rarity}</span>
+           </div>
+ 
++          {isForged && (
++            <div style={{
++              textAlign: 'center',
++              padding: '4px 8px',
++              marginBottom: '6px',
++              background: 'linear-gradient(90deg, rgba(255,170,0,0.2), rgba(160,60,255,0.2), rgba(255,170,0,0.2))',
++              border: '1px solid #ffaa00',
++              borderRadius: '4px',
++              fontSize: '11px',
++              fontWeight: 'bold',
++              color: '#ffdd44',
++              textShadow: '0 0 6px #ff8800',
++              letterSpacing: '2px',
++            }}>
++              STARFORGED
++              <div style={{ fontSize: '9px', color: '#cc88ff', fontWeight: 'normal', letterSpacing: '0.5px', marginTop: '2px' }}>
++                2x Stats | Immune to Silence
++              </div>
++            </div>
++          )}
++
+           {definition?.cardText && (
+             <div style={styles.popupText}>{definition.cardText}</div>
+           )}
+@@ -333,8 +554,8 @@ export const Card: React.FC<CardProps> = ({
+ const styles: { [key: string]: React.CSSProperties } = {
+   card: {
+     position: 'relative',
+-    width: '90px',
+-    height: '130px',
++    width: 'var(--card-width, 90px)',
++    height: 'var(--card-height, 130px)',
+     background: 'linear-gradient(135deg, #2a2a4a 0%, #1a1a3a 100%)',
+     borderRadius: '8px',
+     display: 'flex',
+@@ -344,12 +565,12 @@ const styles: { [key: string]: React.CSSProperties } = {
+     userSelect: 'none',
+   },
+   cardInHand: {
+-    width: '100px',
+-    height: '145px',
++    width: 'var(--card-hand-width, 120px)',
++    height: 'var(--card-hand-height, 170px)',
+   },
+   cardOnBoard: {
+-    width: '85px',
+-    height: '120px',
++    width: 'var(--card-width, 85px)',
++    height: 'var(--card-height, 120px)',
+   },
+   barrierOverlay: {
+     position: 'absolute',
+@@ -385,7 +606,7 @@ const styles: { [key: string]: React.CSSProperties } = {
+     textAlign: 'center',
+   },
+   cardName: {
+-    fontSize: '9px',
++    fontSize: '10px',
+     fontWeight: 'bold',
+     color: '#ffffff',
+     whiteSpace: 'nowrap',
+@@ -466,6 +687,114 @@ const styles: { [key: string]: React.CSSProperties } = {
+     padding: '5px',
+     lineHeight: '1.2',
+   },
++  forgedBadge: {
++    position: 'absolute',
++    top: '50%',
++    left: '50%',
++    transform: 'translate(-50%, -50%) rotate(-12deg)',
++    fontSize: '8px',
++    fontWeight: 'bold',
++    color: '#ffdd44',
++    textShadow: '0 0 8px #ffaa00, 0 0 16px #ff6600, 0 0 24px rgba(160, 60, 255, 0.6)',
++    letterSpacing: '1.5px',
++    zIndex: 15,
++    pointerEvents: 'none',
++    whiteSpace: 'nowrap',
++  },
++  // Full card preview overlay
++  previewOverlay: {
++    position: 'fixed',
++    top: 0,
++    left: 0,
++    right: 0,
++    bottom: 0,
++    background: 'rgba(0, 0, 0, 0.85)',
++    zIndex: 2000,
++    display: 'flex',
++    justifyContent: 'center',
++    alignItems: 'center',
++    backdropFilter: 'blur(4px)',
++    pointerEvents: 'auto',
++  },
++  previewCard: {
++    width: '300px',
++    maxWidth: '90vw',
++    maxHeight: '85vh',
++    background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%)',
++    border: '3px solid #ffcc00',
++    borderRadius: '16px',
++    padding: '20px',
++    overflowY: 'auto',
++    boxShadow: '0 0 40px rgba(255, 204, 0, 0.3), 0 20px 60px rgba(0, 0, 0, 0.8)',
++  },
++  previewHeader: {
++    display: 'flex',
++    alignItems: 'center',
++    gap: '12px',
++    marginBottom: '12px',
++  },
++  previewCost: {
++    width: '40px',
++    height: '40px',
++    background: 'linear-gradient(135deg, #0066cc 0%, #0044aa 100%)',
++    border: '3px solid #88ccff',
++    borderRadius: '50%',
++    display: 'flex',
++    justifyContent: 'center',
++    alignItems: 'center',
++    fontSize: '22px',
++    fontWeight: 'bold',
++    color: '#ffffff',
++    flexShrink: 0,
++  },
++  previewName: {
++    fontSize: '20px',
++    fontWeight: 'bold',
++    color: '#ffffff',
++    flex: 1,
++  },
++  previewArtArea: {
++    textAlign: 'center',
++    padding: '12px 0',
++    background: 'linear-gradient(135deg, #252540 0%, #1a1a30 100%)',
++    borderRadius: '10px',
++    marginBottom: '12px',
++    display: 'flex',
++    justifyContent: 'center',
++    alignItems: 'center',
++  },
++  previewStats: {
++    display: 'flex',
++    justifyContent: 'center',
++    gap: '30px',
++    marginBottom: '8px',
++  },
++  previewText: {
++    fontSize: '15px',
++    color: '#cccccc',
++    textAlign: 'center',
++    padding: '12px',
++    background: 'rgba(0,0,0,0.3)',
++    borderRadius: '8px',
++    marginBottom: '10px',
++    lineHeight: '1.5',
++  },
++  previewKeywords: {
++    borderTop: '1px solid #444466',
++    paddingTop: '10px',
++    marginBottom: '10px',
++  },
++  previewClose: {
++    width: '100%',
++    padding: '10px',
++    background: 'rgba(255,255,255,0.08)',
++    border: '1px solid rgba(255,255,255,0.2)',
++    borderRadius: '8px',
++    color: '#888',
++    fontSize: '14px',
++    cursor: 'pointer',
++    textAlign: 'center',
++  },
+   // Hover popup styles
+   hoverPopup: {
+     position: 'absolute',
+@@ -473,6 +802,7 @@ const styles: { [key: string]: React.CSSProperties } = {
+     left: '50%',
+     transform: 'translateX(-50%)',
+     width: '220px',
++    maxWidth: 'calc(100vw - 20px)',
+     background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%)',
+     border: '2px solid #ffcc00',
+     borderRadius: '12px',
+diff --git a/src/ui/components/GameBoard.tsx b/src/ui/components/GameBoard.tsx
+index c422a6c..9a4bbe3 100644
+--- a/src/ui/components/GameBoard.tsx
++++ b/src/ui/components/GameBoard.tsx
+@@ -6,23 +6,39 @@
+  * - Board battlefield (middle)
+  * - Player area (bottom)
+  * - Spell/hero power targeting mode
++ * - Combat log / play-by-play tracker
++ * - Attack animations between combatants
+  */
+ 
+-import React, { useCallback, useMemo } from 'react';
++import React, { useCallback, useMemo, useState, useRef } from 'react';
+ import { useGame } from '../context/GameContext';
++import { SoundManager } from '../../audio';
+ import { Card } from './Card';
+ import { HeroPortrait } from './HeroPortrait';
+ import { CrystalBar } from './CrystalBar';
+ import { EndTurnButton } from './EndTurnButton';
+ import { GameOverlay } from './GameOverlay';
+ import { TurnTimer } from './TurnTimer';
++import { CombatLog } from './CombatLog';
++import { AttackAnimation } from './AttackAnimation';
++import { VFXOverlay } from './VFXOverlay';
++import { CardBack } from './CardBack';
++import { BoardBackground } from './BoardBackground';
++import { EmoteWheel, EmoteBubble, type Emote } from './EmoteWheel';
++import { CardArt } from './CardArt';
++import { HeroIntro } from './HeroIntro';
+ import { getHeroById } from '../../heroes';
++import { globalCardDatabase } from '../../cards/CardDatabase';
++import { hapticTap, hapticImpact } from '../capacitor';
++import type { Race } from '../../types/Race';
+ 
+ interface GameBoardProps {
+   onBackToMenu: () => void;
++  /** If true, game over overlay shows "Continue" and routes to campaign results */
++  isCampaign?: boolean;
+ }
+ 
+-export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
++export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign = false }) => {
+   const {
+     gameState,
+     playerState,
+@@ -33,6 +49,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+     playerHand,
+     playerBoard,
+     opponentBoard,
++    opponentHandCount,
++    playerDeckCount,
++    opponentDeckCount,
+     selectedCard,
+     validTargets,
+     attackingMinion,
+@@ -46,8 +65,35 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+     endTurn,
+     handleTargetClick,
+     cancelTargeting,
++    activateStarforge,
++    canStarforge,
++    combatLog,
++    currentAnimation,
++    onAnimationComplete,
++    vfxEvents,
++    dismissVFX,
+   } = useGame();
+ 
++  // ── Drag-and-drop state ──
++  const [isDragOver, setIsDragOver] = useState(false);
++  const draggedCardIdRef = useRef<string | null>(null);
++
++  // ── Card flight animation state ──
++  const [flightCard, setFlightCard] = useState<{
++    definitionId: string;
++    cost: number;
++    race?: string;
++    cardType: string;
++  } | null>(null);
++  const flightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
++
++  // ── Hero intro state ──
++  const [showIntro, setShowIntro] = useState(true);
++
++  // ── Emote state ──
++  const [playerEmote, setPlayerEmote] = useState<string | null>(null);
++  const [opponentEmote, setOpponentEmote] = useState<string | null>(null);
++
+   // Timer callback - auto end turn when time runs out
+   const handleTimeUp = useCallback(() => {
+     if (isPlayerTurn) {
+@@ -55,9 +101,64 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+     }
+   }, [isPlayerTurn, endTurn]);
+ 
+-  // Look up hero power info for tooltips
++  // Look up hero definitions for intro + tooltips
+   const playerHeroDef = useMemo(() =>
+-    getHeroById(playerState?.hero.definitionId || ''), [playerState?.hero.definitionId]);
++    getHeroById(playerState?.hero?.definitionId || ''), [playerState?.hero?.definitionId]);
++  const opponentHeroDef = useMemo(() =>
++    getHeroById(opponentState?.hero?.definitionId || ''), [opponentState?.hero?.definitionId]);
++
++  const handleIntroComplete = useCallback(() => setShowIntro(false), []);
++
++  // ── Card flight trigger ──
++  const triggerCardFlight = useCallback((card: any) => {
++    const def = globalCardDatabase.getCard(card.definitionId);
++    setFlightCard({
++      definitionId: card.definitionId,
++      cost: card.currentCost,
++      race: (def as any)?.race,
++      cardType: def?.type || 'MINION',
++    });
++    if (flightTimerRef.current) clearTimeout(flightTimerRef.current);
++    flightTimerRef.current = setTimeout(() => setFlightCard(null), 900);
++  }, []);
++
++  // ── Emote handler ──
++  const handleEmote = useCallback((emote: Emote) => {
++    setPlayerEmote(emote.message);
++    // AI responds with a random emote after a delay
++    setTimeout(() => {
++      const responses = ['Well played.', 'Greetings!', 'Thank you.', 'Wow!'];
++      setOpponentEmote(responses[Math.floor(Math.random() * responses.length)]);
++    }, 1200 + Math.random() * 1500);
++  }, []);
++
++  // ── Drag-and-drop handlers ──
++  // NOTE: These useCallback hooks MUST be before the early return below,
++  // otherwise React sees a different hook count between renders (error #310).
++  const handleDragOver = useCallback((e: React.DragEvent) => {
++    e.preventDefault();
++    e.dataTransfer.dropEffect = 'move';
++    setIsDragOver(true);
++  }, []);
++
++  const handleDragLeave = useCallback(() => {
++    setIsDragOver(false);
++  }, []);
++
++  const handleDrop = useCallback((e: React.DragEvent) => {
++    e.preventDefault();
++    setIsDragOver(false);
++    const cardId = e.dataTransfer.getData('text/plain');
++    if (!cardId) return;
++    const card = playerHand.find(c => c.instanceId === cardId);
++    if (card && canPlayCard(card)) {
++      triggerCardFlight(card);
++      // Delay the actual card play so the flight animation is visible
++      setTimeout(() => {
++        selectCard(card);
++      }, 400);
++    }
++  }, [playerHand, canPlayCard, selectCard, triggerCardFlight]);
+ 
+   if (!gameState || !playerState || !opponentState) {
+     return (
+@@ -68,16 +169,16 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+   }
+ 
+   const handleCardClick = (card: any) => {
+-    if (card.zone === 'HAND' && canPlayCard(card)) {
+-      // Use selectCard which handles targeting mode
+-      selectCard(card);
+-    } else if (card.zone === 'BOARD' && card.controllerId === 'player') {
+-      // Select for attack
++    if (card.zone === 'BOARD' && card.controllerId === 'player') {
++      hapticTap();
+       selectCard(card);
+     }
++    // Hand cards: click opens preview (handled in Card component),
++    // drag-and-drop plays the card
+   };
+ 
+   const onTargetClick = (targetId: string) => {
++    hapticImpact();
+     handleTargetClick(targetId);
+   };
+ 
+@@ -98,12 +199,34 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+     : null;
+ 
+   return (
+-    <div style={styles.container}>
++    <div className="game-board" style={styles.container}>
++      {/* Animated starfield background */}
++      <BoardBackground />
++
++      {/* Hero Intro Overlay — dramatic entrance before match starts */}
++      {showIntro && playerHeroDef && opponentHeroDef && (
++        <HeroIntro
++          playerHero={playerHeroDef}
++          opponentHero={opponentHeroDef}
++          onComplete={handleIntroComplete}
++        />
++      )}
++
++      {/* VFX Overlay - floating damage/heal numbers, death bursts, spell rings */}
++      <VFXOverlay events={vfxEvents} onEventDone={dismissVFX} />
++
++      {/* Attack Animation Overlay */}
++      <AttackAnimation
++        animation={currentAnimation}
++        onComplete={onAnimationComplete}
++      />
++
+       {/* Game Over Overlay */}
+       {isGameOver && (
+         <GameOverlay
+           winnerId={gameState.winnerId}
+           onPlayAgain={onBackToMenu}
++          isCampaign={isCampaign}
+         />
+       )}
+ 
+@@ -115,13 +238,16 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+         </div>
+       )}
+ 
++      {/* Combat Log - Play by Play Tracker */}
++      <CombatLog entries={combatLog} />
++
+       {/* Opponent Area */}
+       <div style={styles.opponentArea}>
+-        {/* Opponent Hand (face down) */}
++        {/* Opponent Hand (face down) — use actual Board zone count */}
+         <div style={styles.opponentHand}>
+-          {opponentState.hand.map((_, index) => (
++          {Array.from({ length: opponentHandCount }, (_, index) => (
+             <div key={index} style={styles.cardBack}>
+-              <div style={styles.cardBackDesign}>★</div>
++              <CardBack width={50} height={70} />
+             </div>
+           ))}
+         </div>
+@@ -134,7 +260,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+             isOpponent
+           />
+           <div style={styles.deckCount}>
+-            Deck: {opponentState.deck.length}
++            Deck: {opponentDeckCount}
+           </div>
+         </div>
+       </div>
+@@ -143,24 +269,35 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+       <div style={styles.battlefield} onClick={handleBoardClick}>
+         {/* Opponent Board */}
+         <div style={styles.boardRow}>
+-          <HeroPortrait
+-            health={opponentState.hero.currentHealth}
+-            maxHealth={opponentState.hero.maxHealth}
+-            armor={opponentState.hero.armor}
+-            isOpponent
+-            isValidTarget={validTargets.includes('hero_opponent')}
+-            onClick={() => onTargetClick('hero_opponent')}
+-          />
++          <div data-card-id="hero_opponent" style={{ position: 'relative' }}>
++            <HeroPortrait
++              health={opponentState.hero.currentHealth}
++              maxHealth={opponentState.hero.maxHealth}
++              armor={opponentState.hero.armor}
++              isOpponent
++              isValidTarget={validTargets.includes('hero_opponent')}
++              onClick={() => onTargetClick('hero_opponent')}
++            />
++            {/* Opponent Emote Bubble */}
++            {opponentEmote && (
++              <EmoteBubble
++                message={opponentEmote}
++                isOpponent
++                onDone={() => setOpponentEmote(null)}
++              />
++            )}
++          </div>
+           <div style={styles.minionsRow}>
+             {opponentBoard.map((card) => (
+-              <Card
+-                key={card.instanceId}
+-                card={card}
+-                isOnBoard
+-                isEnemy
+-                isValidTarget={validTargets.includes(card.instanceId)}
+-                onClick={() => onTargetClick(card.instanceId)}
+-              />
++              <div key={card.instanceId} data-card-id={card.instanceId}>
++                <Card
++                  card={card}
++                  isOnBoard
++                  isEnemy
++                  isValidTarget={validTargets.includes(card.instanceId)}
++                  onClick={() => onTargetClick(card.instanceId)}
++                />
++              </div>
+             ))}
+           </div>
+         </div>
+@@ -172,40 +309,80 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+             turnNumber={turnNumber}
+             onTimeUp={handleTimeUp}
+             maxTime={30}
++            paused={showIntro}
+           />
+         </div>
+ 
+         {/* Player Board */}
+         <div style={styles.boardRow}>
+-          <HeroPortrait
+-            health={playerState.hero.currentHealth}
+-            maxHealth={playerState.hero.maxHealth}
+-            armor={playerState.hero.armor}
+-            heroPowerUsed={playerState.hero.heroPowerUsedThisTurn}
+-            canUseHeroPower={isPlayerTurn && !playerState.hero.heroPowerUsedThisTurn && playerState.crystals.current >= 2}
+-            heroPowerName={playerHeroDef?.heroPower.name}
+-            heroPowerDescription={playerHeroDef?.heroPower.description}
+-            onHeroPowerClick={() => useHeroPower()}
+-            isValidTarget={validTargets.includes('hero_player')}
+-            onClick={() => onTargetClick('hero_player')}
+-          />
+-          <div style={styles.minionsRow}>
+-            {playerBoard.map((card) => (
+-              <Card
+-                key={card.instanceId}
+-                card={card}
+-                isOnBoard
+-                isSelected={selectedCard?.instanceId === card.instanceId}
+-                canAttack={canAttack(card)}
+-                isValidTarget={validTargets.includes(card.instanceId)}
+-                onClick={() => {
+-                  if (validTargets.includes(card.instanceId)) {
+-                    onTargetClick(card.instanceId);
+-                  } else {
+-                    handleCardClick(card);
+-                  }
+-                }}
++          <div data-card-id="hero_player" style={{ position: 'relative' }}>
++            <HeroPortrait
++              health={playerState.hero.currentHealth}
++              maxHealth={playerState.hero.maxHealth}
++              armor={playerState.hero.armor}
++              heroPowerUsed={playerState.hero.heroPowerUsedThisTurn}
++              canUseHeroPower={isPlayerTurn && !playerState.hero.heroPowerUsedThisTurn && playerState.crystals.current >= 2}
++              heroPowerName={playerHeroDef?.heroPower?.name}
++              heroPowerDescription={playerHeroDef?.heroPower?.description}
++              onHeroPowerClick={() => useHeroPower()}
++              isValidTarget={validTargets.includes('hero_player')}
++              onClick={() => onTargetClick('hero_player')}
++            />
++            {/* Player Emote Bubble */}
++            {playerEmote && (
++              <EmoteBubble
++                message={playerEmote}
++                onDone={() => setPlayerEmote(null)}
+               />
++            )}
++            {/* Emote Wheel */}
++            <div style={{ position: 'absolute', bottom: '-24px', left: '50%', transform: 'translateX(-50%)', zIndex: 20 }}>
++              <EmoteWheel onEmote={handleEmote} />
++            </div>
++          </div>
++          <div
++            style={{
++              ...styles.minionsRow,
++              ...(isDragOver ? {
++                borderColor: 'rgba(0, 255, 136, 0.6)',
++                boxShadow: 'inset 0 0 30px rgba(0, 255, 136, 0.15), 0 0 20px rgba(0, 255, 136, 0.2)',
++              } : {}),
++            }}
++            onDragOver={handleDragOver}
++            onDragLeave={handleDragLeave}
++            onDrop={handleDrop}
++          >
++            {playerBoard.map((card) => (
++              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative' }}>
++                <Card
++                  card={card}
++                  isOnBoard
++                  isSelected={selectedCard?.instanceId === card.instanceId}
++                  canAttack={canAttack(card)}
++                  isValidTarget={validTargets.includes(card.instanceId)}
++                  onClick={() => {
++                    if (validTargets.includes(card.instanceId)) {
++                      onTargetClick(card.instanceId);
++                    } else {
++                      handleCardClick(card);
++                    }
++                  }}
++                />
++                {/* STARFORGE ASCENSION Button */}
++                {canStarforge(card) && (
++                  <button
++                    style={styles.starforgeButton}
++                    onClick={(e) => {
++                      e.stopPropagation();
++                      hapticImpact();
++                      activateStarforge(card);
++                    }}
++                    title={`STARFORGE: Spend ALL mana + lose next turn's mana. 2x stats, BARRIER, bonus keyword, immediate attack, silence immunity.`}
++                  >
++                    STARFORGE
++                  </button>
++                )}
++              </div>
+             ))}
+           </div>
+         </div>
+@@ -218,9 +395,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+           <CrystalBar
+             current={playerState.crystals.current}
+             max={playerState.crystals.maximum}
++            overloaded={playerState.crystals.overloaded}
+           />
+           <div style={styles.deckCount}>
+-            Deck: {playerState.deck.length}
++            Deck: {playerDeckCount}
+           </div>
+         </div>
+ 
+@@ -234,9 +412,17 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+               canPlay={canPlayCard(card)}
+               isSelected={selectedCard?.instanceId === card.instanceId}
+               onClick={() => handleCardClick(card)}
++              onDragStart={() => {
++                draggedCardIdRef.current = card.instanceId;
++                SoundManager.play('cardDrag' as any);
++              }}
++              onDragEnd={() => {
++                draggedCardIdRef.current = null;
++                setIsDragOver(false);
++              }}
+               style={{
+-                transform: `rotate(${(index - playerHand.length / 2) * 3}deg)`,
+-                marginLeft: index > 0 ? '-20px' : '0',
++                transform: `rotate(${(index - playerHand.length / 2) * 2.5}deg)`,
++                marginLeft: index > 0 ? 'max(-20px, -2.5vw)' : '0',
+               }}
+             />
+           ))}
+@@ -251,14 +437,66 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu }) => {
+         Turn {turnNumber}
+       </div>
+ 
++      {/* Sound toggle */}
++      <SoundToggle />
++
+       {/* Back button */}
+       <button style={styles.backButton} onClick={onBackToMenu}>
+-        ✕
++        {'\u2715'}
+       </button>
++
++      {/* Card Flight Animation Overlay */}
++      {flightCard && (
++        <div style={styles.flightOverlay}>
++          <div style={styles.flightCard}>
++            <CardArt
++              cardId={flightCard.definitionId}
++              race={flightCard.race as Race | undefined}
++              cardType={flightCard.cardType as 'MINION' | 'SPELL' | 'STRUCTURE'}
++              cost={flightCard.cost}
++              width={120}
++              height={70}
++            />
++          </div>
++        </div>
++      )}
+     </div>
+   );
+ };
+ 
++const SoundToggle: React.FC = () => {
++  const [muted, setMuted] = useState(SoundManager.muted);
++  return (
++    <button
++      style={{
++        position: 'absolute',
++        top: '10px',
++        right: '62px',
++        background: 'rgba(0,0,0,0.5)',
++        border: '1px solid #444',
++        borderRadius: '6px',
++        padding: '4px 10px',
++        color: muted ? '#ff4444' : '#00ff88',
++        fontSize: '16px',
++        cursor: 'pointer',
++        zIndex: 100,
++        minWidth: '36px',
++        minHeight: '36px',
++        display: 'flex',
++        justifyContent: 'center',
++        alignItems: 'center',
++      }}
++      onClick={() => {
++        const on = SoundManager.toggle();
++        setMuted(!on);
++      }}
++      title={muted ? 'Unmute' : 'Mute'}
++    >
++      {muted ? '\u{1F507}' : '\u{1F50A}'}
++    </button>
++  );
++};
++
+ const styles: { [key: string]: React.CSSProperties } = {
+   container: {
+     width: '100%',
+@@ -267,6 +505,7 @@ const styles: { [key: string]: React.CSSProperties } = {
+     flexDirection: 'column',
+     position: 'relative',
+     overflow: 'hidden',
++    background: 'transparent',
+   },
+   loading: {
+     width: '100%',
+@@ -313,7 +552,7 @@ const styles: { [key: string]: React.CSSProperties } = {
+     alignItems: 'center',
+     justifyContent: 'center',
+     padding: '10px',
+-    background: 'linear-gradient(180deg, rgba(20, 20, 40, 0.9) 0%, transparent 100%)',
++    background: 'linear-gradient(180deg, rgba(20, 20, 40, 0.5) 0%, transparent 100%)',
+   },
+   opponentHand: {
+     display: 'flex',
+@@ -321,19 +560,13 @@ const styles: { [key: string]: React.CSSProperties } = {
+     gap: '5px',
+   },
+   cardBack: {
+-    width: '50px',
+-    height: '70px',
+-    background: 'linear-gradient(135deg, #2a2a4a 0%, #1a1a3a 100%)',
+-    border: '2px solid #444466',
++    width: 'var(--opponent-card-w, 50px)',
++    height: 'var(--opponent-card-h, 70px)',
+     borderRadius: '6px',
+     display: 'flex',
+     justifyContent: 'center',
+     alignItems: 'center',
+   },
+-  cardBackDesign: {
+-    fontSize: '20px',
+-    color: '#666688',
+-  },
+   opponentInfo: {
+     display: 'flex',
+     alignItems: 'center',
+@@ -345,31 +578,31 @@ const styles: { [key: string]: React.CSSProperties } = {
+     display: 'flex',
+     flexDirection: 'column',
+     justifyContent: 'space-between',
+-    padding: '20px',
+-    background: `
+-      radial-gradient(ellipse at center, rgba(30, 60, 100, 0.4) 0%, transparent 70%),
+-      linear-gradient(180deg, #0a1525 0%, #152035 50%, #0a1525 100%)
+-    `,
++    padding: '10px',
++    background: 'transparent',
+     position: 'relative',
+   },
+   boardRow: {
+     display: 'flex',
+     alignItems: 'center',
+     justifyContent: 'center',
+-    gap: '30px',
+-    minHeight: '140px',
++    gap: 'var(--board-gap, 10px)',
++    minHeight: 'var(--board-row-min-h, 130px)',
++    flexWrap: 'wrap' as const,
+   },
+   minionsRow: {
+     display: 'flex',
+     justifyContent: 'center',
+     alignItems: 'center',
+-    gap: '8px',
+-    minWidth: '500px',
+-    minHeight: '130px',
+-    padding: '10px',
++    gap: 'var(--board-gap, 8px)',
++    width: '100%',
++    maxWidth: 'var(--minion-row-max-w, 500px)',
++    minHeight: 'var(--board-row-min-h, 130px)',
++    padding: 'var(--board-gap, 10px)',
+     background: 'rgba(0, 0, 0, 0.2)',
+     borderRadius: '10px',
+     border: '1px solid rgba(255, 255, 255, 0.1)',
++    flexWrap: 'wrap' as const,
+   },
+   centerDivider: {
+     display: 'flex',
+@@ -378,13 +611,13 @@ const styles: { [key: string]: React.CSSProperties } = {
+     padding: '10px 0',
+   },
+   playerArea: {
+-    height: '22%',
++    height: '26%',
+     display: 'flex',
+     flexDirection: 'column',
+     alignItems: 'center',
+     justifyContent: 'flex-end',
+-    padding: '10px 20px',
+-    background: 'linear-gradient(0deg, rgba(20, 20, 40, 0.9) 0%, transparent 100%)',
++    padding: '8px 10px',
++    background: 'linear-gradient(0deg, rgba(20, 20, 40, 0.5) 0%, transparent 100%)',
+     position: 'relative',
+   },
+   playerInfo: {
+@@ -401,8 +634,10 @@ const styles: { [key: string]: React.CSSProperties } = {
+     display: 'flex',
+     justifyContent: 'center',
+     alignItems: 'flex-end',
+-    minHeight: '145px',
+-    paddingBottom: '10px',
++    minHeight: '130px',
++    paddingBottom: '8px',
++    maxWidth: '100%',
++    overflowX: 'auto',
+   },
+   turnNumber: {
+     position: 'absolute',
+@@ -416,16 +651,58 @@ const styles: { [key: string]: React.CSSProperties } = {
+     position: 'absolute',
+     top: '10px',
+     right: '10px',
+-    width: '40px',
+-    height: '40px',
++    width: '44px',
++    height: '44px',
+     background: 'rgba(0, 0, 0, 0.5)',
+     border: '1px solid #444',
+     borderRadius: '50%',
+     color: '#888',
+-    fontSize: '20px',
++    fontSize: '18px',
+     cursor: 'pointer',
+     display: 'flex',
+     justifyContent: 'center',
+     alignItems: 'center',
++    zIndex: 100,
++  },
++  starforgeButton: {
++    position: 'absolute',
++    bottom: '-18px',
++    left: '50%',
++    transform: 'translateX(-50%)',
++    background: 'linear-gradient(135deg, #ffaa00 0%, #cc4400 50%, #aa00ff 100%)',
++    border: '2px solid #ffdd44',
++    borderRadius: '8px',
++    padding: '2px 6px',
++    fontSize: '8px',
++    fontWeight: 'bold',
++    color: '#ffffff',
++    cursor: 'pointer',
++    whiteSpace: 'nowrap' as const,
++    zIndex: 30,
++    letterSpacing: '1px',
++    textShadow: '0 1px 3px rgba(0,0,0,0.8)',
++    boxShadow: '0 0 8px #ffaa00, 0 0 16px rgba(170, 0, 255, 0.4)',
++    animation: 'starforgePulse 1.5s ease-in-out infinite',
++  },
++  flightOverlay: {
++    position: 'absolute',
++    top: '35%',
++    left: '50%',
++    transform: 'translate(-50%, -50%)',
++    zIndex: 800,
++    pointerEvents: 'none',
++    animation: 'card-flight 0.9s ease-out forwards',
++  },
++  flightCard: {
++    width: 'var(--flight-card-w, 130px)',
++    height: 'var(--flight-card-h, 80px)',
++    borderRadius: '10px',
++    background: 'linear-gradient(135deg, #2a2a4a 0%, #1a1a3a 100%)',
++    border: '3px solid #00ff88',
++    boxShadow: '0 0 30px rgba(0, 255, 136, 0.5), 0 0 60px rgba(0, 255, 136, 0.2)',
++    display: 'flex',
++    justifyContent: 'center',
++    alignItems: 'center',
++    overflow: 'hidden',
+   },
+ };
+diff --git a/src/ui/components/MainMenu.tsx b/src/ui/components/MainMenu.tsx
+index 85d9683..6b24c75 100644
+--- a/src/ui/components/MainMenu.tsx
++++ b/src/ui/components/MainMenu.tsx
+@@ -1,123 +1,274 @@
+ /**
+  * STARFORGE TCG - Main Menu Component
++ *
++ * Clean Hearthstone-inspired layout:
++ * - Central play area with mode selection
++ * - Bottom navigation bar for collection/shop/progression
++ * - Minimal, elegant, not cluttered
+  */
+ 
+ import React, { useState } from 'react';
+ import { Race, RaceData } from '../../types/Race';
+ import { AIDifficulty } from '../../ai/AIPlayer';
++import { hapticTap } from '../capacitor';
++import { StarforgeLogo } from './StarforgeLogo';
++import { SpaceBackground } from './SpaceBackground';
+ 
+ interface MainMenuProps {
+   onStartGame: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
++  onPlayFriend?: () => void;
+   onBalanceTest?: () => void;
++  onCampaign?: () => void;
++  onDeckbuilder?: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
++  onTutorial?: () => void;
++  onSettings?: () => void;
++  onStats?: () => void;
++  onCollection?: () => void;
++  onCrafting?: () => void;
++  onBattlePass?: () => void;
++  onPacks?: () => void;
++  onAchievements?: () => void;
++  onDaily?: () => void;
++  onTournament?: () => void;
++  onReplays?: () => void;
++  onLeaderboard?: () => void;
++  onMetaDashboard?: () => void;
++  onSpectate?: () => void;
++  onDungeonRun?: () => void;
++  onPuzzles?: () => void;
++  onTagTeam?: () => void;
++  onFactionWars?: () => void;
+ }
+ 
+-export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onBalanceTest }) => {
++type MenuView = 'main' | 'play';
++
++export const MainMenu: React.FC<MainMenuProps> = (props) => {
++  const {
++    onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder,
++    onTutorial, onSettings, onStats, onCollection, onCrafting,
++    onBattlePass, onPacks, onAchievements, onDaily,
++    onTournament, onReplays, onLeaderboard, onMetaDashboard, onSpectate,
++    onDungeonRun, onPuzzles, onTagTeam, onFactionWars,
++  } = props;
++
++  const [view, setView] = useState<MenuView>('main');
+   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
+   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
+ 
++
+   const availableRaces = [
+-    Race.COGSMITHS,
+-    Race.LUMINAR,
+-    Race.PYROCLAST,
+-    Race.VOIDBORN,
+-    Race.BIOTITANS,
+-    Race.PHANTOM_CORSAIRS,
+-    Race.CRYSTALLINE,
+-    Race.HIVEMIND,
+-    Race.ASTROMANCERS,
+-    Race.CHRONOBOUND,
++    Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN,
++    Race.BIOTITANS, Race.PHANTOM_CORSAIRS, Race.CRYSTALLINE,
++    Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND,
+   ];
+ 
+   const difficulties = [
+-    { value: AIDifficulty.EASY, label: 'Easy', description: 'Random plays, forgiving mistakes' },
+-    { value: AIDifficulty.MEDIUM, label: 'Medium', description: 'Basic strategy, some optimization' },
+-    { value: AIDifficulty.HARD, label: 'Hard', description: 'Smart decisions, threat evaluation' },
++    { value: AIDifficulty.EASY, label: 'Easy' },
++    { value: AIDifficulty.MEDIUM, label: 'Medium' },
++    { value: AIDifficulty.HARD, label: 'Hard' },
+   ];
+ 
+-  const handleStartGame = () => {
+-    onStartGame(selectedRace, selectedDifficulty);
+-  };
+-
+-  return (
+-    <div style={styles.container}>
+-      <div style={styles.content}>
+-        {/* Title */}
+-        <div style={styles.titleContainer}>
+-          <h1 style={styles.title}>STARFORGE</h1>
+-          <p style={styles.subtitle}>Trading Card Game</p>
+-        </div>
++  // ── Play Mode Selection ──
++  if (view === 'play') {
++    return (
++      <div style={s.container}>
++        <SpaceBackground />
++        <div style={s.playView}>
++          <h2 style={s.playTitle}>Select Race & Difficulty</h2>
+ 
+-        {/* Race Selection */}
+-        <div style={styles.section}>
+-          <h2 style={styles.sectionTitle}>Choose Your Planet</h2>
+-          <div style={styles.raceGrid}>
++          {/* Race Grid */}
++          <div style={s.raceGrid}>
+             {availableRaces.map((race) => {
+-              const raceInfo = RaceData[race];
+-              const isSelected = selectedRace === race;
++              const info = RaceData[race];
++              const sel = selectedRace === race;
+               return (
+                 <button
+                   key={race}
+                   style={{
+-                    ...styles.raceCard,
+-                    ...(isSelected ? styles.raceCardSelected : {}),
++                    ...s.raceCard,
++                    borderColor: sel ? '#00ff88' : '#2a2a44',
++                    boxShadow: sel ? '0 0 12px rgba(0,255,136,0.3)' : 'none',
++                    background: sel ? 'rgba(0,255,136,0.08)' : 'rgba(15,15,30,0.8)',
+                   }}
+                   onClick={() => setSelectedRace(race)}
+                 >
+-                  <div style={styles.raceName}>{raceInfo.name}</div>
+-                  <div style={styles.racePlanet}>{raceInfo.planet}</div>
+-                  <div style={styles.raceMechanic}>{raceInfo.playstyle}</div>
+-                  <div style={styles.raceTheme}>{raceInfo.theme}</div>
++                  <div style={{ color: sel ? '#00ff88' : '#ccc', fontWeight: 'bold', fontSize: '13px' }}>
++                    {info.name}
++                  </div>
++                  <div style={{ color: '#666', fontSize: '10px' }}>{info.playstyle}</div>
+                 </button>
+               );
+             })}
+           </div>
+-        </div>
+ 
+-        {/* Difficulty Selection */}
+-        <div style={styles.section}>
+-          <h2 style={styles.sectionTitle}>AI Difficulty</h2>
+-          <div style={styles.difficultyGrid}>
+-            {difficulties.map((diff) => {
+-              const isSelected = selectedDifficulty === diff.value;
+-              return (
+-                <button
+-                  key={diff.value}
+-                  style={{
+-                    ...styles.difficultyCard,
+-                    ...(isSelected ? styles.difficultyCardSelected : {}),
+-                  }}
+-                  onClick={() => setSelectedDifficulty(diff.value)}
+-                >
+-                  <div style={styles.difficultyLabel}>{diff.label}</div>
+-                  <div style={styles.difficultyDesc}>{diff.description}</div>
+-                </button>
+-              );
+-            })}
++          {/* Difficulty */}
++          <div style={s.diffRow}>
++            {difficulties.map((d) => (
++              <button
++                key={d.value}
++                style={{
++                  ...s.diffBtn,
++                  borderColor: selectedDifficulty === d.value ? '#ff6600' : '#2a2a44',
++                  color: selectedDifficulty === d.value ? '#ff6600' : '#888',
++                }}
++                onClick={() => setSelectedDifficulty(d.value)}
++              >
++                {d.label}
++              </button>
++            ))}
+           </div>
++
++          {/* Action Buttons */}
++          <div style={s.playActions}>
++            <button style={s.goBtn} onClick={() => { hapticTap(); onStartGame(selectedRace, selectedDifficulty); }}>
++              Quick Play
++            </button>
++            {onDeckbuilder && (
++              <button style={s.buildBtn} onClick={() => { hapticTap(); onDeckbuilder(selectedRace, selectedDifficulty); }}>
++                Build Deck & Play
++              </button>
++            )}
++          </div>
++
++          <button style={s.backLink} onClick={() => setView('main')}>
++            Back
++          </button>
++        </div>
++      </div>
++    );
++  }
++
++  // ── Main View ──
++  return (
++    <div style={s.container}>
++      {/* Animated space background */}
++      <SpaceBackground />
++
++      {/* Top bar: settings & info */}
++      <div style={s.topBar}>
++        {onDaily && <button style={s.topBtn} onClick={onDaily}>Quests</button>}
++        {onSettings && <button style={s.topBtn} onClick={onSettings}>Settings</button>}
++        {onTutorial && <button style={s.topBtn} onClick={onTutorial}>How to Play</button>}
++      </div>
++
++      {/* Center: Logo + Play Modes */}
++      <div style={s.center}>
++        {/* Logo — wide across the top */}
++        <div style={s.logoArea}>
++          <StarforgeLogo width="100%" />
+         </div>
+ 
+-        {/* Start Button */}
+-        <button style={styles.startButton} onClick={handleStartGame}>
+-          Start Game
+-        </button>
++        {/* Primary Play Buttons - vertical stack */}
++        <div style={s.modeStack}>
++          {onCampaign && (
++            <button style={s.modeBtn} onClick={() => { hapticTap(); onCampaign(); }}>
++              <span style={s.modeBtnIcon}>&#x2694;</span>
++              <span style={s.modeBtnLabel}>Story Mode</span>
++            </button>
++          )}
++          <button style={{ ...s.modeBtn, ...s.modeBtnAlt }} onClick={() => { hapticTap(); setView('play'); }}>
++            <span style={s.modeBtnIcon}>&#x269B;</span>
++            <span style={s.modeBtnLabel}>Quick Play</span>
++          </button>
++          {onTournament && (
++            <button style={{ ...s.modeBtn, ...s.modeBtnTourney }} onClick={() => { hapticTap(); onTournament(); }}>
++              <span style={s.modeBtnIcon}>&#x2605;</span>
++              <span style={s.modeBtnLabel}>Tournament</span>
++            </button>
++          )}
++          {onDungeonRun && (
++            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)', boxShadow: '0 4px 16px rgba(220,38,38,0.3)' }} onClick={() => { hapticTap(); onDungeonRun(); }}>
++              <span style={s.modeBtnIcon}>&#x1F3F0;</span>
++              <span style={s.modeBtnLabel}>Dungeon Run</span>
++            </button>
++          )}
++          {onPuzzles && (
++            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }} onClick={() => { hapticTap(); onPuzzles(); }}>
++              <span style={s.modeBtnIcon}>&#x1F9E9;</span>
++              <span style={s.modeBtnLabel}>Lethal Puzzles</span>
++            </button>
++          )}
++          {onTagTeam && (
++            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)', boxShadow: '0 4px 16px rgba(14,165,233,0.3)' }} onClick={() => { hapticTap(); onTagTeam(); }}>
++              <span style={s.modeBtnIcon}>&#x1F91D;</span>
++              <span style={s.modeBtnLabel}>2v2 Tag Team</span>
++            </button>
++          )}
++          {onFactionWars && (
++            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #d97706 0%, #92400e 100%)', boxShadow: '0 4px 16px rgba(217,119,6,0.3)' }} onClick={() => { hapticTap(); onFactionWars(); }}>
++              <span style={s.modeBtnIcon}>&#x2694;</span>
++              <span style={s.modeBtnLabel}>Faction Wars</span>
++            </button>
++          )}
++          {onPlayFriend && (
++            <button style={{ ...s.modeBtn, ...s.modeBtnFriend }} onClick={() => { hapticTap(); onPlayFriend(); }}>
++              <span style={s.modeBtnIcon}>&#x2699;</span>
++              <span style={s.modeBtnLabel}>Play vs Friend</span>
++            </button>
++          )}
++        </div>
++      </div>
+ 
+-        {/* Balance Test Button */}
+-        {onBalanceTest && (
+-          <button
+-            style={{
+-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+-              border: 'none',
+-              borderRadius: '12px',
+-              padding: '16px 50px',
+-              fontSize: '20px',
+-              fontWeight: 'bold',
+-              color: '#000',
+-              cursor: 'pointer',
+-              boxShadow: '0 4px 15px rgba(245, 158, 11, 0.4)',
+-            }}
+-            onClick={onBalanceTest}
+-          >
+-            ⚖️ AI Balance Tester
++      {/* Bottom Nav Bar */}
++      <div style={s.bottomBar}>
++        {onCollection && (
++          <button style={s.navBtn} onClick={onCollection}>
++            <div style={s.navIcon}>&#x1F0CF;</div>
++            <div style={s.navLabel}>Collection</div>
++          </button>
++        )}
++        {onPacks && (
++          <button style={s.navBtn} onClick={onPacks}>
++            <div style={s.navIcon}>&#x1F381;</div>
++            <div style={s.navLabel}>Shop</div>
++          </button>
++        )}
++        {onCrafting && (
++          <button style={s.navBtn} onClick={onCrafting}>
++            <div style={s.navIcon}>&#x2728;</div>
++            <div style={s.navLabel}>Craft</div>
++          </button>
++        )}
++        {onBattlePass && (
++          <button style={s.navBtn} onClick={onBattlePass}>
++            <div style={s.navIcon}>&#x1F525;</div>
++            <div style={s.navLabel}>Battle Pass</div>
++          </button>
++        )}
++        {onAchievements && (
++          <button style={s.navBtn} onClick={onAchievements}>
++            <div style={s.navIcon}>&#x1F3C6;</div>
++            <div style={s.navLabel}>Achieve</div>
++          </button>
++        )}
++        {onLeaderboard && (
++          <button style={s.navBtn} onClick={onLeaderboard}>
++            <div style={s.navIcon}>&#x1F4CA;</div>
++            <div style={s.navLabel}>Ladder</div>
++          </button>
++        )}
++        {onSpectate && (
++          <button style={s.navBtn} onClick={onSpectate}>
++            <div style={s.navIcon}>&#x1F441;</div>
++            <div style={s.navLabel}>Spectate</div>
++          </button>
++        )}
++        {onReplays && (
++          <button style={s.navBtn} onClick={onReplays}>
++            <div style={s.navIcon}>&#x1F3AC;</div>
++            <div style={s.navLabel}>Replays</div>
++          </button>
++        )}
++        {onMetaDashboard && (
++          <button style={s.navBtn} onClick={onMetaDashboard}>
++            <div style={s.navIcon}>&#x1F4C8;</div>
++            <div style={s.navLabel}>Meta</div>
++          </button>
++        )}
++        {onStats && (
++          <button style={s.navBtn} onClick={onStats}>
++            <div style={s.navIcon}>&#x1F4CB;</div>
++            <div style={s.navLabel}>Stats</div>
+           </button>
+         )}
+       </div>
+@@ -125,142 +276,234 @@ export const MainMenu: React.FC<MainMenuProps> = ({ onStartGame, onBalanceTest }
+   );
+ };
+ 
+-const styles: { [key: string]: React.CSSProperties } = {
++// ── Styles ──
++
++const s: Record<string, React.CSSProperties> = {
+   container: {
+     width: '100%',
+     height: '100%',
+     display: 'flex',
+-    justifyContent: 'flex-start',
++    flexDirection: 'column',
++    background: '#040410',
++    position: 'relative',
++    overflow: 'hidden',
++  },
++
++  // Top bar
++  topBar: {
++    display: 'flex',
++    justifyContent: 'flex-end',
++    gap: '8px',
++    padding: '12px 16px',
++    position: 'relative',
++    zIndex: 10,
++  },
++  topBtn: {
++    background: 'rgba(0,0,0,0.5)',
++    border: '1px solid rgba(255,255,255,0.2)',
++    borderRadius: '8px',
++    padding: '10px 16px',
++    minHeight: '44px',
++    color: '#ccc',
++    fontSize: '13px',
++    cursor: 'pointer',
++    backdropFilter: 'blur(8px)',
++    textShadow: '0 1px 4px rgba(0,0,0,0.8)',
++  },
++
++  // Center area
++  center: {
++    flex: 1,
++    display: 'flex',
++    flexDirection: 'column',
+     alignItems: 'center',
+-    padding: '20px',
++    justifyContent: 'center',
++    gap: '32px',
++    padding: '0 20px',
+     overflowY: 'auto',
+-    flexDirection: 'column',
++    minHeight: 0,
++    position: 'relative',
++    zIndex: 5,
+   },
+-  content: {
+-    maxWidth: '900px',
++  logoArea: {
++    textAlign: 'center',
+     width: '100%',
++    maxWidth: '700px',
++    padding: '0 10px',
++  },
++
++  // Mode stack
++  modeStack: {
+     display: 'flex',
+     flexDirection: 'column',
++    gap: '10px',
++    width: '100%',
++    maxWidth: '320px',
++  },
++  modeBtn: {
++    display: 'flex',
+     alignItems: 'center',
+-    gap: '30px',
+-    paddingTop: '40px',
+-    paddingBottom: '40px',
++    gap: '12px',
++    padding: '14px 24px',
++    borderRadius: '10px',
++    border: 'none',
++    cursor: 'pointer',
++    background: 'linear-gradient(135deg, #ff6600 0%, #cc4400 100%)',
++    color: '#fff',
++    fontSize: '16px',
++    fontWeight: 'bold',
++    boxShadow: '0 4px 16px rgba(255,102,0,0.3)',
++    transition: 'transform 0.15s',
++  },
++  modeBtnAlt: {
++    background: 'linear-gradient(135deg, #00cc66 0%, #009944 100%)',
++    boxShadow: '0 4px 16px rgba(0,204,102,0.3)',
+   },
+-  titleContainer: {
++  modeBtnTourney: {
++    background: 'linear-gradient(135deg, #ffcc00 0%, #dd9900 100%)',
++    color: '#000',
++    boxShadow: '0 4px 16px rgba(255,204,0,0.3)',
++  },
++  modeBtnFriend: {
++    background: 'linear-gradient(135deg, #4488ff 0%, #2266cc 100%)',
++    boxShadow: '0 4px 16px rgba(68,136,255,0.3)',
++  },
++  modeBtnIcon: {
++    fontSize: '20px',
++    width: '28px',
+     textAlign: 'center',
+-    marginBottom: '20px',
+   },
+-  title: {
+-    fontSize: '64px',
+-    fontWeight: 'bold',
+-    color: '#00ff88',
+-    textShadow: '0 0 20px #00ff88, 0 0 40px #00ff88',
+-    letterSpacing: '8px',
+-    margin: 0,
++  modeBtnLabel: {
++    flex: 1,
++  },
++
++  // Bottom nav bar
++  bottomBar: {
++    display: 'flex',
++    justifyContent: 'center',
++    gap: '4px',
++    padding: '10px 8px 14px',
++    background: 'linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%)',
++    flexWrap: 'wrap',
++    overflowX: 'auto',
++    WebkitOverflowScrolling: 'touch',
++    flexShrink: 0,
++    position: 'relative',
++    zIndex: 5,
++  } as React.CSSProperties,
++  navBtn: {
++    background: 'transparent',
++    border: 'none',
++    cursor: 'pointer',
++    display: 'flex',
++    flexDirection: 'column',
++    alignItems: 'center',
++    gap: '3px',
++    padding: '8px 12px',
++    borderRadius: '8px',
++    minWidth: '58px',
++    minHeight: '48px',
+   },
+-  subtitle: {
+-    fontSize: '24px',
+-    color: '#aaaaaa',
+-    marginTop: '10px',
++  navIcon: {
++    fontSize: '22px',
++    lineHeight: '1',
+   },
+-  section: {
+-    width: '100%',
++  navLabel: {
++    fontSize: '11px',
++    color: '#aab',
++    letterSpacing: '0.5px',
++    textShadow: '0 1px 4px rgba(0,0,0,0.8)',
++  },
++
++  // Play view
++  playView: {
++    flex: 1,
+     display: 'flex',
+     flexDirection: 'column',
+     alignItems: 'center',
+-    gap: '15px',
++    justifyContent: 'center',
++    gap: '20px',
++    padding: '20px',
++    overflowY: 'auto',
++    minHeight: 0,
++    position: 'relative',
++    zIndex: 5,
+   },
+-  sectionTitle: {
+-    fontSize: '20px',
+-    color: '#ffffff',
+-    marginBottom: '10px',
++  playTitle: {
++    fontSize: '22px',
++    color: '#fff',
++    margin: 0,
++    letterSpacing: '1px',
++    textShadow: '0 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5)',
+   },
+   raceGrid: {
+     display: 'grid',
+-    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+-    gap: '15px',
++    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
++    gap: '8px',
+     width: '100%',
++    maxWidth: '600px',
+   },
+   raceCard: {
+-    background: 'linear-gradient(135deg, #1a1a2e 0%, #252540 100%)',
+-    border: '2px solid #333355',
+-    borderRadius: '12px',
+-    padding: '15px',
++    padding: '12px 10px',
++    borderRadius: '8px',
++    border: '2px solid #2a2a44',
+     cursor: 'pointer',
+-    transition: 'all 0.2s ease',
+-    textAlign: 'left',
+-    color: '#ffffff',
+-  },
+-  raceCardSelected: {
+-    border: '2px solid #00ff88',
+-    boxShadow: '0 0 15px rgba(0, 255, 136, 0.4)',
+-    background: 'linear-gradient(135deg, #1a2a2e 0%, #203040 100%)',
+-  },
+-  raceName: {
+-    fontSize: '18px',
+-    fontWeight: 'bold',
+-    color: '#00ff88',
+-    marginBottom: '4px',
++    textAlign: 'center',
++    transition: 'all 0.15s',
++    minHeight: '48px',
++    backdropFilter: 'blur(6px)',
+   },
+-  racePlanet: {
+-    fontSize: '12px',
+-    color: '#888888',
+-    marginBottom: '8px',
++  diffRow: {
++    display: 'flex',
++    gap: '8px',
+   },
+-  raceMechanic: {
++  diffBtn: {
++    background: 'rgba(15,15,30,0.8)',
++    border: '2px solid #2a2a44',
++    borderRadius: '8px',
++    padding: '12px 24px',
++    minHeight: '48px',
++    color: '#888',
+     fontSize: '14px',
+-    color: '#ffcc00',
+     fontWeight: 'bold',
+-    marginBottom: '4px',
+-  },
+-  raceTheme: {
+-    fontSize: '12px',
+-    color: '#aaaaaa',
+-    lineHeight: '1.3',
++    cursor: 'pointer',
+   },
+-  difficultyGrid: {
++  playActions: {
+     display: 'flex',
+-    gap: '15px',
++    gap: '12px',
+     flexWrap: 'wrap',
+     justifyContent: 'center',
+   },
+-  difficultyCard: {
+-    background: 'linear-gradient(135deg, #1a1a2e 0%, #252540 100%)',
+-    border: '2px solid #333355',
+-    borderRadius: '12px',
+-    padding: '15px 25px',
+-    cursor: 'pointer',
+-    transition: 'all 0.2s ease',
+-    textAlign: 'center',
+-    color: '#ffffff',
+-    minWidth: '150px',
+-  },
+-  difficultyCardSelected: {
+-    border: '2px solid #ff6600',
+-    boxShadow: '0 0 15px rgba(255, 102, 0, 0.4)',
+-    background: 'linear-gradient(135deg, #2a1a1e 0%, #402020 100%)',
+-  },
+-  difficultyLabel: {
++  goBtn: {
++    background: 'linear-gradient(135deg, #00cc66 0%, #00aa44 100%)',
++    border: 'none',
++    borderRadius: '10px',
++    padding: '14px 40px',
+     fontSize: '18px',
+     fontWeight: 'bold',
+-    color: '#ff6600',
+-    marginBottom: '4px',
+-  },
+-  difficultyDesc: {
+-    fontSize: '12px',
+-    color: '#aaaaaa',
++    color: '#fff',
++    cursor: 'pointer',
++    boxShadow: '0 4px 16px rgba(0,204,102,0.4)',
+   },
+-  startButton: {
+-    background: 'linear-gradient(135deg, #00cc66 0%, #00aa55 100%)',
++  buildBtn: {
++    background: 'linear-gradient(135deg, #9933ff 0%, #7722cc 100%)',
+     border: 'none',
+-    borderRadius: '12px',
+-    padding: '18px 60px',
+-    fontSize: '24px',
++    borderRadius: '10px',
++    padding: '14px 32px',
++    fontSize: '16px',
+     fontWeight: 'bold',
+-    color: '#ffffff',
++    color: '#fff',
++    cursor: 'pointer',
++    boxShadow: '0 4px 16px rgba(153,51,255,0.3)',
++  },
++  backLink: {
++    background: 'transparent',
++    border: 'none',
++    color: '#667',
++    fontSize: '14px',
+     cursor: 'pointer',
+-    transition: 'all 0.2s ease',
+-    boxShadow: '0 4px 15px rgba(0, 204, 102, 0.4)',
+-    marginTop: '20px',
++    padding: '12px 24px',
++    minHeight: '44px',
++    marginTop: '8px',
+   },
+ };
+diff --git a/src/ui/components/SpaceBackground.tsx b/src/ui/components/SpaceBackground.tsx
+new file mode 100644
+index 0000000..1475440
+--- /dev/null
++++ b/src/ui/components/SpaceBackground.tsx
+@@ -0,0 +1,141 @@
++/**
++ * STARFORGE TCG - Animated Cosmic Background
++ *
++ * Pure CSS animated background with slowly spiraling cosmic nebula swirls.
++ * Subtle, fluid, smooth — no static images needed.
++ */
++
++import React from 'react';
++
++export const SpaceBackground: React.FC = () => {
++  return (
++    <div style={styles.container}>
++      {/* Base dark gradient */}
++      <div style={styles.base} />
++      {/* Nebula layer 1 - slow clockwise drift */}
++      <div style={styles.nebula1} />
++      {/* Nebula layer 2 - slow counter-clockwise drift */}
++      <div style={styles.nebula2} />
++      {/* Nebula layer 3 - deep purple accent */}
++      <div style={styles.nebula3} />
++      {/* Star particles */}
++      <div style={styles.stars} />
++      <div style={styles.stars2} />
++      {/* Inline keyframes */}
++      <style>{`
++        @keyframes cosmic-drift-1 {
++          0% { transform: translate(0, 0) rotate(0deg) scale(1); }
++          33% { transform: translate(30px, -20px) rotate(120deg) scale(1.05); }
++          66% { transform: translate(-20px, 15px) rotate(240deg) scale(0.98); }
++          100% { transform: translate(0, 0) rotate(360deg) scale(1); }
++        }
++        @keyframes cosmic-drift-2 {
++          0% { transform: translate(0, 0) rotate(0deg) scale(1.02); }
++          33% { transform: translate(-25px, 25px) rotate(-120deg) scale(0.97); }
++          66% { transform: translate(20px, -15px) rotate(-240deg) scale(1.04); }
++          100% { transform: translate(0, 0) rotate(-360deg) scale(1.02); }
++        }
++        @keyframes cosmic-drift-3 {
++          0% { transform: translate(0, 0) rotate(0deg); opacity: 0.3; }
++          50% { transform: translate(15px, -10px) rotate(180deg); opacity: 0.5; }
++          100% { transform: translate(0, 0) rotate(360deg); opacity: 0.3; }
++        }
++        @keyframes twinkle {
++          0%, 100% { opacity: 0.3; }
++          50% { opacity: 0.8; }
++        }
++        @keyframes twinkle2 {
++          0%, 100% { opacity: 0.5; }
++          50% { opacity: 0.2; }
++        }
++      `}</style>
++    </div>
++  );
++};
++
++const styles: Record<string, React.CSSProperties> = {
++  container: {
++    position: 'absolute',
++    top: 0,
++    left: 0,
++    right: 0,
++    bottom: 0,
++    zIndex: 0,
++    overflow: 'hidden',
++    pointerEvents: 'none',
++    background: '#040410',
++  },
++  base: {
++    position: 'absolute',
++    inset: 0,
++    background: 'radial-gradient(ellipse at 30% 20%, rgba(10, 15, 40, 1) 0%, rgba(4, 4, 16, 1) 70%)',
++  },
++  nebula1: {
++    position: 'absolute',
++    top: '-30%',
++    left: '-30%',
++    width: '160%',
++    height: '160%',
++    background: 'radial-gradient(ellipse at 40% 40%, rgba(20, 60, 120, 0.15) 0%, rgba(80, 40, 120, 0.08) 30%, transparent 60%)',
++    animation: 'cosmic-drift-1 90s linear infinite',
++  },
++  nebula2: {
++    position: 'absolute',
++    top: '-20%',
++    left: '-20%',
++    width: '140%',
++    height: '140%',
++    background: 'radial-gradient(ellipse at 60% 55%, rgba(60, 20, 100, 0.12) 0%, rgba(20, 80, 100, 0.06) 35%, transparent 55%)',
++    animation: 'cosmic-drift-2 120s linear infinite',
++  },
++  nebula3: {
++    position: 'absolute',
++    top: '-10%',
++    left: '-10%',
++    width: '120%',
++    height: '120%',
++    background: 'radial-gradient(ellipse at 50% 30%, rgba(100, 40, 160, 0.08) 0%, transparent 40%), radial-gradient(ellipse at 30% 70%, rgba(20, 60, 140, 0.06) 0%, transparent 35%)',
++    animation: 'cosmic-drift-3 150s linear infinite',
++    opacity: 0.3,
++  },
++  stars: {
++    position: 'absolute',
++    inset: 0,
++    backgroundImage: `radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
++      radial-gradient(1px 1px at 25% 45%, rgba(255,255,255,0.5) 0%, transparent 100%),
++      radial-gradient(1px 1px at 40% 10%, rgba(200,220,255,0.4) 0%, transparent 100%),
++      radial-gradient(1.5px 1.5px at 55% 70%, rgba(255,255,255,0.7) 0%, transparent 100%),
++      radial-gradient(1px 1px at 70% 30%, rgba(255,255,255,0.5) 0%, transparent 100%),
++      radial-gradient(1px 1px at 85% 55%, rgba(200,200,255,0.4) 0%, transparent 100%),
++      radial-gradient(1px 1px at 15% 80%, rgba(255,255,255,0.3) 0%, transparent 100%),
++      radial-gradient(1.5px 1.5px at 90% 85%, rgba(255,255,255,0.6) 0%, transparent 100%),
++      radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,0.4) 0%, transparent 100%),
++      radial-gradient(1px 1px at 35% 65%, rgba(200,220,255,0.5) 0%, transparent 100%),
++      radial-gradient(1px 1px at 60% 15%, rgba(255,255,255,0.3) 0%, transparent 100%),
++      radial-gradient(1px 1px at 75% 90%, rgba(255,255,255,0.4) 0%, transparent 100%),
++      radial-gradient(1px 1px at 20% 35%, rgba(255,255,255,0.3) 0%, transparent 100%),
++      radial-gradient(1.5px 1.5px at 45% 85%, rgba(200,200,255,0.5) 0%, transparent 100%),
++      radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.4) 0%, transparent 100%),
++      radial-gradient(1px 1px at 5% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
++      radial-gradient(1px 1px at 95% 40%, rgba(200,220,255,0.4) 0%, transparent 100%),
++      radial-gradient(1.5px 1.5px at 30% 95%, rgba(255,255,255,0.5) 0%, transparent 100%)`,
++    animation: 'twinkle 8s ease-in-out infinite',
++  },
++  stars2: {
++    position: 'absolute',
++    inset: 0,
++    backgroundImage: `radial-gradient(1px 1px at 18% 28%, rgba(255,255,255,0.5) 0%, transparent 100%),
++      radial-gradient(1px 1px at 33% 52%, rgba(200,220,255,0.4) 0%, transparent 100%),
++      radial-gradient(1.5px 1.5px at 48% 18%, rgba(255,255,255,0.6) 0%, transparent 100%),
++      radial-gradient(1px 1px at 63% 78%, rgba(255,255,255,0.4) 0%, transparent 100%),
++      radial-gradient(1px 1px at 78% 38%, rgba(200,200,255,0.5) 0%, transparent 100%),
++      radial-gradient(1px 1px at 93% 62%, rgba(255,255,255,0.3) 0%, transparent 100%),
++      radial-gradient(1px 1px at 8% 72%, rgba(255,255,255,0.5) 0%, transparent 100%),
++      radial-gradient(1.5px 1.5px at 23% 92%, rgba(200,220,255,0.4) 0%, transparent 100%),
++      radial-gradient(1px 1px at 53% 42%, rgba(255,255,255,0.3) 0%, transparent 100%),
++      radial-gradient(1px 1px at 68% 8%, rgba(255,255,255,0.4) 0%, transparent 100%),
++      radial-gradient(1px 1px at 83% 72%, rgba(200,200,255,0.5) 0%, transparent 100%),
++      radial-gradient(1px 1px at 38% 32%, rgba(255,255,255,0.3) 0%, transparent 100%)`,
++    animation: 'twinkle2 12s ease-in-out infinite',
++  },
++};
+diff --git a/src/ui/components/StarforgeLogo.tsx b/src/ui/components/StarforgeLogo.tsx
+new file mode 100644
+index 0000000..1134c14
+--- /dev/null
++++ b/src/ui/components/StarforgeLogo.tsx
+@@ -0,0 +1,40 @@
++/**
++ * STARFORGE TCG - Logo Component
++ *
++ * Displays logo.png as the game logo, stretched wide across the top.
++ * Uses mix-blend-mode to eliminate the white/light background.
++ */
++
++import React from 'react';
++
++const logoImg = 'https://raw.githubusercontent.com/finishstrong23/starforge_tcg/d73f605/src/assets/logo.png';
++
++interface StarforgeLogoProps {
++  width?: number | string;
++  height?: number;
++}
++
++export const StarforgeLogo: React.FC<StarforgeLogoProps> = ({
++  width = '100%',
++  height,
++}) => {
++  return (
++    <div style={{
++      width: typeof width === 'number' ? `${width}px` : width,
++      maxWidth: '100%',
++    }}>
++      <img
++        src={logoImg}
++        alt="STARFORGE TCG"
++        style={{
++          width: '100%',
++          height: height ? `${height}px` : 'auto',
++          objectFit: 'contain',
++          display: 'block',
++          mixBlendMode: 'screen',
++          filter: 'brightness(1.1) contrast(1.05)',
++        }}
++      />
++    </div>
++  );
++};
+diff --git a/src/ui/styles/global.css b/src/ui/styles/global.css
+index 068241c..84d477f 100644
+--- a/src/ui/styles/global.css
++++ b/src/ui/styles/global.css
+@@ -2,9 +2,9 @@
+ 
+ :root {
+   /* Colors */
+-  --color-bg-dark: #0a0a1a;
+-  --color-bg-medium: #1a1a2e;
+-  --color-bg-light: #252540;
++  --color-bg-dark: #060612;
++  --color-bg-medium: #12122a;
++  --color-bg-light: #1e1e3a;
+   --color-board: #1e3a5f;
+   --color-board-light: #2d4a6f;
+ 
+@@ -34,16 +34,41 @@
+   --color-text: #ffffff;
+   --color-text-dim: #aaaaaa;
+ 
++  /* Gold accent (UI frames, borders) */
++  --color-gold: #c89b3c;
++  --color-gold-light: #f0d060;
++
+   /* Glow effects */
+-  --glow-playable: 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 30px #00ff88;
+-  --glow-attack: 0 0 10px #ff6600, 0 0 20px #ff6600, 0 0 30px #ff6600;
+-  --glow-target: 0 0 10px #ff0066, 0 0 20px #ff0066;
++  --glow-playable: 0 0 8px #00ff88, 0 0 16px #00ff88, 0 0 28px rgba(0, 255, 136, 0.4);
++  --glow-attack: 0 0 8px #ff6600, 0 0 16px #ff6600, 0 0 28px rgba(255, 102, 0, 0.4);
++  --glow-target: 0 0 8px #ff0066, 0 0 16px #ff0066;
+ 
+   /* Spacing */
+   --card-width: 90px;
+   --card-height: 130px;
+-  --card-hand-width: 100px;
+-  --card-hand-height: 145px;
++  --card-hand-width: 120px;
++  --card-hand-height: 170px;
++
++  /* Hero portrait */
++  --hero-width: 80px;
++  --hero-height: 100px;
++  --hero-face-size: 74px;
++  --hero-power-size: 50px;
++
++  /* End turn button */
++  --end-turn-size: 100px;
++  --end-turn-font: 14px;
++
++  /* Board layout */
++  --opponent-card-w: 50px;
++  --opponent-card-h: 70px;
++  --minion-row-max-w: 500px;
++  --board-row-min-h: 130px;
++  --board-gap: 10px;
++
++  /* Flight card */
++  --flight-card-w: 130px;
++  --flight-card-h: 80px;
+ }
+ 
+ /* Reset */
+@@ -60,6 +85,8 @@ html, body {
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   color: var(--color-text);
+   background: var(--color-bg-dark);
++  -webkit-font-smoothing: antialiased;
++  -moz-osx-font-smoothing: grayscale;
+ }
+ 
+ #root {
+@@ -79,7 +106,8 @@ html, body {
+   flex-direction: column;
+ }
+ 
+-/* Animations */
++/* ─── Animations ─────────────────────────────────────────────── */
++
+ @keyframes pulse-glow {
+   0%, 100% {
+     filter: brightness(1);
+@@ -91,8 +119,10 @@ html, body {
+ 
+ @keyframes shake {
+   0%, 100% { transform: translateX(0); }
+-  25% { transform: translateX(-5px); }
+-  75% { transform: translateX(5px); }
++  20% { transform: translateX(-4px) rotate(-0.5deg); }
++  40% { transform: translateX(4px) rotate(0.5deg); }
++  60% { transform: translateX(-3px); }
++  80% { transform: translateX(2px); }
+ }
+ 
+ @keyframes float {
+@@ -100,12 +130,13 @@ html, body {
+   50% { transform: translateY(-5px); }
+ }
+ 
++/* Card playability glows with smooth pulsing */
+ @keyframes glow-pulse {
+   0%, 100% {
+     box-shadow: var(--glow-playable);
+   }
+   50% {
+-    box-shadow: 0 0 15px #00ff88, 0 0 30px #00ff88, 0 0 45px #00ff88;
++    box-shadow: 0 0 12px #00ff88, 0 0 24px #00ff88, 0 0 40px rgba(0, 255, 136, 0.5);
+   }
+ }
+ 
+@@ -114,7 +145,7 @@ html, body {
+     box-shadow: var(--glow-attack);
+   }
+   50% {
+-    box-shadow: 0 0 15px #ff6600, 0 0 30px #ff6600, 0 0 45px #ff6600;
++    box-shadow: 0 0 12px #ff6600, 0 0 24px #ff6600, 0 0 40px rgba(255, 102, 0, 0.5);
+   }
+ }
+ 
+@@ -126,10 +157,135 @@ html, body {
+   animation: attack-glow-pulse 1.5s ease-in-out infinite;
+ }
+ 
+-/* Scrollbar styling */
++/* STARFORGE Ascension button pulse */
++@keyframes starforgePulse {
++  0%, 100% {
++    box-shadow: 0 0 8px #ffaa00, 0 0 16px rgba(170, 0, 255, 0.4);
++    transform: translateX(-50%) scale(1);
++  }
++  50% {
++    box-shadow: 0 0 14px #ffcc00, 0 0 28px rgba(170, 0, 255, 0.7), 0 0 40px rgba(255, 100, 0, 0.3);
++    transform: translateX(-50%) scale(1.05);
++  }
++}
++
++/* STARFORGED card cosmic glow */
++@keyframes starforgedGlow {
++  0%, 100% {
++    box-shadow: 0 0 12px #ffcc00, 0 0 24px #ff8800, 0 0 40px #ff4400, 0 0 60px rgba(160, 60, 255, 0.4);
++  }
++  50% {
++    box-shadow: 0 0 16px #ffdd44, 0 0 32px #ffaa00, 0 0 50px #ff6600, 0 0 70px rgba(180, 80, 255, 0.6);
++  }
++}
++
++/* ─── Card animations ────────────────────────────────────────── */
++
++/* Card hover lift effect */
++@keyframes card-hover-lift {
++  0% { transform: translateY(0) scale(1); }
++  100% { transform: translateY(-8px) scale(1.05); }
++}
++
++/* Card play from hand to board */
++@keyframes card-play {
++  0% { transform: scale(1); opacity: 1; }
++  30% { transform: scale(1.15); opacity: 1; }
++  60% { transform: scale(0.95); opacity: 0.9; }
++  100% { transform: scale(1); opacity: 1; }
++}
++
++/* Card draw into hand */
++@keyframes card-draw {
++  0% { transform: translateY(-20px) scale(0.8) rotate(-5deg); opacity: 0; }
++  60% { transform: translateY(3px) scale(1.05) rotate(0deg); opacity: 1; }
++  100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
++}
++
++/* Subtle idle breathing for cards on board */
++@keyframes card-breathe {
++  0%, 100% { transform: translateY(0); }
++  50% { transform: translateY(-1px); }
++}
++
++/* Target highlight pulse */
++@keyframes target-pulse {
++  0%, 100% {
++    box-shadow: 0 0 8px #ff0066, 0 0 16px #ff0066;
++  }
++  50% {
++    box-shadow: 0 0 12px #ff0066, 0 0 24px #ff0066, 0 0 36px rgba(255, 0, 102, 0.4);
++  }
++}
++
++.target-glow {
++  animation: target-pulse 1s ease-in-out infinite;
++}
++
++/* ─── Card drag & drop ──────────────────────────────────────── */
++
++@keyframes card-flight {
++  0% {
++    transform: translateY(120px) scale(0.7) rotate(-3deg);
++    opacity: 0;
++  }
++  15% {
++    transform: translateY(60px) scale(0.9) rotate(-1deg);
++    opacity: 0.7;
++  }
++  40% {
++    transform: translateY(-10px) scale(1.1) rotate(0deg);
++    opacity: 1;
++  }
++  60% {
++    transform: translateY(0) scale(1.15) rotate(0deg);
++    opacity: 1;
++    filter: brightness(1.4);
++  }
++  80% {
++    transform: translateY(0) scale(0.97) rotate(0deg);
++    opacity: 0.9;
++    filter: brightness(1.1);
++  }
++  100% {
++    transform: translateY(0) scale(1) rotate(0deg);
++    opacity: 0;
++    filter: brightness(1);
++  }
++}
++
++@keyframes card-slam {
++  0% { transform: scale(1.3); opacity: 1; filter: brightness(2); }
++  50% { transform: scale(0.9); opacity: 1; filter: brightness(1.5); }
++  100% { transform: scale(1); opacity: 1; filter: brightness(1); }
++}
++
++.board-drop-active {
++  border-color: rgba(0, 255, 136, 0.6) !important;
++  box-shadow: inset 0 0 30px rgba(0, 255, 136, 0.15), 0 0 20px rgba(0, 255, 136, 0.2) !important;
++  transition: border-color 0.2s, box-shadow 0.2s;
++}
++
++/* ─── Emote animations ──────────────────────────────────────── */
++
++@keyframes emote-pop {
++  0% { transform: translateX(-50%) scale(0) rotate(-10deg); opacity: 0; }
++  60% { transform: translateX(-50%) scale(1.1) rotate(2deg); opacity: 1; }
++  100% { transform: translateX(-50%) scale(1) rotate(0deg); opacity: 1; }
++}
++
++/* ─── Button animations ──────────────────────────────────────── */
++
++@keyframes button-shine {
++  0% { background-position: -200% center; }
++  100% { background-position: 200% center; }
++}
++
++/* ─── Scrollbar styling ──────────────────────────────────────── */
++
+ ::-webkit-scrollbar {
+-  width: 8px;
+-  height: 8px;
++  width: 6px;
++  height: 6px;
+ }
+ 
+ ::-webkit-scrollbar-track {
+@@ -138,9 +294,434 @@ html, body {
+ 
+ ::-webkit-scrollbar-thumb {
+   background: var(--color-bg-light);
+-  border-radius: 4px;
++  border-radius: 3px;
+ }
+ 
+ ::-webkit-scrollbar-thumb:hover {
+   background: var(--color-board);
+ }
++
++/* ─── Selection styling ──────────────────────────────────────── */
++
++::selection {
++  background: rgba(0, 170, 255, 0.3);
++  color: #ffffff;
++}
++
++/* ═══ Mobile Responsive ══════════════════════════════════════════ */
++
++/* Tablet (768px - 1024px) */
++@media (max-width: 1024px) {
++  :root {
++    --card-width: 75px;
++    --card-height: 110px;
++    --card-hand-width: 105px;
++    --card-hand-height: 150px;
++
++    --hero-width: 72px;
++    --hero-height: 90px;
++    --hero-face-size: 66px;
++    --hero-power-size: 44px;
++
++    --end-turn-size: 85px;
++    --end-turn-font: 13px;
++
++    --opponent-card-w: 44px;
++    --opponent-card-h: 62px;
++    --minion-row-max-w: 420px;
++    --board-row-min-h: 110px;
++    --board-gap: 8px;
++
++    --flight-card-w: 110px;
++    --flight-card-h: 65px;
++  }
++}
++
++/* Phone landscape + small tablets (max 768px) */
++@media (max-width: 768px) {
++  :root {
++    --card-width: 60px;
++    --card-height: 90px;
++    --card-hand-width: 85px;
++    --card-hand-height: 120px;
++
++    --hero-width: 60px;
++    --hero-height: 76px;
++    --hero-face-size: 54px;
++    --hero-power-size: 40px;
++
++    --end-turn-size: 70px;
++    --end-turn-font: 12px;
++
++    --opponent-card-w: 36px;
++    --opponent-card-h: 52px;
++    --minion-row-max-w: 90vw;
++    --board-row-min-h: 95px;
++    --board-gap: 6px;
++
++    --flight-card-w: 90px;
++    --flight-card-h: 55px;
++  }
++
++  /* Make buttons touch-friendly (min 44px tap targets) */
++  button {
++    min-height: 44px;
++    min-width: 44px;
++  }
++
++  /* Scale down fonts globally */
++  body {
++    font-size: 14px;
++  }
++}
++
++/* Phone portrait (max 480px) */
++@media (max-width: 480px) {
++  :root {
++    --card-width: 55px;
++    --card-height: 80px;
++    --card-hand-width: 75px;
++    --card-hand-height: 105px;
++
++    --hero-width: 52px;
++    --hero-height: 66px;
++    --hero-face-size: 46px;
++    --hero-power-size: 36px;
++
++    --end-turn-size: 60px;
++    --end-turn-font: 11px;
++
++    --opponent-card-w: 30px;
++    --opponent-card-h: 44px;
++    --minion-row-max-w: 92vw;
++    --board-row-min-h: 85px;
++    --board-gap: 4px;
++
++    --flight-card-w: 75px;
++    --flight-card-h: 45px;
++  }
++
++  body {
++    font-size: 12px;
++  }
++
++  /* Tighten spacing on very small screens */
++  .flex-center, .flex-column {
++    gap: 4px;
++  }
++}
++
++/* Touch device optimizations */
++@media (hover: none) and (pointer: coarse) {
++  /* Disable hover effects that don't work on touch */
++  button:hover {
++    transform: none !important;
++  }
++
++  /* Bigger tap targets for interactive elements */
++  button, [role="button"], a {
++    min-height: 44px;
++    touch-action: manipulation;
++  }
++
++  /* Disable context menu on long press for game elements */
++  .game-board {
++    -webkit-touch-callout: none;
++    -webkit-user-select: none;
++    user-select: none;
++  }
++}
++
++/* Landscape phone optimization */
++@media (max-height: 500px) and (orientation: landscape) {
++  :root {
++    --card-width: 55px;
++    --card-height: 80px;
++    --card-hand-width: 62px;
++    --card-hand-height: 90px;
++
++    --hero-width: 50px;
++    --hero-height: 64px;
++    --hero-face-size: 44px;
++    --hero-power-size: 34px;
++
++    --end-turn-size: 56px;
++    --end-turn-font: 10px;
++
++    --opponent-card-w: 28px;
++    --opponent-card-h: 40px;
++    --minion-row-max-w: 60vw;
++    --board-row-min-h: 75px;
++    --board-gap: 4px;
++
++    --flight-card-w: 70px;
++    --flight-card-h: 42px;
++  }
++}
++
++/* Wider landscape phones (enough height but narrow) */
++@media (max-width: 900px) and (orientation: landscape) {
++  :root {
++    --minion-row-max-w: 55vw;
++  }
++}
++
++/* ═══ DeckBuilder Mobile Layout ═════════════════════════════════ */
++
++/* Stack deck builder panels vertically on narrow screens */
++@media (max-width: 768px) {
++  .deckbuilder-body {
++    flex-direction: column !important;
++  }
++
++  .deckbuilder-pool {
++    border-right: none !important;
++    border-bottom: 1px solid #333355;
++    flex: 1 !important;
++    min-height: 0;
++  }
++
++  .deckbuilder-deck {
++    width: 100% !important;
++    max-height: 35vh;
++    flex-shrink: 0 !important;
++  }
++}
++
++/* High DPI screens */
++@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
++  /* Ensure crisp rendering on retina */
++  * {
++    -webkit-font-smoothing: antialiased;
++    -moz-osx-font-smoothing: grayscale;
++  }
++}
++
++/* ═══ Keyboard Avoidance ═════════════════════════════════════════ */
++
++/* Shift content above the soft keyboard on mobile */
++.keyboard-aware {
++  padding-bottom: var(--keyboard-height, 0px);
++  transition: padding-bottom 0.2s ease;
++}
++
++/* ═══ Phase 3: Mobile-Responsive Screens ═════════════════════════ */
++
++/* --- Scrollable full-screen panel base --- */
++.mobile-screen {
++  width: 100%;
++  height: 100%;
++  overflow-y: auto;
++  -webkit-overflow-scrolling: touch;
++}
++
++/* --- Game overlays (mulligan, game over) --- */
++@media (max-width: 480px) {
++  .mulligan-card {
++    width: 90px !important;
++    padding: 6px !important;
++  }
++  .mulligan-card .card-art-area {
++    width: 80px;
++    height: 52px;
++  }
++  .mulligan-title {
++    font-size: 20px !important;
++  }
++  .game-over-content {
++    padding: 24px 20px !important;
++  }
++  .game-over-title {
++    font-size: 36px !important;
++    letter-spacing: 4px !important;
++  }
++  .game-over-icon svg {
++    width: 70px !important;
++    height: 70px !important;
++  }
++}
++
++@media (max-width: 768px) {
++  .mulligan-card {
++    width: 100px !important;
++    padding: 8px !important;
++  }
++  .mulligan-title {
++    font-size: 22px !important;
++  }
++  .game-over-content {
++    padding: 30px 30px !important;
++  }
++  .game-over-title {
++    font-size: 42px !important;
++    letter-spacing: 6px !important;
++  }
++}
++
++/* --- Combat log collapses on small screens --- */
++@media (max-width: 768px) {
++  .combat-log {
++    width: 200px !important;
++    top: 40px !important;
++    left: 4px !important;
++  }
++  .combat-log .log-body {
++    max-height: 140px !important;
++  }
++}
++
++@media (max-width: 480px) {
++  .combat-log {
++    width: 160px !important;
++    top: 36px !important;
++    left: 2px !important;
++  }
++  .combat-log .log-body {
++    max-height: 100px !important;
++  }
++  .combat-log .entry-text {
++    font-size: 9px !important;
++  }
++}
++
++/* --- Turn timer scales down --- */
++@media (max-width: 480px) {
++  .turn-timer .timer-box {
++    padding: 6px 12px !important;
++    min-width: 100px !important;
++  }
++  .turn-timer .time-text {
++    font-size: 22px !important;
++  }
++}
++
++/* --- Full-screen menu/panel responsive --- */
++.screen-container {
++  width: 100%;
++  height: 100%;
++  overflow-y: auto;
++  -webkit-overflow-scrolling: touch;
++  padding: 20px;
++}
++
++@media (max-width: 768px) {
++  .screen-container {
++    padding: 12px;
++  }
++}
++
++@media (max-width: 480px) {
++  .screen-container {
++    padding: 8px;
++  }
++}
++
++/* --- Card grid responsive (Collection, Crafting) --- */
++.card-grid {
++  display: grid;
++  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
++  gap: 8px;
++}
++
++@media (max-width: 768px) {
++  .card-grid {
++    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
++    gap: 6px;
++  }
++}
++
++@media (max-width: 480px) {
++  .card-grid {
++    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
++    gap: 4px;
++  }
++}
++
++/* --- Filter bar responsive (Collection, Crafting) --- */
++.filter-bar {
++  display: flex;
++  flex-wrap: wrap;
++  gap: 6px;
++  align-items: center;
++}
++
++@media (max-width: 480px) {
++  .filter-bar {
++    gap: 4px;
++  }
++  .filter-bar button,
++  .filter-bar select,
++  .filter-bar input {
++    font-size: 11px !important;
++    padding: 4px 8px !important;
++    min-height: 36px;
++  }
++}
++
++/* --- Stats / achievement grids --- */
++.stat-grid {
++  display: grid;
++  grid-template-columns: repeat(3, 1fr);
++  gap: 12px;
++}
++
++@media (max-width: 480px) {
++  .stat-grid {
++    grid-template-columns: repeat(2, 1fr);
++    gap: 8px;
++  }
++}
++
++/* --- Leaderboard/table responsive --- */
++.responsive-table {
++  width: 100%;
++  overflow-x: auto;
++  -webkit-overflow-scrolling: touch;
++}
++
++/* --- Modal/panel responsive (Daily, Settings) --- */
++.modal-panel {
++  max-width: 90vw;
++  max-height: 85vh;
++  overflow-y: auto;
++  -webkit-overflow-scrolling: touch;
++}
++
++@media (max-width: 480px) {
++  .modal-panel {
++    max-width: 95vw;
++    max-height: 90vh;
++    border-radius: 12px !important;
++  }
++}
++
++/* --- Campaign map planet touch targets --- */
++@media (hover: none) and (pointer: coarse) {
++  .planet-node {
++    min-width: 56px;
++    min-height: 56px;
++  }
++}
++
++/* --- Battle pass tier track horizontal scroll --- */
++.tier-track {
++  display: flex;
++  overflow-x: auto;
++  -webkit-overflow-scrolling: touch;
++  scroll-snap-type: x mandatory;
++  gap: 8px;
++  padding-bottom: 8px;
++}
++
++.tier-track > * {
++  scroll-snap-align: center;
++  flex-shrink: 0;
++}
++
++/* --- Meta dashboard matchup matrix scroll --- */
++@media (max-width: 768px) {
++  .matchup-matrix {
++    overflow-x: auto;
++    -webkit-overflow-scrolling: touch;
++  }
++}
