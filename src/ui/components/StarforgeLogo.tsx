@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-const logoImg = 'https://raw.githubusercontent.com/finishstrong23/starforge_tcg/claude/add-last-words-keyword-3xGpp/src/assets/logo.png';
+const logoImg = 'https://raw.githubusercontent.com/finishstrong23/starforge_tcg/main/src/assets/logo.png';
 
 interface StarforgeLogoProps {
   width?: number;
