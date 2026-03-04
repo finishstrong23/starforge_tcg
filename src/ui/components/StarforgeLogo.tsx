@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-const logoImg = 'https://raw.githubusercontent.com/finishstrong23/starforge_tcg/b1639e2/src/assets/logo.png';
+const logoImg = 'https://raw.githubusercontent.com/finishstrong23/starforge_tcg/d73f605/src/assets/logo.png';
 
 interface StarforgeLogoProps {
   width?: number;
@@ -28,6 +28,7 @@ export const StarforgeLogo: React.FC<StarforgeLogoProps> = ({
           height: height ? `${height}px` : 'auto',
           objectFit: 'contain',
           display: 'block',
+          mixBlendMode: 'screen',
         }}
       />
     </div>

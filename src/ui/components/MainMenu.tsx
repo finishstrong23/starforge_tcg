@@ -155,7 +155,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
       <div style={s.center}>
         {/* Logo */}
         <div style={s.logoArea}>
-          <StarforgeLogo width={320} />
+          <StarforgeLogo width={550} />
         </div>
 
         {/* Primary Play Buttons - vertical stack */}
