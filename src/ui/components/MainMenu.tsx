@@ -11,8 +11,8 @@ import React, { useState } from 'react';
 import { Race, RaceData } from '../../types/Race';
 import { AIDifficulty } from '../../ai/AIPlayer';
 import { hapticTap } from '../capacitor';
-import backgroundImg from '../../assets/background.png';
-import logoImg from '../../assets/logo.png';
+import { StarforgeLogo } from './StarforgeLogo';
+import { SpaceBackground } from './SpaceBackground';
 
 interface MainMenuProps {
   onStartGame: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
@@ -54,7 +54,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
   const [view, setView] = useState<MenuView>('main');
   const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
-  const [logoLoaded, setLogoLoaded] = useState(true);
+
 
   const availableRaces = [
     Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN,
@@ -72,6 +72,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
   if (view === 'play') {
     return (
       <div style={s.container}>
+        <SpaceBackground />
         <div style={s.playView}>
           <h2 style={s.playTitle}>Select Race & Difficulty</h2>
 
@@ -140,6 +141,9 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
   // ── Main View ──
   return (
     <div style={s.container}>
+      {/* Animated space background */}
+      <SpaceBackground />
+
       {/* Top bar: settings & info */}
       <div style={s.topBar}>
         {onDaily && <button style={s.topBtn} onClick={onDaily}>Quests</button>}
@@ -151,18 +155,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
       <div style={s.center}>
         {/* Logo */}
         <div style={s.logoArea}>
-          {logoLoaded ? (
-            <img
-              src={logoImg}
-              alt="STARFORGE"
-              style={s.logo}
-              onLoad={(e) => { if (e.currentTarget.naturalWidth <= 1) setLogoLoaded(false); }}
-              onError={() => setLogoLoaded(false)}
-            />
-          ) : (
-            <h1 style={s.titleText}>STARFORGE</h1>
-          )}
-          <p style={s.tagline}>Trading Card Game</p>
+          <StarforgeLogo width={320} />
         </div>
 
         {/* Primary Play Buttons - vertical stack */}
@@ -291,7 +284,7 @@ const s: Record<string, React.CSSProperties> = {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -330,26 +323,6 @@ const s: Record<string, React.CSSProperties> = {
   },
   logoArea: {
     textAlign: 'center',
-  },
-  logo: {
-    maxWidth: '320px',
-    width: '100%',
-    height: 'auto',
-    filter: 'drop-shadow(0 0 20px rgba(0,255,136,0.4))',
-  },
-  titleText: {
-    fontSize: '52px',
-    fontWeight: 'bold',
-    color: '#00ff88',
-    textShadow: '0 0 30px rgba(0,255,136,0.5)',
-    letterSpacing: '6px',
-    margin: 0,
-  },
-  tagline: {
-    fontSize: '16px',
-    color: '#667788',
-    marginTop: '6px',
-    letterSpacing: '4px',
   },
 
   // Mode stack

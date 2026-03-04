@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface ArenaResultsProps {
   wins: number;
@@ -42,6 +42,7 @@ export const ArenaResults: React.FC<ArenaResultsProps> = ({
 
   return (
     <div style={arStyles.container}>
+      <SpaceBackground />
       <div style={arStyles.card}>
         <h1 style={arStyles.title}>Arena Run</h1>
 
@@ -139,7 +140,7 @@ const arStyles: Record<string, React.CSSProperties> = {
   container: {
     position: 'fixed',
     top: 0, left: 0, right: 0, bottom: 0,
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',

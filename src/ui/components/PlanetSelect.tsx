@@ -9,8 +9,8 @@ import React, { useState } from 'react';
 import { Race, RaceData } from '../../types/Race';
 import { STARTER_PLANETS, STARTER_DESCRIPTIONS, PLANET_ENCOUNTERS } from '../../campaign/CampaignData';
 import { hapticTap, hapticImpact } from '../capacitor';
-import backgroundImg from '../../assets/background.png';
-import logoImg from '../../assets/logo.png';
+import { SpaceBackground } from './SpaceBackground';
+import { StarforgeLogo } from './StarforgeLogo';
 
 interface PlanetSelectProps {
   onSelect: (race: Race) => void;
@@ -30,15 +30,11 @@ export const PlanetSelect: React.FC<PlanetSelectProps> = ({ onSelect }) => {
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       <div style={styles.content}>
         {/* Title */}
         <div style={styles.header}>
-          <img
-            src={logoImg}
-            alt="STARFORGE"
-            style={styles.logo}
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
-          />
+          <StarforgeLogo width={240} />
           <h2 style={styles.subtitle}>STORY MODE</h2>
           <p style={styles.prompt}>
             The galaxy is fractured. Ten worlds wage war for control of the STARFORGE —
@@ -152,7 +148,8 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '20px',
     overflowY: 'auto',
     WebkitOverflowScrolling: 'touch',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
+    position: 'relative',
   } as React.CSSProperties,
   content: {
     maxWidth: '900px',

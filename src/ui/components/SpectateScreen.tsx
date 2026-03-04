@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { hapticTap } from '../capacitor';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface SpectateScreenProps {
   onBack: () => void;
@@ -172,6 +172,7 @@ export const SpectateScreen: React.FC<SpectateScreenProps> = ({ onBack }) => {
   if (spectating.connected && spectating.gameState) {
     return (
       <div style={styles.container}>
+        <SpaceBackground />
         <div style={styles.spectateHeader}>
           <button style={styles.backBtn} onClick={handleStopSpectating}>
             &#x2190; Back to Games
@@ -389,11 +390,12 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%',
     height: '100%',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     color: '#e0e0e0',
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
+    position: 'relative',
   },
   header: {
     display: 'flex',

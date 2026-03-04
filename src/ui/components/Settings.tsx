@@ -9,7 +9,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { SoundManager } from '../../audio/SoundManager';
 import { hapticTap } from '../capacitor';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 const SETTINGS_KEY = 'starforge_settings';
 
@@ -104,6 +104,7 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       <div style={styles.content}>
         <h1 style={styles.title}>Settings</h1>
 
@@ -386,7 +387,8 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '40px 20px',
     overflowY: 'auto',
     WebkitOverflowScrolling: 'touch',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
+    position: 'relative',
   } as React.CSSProperties,
   content: {
     maxWidth: '600px',

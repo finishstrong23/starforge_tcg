@@ -21,7 +21,7 @@ import {
   getRoundLabel,
 } from '../../progression/TournamentMode';
 import { loadDailyState, spendGold, type DailyState } from '../../progression/DailyQuests';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface TournamentScreenProps {
   onBack: () => void;
@@ -74,6 +74,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ onBack, onSt
   if (state.activeRun) {
     return (
       <div style={styles.container}>
+        <SpaceBackground />
         <div style={styles.content}>
           <div style={styles.header}>
             <h1 style={{ ...styles.title, color: TOURNAMENT_CONFIGS[state.activeRun.tier].color }}>
@@ -123,6 +124,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ onBack, onSt
   // Tournament selection view
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       <div style={styles.content}>
         <div style={styles.header}>
           <h1 style={styles.title}>Tournament Arena</h1>
@@ -294,9 +296,10 @@ const BracketMatchCard: React.FC<{ match: BracketMatch; isCurrent: boolean }> = 
 const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', overflowY: 'auto', padding: '20px',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     display: 'flex', justifyContent: 'center',
     WebkitOverflowScrolling: 'touch',
+    position: 'relative',
   } as React.CSSProperties,
   content: {
     maxWidth: '1000px', width: '100%', display: 'flex', flexDirection: 'column',

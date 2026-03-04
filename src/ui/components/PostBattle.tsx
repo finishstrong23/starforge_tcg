@@ -16,7 +16,7 @@ import { PLANET_ENCOUNTERS } from '../../campaign/CampaignData';
 import type { PlanetStats, BattleReward } from '../../campaign/CampaignState';
 import { SoundManager } from '../../audio';
 import { hapticTap, hapticHeavy } from '../capacitor';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface PostBattleProps {
   opponentRace: Race;
@@ -74,6 +74,7 @@ export const PostBattle: React.FC<PostBattleProps> = ({
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       <div style={styles.content}>
         {/* Result Banner */}
         <div style={{
@@ -287,7 +288,8 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '20px',
     overflowY: 'auto',
     WebkitOverflowScrolling: 'touch',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
+    position: 'relative',
   } as React.CSSProperties,
   content: {
     maxWidth: '650px',

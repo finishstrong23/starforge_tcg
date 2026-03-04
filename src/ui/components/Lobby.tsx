@@ -11,7 +11,7 @@ import { Race, RaceData } from '../../types/Race';
 import { MultiplayerManager } from '../network/MultiplayerManager';
 import { loadPvPProfile, getRankTitle } from '../../stats/PvPRating';
 import type { PvPProfile } from '../../stats/PvPRating';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 type LobbyPhase = 'choose' | 'creating' | 'waiting' | 'joining' | 'ready';
 
@@ -144,6 +144,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onGameReady, onBack }) => {
   if (phase === 'waiting') {
     return (
       <div style={styles.container}>
+        <SpaceBackground />
         <div style={styles.content}>
           <h1 style={styles.title}>STARFORGE</h1>
           <p style={styles.subtitle}>Waiting for Opponent</p>
@@ -178,6 +179,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onGameReady, onBack }) => {
   if (phase === 'creating' || phase === 'joining') {
     return (
       <div style={styles.container}>
+        <SpaceBackground />
         <div style={styles.content}>
           <h1 style={styles.title}>STARFORGE</h1>
           <div style={styles.statusText}>{statusText}</div>
@@ -191,6 +193,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onGameReady, onBack }) => {
   // Main lobby: pick race + create or join
   return (
     <div className="keyboard-aware" style={styles.container}>
+      <SpaceBackground />
       <div style={styles.content}>
         <h1 style={styles.title}>STARFORGE</h1>
         <p style={styles.subtitle}>Play vs Friend</p>
@@ -328,8 +331,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '20px',
     overflowY: 'auto',
     flexDirection: 'column',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     WebkitOverflowScrolling: 'touch',
+    position: 'relative',
   } as React.CSSProperties,
   content: {
     maxWidth: '900px',

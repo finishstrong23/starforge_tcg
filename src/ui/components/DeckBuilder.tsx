@@ -26,7 +26,7 @@ import {
   getBalancedStarterDeck,
 } from '../../data';
 import type { PlayerCollection } from '../../data';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface DeckBuilderProps {
   playerRace: Race;
@@ -191,6 +191,7 @@ export const DeckBuilder: React.FC<DeckBuilderProps> = ({
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       {/* Header */}
       <div style={styles.header}>
         <button style={styles.backButton} onClick={onBack}>Back</button>
@@ -418,9 +419,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     color: '#ffffff',
     overflow: 'hidden',
+    position: 'relative',
   },
   header: {
     display: 'flex',

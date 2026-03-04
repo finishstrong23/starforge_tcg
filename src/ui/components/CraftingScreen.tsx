@@ -16,7 +16,7 @@ import type { CardDefinition } from '../../types/Card';
 import { CardArt } from './CardArt';
 import { SoundManager } from '../../audio';
 import { hapticTap, hapticImpact } from '../capacitor';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 import {
   loadCraftingState,
   getAllCollectibleCards,
@@ -125,6 +125,7 @@ export const CraftingScreen: React.FC<CraftingScreenProps> = ({ onBack }) => {
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       <style>{`
         @keyframes craft-burst {
           0% { transform: scale(1); box-shadow: 0 0 0 rgba(0,200,255,0); }
@@ -371,8 +372,9 @@ export const CraftingScreen: React.FC<CraftingScreenProps> = ({ onBack }) => {
 const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', display: 'flex',
-    flexDirection: 'column', background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    flexDirection: 'column', background: '#040410',
     overflow: 'hidden',
+    position: 'relative',
   },
   header: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',

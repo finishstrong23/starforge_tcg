@@ -20,7 +20,7 @@ import {
   recordPuzzleAttempt,
   getTierCompletion,
 } from '../../puzzle/PuzzleState';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface PuzzleModeProps {
   onBack: () => void;
@@ -77,6 +77,7 @@ const PuzzleBrowser: React.FC<{
 
   return (
     <div style={s.container}>
+      <SpaceBackground />
       <div style={s.header}>
         <button onClick={onBack} style={s.backBtn}>Back</button>
         <h1 style={s.title}>Lethal Puzzles</h1>
@@ -170,6 +171,7 @@ const PuzzleSolver: React.FC<{
 
   return (
     <div style={s.container}>
+      <SpaceBackground />
       <div style={s.solverHeader}>
         <button onClick={onBack} style={s.backBtn}>Back</button>
         <div>
@@ -299,13 +301,14 @@ const s: Record<string, React.CSSProperties> = {
   container: {
     width: '100%',
     height: '100%',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     color: '#fff',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     overflow: 'auto',
     padding: 20,
+    position: 'relative',
   },
   header: {
     textAlign: 'center',

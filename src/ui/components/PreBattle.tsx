@@ -10,7 +10,7 @@ import { Race, RaceData } from '../../types/Race';
 import { PLANET_ENCOUNTERS } from '../../campaign/CampaignData';
 import type { PlanetStats } from '../../campaign/CampaignState';
 import { hapticTap } from '../capacitor';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface PreBattleProps {
   opponentRace: Race;
@@ -44,6 +44,7 @@ export const PreBattle: React.FC<PreBattleProps> = ({
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       <div style={styles.content}>
         {/* Back button */}
         <button style={styles.backButton} onClick={onBack}>
@@ -168,7 +169,8 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '20px',
     overflowY: 'auto',
     WebkitOverflowScrolling: 'touch',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
+    position: 'relative',
   } as React.CSSProperties,
   content: {
     maxWidth: '700px',

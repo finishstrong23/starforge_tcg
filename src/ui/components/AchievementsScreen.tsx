@@ -18,7 +18,7 @@ import {
 } from '../../progression/Achievements';
 import { loadDailyState, addGold, saveDailyState } from '../../progression/DailyQuests';
 import { hapticTap } from '../capacitor';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface AchievementsScreenProps {
   onBack: () => void;
@@ -56,6 +56,7 @@ export const AchievementsScreen: React.FC<AchievementsScreenProps> = ({ onBack }
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       {/* Header */}
       <div style={styles.header}>
         <button style={styles.backBtn} onClick={onBack}>Back</button>
@@ -196,9 +197,10 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', display: 'flex',
     flexDirection: 'column', alignItems: 'center',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     overflow: 'auto', padding: '16px',
     WebkitOverflowScrolling: 'touch',
+    position: 'relative',
   } as React.CSSProperties,
   header: {
     width: '100%', maxWidth: '700px', display: 'flex',

@@ -8,7 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { SoundManager } from '../../audio';
 import { hapticTap } from '../capacitor';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 import {
   loadBattlePass,
   saveBattlePass,
@@ -71,6 +71,7 @@ export const BattlePassScreen: React.FC<BattlePassScreenProps> = ({ onBack }) =>
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       <style>{`
         @keyframes bp-shine {
           0% { background-position: -200% center; }
@@ -242,8 +243,9 @@ export const BattlePassScreen: React.FC<BattlePassScreenProps> = ({ onBack }) =>
 const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     overflow: 'hidden',
+    position: 'relative',
   },
   header: {
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',

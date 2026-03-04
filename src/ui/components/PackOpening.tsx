@@ -15,7 +15,7 @@ import { loadDailyState, spendGold as spendDailyGold, saveDailyState } from '../
 import { CardArt } from './CardArt';
 import { hapticTap, hapticImpact, hapticHeavy } from '../capacitor';
 import type { Race } from '../../types/Race';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface PackOpeningProps {
   onBack: () => void;
@@ -77,6 +77,7 @@ export const PackOpening: React.FC<PackOpeningProps> = ({ onBack }) => {
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       <style>{`
         @keyframes pack-glow-burst {
           0% { transform: scale(1); box-shadow: 0 0 20px rgba(255,204,0,0.3); }
@@ -274,8 +275,9 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', display: 'flex',
     flexDirection: 'column', alignItems: 'center',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     overflow: 'auto', padding: '20px',
+    position: 'relative',
     WebkitOverflowScrolling: 'touch',
   } as React.CSSProperties,
   header: {

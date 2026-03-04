@@ -23,7 +23,7 @@ import {
   GALACTIC_MAP,
   type FactionWarsSeason,
 } from '../../events/FactionWars';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface FactionWarsScreenProps {
   onBack: () => void;
@@ -48,6 +48,7 @@ export const FactionWarsScreen: React.FC<FactionWarsScreenProps> = ({ onBack }) 
 
   return (
     <div style={st.container}>
+      <SpaceBackground />
       {/* Header */}
       <div style={st.header}>
         <button style={st.backBtn} onClick={onBack}>&larr; Back</button>
@@ -340,9 +341,10 @@ const st: Record<string, React.CSSProperties> = {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     color: '#fff',
     overflow: 'auto',
+    position: 'relative',
   },
   header: {
     display: 'flex',

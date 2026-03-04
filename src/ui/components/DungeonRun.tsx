@@ -29,7 +29,7 @@ import {
 } from '../../dungeon/DungeonState';
 import type { DungeonRunSave, DungeonRunRecord } from '../../dungeon/DungeonState';
 import type { DungeonBoss, DungeonRelic as RelicType, CardBundle } from '../../dungeon/DungeonData';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface DungeonRunProps {
   onBack: () => void;
@@ -161,6 +161,7 @@ const FactionSelect: React.FC<{
 
   return (
     <div style={s.container}>
+      <SpaceBackground />
       <div style={s.header}>
         <button onClick={onBack} style={s.backBtn}>Back</button>
         <h1 style={s.title}>Dungeon Run</h1>
@@ -235,6 +236,7 @@ const PreBossScreen: React.FC<{
 
   return (
     <div style={s.container}>
+      <SpaceBackground />
       <div style={s.runHeader}>
         <div style={s.runInfo}>
           <span style={s.runStat}>HP: {save.currentHP}/{save.maxHP}</span>
@@ -330,6 +332,7 @@ const ChooseCardsScreen: React.FC<{
 }> = ({ save, bundles, onChoose }) => {
   return (
     <div style={s.container}>
+      <SpaceBackground />
       <RunStatus save={save} />
       <h2 style={s.choiceTitle}>Choose a Card Bundle</h2>
       <p style={s.choiceSubtitle}>Add 3 cards to your deck ({save.deck.length} cards currently)</p>
@@ -364,6 +367,7 @@ const ChooseRelicScreen: React.FC<{
 }> = ({ save, relics, onChoose }) => {
   return (
     <div style={s.container}>
+      <SpaceBackground />
       <RunStatus save={save} />
       <h2 style={s.choiceTitle}>Choose a Relic</h2>
       <p style={s.choiceSubtitle}>Permanent passive bonus for the rest of this run</p>
@@ -420,6 +424,7 @@ const RemoveCardsScreen: React.FC<{
 
   return (
     <div style={s.container}>
+      <SpaceBackground />
       <RunStatus save={save} />
       <h2 style={s.choiceTitle}>Remove Cards</h2>
       <p style={s.choiceSubtitle}>
@@ -472,6 +477,7 @@ const RunResultScreen: React.FC<{
   // onContinue triggers deletion + reset to faction select
   return (
     <div style={s.container}>
+      <SpaceBackground />
       <div style={s.resultScreen}>
         <div style={s.resultIcon}>{won ? '🏆' : '💀'}</div>
         <h1 style={{ ...s.resultTitle, color: won ? '#ffd700' : '#f87171' }}>
@@ -551,13 +557,14 @@ const s: Record<string, React.CSSProperties> = {
   container: {
     width: '100%',
     height: '100%',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     color: '#fff',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     overflow: 'auto',
     padding: 20,
+    position: 'relative',
   },
   header: {
     textAlign: 'center',

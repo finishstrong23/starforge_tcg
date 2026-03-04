@@ -19,3 +19,5 @@ export { TagTeamMode } from './TagTeamMode';
 export { LegendaryCinematic, useLegendaryCinematic } from './LegendaryCinematic';
 export { FactionWarsScreen } from './FactionWarsScreen';
 export { BoardPet, PetSelector, firePetEvent } from './BoardPet';
+export { StarforgeLogo } from './StarforgeLogo';
+export { SpaceBackground } from './SpaceBackground';

@@ -29,7 +29,7 @@ import {
   type TagTeamMatchState,
   type TagTeamRecord,
 } from '../../tagteam';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface TagTeamModeProps {
   onBack: () => void;
@@ -111,6 +111,7 @@ export const TagTeamMode: React.FC<TagTeamModeProps> = ({ onBack }) => {
   if (phase === 'setup') {
     return (
       <div style={st.container}>
+        <SpaceBackground />
         <div style={st.header}>
           <button style={st.backBtn} onClick={onBack}>&larr; Back</button>
           <h1 style={st.title}>2v2 Tag Team</h1>
@@ -243,6 +244,7 @@ export const TagTeamMode: React.FC<TagTeamModeProps> = ({ onBack }) => {
   // ── Results Phase ──
   return (
     <div style={st.container}>
+      <SpaceBackground />
       <div style={st.resultsPanel}>
         <div style={{
           ...st.resultBanner,
@@ -370,11 +372,12 @@ const st: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     color: '#fff',
     padding: 20,
     overflowY: 'auto',
     gap: 16,
+    position: 'relative',
   },
   header: {
     textAlign: 'center',

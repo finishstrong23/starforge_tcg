@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface ArenaCard {
   cardId: string;
@@ -102,6 +102,7 @@ export const ArenaDraft: React.FC<ArenaDraftProps> = ({ onDraftComplete, onBack 
 
   return (
     <div style={draftStyles.container}>
+      <SpaceBackground />
       {/* Header */}
       <div style={draftStyles.header}>
         <button style={draftStyles.backBtn} onClick={onBack}>Back</button>
@@ -215,7 +216,7 @@ const draftStyles: Record<string, React.CSSProperties> = {
   container: {
     position: 'fixed',
     top: 0, left: 0, right: 0, bottom: 0,
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     display: 'flex',
     flexDirection: 'column',
     color: '#ccccdd',

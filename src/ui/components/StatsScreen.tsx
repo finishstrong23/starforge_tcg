@@ -10,7 +10,7 @@ import { hapticTap } from '../capacitor';
 import { Race, RaceData } from '../../types/Race';
 import { loadStats, resetStats } from '../../stats/GameStats';
 import type { GlobalStats } from '../../stats/GameStats';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 
 interface StatsScreenProps {
   onBack: () => void;
@@ -72,6 +72,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({ onBack }) => {
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       <div style={styles.content}>
         <h1 style={styles.title}>Statistics</h1>
 
@@ -321,8 +322,9 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'flex-start',
     padding: '40px 20px',
     overflowY: 'auto',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     WebkitOverflowScrolling: 'touch',
+    position: 'relative',
   } as React.CSSProperties,
   content: {
     maxWidth: '700px',

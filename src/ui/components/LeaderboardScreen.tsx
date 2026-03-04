@@ -8,7 +8,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { hapticTap } from '../capacitor';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 import { Race, RaceData } from '../../types/Race';
 import { loadPvPProfile, getRankTitle, getSeasonInfo, type PvPProfile, type SeasonArchive } from '../../stats/PvPRating';
 import { loadStats, type GlobalStats } from '../../stats/GameStats';
@@ -97,6 +97,7 @@ export const LeaderboardScreen: React.FC<LeaderboardScreenProps> = ({ onBack }) 
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       <div style={styles.content}>
         <div style={styles.header}>
           <h1 style={styles.title}>Leaderboard</h1>
@@ -300,9 +301,10 @@ const RecordItem: React.FC<{ label: string; value: string; icon: string }> = ({ 
 const styles: Record<string, React.CSSProperties> = {
   container: {
     width: '100%', height: '100%', overflowY: 'auto', padding: '20px',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
     display: 'flex', justifyContent: 'center',
     WebkitOverflowScrolling: 'touch',
+    position: 'relative',
   } as React.CSSProperties,
   content: {
     maxWidth: '900px', width: '100%', display: 'flex', flexDirection: 'column',

@@ -11,8 +11,8 @@ import { PLANET_ENCOUNTERS, getCampaignEncounters } from '../../campaign/Campaig
 import type { CampaignSave } from '../../campaign/CampaignState';
 import { getNextEncounter, getCampaignProgress, isCampaignComplete } from '../../campaign/CampaignState';
 import { hapticTap } from '../capacitor';
-import backgroundImg from '../../assets/background.png';
-import logoImg from '../../assets/logo.png';
+import { SpaceBackground } from './SpaceBackground';
+import { StarforgeLogo } from './StarforgeLogo';
 
 interface CampaignMapProps {
   save: CampaignSave;
@@ -36,6 +36,7 @@ export const CampaignMap: React.FC<CampaignMapProps> = ({
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       <div style={styles.content}>
         {/* Header */}
         <div style={styles.header}>
@@ -45,12 +46,7 @@ export const CampaignMap: React.FC<CampaignMapProps> = ({
             </button>
           </div>
           <div style={styles.headerCenter}>
-            <img
-              src={logoImg}
-              alt="STARFORGE"
-              style={styles.logo}
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
-            />
+            <StarforgeLogo width={180} />
             <div style={styles.headerTitle}>GALACTIC CAMPAIGN</div>
           </div>
           <div style={styles.headerRight}>
@@ -216,7 +212,8 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '16px',
     overflowY: 'auto',
     WebkitOverflowScrolling: 'touch',
-    background: `url(${backgroundImg}) center/cover no-repeat, linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)`,
+    background: '#040410',
+    position: 'relative',
   } as React.CSSProperties,
   content: {
     maxWidth: '900px',

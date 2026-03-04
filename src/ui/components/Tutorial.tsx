@@ -15,7 +15,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import backgroundImg from '../../assets/background.png';
+import { SpaceBackground } from './SpaceBackground';
 import { KeywordGlossary } from './KeywordGlossary';
 
 interface TutorialStep {
@@ -155,6 +155,7 @@ export const Tutorial: React.FC<TutorialProps> = ({ onComplete, onSkip }) => {
 
   return (
     <div style={styles.container}>
+      <SpaceBackground />
       {/* Background */}
       <div style={styles.backdrop} />
 
@@ -267,7 +268,7 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 10000,
-    background: `url(${backgroundImg}) center/cover no-repeat`,
+    background: '#040410',
   },
   backdrop: {
     position: 'absolute',
