@@ -125,8 +125,7 @@ function computeSpellTargets(
   def: any,
   board: any,
   playerId: string,
-  opponentId: string,
-  selfCard?: CardInstance
+  opponentId: string
 ): string[] {
   if (!def?.effects?.length) return [];
 
@@ -167,20 +166,12 @@ function computeSpellTargets(
     for (const m of enemyMinions) {
       targets.push(m.instanceId);
     }
-    // Include self (minion with DEPLOY heal, not yet on board)
-    if (selfCard && def.type === 'MINION' && !targets.includes(selfCard.instanceId)) {
-      targets.push(selfCard.instanceId);
-    }
   }
-  // Buff/GrantKeyword effects target ONLY friendly minions
+  // Buff/GrantKeyword effects target ONLY friendly minions on board
   else if (isBuff) {
     const friendlyMinions = board.getBoardCards(playerId);
     for (const m of friendlyMinions) {
       targets.push(m.instanceId);
-    }
-    // Include self (minion with DEPLOY buff, not yet on board)
-    if (selfCard && def.type === 'MINION' && !targets.includes(selfCard.instanceId)) {
-      targets.push(selfCard.instanceId);
     }
   }
   // Silence targets enemy minions
@@ -190,7 +181,7 @@ function computeSpellTargets(
       targets.push(m.instanceId);
     }
   }
-  // Default: target friendly minions only (safer default than targeting all)
+  // Default: all minions on board
   else {
     const friendlyMinions = board.getBoardCards(playerId);
     for (const m of friendlyMinions) {
@@ -199,10 +190,6 @@ function computeSpellTargets(
     const enemyMinions = board.getBoardCards(opponentId);
     for (const m of enemyMinions) {
       targets.push(m.instanceId);
-    }
-    // Include self for minion DEPLOY effects
-    if (selfCard && def.type === 'MINION' && !targets.includes(selfCard.instanceId)) {
-      targets.push(selfCard.instanceId);
     }
   }
 
@@ -706,7 +693,18 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       if (hasChosenTarget(def)) {
         if (engineRef.current) {
           const board = engineRef.current.getStateManager().getBoard();
-          const targets = computeSpellTargets(def, board, 'player', 'opponent', card);
+          // Don't include self — like Hearthstone, battlecries can't self-target
+          const targets = computeSpellTargets(def, board, 'player', 'opponent');
+
+          if (targets.length === 0) {
+            // Hearthstone rule: minions with no valid battlecry targets still get played,
+            // the battlecry just doesn't fire. Spells require a valid target.
+            if (def.type === CardType.MINION || def.type === 'MINION') {
+              playCard(card);
+            }
+            // Spells with no targets: can't be played (do nothing)
+            return;
+          }
 
           // Auto-target if there's exactly 1 valid target
           if (targets.length === 1) {

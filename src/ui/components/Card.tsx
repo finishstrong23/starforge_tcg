@@ -330,14 +330,14 @@ export const Card: React.FC<CardProps> = ({
         onClick={(e) => {
           e.stopPropagation();
           if (isInHand) {
-            // In hand: click to preview, NOT to play
+            // In hand: click to preview so you can read the card
             setShowPreview(prev => !prev);
           } else if (isValidTarget) {
-            // Valid target: execute the targeting action immediately
+            // Valid target: execute the targeting action immediately (no preview)
             onClick?.();
           } else {
-            // Board card: first click shows preview, also triggers select for attack
-            setShowPreview(prev => !prev);
+            // Board card: click to select for attack (like Hearthstone)
+            // Preview is available via hover popup, not click
             onClick?.();
           }
         }}
@@ -413,7 +413,7 @@ export const Card: React.FC<CardProps> = ({
         )}
       </div>
 
-      {/* Full Card Preview Overlay (click to see details) */}
+      {/* Full Card Preview Overlay — click ANYWHERE to close */}
       {showPreview && (
         <div
           style={styles.previewOverlay}
@@ -422,7 +422,7 @@ export const Card: React.FC<CardProps> = ({
             setShowPreview(false);
           }}
         >
-          <div style={styles.previewCard} onClick={(e) => e.stopPropagation()}>
+          <div style={styles.previewCard}>
             <div style={styles.previewHeader}>
               <span style={styles.previewCost}>{card.currentCost}</span>
               <span style={styles.previewName}>{definition?.name || 'Unknown'}</span>
@@ -479,12 +479,9 @@ export const Card: React.FC<CardProps> = ({
               </div>
             )}
 
-            <button
-              style={styles.previewClose}
-              onClick={(e) => { e.stopPropagation(); setShowPreview(false); }}
-            >
-              Tap to close
-            </button>
+            <div style={styles.previewCloseHint}>
+              Click anywhere to close
+            </div>
           </div>
         </div>
       )}
@@ -824,6 +821,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '16px',
     cursor: 'pointer',
     textAlign: 'center',
+  },
+  previewCloseHint: {
+    textAlign: 'center',
+    fontSize: '14px',
+    color: '#666',
+    marginTop: '12px',
+    fontStyle: 'italic',
   },
   // Hover popup styles
   hoverPopup: {
