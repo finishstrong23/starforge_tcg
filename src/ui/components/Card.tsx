@@ -176,12 +176,22 @@ export const Card: React.FC<CardProps> = ({
     }
   }, [showPreview, isInHand]);
 
-  // Close preview when targeting state changes (turn ends, etc.)
+  // Close preview when targeting state changes, card zone changes, or any game state shift
   useEffect(() => {
     if (isValidTarget || isSelected) {
       setShowPreview(false);
     }
   }, [isValidTarget, isSelected]);
+
+  // Close preview when card zone changes (e.g. played from hand to board)
+  useEffect(() => {
+    setShowPreview(false);
+  }, [card.zone]);
+
+  // Close preview when canPlay/canAttack state changes (turn transitions)
+  useEffect(() => {
+    setShowPreview(false);
+  }, [canPlay, canAttack]);
   const definition = globalCardDatabase.getCard(card.definitionId);
   const isMinion = card.currentAttack !== undefined;
 

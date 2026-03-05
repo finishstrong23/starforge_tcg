@@ -125,7 +125,8 @@ function computeSpellTargets(
   def: any,
   board: any,
   playerId: string,
-  opponentId: string
+  opponentId: string,
+  selfCard?: CardInstance
 ): string[] {
   if (!def?.effects?.length) return [];
 
@@ -166,12 +167,20 @@ function computeSpellTargets(
     for (const m of enemyMinions) {
       targets.push(m.instanceId);
     }
+    // Include self (minion with DEPLOY heal, not yet on board)
+    if (selfCard && def.type === 'MINION' && !targets.includes(selfCard.instanceId)) {
+      targets.push(selfCard.instanceId);
+    }
   }
   // Buff/GrantKeyword effects target ONLY friendly minions
   else if (isBuff) {
     const friendlyMinions = board.getBoardCards(playerId);
     for (const m of friendlyMinions) {
       targets.push(m.instanceId);
+    }
+    // Include self (minion with DEPLOY buff, not yet on board)
+    if (selfCard && def.type === 'MINION' && !targets.includes(selfCard.instanceId)) {
+      targets.push(selfCard.instanceId);
     }
   }
   // Silence targets enemy minions
@@ -190,6 +199,10 @@ function computeSpellTargets(
     const enemyMinions = board.getBoardCards(opponentId);
     for (const m of enemyMinions) {
       targets.push(m.instanceId);
+    }
+    // Include self for minion DEPLOY effects
+    if (selfCard && def.type === 'MINION' && !targets.includes(selfCard.instanceId)) {
+      targets.push(selfCard.instanceId);
     }
   }
 
@@ -693,7 +706,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       if (hasChosenTarget(def)) {
         if (engineRef.current) {
           const board = engineRef.current.getStateManager().getBoard();
-          const targets = computeSpellTargets(def, board, 'player', 'opponent');
+          const targets = computeSpellTargets(def, board, 'player', 'opponent', card);
 
           // Auto-target if there's exactly 1 valid target
           if (targets.length === 1) {
