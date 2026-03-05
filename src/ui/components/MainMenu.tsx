@@ -328,8 +328,8 @@ const s: Record<string, React.CSSProperties> = {
   logoArea: {
     textAlign: 'center',
     width: '100%',
-    maxWidth: '700px',
-    padding: '0 10px',
+    maxWidth: '1000px',
+    padding: '0 20px',
   },
 
   // Mode stack

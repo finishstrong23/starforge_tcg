@@ -403,9 +403,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     setTimeout(() => {
       setCurrentAnimation(null);
       forceUpdate();
-      // Small gap before next animation
-      setTimeout(() => processAiAnimationQueue(), 100);
-    }, 500);
+      // Gap before next animation so player can see each one
+      setTimeout(() => processAiAnimationQueue(), 400);
+    }, 800);
   }, [forceUpdate]);
 
   // Queue an opponent attack animation — assign to ref for access from event handler
@@ -492,9 +492,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       engine.startGame();
       console.log('Game started, active player:', engine.getState().activePlayerId);
 
-      // Create AI player with small delay so attacks are visible
+      // Create AI player with longer delay so each action is visible (Hearthstone-style)
       const ai = createAIPlayer('opponent', aiDifficulty);
-      ai.setThinkingDelay(300);
+      ai.setThinkingDelay(1200);
 
       engineRef.current = engine;
       aiRef.current = ai;
@@ -566,15 +566,48 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     console.log('AI turn starting...');
     aiTurnInProgressRef.current = true;
 
-    // Execute AI turn
+    // Execute AI turn — step-by-step with UI updates between each action
     const runAI = async () => {
       try {
-        // Small delay so UI can update
-        await new Promise(resolve => setTimeout(resolve, 200));
+        // Initial delay so player can see it's the AI's turn
+        await new Promise(resolve => setTimeout(resolve, 600));
 
         if (engineRef.current && aiRef.current) {
-          await aiRef.current.executeTurn(engineRef.current);
-          console.log('AI turn complete, active player now:', engineRef.current.getState().activePlayerId);
+          // Override the AI's executeTurn to force UI updates between actions
+          const engine = engineRef.current;
+          const ai = aiRef.current;
+          const stateManager = engine.getStateManager();
+          const board = stateManager.getBoard();
+          let actionsTaken = 0;
+          const maxActions = 20;
+
+          while (actionsTaken < maxActions) {
+            const state = stateManager.getState();
+            if (state.activePlayerId !== 'opponent' || state.phase !== GamePhase.MAIN) break;
+
+            const action = (ai as any).decideAction(stateManager, board, engine);
+            if (!action) break;
+
+            const result = engine.processAction(action);
+            if (!result.success) break;
+            actionsTaken++;
+
+            // Force UI update so the player can SEE each AI action
+            forceUpdateRef.current();
+
+            // Wait between actions so animations play out
+            await new Promise(resolve => setTimeout(resolve, 1200));
+          }
+
+          // End turn
+          engine.processAction({
+            type: ActionType.END_TURN,
+            playerId: 'opponent',
+            timestamp: Date.now(),
+            data: {},
+          });
+
+          console.log('AI turn complete, active player now:', engine.getState().activePlayerId);
         }
       } catch (err) {
         console.error('AI turn error:', err);

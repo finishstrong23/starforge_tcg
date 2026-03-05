@@ -173,12 +173,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
   }
 
   const handleCardClick = (card: any) => {
+    hapticTap();
     if (card.zone === 'BOARD' && card.controllerId === 'player') {
-      hapticTap();
+      selectCard(card);
+    } else if (card.zone === 'HAND') {
+      // Click to play hand cards (same as drag-and-drop)
       selectCard(card);
     }
-    // Hand cards: click opens preview (handled in Card component),
-    // drag-and-drop plays the card
   };
 
   const onTargetClick = (targetId: string) => {
@@ -273,7 +274,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       <div style={styles.battlefield} onClick={handleBoardClick}>
         {/* Opponent Board */}
         <div style={styles.boardRow}>
-          <div data-card-id="hero_opponent" style={{ position: 'relative' }}>
+          <div data-card-id="hero_opponent" style={{ position: 'relative' }} onClick={(e) => {
+            e.stopPropagation();
+            onTargetClick('hero_opponent');
+          }}>
             <HeroPortrait
               health={opponentState.hero.currentHealth}
               maxHealth={opponentState.hero.maxHealth}
@@ -293,7 +297,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
           </div>
           <div style={styles.minionsRow}>
             {opponentBoard.map((card) => (
-              <div key={card.instanceId} data-card-id={card.instanceId}>
+              <div key={card.instanceId} data-card-id={card.instanceId} onClick={(e) => e.stopPropagation()}>
                 <Card
                   card={card}
                   isOnBoard
@@ -319,7 +323,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
 
         {/* Player Board */}
         <div style={styles.boardRow}>
-          <div data-card-id="hero_player" style={{ position: 'relative' }}>
+          <div data-card-id="hero_player" style={{ position: 'relative' }} onClick={(e) => {
+            e.stopPropagation();
+            onTargetClick('hero_player');
+          }}>
             <HeroPortrait
               health={playerState.hero.currentHealth}
               maxHealth={playerState.hero.maxHealth}
@@ -625,7 +632,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    padding: '10px',
+    padding: '10px 20px',
     background: 'transparent',
     position: 'relative',
   },
@@ -633,21 +640,21 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 'var(--board-gap, 10px)',
-    minHeight: 'var(--board-row-min-h, 130px)',
+    gap: '20px',
+    minHeight: '160px',
     flexWrap: 'wrap' as const,
   },
   minionsRow: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 'var(--board-gap, 8px)',
+    gap: '12px',
     width: '100%',
-    maxWidth: 'var(--minion-row-max-w, 500px)',
-    minHeight: 'var(--board-row-min-h, 130px)',
-    padding: 'var(--board-gap, 10px)',
+    maxWidth: '800px',
+    minHeight: '160px',
+    padding: '12px 16px',
     background: 'rgba(0, 0, 0, 0.2)',
-    borderRadius: '10px',
+    borderRadius: '12px',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     flexWrap: 'wrap' as const,
   },
@@ -655,7 +662,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: '10px 0',
+    padding: '6px 0',
   },
   playerArea: {
     display: 'flex',
