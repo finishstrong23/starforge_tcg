@@ -688,41 +688,42 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     // Hand card = try to play
     if (card.zone === CardZone.HAND && canPlayCard(card)) {
       const def = globalCardDatabase.getCard(card.definitionId);
+      const isMinion = def?.type === CardType.MINION || def?.type === CardType.STRUCTURE;
 
       // Check if it has CHOSEN targeting
       if (hasChosenTarget(def)) {
+        // Detect self-buff DEPLOY cards ("Gain +1/+1") — play instantly, no targeting
+        const cardText = (def?.cardText || '').toLowerCase();
+        const chosenEffect = def?.effects?.find(
+          (e: any) => e.targetType === TargetType.CHOSEN || e.targetType === 'CHOSEN'
+        );
+        const effectType = chosenEffect ? String(chosenEffect.type) : '';
+        const isBuff = effectType === 'BUFF' || effectType === 'GRANT_KEYWORD';
+        const isSelfBuff = isBuff && isMinion && (
+          cardText.includes('gain +') || cardText.includes('gain +')
+        );
+
+        // Self-buff DEPLOY: play instantly with self as target, no UI prompt
+        if (isSelfBuff) {
+          playCard(card, undefined, card.instanceId);
+          return;
+        }
+
         if (engineRef.current) {
           const board = engineRef.current.getStateManager().getBoard();
           const targets = computeSpellTargets(def, board, 'player', 'opponent');
 
-          const isMinion = def?.type === CardType.MINION || def?.type === CardType.STRUCTURE;
-          const chosenEffect = def?.effects?.find(
-            (e: any) => e.targetType === TargetType.CHOSEN || e.targetType === 'CHOSEN'
-          );
-          const effectType = chosenEffect ? String(chosenEffect.type) : '';
-          const isBuff = effectType === 'BUFF' || effectType === 'GRANT_KEYWORD';
-          const cardText = (def?.cardText || '').toLowerCase();
-          const isSelfBuff = isBuff && isMinion && (cardText.includes('gain') || cardText.startsWith('+'));
-
-          // For DEPLOY minion buffs, include self as valid target
+          // For DEPLOY minion "Give" buffs, include self as a choosable target
           // (engine places minion on board BEFORE resolving DEPLOY)
           if (isMinion && isBuff && !targets.includes(card.instanceId)) {
             targets.push(card.instanceId);
           }
 
-          // Self-buff cards ("Gain +1/+1") — auto-target self, no prompt
-          if (isSelfBuff) {
-            playCard(card, undefined, card.instanceId);
-            return;
-          }
-
           if (targets.length === 0) {
-            // Hearthstone rule: minions with no valid battlecry targets still get played,
-            // the battlecry just doesn't fire. Spells require a valid target.
+            // Hearthstone rule: minions play even with no valid battlecry targets
             if (isMinion) {
               playCard(card);
             }
-            // Spells with no targets: can't be played (do nothing)
             return;
           }
 
