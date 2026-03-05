@@ -693,13 +693,33 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       if (hasChosenTarget(def)) {
         if (engineRef.current) {
           const board = engineRef.current.getStateManager().getBoard();
-          // Don't include self — like Hearthstone, battlecries can't self-target
           const targets = computeSpellTargets(def, board, 'player', 'opponent');
+
+          const isMinion = def?.type === CardType.MINION || def?.type === CardType.STRUCTURE;
+          const chosenEffect = def?.effects?.find(
+            (e: any) => e.targetType === TargetType.CHOSEN || e.targetType === 'CHOSEN'
+          );
+          const effectType = chosenEffect ? String(chosenEffect.type) : '';
+          const isBuff = effectType === 'BUFF' || effectType === 'GRANT_KEYWORD';
+          const cardText = (def?.cardText || '').toLowerCase();
+          const isSelfBuff = isBuff && isMinion && (cardText.includes('gain') || cardText.startsWith('+'));
+
+          // For DEPLOY minion buffs, include self as valid target
+          // (engine places minion on board BEFORE resolving DEPLOY)
+          if (isMinion && isBuff && !targets.includes(card.instanceId)) {
+            targets.push(card.instanceId);
+          }
+
+          // Self-buff cards ("Gain +1/+1") — auto-target self, no prompt
+          if (isSelfBuff) {
+            playCard(card, undefined, card.instanceId);
+            return;
+          }
 
           if (targets.length === 0) {
             // Hearthstone rule: minions with no valid battlecry targets still get played,
             // the battlecry just doesn't fire. Spells require a valid target.
-            if (def && (def.type === CardType.MINION || def.type === CardType.STRUCTURE)) {
+            if (isMinion) {
               playCard(card);
             }
             // Spells with no targets: can't be played (do nothing)
