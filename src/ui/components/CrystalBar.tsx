@@ -14,7 +14,7 @@ interface CrystalBarProps {
 }
 
 const CrystalGem: React.FC<{ filled: boolean }> = ({ filled }) => (
-  <svg width="20" height="22" viewBox="0 0 16 18" style={{ display: 'block' }}>
+  <svg width="26" height="28" viewBox="0 0 16 18" style={{ display: 'block' }}>
     <defs>
       <linearGradient id={filled ? 'cg_fill' : 'cg_empty'} x1="0" y1="0" x2="0.3" y2="1">
         <stop offset="0%" stopColor={filled ? '#44ddff' : '#334455'} />
@@ -83,30 +83,35 @@ const styles: { [key: string]: React.CSSProperties } = {
   container: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '12px',
+    background: 'rgba(0, 10, 30, 0.85)',
+    borderRadius: '12px',
+    padding: '8px 16px',
+    border: '1px solid rgba(0, 170, 255, 0.3)',
+    boxShadow: '0 0 12px rgba(0, 136, 255, 0.15)',
   },
   crystalsRow: {
     display: 'flex',
-    gap: '2px',
+    gap: '3px',
     alignItems: 'center',
   },
   crystalWrap: {
     transition: 'all 0.3s ease',
   },
   crystalSlot: {
-    width: '18px',
-    height: '20px',
+    width: '24px',
+    height: '26px',
     background: 'rgba(30, 30, 50, 0.3)',
     borderRadius: '2px',
     border: '1px solid rgba(60, 60, 90, 0.2)',
     clipPath: 'polygon(50% 0%, 100% 35%, 50% 100%, 0% 35%)',
   },
   countText: {
-    fontSize: '16px',
+    fontSize: '22px',
     fontWeight: 'bold',
-    color: '#00aaff',
-    textShadow: '0 0 5px rgba(0, 170, 255, 0.4)',
-    minWidth: '44px',
+    color: '#00ccff',
+    textShadow: '0 0 8px rgba(0, 170, 255, 0.6)',
+    minWidth: '50px',
   },
   overloadText: {
     fontSize: '10px',

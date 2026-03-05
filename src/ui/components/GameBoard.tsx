@@ -702,11 +702,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
     gap: '20px',
-    marginBottom: '10px',
+    marginBottom: '8px',
+    justifyContent: 'center',
+    width: '100%',
   },
   deckCount: {
     fontSize: '16px',
     color: '#888888',
+    background: 'rgba(0, 10, 30, 0.85)',
+    borderRadius: '10px',
+    padding: '6px 14px',
+    border: '1px solid rgba(255,255,255,0.1)',
   },
   playerHand: {
     display: 'flex',

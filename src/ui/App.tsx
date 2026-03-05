@@ -398,7 +398,6 @@ export const App: React.FC = () => {
           stats={campaignSave.planetStats[campaignOpponent]}
           onFight={handleCampaignFight}
           onBack={handleCampaignContinue}
-          onCustomizeDeck={handleCampaignDeckbuilder}
         />
       )}
 

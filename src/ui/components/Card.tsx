@@ -167,10 +167,11 @@ export const Card: React.FC<CardProps> = ({
     };
   }, []);
 
-  // Auto-close preview for board cards after 3 seconds
+  // Auto-close preview after a few seconds (board=3s, hand=5s)
   useEffect(() => {
-    if (showPreview && !isInHand) {
-      const timer = setTimeout(() => setShowPreview(false), 3000);
+    if (showPreview) {
+      const delay = isInHand ? 5000 : 3000;
+      const timer = setTimeout(() => setShowPreview(false), delay);
       return () => clearTimeout(timer);
     }
   }, [showPreview, isInHand]);

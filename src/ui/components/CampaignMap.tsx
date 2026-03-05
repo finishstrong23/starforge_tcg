@@ -224,6 +224,8 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '20px',
     paddingTop: '10px',
     paddingBottom: '40px',
+    position: 'relative',
+    zIndex: 5,
   },
   header: {
     width: '100%',
@@ -345,7 +347,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: '12px',
     padding: '14px 16px',
-    background: 'linear-gradient(135deg, #12122a 0%, #1a1a35 100%)',
+    background: 'rgba(12, 12, 30, 0.95)',
     border: '2px solid #222244',
     borderRadius: '12px',
     color: '#ffffff',
@@ -354,6 +356,7 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'left',
     minHeight: '56px',
     flexWrap: 'wrap',
+    backdropFilter: 'blur(8px)',
   } as React.CSSProperties,
   planetIcon: {
     fontSize: '32px',
