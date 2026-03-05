@@ -488,8 +488,8 @@ export const Card: React.FC<CardProps> = ({
         document.body
       )}
 
-      {/* Hover Popup - Large card with details */}
-      {isHovered && !showPreview && (
+      {/* Hover Popup - Large card with details (board cards only, not hand) */}
+      {isHovered && !showPreview && !isInHand && (
         <div style={{
           ...styles.hoverPopup,
           ...(popupSide === 'below' ? { top: '100%', bottom: 'auto', marginTop: '10px', marginBottom: 0 } : {}),
