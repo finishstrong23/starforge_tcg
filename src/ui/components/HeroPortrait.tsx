@@ -186,7 +186,7 @@ export const HeroPortrait: React.FC<HeroPortraitProps> = ({
       }}>
         {/* Portrait area */}
         <div style={styles.portrait}>
-          <HeroFace isOpponent={isOpponent} size={74} />
+          <HeroFace isOpponent={isOpponent} size={92} />
         </div>
 
         {/* Health bar */}
@@ -313,7 +313,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   healthBarContainer: {
     position: 'relative',
     width: '90%',
-    height: '8px',
+    height: '10px',
     background: '#1a1a22',
     borderRadius: '4px',
     overflow: 'hidden',
@@ -336,7 +336,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     pointerEvents: 'none',
   },
   healthNumber: {
-    fontSize: '13px',
+    fontSize: '16px',
     fontWeight: 'bold',
     color: '#ffffff',
     marginBottom: '4px',
@@ -344,7 +344,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   healthMax: {
     color: '#889999',
-    fontSize: '11px',
+    fontSize: '13px',
   },
   damagedHealth: {
     color: '#ff4444',
@@ -416,15 +416,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'absolute',
     top: '-5px',
     right: '-5px',
-    width: '20px',
-    height: '20px',
+    width: '24px',
+    height: '24px',
     background: 'linear-gradient(135deg, #0066cc 0%, #0044aa 100%)',
     border: '2px solid #88ccff',
     borderRadius: '50%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 'bold',
     color: '#ffffff',
     zIndex: 5,

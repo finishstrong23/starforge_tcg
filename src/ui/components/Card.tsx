@@ -349,8 +349,8 @@ export const Card: React.FC<CardProps> = ({
               race={(definition as any)?.race as Race | undefined}
               cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
               cost={card.currentCost}
-              width={isInHand ? 92 : 77}
-              height={isInHand ? 55 : 45}
+              width={isInHand ? 130 : 110}
+              height={isInHand ? 80 : 65}
               isForged={card.isForged}
             />
           )}
@@ -586,17 +586,17 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   costBadge: {
     position: 'absolute',
-    top: '-5px',
-    left: '-5px',
-    width: '28px',
-    height: '28px',
+    top: '-8px',
+    left: '-8px',
+    width: '36px',
+    height: '36px',
     background: 'linear-gradient(135deg, #0066cc 0%, #0044aa 100%)',
     border: '2px solid #88ccff',
     borderRadius: '50%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    fontSize: '16px',
+    fontSize: '20px',
     fontWeight: 'bold',
     color: '#ffffff',
     zIndex: 20,
@@ -606,7 +606,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     textAlign: 'center',
   },
   cardName: {
-    fontSize: '10px',
+    fontSize: '13px',
     fontWeight: 'bold',
     color: '#ffffff',
     whiteSpace: 'nowrap',
@@ -615,7 +615,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingBottom: '2px',
   },
   tribeBadge: {
-    fontSize: '7px',
+    fontSize: '10px',
     textAlign: 'center',
     textTransform: 'capitalize',
     fontWeight: 'bold',
@@ -641,51 +641,51 @@ const styles: { [key: string]: React.CSSProperties } = {
     opacity: 0.5,
   },
   keywordRow: {
-    fontSize: '12px',
+    fontSize: '15px',
     textAlign: 'center',
-    padding: '2px 0',
+    padding: '3px 0',
   },
   // Hearthstone-style stat badges - absolute positioned, overlapping card edges
   attackBadge: {
     position: 'absolute',
-    bottom: '-8px',
-    left: '-8px',
-    width: '30px',
-    height: '30px',
+    bottom: '-10px',
+    left: '-10px',
+    width: '38px',
+    height: '38px',
     background: 'linear-gradient(135deg, #ffcc00 0%, #cc9900 100%)',
     border: '2px solid #ffee88',
     borderRadius: '50%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    fontSize: '16px',
+    fontSize: '20px',
     fontWeight: 'bold',
     zIndex: 20,
     boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
   },
   healthBadge: {
     position: 'absolute',
-    bottom: '-8px',
-    right: '-8px',
-    width: '30px',
-    height: '30px',
+    bottom: '-10px',
+    right: '-10px',
+    width: '38px',
+    height: '38px',
     background: 'linear-gradient(135deg, #cc2222 0%, #aa0000 100%)',
     border: '2px solid #ff6666',
     borderRadius: '50%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    fontSize: '16px',
+    fontSize: '20px',
     fontWeight: 'bold',
     zIndex: 20,
     boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
   },
   spellText: {
-    fontSize: '8px',
+    fontSize: '11px',
     color: '#aaaaaa',
     textAlign: 'center',
     padding: '5px',
-    lineHeight: '1.2',
+    lineHeight: '1.3',
   },
   forgedBadge: {
     position: 'absolute',

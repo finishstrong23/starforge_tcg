@@ -247,7 +247,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
         <div style={styles.opponentHand}>
           {Array.from({ length: opponentHandCount }, (_, index) => (
             <div key={index} style={styles.cardBack}>
-              <CardBack width={50} height={70} />
+              <CardBack width={60} height={85} />
             </div>
           ))}
         </div>
@@ -422,7 +422,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
               }}
               style={{
                 transform: `rotate(${(index - playerHand.length / 2) * 2.5}deg)`,
-                marginLeft: index > 0 ? 'max(-20px, -2.5vw)' : '0',
+                marginLeft: index > 0 ? 'max(-30px, -3vw)' : '0',
               }}
             />
           ))}
@@ -546,12 +546,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
   },
   opponentArea: {
-    height: '15%',
+    height: '14%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '10px',
+    padding: '8px 10px',
     background: 'linear-gradient(180deg, rgba(20, 20, 40, 0.5) 0%, transparent 100%)',
   },
   opponentHand: {
@@ -611,7 +611,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '10px 0',
   },
   playerArea: {
-    height: '26%',
+    height: '30%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -627,14 +627,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '10px',
   },
   deckCount: {
-    fontSize: '14px',
+    fontSize: '16px',
     color: '#888888',
   },
   playerHand: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-end',
-    minHeight: '130px',
+    minHeight: '200px',
     paddingBottom: '8px',
     maxWidth: '100%',
     overflowX: 'auto',
@@ -666,14 +666,14 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   starforgeButton: {
     position: 'absolute',
-    bottom: '-18px',
+    bottom: '-22px',
     left: '50%',
     transform: 'translateX(-50%)',
     background: 'linear-gradient(135deg, #ffaa00 0%, #cc4400 50%, #aa00ff 100%)',
     border: '2px solid #ffdd44',
     borderRadius: '8px',
-    padding: '2px 6px',
-    fontSize: '8px',
+    padding: '4px 10px',
+    fontSize: '11px',
     fontWeight: 'bold',
     color: '#ffffff',
     cursor: 'pointer',

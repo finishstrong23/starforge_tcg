@@ -44,31 +44,31 @@
   --glow-target: 0 0 8px #ff0066, 0 0 16px #ff0066;
 
   /* Spacing */
-  --card-width: 90px;
-  --card-height: 130px;
-  --card-hand-width: 120px;
-  --card-hand-height: 170px;
+  --card-width: 130px;
+  --card-height: 185px;
+  --card-hand-width: 160px;
+  --card-hand-height: 225px;
 
   /* Hero portrait */
-  --hero-width: 80px;
-  --hero-height: 100px;
-  --hero-face-size: 74px;
-  --hero-power-size: 50px;
+  --hero-width: 100px;
+  --hero-height: 130px;
+  --hero-face-size: 92px;
+  --hero-power-size: 60px;
 
   /* End turn button */
-  --end-turn-size: 100px;
-  --end-turn-font: 14px;
+  --end-turn-size: 110px;
+  --end-turn-font: 16px;
 
   /* Board layout */
-  --opponent-card-w: 50px;
-  --opponent-card-h: 70px;
-  --minion-row-max-w: 500px;
-  --board-row-min-h: 130px;
-  --board-gap: 10px;
+  --opponent-card-w: 60px;
+  --opponent-card-h: 85px;
+  --minion-row-max-w: 700px;
+  --board-row-min-h: 200px;
+  --board-gap: 14px;
 
   /* Flight card */
-  --flight-card-w: 130px;
-  --flight-card-h: 80px;
+  --flight-card-w: 170px;
+  --flight-card-h: 100px;
 }
 
 /* Reset */
@@ -313,54 +313,54 @@ html, body {
 /* Tablet (768px - 1024px) */
 @media (max-width: 1024px) {
   :root {
-    --card-width: 75px;
-    --card-height: 110px;
-    --card-hand-width: 105px;
-    --card-hand-height: 150px;
+    --card-width: 105px;
+    --card-height: 150px;
+    --card-hand-width: 130px;
+    --card-hand-height: 185px;
 
-    --hero-width: 72px;
-    --hero-height: 90px;
-    --hero-face-size: 66px;
-    --hero-power-size: 44px;
+    --hero-width: 88px;
+    --hero-height: 110px;
+    --hero-face-size: 80px;
+    --hero-power-size: 52px;
 
-    --end-turn-size: 85px;
-    --end-turn-font: 13px;
+    --end-turn-size: 95px;
+    --end-turn-font: 14px;
 
-    --opponent-card-w: 44px;
-    --opponent-card-h: 62px;
-    --minion-row-max-w: 420px;
-    --board-row-min-h: 110px;
-    --board-gap: 8px;
+    --opponent-card-w: 52px;
+    --opponent-card-h: 74px;
+    --minion-row-max-w: 580px;
+    --board-row-min-h: 165px;
+    --board-gap: 12px;
 
-    --flight-card-w: 110px;
-    --flight-card-h: 65px;
+    --flight-card-w: 140px;
+    --flight-card-h: 85px;
   }
 }
 
 /* Phone landscape + small tablets (max 768px) */
 @media (max-width: 768px) {
   :root {
-    --card-width: 60px;
-    --card-height: 90px;
-    --card-hand-width: 85px;
-    --card-hand-height: 120px;
+    --card-width: 85px;
+    --card-height: 125px;
+    --card-hand-width: 110px;
+    --card-hand-height: 155px;
 
-    --hero-width: 60px;
-    --hero-height: 76px;
-    --hero-face-size: 54px;
-    --hero-power-size: 40px;
+    --hero-width: 72px;
+    --hero-height: 92px;
+    --hero-face-size: 66px;
+    --hero-power-size: 46px;
 
-    --end-turn-size: 70px;
-    --end-turn-font: 12px;
+    --end-turn-size: 80px;
+    --end-turn-font: 13px;
 
-    --opponent-card-w: 36px;
-    --opponent-card-h: 52px;
-    --minion-row-max-w: 90vw;
-    --board-row-min-h: 95px;
-    --board-gap: 6px;
+    --opponent-card-w: 44px;
+    --opponent-card-h: 62px;
+    --minion-row-max-w: 92vw;
+    --board-row-min-h: 140px;
+    --board-gap: 8px;
 
-    --flight-card-w: 90px;
-    --flight-card-h: 55px;
+    --flight-card-w: 120px;
+    --flight-card-h: 70px;
   }
 
   /* Make buttons touch-friendly (min 44px tap targets) */
@@ -561,26 +561,26 @@ html, body {
 /* --- Combat log collapses on small screens --- */
 @media (max-width: 768px) {
   .combat-log {
-    width: 200px !important;
+    width: 280px !important;
     top: 40px !important;
     left: 4px !important;
   }
   .combat-log .log-body {
-    max-height: 140px !important;
+    max-height: 200px !important;
   }
 }
 
 @media (max-width: 480px) {
   .combat-log {
-    width: 160px !important;
+    width: 220px !important;
     top: 36px !important;
     left: 2px !important;
   }
   .combat-log .log-body {
-    max-height: 100px !important;
+    max-height: 150px !important;
   }
   .combat-log .entry-text {
-    font-size: 9px !important;
+    font-size: 12px !important;
   }
 }
 
