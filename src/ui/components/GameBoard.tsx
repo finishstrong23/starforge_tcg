@@ -439,26 +439,22 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
           data-hand-zone
           style={{
             ...styles.playerHand,
-            minHeight: handExpanded ? '200px' : '80px',
-            transition: 'min-height 0.3s ease',
+            minHeight: '120px',
           }}
           onMouseEnter={() => setHandExpanded(true)}
           onMouseLeave={() => { setHandExpanded(false); setHoveredHandCard(null); }}
         >
           {playerHand.map((card, index) => {
             const isHovered = hoveredHandCard === card.instanceId;
-            const fanAngle = handExpanded
-              ? (index - playerHand.length / 2) * 3
-              : (index - playerHand.length / 2) * 2;
-            const liftY = isHovered ? -60 : 0;
-            const hoverScale = isHovered ? 1.35 : 1;
+            const liftY = isHovered ? -40 : 0;
+            const hoverScale = isHovered ? 1.25 : 1;
 
             return (
               <div
                 key={card.instanceId}
                 style={{
-                  transform: `rotate(${fanAngle}deg) translateY(${handExpanded ? 0 : 60}px) translateY(${liftY}px) scale(${hoverScale})`,
-                  marginLeft: index > 0 ? (handExpanded ? 'max(-25px, -2vw)' : 'max(-50px, -5vw)') : '0',
+                  transform: `translateY(${liftY}px) scale(${hoverScale})`,
+                  marginLeft: index > 0 ? 'max(-15px, -1vw)' : '0',
                   transition: 'transform 0.25s ease, margin-left 0.3s ease, z-index 0s',
                   zIndex: isHovered ? 100 : index,
                   position: 'relative',
@@ -485,11 +481,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
             );
           })}
         </div>
-
-        {/* Hand expand hint */}
-        {!handExpanded && playerHand.length > 0 && (
-          <div style={styles.handHint}>▲ Hover to expand hand</div>
-        )}
 
         {/* End Turn Button */}
         <EndTurnButton />
@@ -721,9 +712,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-end',
-    paddingBottom: '8px',
+    paddingBottom: '4px',
     maxWidth: '100%',
     overflow: 'visible',
+    gap: '4px',
+    flexWrap: 'nowrap' as const,
   },
   handHint: {
     fontSize: '11px',
