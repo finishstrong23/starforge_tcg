@@ -90,6 +90,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
   // ── Hero intro state ──
   const [showIntro, setShowIntro] = useState(true);
 
+  // ── Hand expand state (Hearthstone-style) ──
+  const [handExpanded, setHandExpanded] = useState(false);
+  const [hoveredHandCard, setHoveredHandCard] = useState<string | null>(null);
+
   // ── Emote state ──
   const [playerEmote, setPlayerEmote] = useState<string | null>(null);
   const [opponentEmote, setOpponentEmote] = useState<string | null>(null);
@@ -388,8 +392,20 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
         </div>
       </div>
 
-      {/* Player Area */}
-      <div style={styles.playerArea}>
+      {/* Player Area — Hearthstone-style expandable hand */}
+      <div
+        style={{
+          ...styles.playerArea,
+          height: handExpanded ? '38%' : '18%',
+          transition: 'height 0.3s ease',
+        }}
+        onClick={(e) => {
+          // Click the area (not a card) to toggle
+          if (e.target === e.currentTarget || (e.target as HTMLElement).closest?.('[data-hand-zone]')) {
+            setHandExpanded(!handExpanded);
+          }
+        }}
+      >
         {/* Player Info */}
         <div style={styles.playerInfo}>
           <CrystalBar
@@ -403,30 +419,61 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
         </div>
 
         {/* Player Hand */}
-        <div style={styles.playerHand}>
-          {playerHand.map((card, index) => (
-            <Card
-              key={card.instanceId}
-              card={card}
-              isInHand
-              canPlay={canPlayCard(card)}
-              isSelected={selectedCard?.instanceId === card.instanceId}
-              onClick={() => handleCardClick(card)}
-              onDragStart={() => {
-                draggedCardIdRef.current = card.instanceId;
-                SoundManager.play('cardDrag' as any);
-              }}
-              onDragEnd={() => {
-                draggedCardIdRef.current = null;
-                setIsDragOver(false);
-              }}
-              style={{
-                transform: `rotate(${(index - playerHand.length / 2) * 2.5}deg)`,
-                marginLeft: index > 0 ? 'max(-30px, -3vw)' : '0',
-              }}
-            />
-          ))}
+        <div
+          data-hand-zone
+          style={{
+            ...styles.playerHand,
+            minHeight: handExpanded ? '200px' : '80px',
+            transition: 'min-height 0.3s ease',
+          }}
+          onMouseEnter={() => setHandExpanded(true)}
+          onMouseLeave={() => { setHandExpanded(false); setHoveredHandCard(null); }}
+        >
+          {playerHand.map((card, index) => {
+            const isHovered = hoveredHandCard === card.instanceId;
+            const fanAngle = handExpanded
+              ? (index - playerHand.length / 2) * 3
+              : (index - playerHand.length / 2) * 2;
+            const liftY = isHovered ? -60 : 0;
+            const hoverScale = isHovered ? 1.35 : 1;
+
+            return (
+              <div
+                key={card.instanceId}
+                style={{
+                  transform: `rotate(${fanAngle}deg) translateY(${handExpanded ? 0 : 60}px) translateY(${liftY}px) scale(${hoverScale})`,
+                  marginLeft: index > 0 ? (handExpanded ? 'max(-25px, -2vw)' : 'max(-50px, -5vw)') : '0',
+                  transition: 'transform 0.25s ease, margin-left 0.3s ease, z-index 0s',
+                  zIndex: isHovered ? 100 : index,
+                  position: 'relative',
+                }}
+                onMouseEnter={() => setHoveredHandCard(card.instanceId)}
+                onMouseLeave={() => setHoveredHandCard(null)}
+              >
+                <Card
+                  card={card}
+                  isInHand
+                  canPlay={canPlayCard(card)}
+                  isSelected={selectedCard?.instanceId === card.instanceId}
+                  onClick={() => handleCardClick(card)}
+                  onDragStart={() => {
+                    draggedCardIdRef.current = card.instanceId;
+                    SoundManager.play('cardDrag' as any);
+                  }}
+                  onDragEnd={() => {
+                    draggedCardIdRef.current = null;
+                    setIsDragOver(false);
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
+
+        {/* Hand expand hint */}
+        {!handExpanded && playerHand.length > 0 && (
+          <div style={styles.handHint}>▲ Hover to expand hand</div>
+        )}
 
         {/* End Turn Button */}
         <EndTurnButton />
@@ -611,14 +658,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '10px 0',
   },
   playerArea: {
-    height: '30%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-end',
     padding: '8px 10px',
-    background: 'linear-gradient(0deg, rgba(20, 20, 40, 0.5) 0%, transparent 100%)',
+    background: 'linear-gradient(0deg, rgba(10, 10, 25, 0.7) 0%, transparent 100%)',
     position: 'relative',
+    cursor: 'pointer',
+    overflow: 'visible',
   },
   playerInfo: {
     display: 'flex',
@@ -634,10 +682,16 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'flex-end',
-    minHeight: '200px',
     paddingBottom: '8px',
     maxWidth: '100%',
-    overflowX: 'auto',
+    overflow: 'visible',
+  },
+  handHint: {
+    fontSize: '11px',
+    color: 'rgba(255,255,255,0.4)',
+    textAlign: 'center',
+    marginTop: '2px',
+    pointerEvents: 'none',
   },
   turnNumber: {
     position: 'absolute',
