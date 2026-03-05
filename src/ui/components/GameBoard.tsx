@@ -406,6 +406,18 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
             ))}
           </div>
         </div>
+
+        {/* Mana Crystal Bar — at bottom of battlefield, above hand */}
+        <div style={styles.manaBarFixed}>
+          <CrystalBar
+            current={playerState.crystals.current}
+            max={playerState.crystals.maximum}
+            overloaded={playerState.crystals.overloaded}
+          />
+          <div style={styles.deckCount}>
+            Deck: {playerDeckCount}
+          </div>
+        </div>
       </div>
 
       {/* Player Area — Hearthstone-style expandable hand */}
@@ -422,18 +434,6 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
           }
         }}
       >
-        {/* Player Info */}
-        <div style={styles.playerInfo}>
-          <CrystalBar
-            current={playerState.crystals.current}
-            max={playerState.crystals.maximum}
-            overloaded={playerState.crystals.overloaded}
-          />
-          <div style={styles.deckCount}>
-            Deck: {playerDeckCount}
-          </div>
-        </div>
-
         {/* Player Hand */}
         <div
           data-hand-zone
@@ -707,6 +707,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '100%',
     position: 'relative',
     zIndex: 200,
+  },
+  manaBarFixed: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '20px',
+    padding: '4px 0',
+    zIndex: 300,
   },
   deckCount: {
     fontSize: '16px',
