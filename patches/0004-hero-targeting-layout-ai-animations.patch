@@ -1,0 +1,199 @@
+diff --git a/src/ui/components/GameBoard.tsx b/src/ui/components/GameBoard.tsx
+index 83afd8b..34bb6b1 100644
+--- a/src/ui/components/GameBoard.tsx
++++ b/src/ui/components/GameBoard.tsx
+@@ -173,12 +173,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
+   }
+ 
+   const handleCardClick = (card: any) => {
++    hapticTap();
+     if (card.zone === 'BOARD' && card.controllerId === 'player') {
+-      hapticTap();
++      selectCard(card);
++    } else if (card.zone === 'HAND') {
++      // Click to play hand cards (same as drag-and-drop)
+       selectCard(card);
+     }
+-    // Hand cards: click opens preview (handled in Card component),
+-    // drag-and-drop plays the card
+   };
+ 
+   const onTargetClick = (targetId: string) => {
+@@ -273,7 +274,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
+       <div style={styles.battlefield} onClick={handleBoardClick}>
+         {/* Opponent Board */}
+         <div style={styles.boardRow}>
+-          <div data-card-id="hero_opponent" style={{ position: 'relative' }}>
++          <div data-card-id="hero_opponent" style={{ position: 'relative' }} onClick={(e) => {
++            e.stopPropagation();
++            onTargetClick('hero_opponent');
++          }}>
+             <HeroPortrait
+               health={opponentState.hero.currentHealth}
+               maxHealth={opponentState.hero.maxHealth}
+@@ -293,7 +297,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
+           </div>
+           <div style={styles.minionsRow}>
+             {opponentBoard.map((card) => (
+-              <div key={card.instanceId} data-card-id={card.instanceId}>
++              <div key={card.instanceId} data-card-id={card.instanceId} onClick={(e) => e.stopPropagation()}>
+                 <Card
+                   card={card}
+                   isOnBoard
+@@ -319,7 +323,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
+ 
+         {/* Player Board */}
+         <div style={styles.boardRow}>
+-          <div data-card-id="hero_player" style={{ position: 'relative' }}>
++          <div data-card-id="hero_player" style={{ position: 'relative' }} onClick={(e) => {
++            e.stopPropagation();
++            onTargetClick('hero_player');
++          }}>
+             <HeroPortrait
+               health={playerState.hero.currentHealth}
+               maxHealth={playerState.hero.maxHealth}
+@@ -625,7 +632,7 @@ const styles: { [key: string]: React.CSSProperties } = {
+     display: 'flex',
+     flexDirection: 'column',
+     justifyContent: 'space-between',
+-    padding: '10px',
++    padding: '10px 20px',
+     background: 'transparent',
+     position: 'relative',
+   },
+@@ -633,21 +640,21 @@ const styles: { [key: string]: React.CSSProperties } = {
+     display: 'flex',
+     alignItems: 'center',
+     justifyContent: 'center',
+-    gap: 'var(--board-gap, 10px)',
+-    minHeight: 'var(--board-row-min-h, 130px)',
++    gap: '20px',
++    minHeight: '160px',
+     flexWrap: 'wrap' as const,
+   },
+   minionsRow: {
+     display: 'flex',
+     justifyContent: 'center',
+     alignItems: 'center',
+-    gap: 'var(--board-gap, 8px)',
++    gap: '12px',
+     width: '100%',
+-    maxWidth: 'var(--minion-row-max-w, 500px)',
+-    minHeight: 'var(--board-row-min-h, 130px)',
+-    padding: 'var(--board-gap, 10px)',
++    maxWidth: '800px',
++    minHeight: '160px',
++    padding: '12px 16px',
+     background: 'rgba(0, 0, 0, 0.2)',
+-    borderRadius: '10px',
++    borderRadius: '12px',
+     border: '1px solid rgba(255, 255, 255, 0.1)',
+     flexWrap: 'wrap' as const,
+   },
+@@ -655,7 +662,7 @@ const styles: { [key: string]: React.CSSProperties } = {
+     display: 'flex',
+     justifyContent: 'center',
+     alignItems: 'center',
+-    padding: '10px 0',
++    padding: '6px 0',
+   },
+   playerArea: {
+     display: 'flex',
+diff --git a/src/ui/components/MainMenu.tsx b/src/ui/components/MainMenu.tsx
+index 6b24c75..d330863 100644
+--- a/src/ui/components/MainMenu.tsx
++++ b/src/ui/components/MainMenu.tsx
+@@ -328,8 +328,8 @@ const s: Record<string, React.CSSProperties> = {
+   logoArea: {
+     textAlign: 'center',
+     width: '100%',
+-    maxWidth: '700px',
+-    padding: '0 10px',
++    maxWidth: '1000px',
++    padding: '0 20px',
+   },
+ 
+   // Mode stack
+diff --git a/src/ui/context/GameContext.tsx b/src/ui/context/GameContext.tsx
+index f053759..37931a5 100644
+--- a/src/ui/context/GameContext.tsx
++++ b/src/ui/context/GameContext.tsx
+@@ -403,9 +403,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
+     setTimeout(() => {
+       setCurrentAnimation(null);
+       forceUpdate();
+-      // Small gap before next animation
+-      setTimeout(() => processAiAnimationQueue(), 100);
+-    }, 500);
++      // Gap before next animation so player can see each one
++      setTimeout(() => processAiAnimationQueue(), 400);
++    }, 800);
+   }, [forceUpdate]);
+ 
+   // Queue an opponent attack animation — assign to ref for access from event handler
+@@ -492,9 +492,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
+       engine.startGame();
+       console.log('Game started, active player:', engine.getState().activePlayerId);
+ 
+-      // Create AI player with small delay so attacks are visible
++      // Create AI player with longer delay so each action is visible (Hearthstone-style)
+       const ai = createAIPlayer('opponent', aiDifficulty);
+-      ai.setThinkingDelay(300);
++      ai.setThinkingDelay(1200);
+ 
+       engineRef.current = engine;
+       aiRef.current = ai;
+@@ -566,15 +566,48 @@ export const GameProvider: React.FC<GameProviderProps> = ({
+     console.log('AI turn starting...');
+     aiTurnInProgressRef.current = true;
+ 
+-    // Execute AI turn
++    // Execute AI turn — step-by-step with UI updates between each action
+     const runAI = async () => {
+       try {
+-        // Small delay so UI can update
+-        await new Promise(resolve => setTimeout(resolve, 200));
++        // Initial delay so player can see it's the AI's turn
++        await new Promise(resolve => setTimeout(resolve, 600));
+ 
+         if (engineRef.current && aiRef.current) {
+-          await aiRef.current.executeTurn(engineRef.current);
+-          console.log('AI turn complete, active player now:', engineRef.current.getState().activePlayerId);
++          // Override the AI's executeTurn to force UI updates between actions
++          const engine = engineRef.current;
++          const ai = aiRef.current;
++          const stateManager = engine.getStateManager();
++          const board = stateManager.getBoard();
++          let actionsTaken = 0;
++          const maxActions = 20;
++
++          while (actionsTaken < maxActions) {
++            const state = stateManager.getState();
++            if (state.activePlayerId !== 'opponent' || state.phase !== GamePhase.MAIN) break;
++
++            const action = (ai as any).decideAction(stateManager, board, engine);
++            if (!action) break;
++
++            const result = engine.processAction(action);
++            if (!result.success) break;
++            actionsTaken++;
++
++            // Force UI update so the player can SEE each AI action
++            forceUpdateRef.current();
++
++            // Wait between actions so animations play out
++            await new Promise(resolve => setTimeout(resolve, 1200));
++          }
++
++          // End turn
++          engine.processAction({
++            type: ActionType.END_TURN,
++            playerId: 'opponent',
++            timestamp: Date.now(),
++            data: {},
++          });
++
++          console.log('AI turn complete, active player now:', engine.getState().activePlayerId);
+         }
+       } catch (err) {
+         console.error('AI turn error:', err);
