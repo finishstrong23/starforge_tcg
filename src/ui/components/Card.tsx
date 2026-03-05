@@ -166,6 +166,21 @@ export const Card: React.FC<CardProps> = ({
       if (longPressTimer.current) clearTimeout(longPressTimer.current);
     };
   }, []);
+
+  // Auto-close preview for board cards after 3 seconds
+  useEffect(() => {
+    if (showPreview && !isInHand) {
+      const timer = setTimeout(() => setShowPreview(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showPreview, isInHand]);
+
+  // Close preview when targeting state changes (turn ends, etc.)
+  useEffect(() => {
+    if (isValidTarget || isSelected) {
+      setShowPreview(false);
+    }
+  }, [isValidTarget, isSelected]);
   const definition = globalCardDatabase.getCard(card.definitionId);
   const isMinion = card.currentAttack !== undefined;
 
@@ -306,8 +321,12 @@ export const Card: React.FC<CardProps> = ({
           if (isInHand) {
             // In hand: click to preview, NOT to play
             setShowPreview(prev => !prev);
+          } else if (isValidTarget) {
+            // Valid target: execute the targeting action immediately
+            onClick?.();
           } else {
-            // On board or enemy: use normal click handler (select for attack, target, etc.)
+            // Board card: first click shows preview, also triggers select for attack
+            setShowPreview(prev => !prev);
             onClick?.();
           }
         }}
@@ -383,8 +402,8 @@ export const Card: React.FC<CardProps> = ({
         )}
       </div>
 
-      {/* Full Card Preview Overlay (click in hand to see) */}
-      {showPreview && isInHand && (
+      {/* Full Card Preview Overlay (click to see details) */}
+      {showPreview && (
         <div
           style={styles.previewOverlay}
           onClick={(e) => {

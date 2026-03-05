@@ -576,7 +576,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     const runAI = async () => {
       try {
         // Initial delay so player can see it's the AI's turn
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
 
         if (engineRef.current && aiRef.current) {
           // Override the AI's executeTurn to force UI updates between actions
@@ -601,8 +601,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             // Force UI update so the player can SEE each AI action
             forceUpdateRef.current();
 
-            // Wait between actions so player can see each move (Hearthstone-style)
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // Wait between actions so player can see each move (Hearthstone-style pacing)
+            await new Promise(resolve => setTimeout(resolve, 2500));
           }
 
           // End turn

@@ -14,9 +14,10 @@ import { StarforgeLogo } from './StarforgeLogo';
 
 interface PlanetSelectProps {
   onSelect: (race: Race) => void;
+  onBack?: () => void;
 }
 
-export const PlanetSelect: React.FC<PlanetSelectProps> = ({ onSelect }) => {
+export const PlanetSelect: React.FC<PlanetSelectProps> = ({ onSelect, onBack }) => {
   const [hoveredRace, setHoveredRace] = useState<Race | null>(null);
   const [selectedRace, setSelectedRace] = useState<Race | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -131,6 +132,13 @@ export const PlanetSelect: React.FC<PlanetSelectProps> = ({ onSelect }) => {
             disabled={confirmed}
           >
             {confirmed ? 'Launching...' : `Launch from ${PLANET_ENCOUNTERS[selectedRace].planet}`}
+          </button>
+        )}
+
+        {/* Back to Main Menu */}
+        {onBack && (
+          <button style={styles.backButton} onClick={onBack}>
+            ← Back to Main Menu
           </button>
         )}
       </div>
@@ -283,5 +291,16 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'all 0.3s ease',
     letterSpacing: '1px',
     boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+  },
+  backButton: {
+    background: 'rgba(255,255,255,0.08)',
+    border: '1px solid rgba(255,255,255,0.25)',
+    borderRadius: '10px',
+    padding: '14px 32px',
+    fontSize: '16px',
+    fontWeight: 'bold',
+    color: '#cccccc',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
   },
 };

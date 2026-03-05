@@ -299,15 +299,10 @@ export const App: React.FC = () => {
           onPacks={() => setScreen('packs')}
           onAchievements={() => setScreen('achievements')}
           onDaily={() => setShowDailyPanel(true)}
-          onTournament={() => setScreen('tournament')}
           onReplays={() => setScreen('replays')}
           onLeaderboard={() => setScreen('leaderboard')}
           onMetaDashboard={() => setScreen('meta-dashboard')}
           onSpectate={() => setScreen('spectate')}
-          onDungeonRun={() => setScreen('dungeon-run')}
-          onPuzzles={() => setScreen('puzzles')}
-          onTagTeam={() => setScreen('tag-team')}
-          onFactionWars={() => setScreen('faction-wars')}
         />
       )}
 
@@ -382,7 +377,7 @@ export const App: React.FC = () => {
 
       {/* Campaign: Planet Selection (first time) */}
       {screen === 'campaign-select' && (
-        <PlanetSelect onSelect={handlePlanetSelected} />
+        <PlanetSelect onSelect={handlePlanetSelected} onBack={() => setScreen('menu')} />
       )}
 
       {/* Campaign: Galaxy Map */}

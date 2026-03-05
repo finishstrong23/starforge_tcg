@@ -92,10 +92,10 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
                   }}
                   onClick={() => setSelectedRace(race)}
                 >
-                  <div style={{ color: sel ? '#00ff88' : '#ccc', fontWeight: 'bold', fontSize: '13px' }}>
+                  <div style={{ color: sel ? '#00ff88' : '#ddd', fontWeight: 'bold', fontSize: '14px' }}>
                     {info.name}
                   </div>
-                  <div style={{ color: '#666', fontSize: '10px' }}>{info.playstyle}</div>
+                  <div style={{ color: sel ? '#aaffcc' : '#aaa', fontSize: '11px' }}>{info.playstyle}</div>
                 </button>
               );
             })}
@@ -170,36 +170,6 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
             <span style={s.modeBtnIcon}>&#x269B;</span>
             <span style={s.modeBtnLabel}>Quick Play</span>
           </button>
-          {onTournament && (
-            <button style={{ ...s.modeBtn, ...s.modeBtnTourney }} onClick={() => { hapticTap(); onTournament(); }}>
-              <span style={s.modeBtnIcon}>&#x2605;</span>
-              <span style={s.modeBtnLabel}>Tournament</span>
-            </button>
-          )}
-          {onDungeonRun && (
-            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)', boxShadow: '0 4px 16px rgba(220,38,38,0.3)' }} onClick={() => { hapticTap(); onDungeonRun(); }}>
-              <span style={s.modeBtnIcon}>&#x1F3F0;</span>
-              <span style={s.modeBtnLabel}>Dungeon Run</span>
-            </button>
-          )}
-          {onPuzzles && (
-            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }} onClick={() => { hapticTap(); onPuzzles(); }}>
-              <span style={s.modeBtnIcon}>&#x1F9E9;</span>
-              <span style={s.modeBtnLabel}>Lethal Puzzles</span>
-            </button>
-          )}
-          {onTagTeam && (
-            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)', boxShadow: '0 4px 16px rgba(14,165,233,0.3)' }} onClick={() => { hapticTap(); onTagTeam(); }}>
-              <span style={s.modeBtnIcon}>&#x1F91D;</span>
-              <span style={s.modeBtnLabel}>2v2 Tag Team</span>
-            </button>
-          )}
-          {onFactionWars && (
-            <button style={{ ...s.modeBtn, background: 'linear-gradient(135deg, #d97706 0%, #92400e 100%)', boxShadow: '0 4px 16px rgba(217,119,6,0.3)' }} onClick={() => { hapticTap(); onFactionWars(); }}>
-              <span style={s.modeBtnIcon}>&#x2694;</span>
-              <span style={s.modeBtnLabel}>Faction Wars</span>
-            </button>
-          )}
           {onPlayFriend && (
             <button style={{ ...s.modeBtn, ...s.modeBtnFriend }} onClick={() => { hapticTap(); onPlayFriend(); }}>
               <span style={s.modeBtnIcon}>&#x2699;</span>
@@ -318,9 +288,9 @@ const s: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '32px',
+    gap: '16px',
     padding: '0 20px',
-    overflowY: 'auto',
+    overflowY: 'hidden',
     minHeight: 0,
     position: 'relative',
     zIndex: 5,
@@ -328,7 +298,7 @@ const s: Record<string, React.CSSProperties> = {
   logoArea: {
     textAlign: 'center',
     width: '100%',
-    maxWidth: '1000px',
+    maxWidth: '600px',
     padding: '0 20px',
   },
 
@@ -336,7 +306,7 @@ const s: Record<string, React.CSSProperties> = {
   modeStack: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '10px',
+    gap: '8px',
     width: '100%',
     maxWidth: '320px',
   },
@@ -344,13 +314,13 @@ const s: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
-    padding: '14px 24px',
+    padding: '12px 24px',
     borderRadius: '10px',
     border: 'none',
     cursor: 'pointer',
     background: 'linear-gradient(135deg, #ff6600 0%, #cc4400 100%)',
     color: '#fff',
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: 'bold',
     boxShadow: '0 4px 16px rgba(255,102,0,0.3)',
     transition: 'transform 0.15s',
@@ -497,13 +467,15 @@ const s: Record<string, React.CSSProperties> = {
     boxShadow: '0 4px 16px rgba(153,51,255,0.3)',
   },
   backLink: {
-    background: 'transparent',
-    border: 'none',
-    color: '#667',
-    fontSize: '14px',
+    background: 'rgba(255,255,255,0.08)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '8px',
+    color: '#cccccc',
+    fontSize: '15px',
     cursor: 'pointer',
-    padding: '12px 24px',
+    padding: '12px 28px',
     minHeight: '44px',
     marginTop: '8px',
+    fontWeight: 'bold',
   },
 };
