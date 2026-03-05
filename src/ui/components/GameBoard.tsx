@@ -201,6 +201,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     ? 'Choose a target for your spell'
     : targetingMode === 'heropower'
     ? 'Choose a target for your hero power'
+    : targetingMode === 'attack'
+    ? 'Choose a target to attack'
     : null;
 
   return (
@@ -240,6 +242,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
         <div style={styles.targetingBanner}>
           {targetingLabel}
           <button style={styles.cancelButton} onClick={cancelTargeting}>Cancel</button>
+        </div>
+      )}
+
+      {/* Opponent's Turn Banner */}
+      {!isPlayerTurn && !isGameOver && (
+        <div style={styles.opponentTurnBanner}>
+          <div style={styles.opponentTurnText}>Opponent&apos;s Turn</div>
         </div>
       )}
 
@@ -574,21 +583,44 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   targetingBanner: {
     position: 'absolute',
-    top: '50%',
+    top: '46%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    background: 'rgba(0, 0, 0, 0.85)',
+    background: 'rgba(0, 0, 0, 0.9)',
     border: '2px solid #ff6600',
-    borderRadius: '12px',
-    padding: '12px 24px',
+    borderRadius: '14px',
+    padding: '16px 32px',
     color: '#ffcc00',
-    fontSize: '18px',
+    fontSize: '20px',
     fontWeight: 'bold',
     zIndex: 500,
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '14px',
     pointerEvents: 'auto',
+    boxShadow: '0 0 30px rgba(255, 102, 0, 0.3)',
+    textShadow: '0 0 8px rgba(255, 204, 0, 0.5)',
+  },
+  opponentTurnBanner: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    zIndex: 450,
+    pointerEvents: 'none',
+    animation: 'pulse-glow 2s ease-in-out infinite',
+  },
+  opponentTurnText: {
+    background: 'rgba(180, 0, 0, 0.85)',
+    border: '2px solid #ff4444',
+    borderRadius: '12px',
+    padding: '14px 36px',
+    color: '#ffffff',
+    fontSize: '22px',
+    fontWeight: 'bold',
+    letterSpacing: '2px',
+    textShadow: '0 0 10px rgba(255, 68, 68, 0.8)',
+    boxShadow: '0 0 30px rgba(255, 0, 0, 0.3)',
   },
   cancelButton: {
     background: 'rgba(255, 0, 0, 0.3)',
@@ -648,11 +680,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: '12px',
+    gap: '16px',
     width: '100%',
-    maxWidth: '800px',
-    minHeight: '160px',
-    padding: '12px 16px',
+    maxWidth: '900px',
+    minHeight: '180px',
+    padding: '14px 20px',
     background: 'rgba(0, 0, 0, 0.2)',
     borderRadius: '12px',
     border: '1px solid rgba(255, 255, 255, 0.1)',

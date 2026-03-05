@@ -349,8 +349,8 @@ export const Card: React.FC<CardProps> = ({
               race={(definition as any)?.race as Race | undefined}
               cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
               cost={card.currentCost}
-              width={isInHand ? 130 : 110}
-              height={isInHand ? 80 : 65}
+              width={isInHand ? 140 : 120}
+              height={isInHand ? 90 : 75}
               isForged={card.isForged}
             />
           )}
@@ -404,30 +404,30 @@ export const Card: React.FC<CardProps> = ({
                 race={(definition as any)?.race as Race | undefined}
                 cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
                 cost={card.currentCost}
-                width={260}
-                height={140}
+                width={360}
+                height={180}
                 isForged={card.isForged}
               />
             </div>
 
             {isMinion && (
               <div style={styles.previewStats}>
-                <span style={{ fontSize: '22px', fontWeight: 'bold', color: '#ffcc00' }}>
+                <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#ffcc00' }}>
                   ⚔️ {currentAttack}
                 </span>
-                <span style={{ fontSize: '22px', fontWeight: 'bold', color: '#ff4444' }}>
+                <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#ff4444' }}>
                   ❤️ {currentHealth}
                 </span>
               </div>
             )}
 
             {showTribe && (
-              <div style={{ textAlign: 'center', fontSize: '14px', color: tribeColor, fontWeight: 'bold', marginBottom: '6px' }}>
+              <div style={{ textAlign: 'center', fontSize: '16px', color: tribeColor, fontWeight: 'bold', marginBottom: '8px' }}>
                 ⬡ {tribe!.charAt(0) + tribe!.slice(1).toLowerCase()}
               </div>
             )}
 
-            <div style={{ textAlign: 'center', fontSize: '13px', color: rarityColor, marginBottom: '8px' }}>
+            <div style={{ textAlign: 'center', fontSize: '15px', color: rarityColor, marginBottom: '10px' }}>
               {definition?.rarity}
             </div>
 
@@ -440,9 +440,9 @@ export const Card: React.FC<CardProps> = ({
                 {cardKeywords.map(kw => {
                   const info = KEYWORD_DESCRIPTIONS[kw];
                   return info ? (
-                    <div key={kw} style={{ marginBottom: '6px' }}>
-                      <span style={{ fontSize: '14px', color: '#ffcc00', fontWeight: 'bold' }}>{keywordIcons[kw]} {info.name}</span>
-                      <span style={{ display: 'block', fontSize: '12px', color: '#aaa', lineHeight: '1.4' }}>{info.description}</span>
+                    <div key={kw} style={{ marginBottom: '8px' }}>
+                      <span style={{ fontSize: '17px', color: '#ffcc00', fontWeight: 'bold' }}>{keywordIcons[kw]} {info.name}</span>
+                      <span style={{ display: 'block', fontSize: '14px', color: '#aaa', lineHeight: '1.5' }}>{info.description}</span>
                     </div>
                   ) : null;
                 })}
@@ -554,23 +554,23 @@ export const Card: React.FC<CardProps> = ({
 const styles: { [key: string]: React.CSSProperties } = {
   card: {
     position: 'relative',
-    width: 'var(--card-width, 90px)',
-    height: 'var(--card-height, 130px)',
+    width: '110px',
+    height: '155px',
     background: 'linear-gradient(135deg, #2a2a4a 0%, #1a1a3a 100%)',
     borderRadius: '8px',
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'visible', // Allow stat badges to overflow edges
+    overflow: 'visible',
     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
     userSelect: 'none',
   },
   cardInHand: {
-    width: 'var(--card-hand-width, 120px)',
-    height: 'var(--card-hand-height, 170px)',
+    width: '130px',
+    height: '185px',
   },
   cardOnBoard: {
-    width: 'var(--card-width, 85px)',
-    height: 'var(--card-height, 120px)',
+    width: '110px',
+    height: '155px',
   },
   barrierOverlay: {
     position: 'absolute',
@@ -602,11 +602,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 20,
   },
   nameArea: {
-    padding: '20px 5px 1px 5px',
+    padding: '22px 6px 2px 6px',
     textAlign: 'center',
   },
   cardName: {
-    fontSize: '13px',
+    fontSize: '12px',
     fontWeight: 'bold',
     color: '#ffffff',
     whiteSpace: 'nowrap',
@@ -717,38 +717,38 @@ const styles: { [key: string]: React.CSSProperties } = {
     pointerEvents: 'auto',
   },
   previewCard: {
-    width: '300px',
-    maxWidth: '90vw',
-    maxHeight: '85vh',
+    width: '420px',
+    maxWidth: '95vw',
+    maxHeight: '90vh',
     background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%)',
     border: '3px solid #ffcc00',
     borderRadius: '16px',
-    padding: '20px',
+    padding: '24px',
     overflowY: 'auto',
     boxShadow: '0 0 40px rgba(255, 204, 0, 0.3), 0 20px 60px rgba(0, 0, 0, 0.8)',
   },
   previewHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    marginBottom: '12px',
+    gap: '14px',
+    marginBottom: '16px',
   },
   previewCost: {
-    width: '40px',
-    height: '40px',
+    width: '52px',
+    height: '52px',
     background: 'linear-gradient(135deg, #0066cc 0%, #0044aa 100%)',
     border: '3px solid #88ccff',
     borderRadius: '50%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    fontSize: '22px',
+    fontSize: '28px',
     fontWeight: 'bold',
     color: '#ffffff',
     flexShrink: 0,
   },
   previewName: {
-    fontSize: '20px',
+    fontSize: '26px',
     fontWeight: 'bold',
     color: '#ffffff',
     flex: 1,
@@ -766,32 +766,32 @@ const styles: { [key: string]: React.CSSProperties } = {
   previewStats: {
     display: 'flex',
     justifyContent: 'center',
-    gap: '30px',
-    marginBottom: '8px',
+    gap: '40px',
+    marginBottom: '12px',
   },
   previewText: {
-    fontSize: '15px',
+    fontSize: '18px',
     color: '#cccccc',
     textAlign: 'center',
-    padding: '12px',
+    padding: '14px 16px',
     background: 'rgba(0,0,0,0.3)',
     borderRadius: '8px',
-    marginBottom: '10px',
-    lineHeight: '1.5',
+    marginBottom: '14px',
+    lineHeight: '1.6',
   },
   previewKeywords: {
     borderTop: '1px solid #444466',
-    paddingTop: '10px',
-    marginBottom: '10px',
+    paddingTop: '12px',
+    marginBottom: '12px',
   },
   previewClose: {
     width: '100%',
-    padding: '10px',
+    padding: '12px',
     background: 'rgba(255,255,255,0.08)',
     border: '1px solid rgba(255,255,255,0.2)',
     borderRadius: '8px',
     color: '#888',
-    fontSize: '14px',
+    fontSize: '16px',
     cursor: 'pointer',
     textAlign: 'center',
   },
@@ -801,12 +801,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     bottom: '100%',
     left: '50%',
     transform: 'translateX(-50%)',
-    width: '220px',
+    width: '280px',
     maxWidth: 'calc(100vw - 20px)',
     background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%)',
     border: '2px solid #ffcc00',
     borderRadius: '12px',
-    padding: '12px',
+    padding: '14px',
     zIndex: 1000,
     marginBottom: '10px',
     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.8)',
@@ -819,21 +819,21 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '8px',
   },
   popupCost: {
-    width: '28px',
-    height: '28px',
+    width: '34px',
+    height: '34px',
     background: 'linear-gradient(135deg, #0066cc 0%, #0044aa 100%)',
     border: '2px solid #88ccff',
     borderRadius: '50%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    fontSize: '16px',
+    fontSize: '18px',
     fontWeight: 'bold',
     color: '#ffffff',
     flexShrink: 0,
   },
   popupName: {
-    fontSize: '16px',
+    fontSize: '18px',
     fontWeight: 'bold',
     color: '#ffffff',
     flex: 1,
@@ -875,14 +875,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     textTransform: 'capitalize',
   },
   popupText: {
-    fontSize: '12px',
+    fontSize: '14px',
     color: '#cccccc',
     textAlign: 'center',
-    padding: '8px',
+    padding: '10px',
     background: 'rgba(0,0,0,0.3)',
     borderRadius: '6px',
     marginBottom: '8px',
-    lineHeight: '1.4',
+    lineHeight: '1.5',
   },
   popupKeywords: {
     borderTop: '1px solid #444466',

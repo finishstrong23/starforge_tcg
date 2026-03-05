@@ -186,7 +186,7 @@ export const HeroPortrait: React.FC<HeroPortraitProps> = ({
       }}>
         {/* Portrait area */}
         <div style={styles.portrait}>
-          <HeroFace isOpponent={isOpponent} size={92} />
+          <HeroFace isOpponent={isOpponent} size={110} />
         </div>
 
         {/* Health bar */}
@@ -290,8 +290,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   heroFrame: {
     position: 'relative',
-    width: 'var(--hero-width, 80px)',
-    height: 'var(--hero-height, 100px)',
+    width: '100px',
+    height: '120px',
     background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a20 100%)',
     border: '3px solid #556688',
     borderRadius: '10px',
@@ -336,7 +336,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     pointerEvents: 'none',
   },
   healthNumber: {
-    fontSize: '16px',
+    fontSize: '18px',
     fontWeight: 'bold',
     color: '#ffffff',
     marginBottom: '4px',
@@ -344,7 +344,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   healthMax: {
     color: '#889999',
-    fontSize: '13px',
+    fontSize: '14px',
   },
   damagedHealth: {
     color: '#ff4444',

@@ -137,10 +137,15 @@ function computeSpellTargets(
 
   if (!chosenEffect) return [];
 
-  const effectType = chosenEffect.type;
+  const effectType = String(chosenEffect.type);
+
+  // Check if the card text mentions "friendly" — additional safety for buff targeting
+  const cardText = (def.cardText || '').toLowerCase();
+  const isBuff = effectType === 'BUFF' || effectType === 'GRANT_KEYWORD' ||
+    cardText.includes('+') && (cardText.includes('give') || cardText.includes('grant'));
 
   // Damage/Destroy effects can target enemy minions and hero
-  if (effectType === 'DAMAGE' || effectType === 'DESTROY') {
+  if (effectType === 'DAMAGE' || effectType === 'DESTROY' || effectType === 'DEBUFF') {
     const enemyMinions = board.getBoardCards(opponentId);
     for (const m of enemyMinions) {
       targets.push(m.instanceId);
@@ -162,8 +167,8 @@ function computeSpellTargets(
       targets.push(m.instanceId);
     }
   }
-  // Buff/GrantKeyword effects target friendly minions
-  else if (effectType === 'BUFF' || effectType === 'GRANT_KEYWORD') {
+  // Buff/GrantKeyword effects target ONLY friendly minions
+  else if (isBuff) {
     const friendlyMinions = board.getBoardCards(playerId);
     for (const m of friendlyMinions) {
       targets.push(m.instanceId);
@@ -176,13 +181,14 @@ function computeSpellTargets(
       targets.push(m.instanceId);
     }
   }
-  // Default: can target any minion
+  // Default: target friendly minions only (safer default than targeting all)
   else {
-    const allMinions = [
-      ...board.getBoardCards(playerId),
-      ...board.getBoardCards(opponentId),
-    ];
-    for (const m of allMinions) {
+    const friendlyMinions = board.getBoardCards(playerId);
+    for (const m of friendlyMinions) {
+      targets.push(m.instanceId);
+    }
+    const enemyMinions = board.getBoardCards(opponentId);
+    for (const m of enemyMinions) {
       targets.push(m.instanceId);
     }
   }
@@ -570,7 +576,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     const runAI = async () => {
       try {
         // Initial delay so player can see it's the AI's turn
-        await new Promise(resolve => setTimeout(resolve, 600));
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         if (engineRef.current && aiRef.current) {
           // Override the AI's executeTurn to force UI updates between actions
@@ -595,8 +601,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             // Force UI update so the player can SEE each AI action
             forceUpdateRef.current();
 
-            // Wait between actions so animations play out
-            await new Promise(resolve => setTimeout(resolve, 1200));
+            // Wait between actions so player can see each move (Hearthstone-style)
+            await new Promise(resolve => setTimeout(resolve, 1500));
           }
 
           // End turn
