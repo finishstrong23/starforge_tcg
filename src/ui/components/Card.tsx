@@ -331,14 +331,14 @@ export const Card: React.FC<CardProps> = ({
         onClick={(e) => {
           e.stopPropagation();
           if (isInHand) {
-            // In hand: click to preview so you can read the card
-            setShowPreview(prev => !prev);
+            // In hand: click to PLAY the card (like Hearthstone)
+            // Preview is available via long-press / touch-hold
+            onClick?.();
           } else if (isValidTarget) {
-            // Valid target: execute the targeting action immediately (no preview)
+            // Valid target: execute the targeting action immediately
             onClick?.();
           } else {
             // Board card: click to select for attack (like Hearthstone)
-            // Preview is available via hover popup, not click
             onClick?.();
           }
         }}
@@ -488,8 +488,8 @@ export const Card: React.FC<CardProps> = ({
         document.body
       )}
 
-      {/* Hover Popup - Large card with details (board cards only, not hand) */}
-      {isHovered && !showPreview && !isInHand && (
+      {/* Hover Popup - Large card with details */}
+      {isHovered && !showPreview && (
         <div style={{
           ...styles.hoverPopup,
           ...(popupSide === 'below' ? { top: '100%', bottom: 'auto', marginTop: '10px', marginBottom: 0 } : {}),
