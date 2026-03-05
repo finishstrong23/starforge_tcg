@@ -705,6 +705,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginBottom: '8px',
     justifyContent: 'center',
     width: '100%',
+    position: 'relative',
+    zIndex: 200,
   },
   deckCount: {
     fontSize: '16px',
@@ -723,6 +725,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     overflow: 'visible',
     gap: '4px',
     flexWrap: 'nowrap' as const,
+    position: 'relative',
+    zIndex: 1,
   },
   handHint: {
     fontSize: '11px',

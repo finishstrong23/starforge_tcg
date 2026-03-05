@@ -12,6 +12,7 @@
  */
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { hasKeyword } from '../../types/Card';
 import type { CardInstance } from '../../types/Card';
 import { CombatKeyword, OriginalKeyword, TriggerKeyword } from '../../types/Keywords';
@@ -413,8 +414,8 @@ export const Card: React.FC<CardProps> = ({
         )}
       </div>
 
-      {/* Full Card Preview Overlay — click ANYWHERE to close */}
-      {showPreview && (
+      {/* Full Card Preview Overlay — portaled to body to escape transform containers */}
+      {showPreview && createPortal(
         <div
           style={styles.previewOverlay}
           onClick={(e) => {
@@ -483,7 +484,8 @@ export const Card: React.FC<CardProps> = ({
               Click anywhere to close
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Hover Popup - Large card with details */}

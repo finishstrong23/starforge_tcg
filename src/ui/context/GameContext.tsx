@@ -699,7 +699,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           if (targets.length === 0) {
             // Hearthstone rule: minions with no valid battlecry targets still get played,
             // the battlecry just doesn't fire. Spells require a valid target.
-            if (def.type === CardType.MINION || def.type === 'MINION') {
+            if (def && (def.type === CardType.MINION || def.type === CardType.STRUCTURE)) {
               playCard(card);
             }
             // Spells with no targets: can't be played (do nothing)
