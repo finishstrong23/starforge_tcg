@@ -424,7 +424,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       <div
         style={{
           ...styles.playerArea,
-          height: handExpanded ? '38%' : '18%',
+          height: handExpanded ? '35%' : '22%',
           transition: 'height 0.3s ease',
         }}
         onClick={(e) => {
@@ -439,7 +439,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
           data-hand-zone
           style={{
             ...styles.playerHand,
-            minHeight: '120px',
+            minHeight: '100px',
           }}
           onMouseEnter={() => setHandExpanded(true)}
           onMouseLeave={() => { setHandExpanded(false); setHoveredHandCard(null); }}

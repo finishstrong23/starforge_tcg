@@ -594,8 +594,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     userSelect: 'none',
   },
   cardInHand: {
-    width: '100px',
-    height: '145px',
+    width: '90px',
+    height: '130px',
   },
   cardOnBoard: {
     width: '110px',
