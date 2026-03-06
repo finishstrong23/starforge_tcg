@@ -380,8 +380,8 @@ export const Card: React.FC<CardProps> = ({
               race={(definition as any)?.race as Race | undefined}
               cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
               cost={card.currentCost}
-              width={isInHand ? 140 : 120}
-              height={isInHand ? 90 : 75}
+              width={isInHand ? 110 : 120}
+              height={isInHand ? 70 : 75}
               isForged={card.isForged}
             />
           )}
@@ -594,8 +594,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     userSelect: 'none',
   },
   cardInHand: {
-    width: '130px',
-    height: '185px',
+    width: '100px',
+    height: '145px',
   },
   cardOnBoard: {
     width: '110px',

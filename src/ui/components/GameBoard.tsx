@@ -446,8 +446,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
         >
           {playerHand.map((card, index) => {
             const isHovered = hoveredHandCard === card.instanceId;
-            const liftY = isHovered ? -40 : 0;
-            const hoverScale = isHovered ? 1.25 : 1;
+            const liftY = isHovered ? -30 : 0;
+            const hoverScale = isHovered ? 1.15 : 1;
 
             return (
               <div

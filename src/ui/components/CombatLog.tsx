@@ -45,7 +45,7 @@ const TYPE_COLORS: Record<CombatLogEntry['type'], string> = {
 };
 
 export const CombatLog: React.FC<CombatLogProps> = ({ entries }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new entries arrive
@@ -105,73 +105,73 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'absolute',
     top: '50px',
     left: '10px',
-    width: '400px',
+    width: '260px',
     zIndex: 400,
     pointerEvents: 'auto',
   },
   header: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    padding: '10px 16px',
-    background: 'rgba(10, 15, 30, 0.94)',
+    gap: '6px',
+    padding: '6px 10px',
+    background: 'rgba(10, 15, 30, 0.85)',
     border: '1px solid #334',
-    borderRadius: '8px 8px 0 0',
+    borderRadius: '6px',
     cursor: 'pointer',
     userSelect: 'none',
   },
   headerIcon: {
-    fontSize: '20px',
+    fontSize: '14px',
   },
   headerText: {
-    fontSize: '18px',
+    fontSize: '13px',
     fontWeight: 'bold',
     color: '#aabbcc',
     flex: 1,
   },
   entryCount: {
-    fontSize: '14px',
+    fontSize: '11px',
     color: '#667788',
     background: 'rgba(255,255,255,0.08)',
-    borderRadius: '8px',
-    padding: '3px 10px',
+    borderRadius: '6px',
+    padding: '2px 6px',
   },
   toggleArrow: {
-    fontSize: '14px',
+    fontSize: '11px',
     color: '#667788',
   },
   logBody: {
-    maxHeight: '360px',
+    maxHeight: '250px',
     overflowY: 'auto',
     background: 'rgba(10, 15, 30, 0.90)',
     border: '1px solid #334',
     borderTop: 'none',
-    borderRadius: '0 0 8px 8px',
+    borderRadius: '0 0 6px 6px',
     scrollbarWidth: 'thin' as any,
     scrollbarColor: '#334 transparent',
   },
   emptyLog: {
-    padding: '16px',
+    padding: '10px',
     textAlign: 'center',
     color: '#556677',
-    fontSize: '16px',
+    fontSize: '12px',
     fontStyle: 'italic',
   },
   entry: {
     display: 'flex',
     alignItems: 'flex-start',
-    gap: '10px',
-    padding: '8px 12px',
+    gap: '6px',
+    padding: '4px 8px',
     borderBottom: '1px solid rgba(255,255,255,0.04)',
   },
   entryIcon: {
-    fontSize: '16px',
+    fontSize: '12px',
     flexShrink: 0,
     marginTop: '1px',
   },
   entryText: {
-    fontSize: '16px',
-    lineHeight: '1.5',
+    fontSize: '12px',
+    lineHeight: '1.4',
     color: '#ccccdd',
   },
 };

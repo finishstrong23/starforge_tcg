@@ -72,17 +72,19 @@ export const HeroIntro: React.FC<HeroIntroProps> = ({
     }, 4500));
     timers.push(setTimeout(() => onComplete(), 5200)); // fully done
 
-    return () => timers.forEach(clearTimeout);
-  }, [onComplete]);
+    // Safety fallback: force complete after 8 seconds no matter what
+    timers.push(setTimeout(() => onComplete(), 8000));
 
-  // Skip on click
+    return () => timers.forEach(clearTimeout);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Skip on click — immediate, no conditions
   const handleSkip = useCallback(() => {
-    if (!exiting) {
-      setExiting(true);
-      setPhase(6);
-      setTimeout(() => onComplete(), 400);
-    }
-  }, [exiting, onComplete]);
+    setExiting(true);
+    setPhase(6);
+    // Call onComplete immediately
+    onComplete();
+  }, [onComplete]);
 
   return (
     <div style={{
