@@ -380,8 +380,8 @@ export const Card: React.FC<CardProps> = ({
               race={(definition as any)?.race as Race | undefined}
               cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
               cost={card.currentCost}
-              width={isInHand ? 110 : 120}
-              height={isInHand ? 70 : 75}
+              width={isInHand ? 80 : 120}
+              height={isInHand ? 50 : 75}
               isForged={card.isForged}
             />
           )}
@@ -594,8 +594,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     userSelect: 'none',
   },
   cardInHand: {
-    width: '90px',
-    height: '130px',
+    width: '72px',
+    height: '105px',
   },
   cardOnBoard: {
     width: '110px',
@@ -615,27 +615,27 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   costBadge: {
     position: 'absolute',
-    top: '-8px',
-    left: '-8px',
-    width: '36px',
-    height: '36px',
+    top: '-6px',
+    left: '-6px',
+    width: '28px',
+    height: '28px',
     background: 'linear-gradient(135deg, #0066cc 0%, #0044aa 100%)',
     border: '2px solid #88ccff',
     borderRadius: '50%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    fontSize: '20px',
+    fontSize: '16px',
     fontWeight: 'bold',
     color: '#ffffff',
     zIndex: 20,
   },
   nameArea: {
-    padding: '22px 6px 2px 6px',
+    padding: '18px 4px 1px 4px',
     textAlign: 'center',
   },
   cardName: {
-    fontSize: '12px',
+    fontSize: '10px',
     fontWeight: 'bold',
     color: '#ffffff',
     whiteSpace: 'nowrap',
@@ -677,34 +677,34 @@ const styles: { [key: string]: React.CSSProperties } = {
   // Hearthstone-style stat badges - absolute positioned, overlapping card edges
   attackBadge: {
     position: 'absolute',
-    bottom: '-10px',
-    left: '-10px',
-    width: '38px',
-    height: '38px',
+    bottom: '-8px',
+    left: '-8px',
+    width: '30px',
+    height: '30px',
     background: 'linear-gradient(135deg, #ffcc00 0%, #cc9900 100%)',
     border: '2px solid #ffee88',
     borderRadius: '50%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    fontSize: '20px',
+    fontSize: '16px',
     fontWeight: 'bold',
     zIndex: 20,
     boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
   },
   healthBadge: {
     position: 'absolute',
-    bottom: '-10px',
-    right: '-10px',
-    width: '38px',
-    height: '38px',
+    bottom: '-8px',
+    right: '-8px',
+    width: '30px',
+    height: '30px',
     background: 'linear-gradient(135deg, #cc2222 0%, #aa0000 100%)',
     border: '2px solid #ff6666',
     borderRadius: '50%',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    fontSize: '20px',
+    fontSize: '16px',
     fontWeight: 'bold',
     zIndex: 20,
     boxShadow: '0 2px 6px rgba(0,0,0,0.5)',

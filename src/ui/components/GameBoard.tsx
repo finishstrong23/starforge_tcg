@@ -427,7 +427,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       <div
         style={{
           ...styles.playerArea,
-          height: handExpanded ? '35%' : '22%',
+          height: handExpanded ? '28%' : '18%',
           transition: 'height 0.3s ease',
         }}
         onClick={(e) => {
@@ -442,15 +442,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
           data-hand-zone
           style={{
             ...styles.playerHand,
-            minHeight: '100px',
+            minHeight: '80px',
           }}
           onMouseEnter={() => setHandExpanded(true)}
           onMouseLeave={() => { setHandExpanded(false); setHoveredHandCard(null); }}
         >
           {playerHand.map((card, index) => {
             const isHovered = hoveredHandCard === card.instanceId;
-            const liftY = isHovered ? -30 : 0;
-            const hoverScale = isHovered ? 1.15 : 1;
+            const liftY = isHovered ? -20 : 0;
+            const hoverScale = isHovered ? 1.08 : 1;
 
             return (
               <div
@@ -626,12 +626,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
   },
   opponentArea: {
-    height: '14%',
+    height: '10%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: '8px 10px',
+    justifyContent: 'flex-start',
+    padding: '2px 10px',
     background: 'linear-gradient(180deg, rgba(20, 20, 40, 0.5) 0%, transparent 100%)',
   },
   opponentHand: {
@@ -666,19 +666,19 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '20px',
-    minHeight: '160px',
+    gap: '14px',
+    minHeight: '120px',
     flexWrap: 'wrap' as const,
   },
   minionsRow: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: '16px',
+    gap: '12px',
     width: '100%',
     maxWidth: '900px',
-    minHeight: '180px',
-    padding: '14px 20px',
+    minHeight: '130px',
+    padding: '10px 16px',
     background: 'rgba(0, 0, 0, 0.2)',
     borderRadius: '12px',
     border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -714,11 +714,11 @@ const styles: { [key: string]: React.CSSProperties } = {
   manaBarFixed: {
     position: 'absolute',
     left: '10px',
-    bottom: '24%',
+    bottom: '160px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    gap: '6px',
+    gap: '4px',
     zIndex: 400,
     pointerEvents: 'auto',
   },
