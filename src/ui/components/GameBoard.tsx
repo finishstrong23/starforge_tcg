@@ -407,16 +407,19 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
           </div>
         </div>
 
-        {/* Mana Crystal Bar — at bottom of battlefield, above hand */}
-        <div style={styles.manaBarFixed}>
-          <CrystalBar
-            current={playerState.crystals.current}
-            max={playerState.crystals.maximum}
-            overloaded={playerState.crystals.overloaded}
-          />
-          <div style={styles.deckCount}>
-            Deck: {playerDeckCount}
-          </div>
+        {/* Mana Crystal Bar — moved to separate absolute position on left */}
+      </div>
+
+      {/* Mana Crystal Bar — left side, below battle log */}
+      <div style={styles.manaBarFixed}>
+        <CrystalBar
+          current={playerState.crystals.current}
+          max={playerState.crystals.maximum}
+          overloaded={playerState.crystals.overloaded}
+          compact
+        />
+        <div style={styles.deckCountLeft}>
+          Deck: {playerDeckCount}
         </div>
       </div>
 
@@ -709,12 +712,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 200,
   },
   manaBarFixed: {
+    position: 'absolute',
+    left: '10px',
+    bottom: '24%',
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '20px',
-    padding: '4px 0',
-    zIndex: 300,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '6px',
+    zIndex: 400,
+    pointerEvents: 'auto',
   },
   deckCount: {
     fontSize: '16px',
@@ -722,6 +728,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     background: 'rgba(0, 10, 30, 0.85)',
     borderRadius: '10px',
     padding: '6px 14px',
+    border: '1px solid rgba(255,255,255,0.1)',
+  },
+  deckCountLeft: {
+    fontSize: '12px',
+    color: '#888888',
+    background: 'rgba(0, 10, 30, 0.85)',
+    borderRadius: '8px',
+    padding: '4px 10px',
     border: '1px solid rgba(255,255,255,0.1)',
   },
   playerHand: {

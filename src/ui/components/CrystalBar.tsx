@@ -11,6 +11,7 @@ interface CrystalBarProps {
   max: number;
   overloaded?: number;
   isOpponent?: boolean;
+  compact?: boolean;
 }
 
 const CrystalGem: React.FC<{ filled: boolean }> = ({ filled }) => (
@@ -45,6 +46,7 @@ export const CrystalBar: React.FC<CrystalBarProps> = ({
   max,
   overloaded = 0,
   isOpponent = false,
+  compact = false,
 }) => {
   const crystals = [];
 
@@ -65,11 +67,20 @@ export const CrystalBar: React.FC<CrystalBarProps> = ({
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.crystalsRow}>
+    <div style={{
+      ...styles.container,
+      ...(compact ? { padding: '6px 10px', gap: '8px' } : {}),
+    }}>
+      <div style={{
+        ...styles.crystalsRow,
+        ...(compact ? { flexWrap: 'wrap' as const, maxWidth: '135px', gap: '2px' } : {}),
+      }}>
         {crystals}
       </div>
-      <div style={styles.countText}>
+      <div style={{
+        ...styles.countText,
+        ...(compact ? { fontSize: '16px', minWidth: '36px' } : {}),
+      }}>
         {current}/{max}
         {overloaded > 0 && (
           <span style={styles.overloadText}> (LOCKED: {overloaded})</span>
