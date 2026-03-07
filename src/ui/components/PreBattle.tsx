@@ -37,8 +37,8 @@ export const PreBattle: React.FC<PreBattleProps> = ({
 
   // Animate the taunt appearing
   useEffect(() => {
-    const t1 = setTimeout(() => setShowTaunt(true), 600);
-    const t2 = setTimeout(() => setReady(true), 1200);
+    const t1 = setTimeout(() => setShowTaunt(true), 400);
+    const t2 = setTimeout(() => setReady(true), 600);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
@@ -157,7 +157,10 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '24px',
+    gap: '20px',
+    position: 'relative',
+    zIndex: 5,
+    paddingBottom: '40px',
   },
   backButton: {
     alignSelf: 'flex-start',

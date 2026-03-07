@@ -57,23 +57,28 @@ export const HeroIntro: React.FC<HeroIntroProps> = ({
   const playerColor = getRaceColor(playerHero.race);
   const opponentColor = getRaceColor(opponentHero.race);
 
-  // Phase timing
+  // Phase timing — fast sequence, auto-completes after ~4s
+  // Capture onComplete in a ref so timers always call the latest version
+  const onCompleteRef = React.useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
+    const finish = () => onCompleteRef.current();
 
-    timers.push(setTimeout(() => setPhase(1), 300));   // player slides in
-    timers.push(setTimeout(() => setPhase(2), 800));   // opponent slides in
-    timers.push(setTimeout(() => setPhase(3), 1300));  // VS flash
-    timers.push(setTimeout(() => setPhase(4), 1800));  // quotes appear
-    timers.push(setTimeout(() => setPhase(5), 2300));  // hold
+    timers.push(setTimeout(() => setPhase(1), 200));   // player slides in
+    timers.push(setTimeout(() => setPhase(2), 600));   // opponent slides in
+    timers.push(setTimeout(() => setPhase(3), 1000));  // VS flash
+    timers.push(setTimeout(() => setPhase(4), 1400));  // quotes appear
+    timers.push(setTimeout(() => setPhase(5), 1800));  // hold
     timers.push(setTimeout(() => {
       setExiting(true);
       setPhase(6);
-    }, 4500));
-    timers.push(setTimeout(() => onComplete(), 5200)); // fully done
+    }, 3500));
+    timers.push(setTimeout(finish, 4200)); // fully done
 
-    // Safety fallback: force complete after 8 seconds no matter what
-    timers.push(setTimeout(() => onComplete(), 8000));
+    // Safety fallback: force complete after 6 seconds no matter what
+    timers.push(setTimeout(finish, 6000));
 
     return () => timers.forEach(clearTimeout);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -82,9 +87,8 @@ export const HeroIntro: React.FC<HeroIntroProps> = ({
   const handleSkip = useCallback(() => {
     setExiting(true);
     setPhase(6);
-    // Call onComplete immediately
-    onComplete();
-  }, [onComplete]);
+    onCompleteRef.current();
+  }, []);
 
   return (
     <div style={{
