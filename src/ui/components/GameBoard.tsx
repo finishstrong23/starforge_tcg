@@ -626,12 +626,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
   },
   opponentArea: {
-    height: '10%',
+    height: '8%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    padding: '2px 10px',
+    padding: '0px 10px',
     background: 'linear-gradient(180deg, rgba(20, 20, 40, 0.5) 0%, transparent 100%)',
   },
   opponentHand: {
