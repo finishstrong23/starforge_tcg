@@ -138,13 +138,50 @@ src/
 | `StarforgeLogo.tsx` | Logo component (uses raw GitHub URLs with commit SHAs) |
 | `SpaceBackground.tsx` | Animated space background |
 
+### Backend Server (`server/`)
+Separate Node.js backend with its own `package.json`:
+```
+server/
+├── src/
+│   ├── index.ts        # Express server entry point
+│   ├── config/         # Server configuration
+│   ├── middleware/      # Auth, CORS, etc.
+│   ├── migrations/     # PostgreSQL schema migrations
+│   ├── models/         # Database models
+│   ├── routes/         # API route handlers
+│   └── services/       # Business logic services
+└── package.json        # Server-specific dependencies
+```
+
+**Server commands** (run from `server/`):
+```bash
+npm run dev       # Start dev server (ts-node)
+npm run build     # Compile TypeScript
+npm start         # Run compiled server
+npm run migrate   # Run database migrations
+```
+
+**Server tech**: Express 4, PostgreSQL (pg), JWT auth, bcrypt, WebSocket (ws)
+
+### Root-Level Utility Scripts
+Data processing and balance tools (run with `node`):
+- `convert-cards.mjs` — Convert card data formats
+- `read-xlsx.mjs` — Import cards from Excel spreadsheets
+- `rebuild-decks.mjs` / `rewrite-decks.mjs` — Regenerate starter decks
+- `balance-test.mjs` / `tune-balance*.mjs` — Card balance testing and tuning
+- `adjust-stats.mjs` — Batch card stat adjustments
+- `add-last-words.mjs` / `re-keyword.mjs` — Keyword processing utilities
+
 ## Tech Stack
 - **Language**: TypeScript 5.3 (strict mode, ES2020 target)
 - **UI**: React 18 + Vite 5
+- **Backend**: Express 4 + PostgreSQL + WebSocket
+- **Auth**: JWT + bcrypt
 - **Testing**: Jest 29 + ts-jest
 - **Linting**: ESLint 8 + @typescript-eslint
 - **Mobile**: Capacitor 8 (Android + iOS)
 - **Multiplayer**: PeerJS (P2P WebRTC)
+- **CI/CD**: GitHub Actions → Vercel (web), Fastlane (mobile)
 - **Build output**: `dist/` directory
 
 ## TypeScript Configuration
@@ -192,6 +229,23 @@ src/
 - `globalCardFactory` — Card instance factory
 - Use `initializeSampleDatabase()` or `initializeFullDatabase()` to populate
 
+## CI/CD (GitHub Actions)
+Three workflows in `.github/workflows/`:
+
+1. **`ci.yml`** — Runs on push/PR to `main`/`master`
+   - **Lint**: `npm run lint`
+   - **Test**: `npm test -- --ci --coverage` (uploads coverage artifact)
+   - **Build**: `npm run build` + `npm run build:ui` (uploads dist artifact)
+   - Node 22, ubuntu-latest
+
+2. **`deploy.yml`** — Runs on push to `main` or manual dispatch
+   - Deploys web to Vercel (staging → production)
+   - Deploys server (via secrets)
+   - Builds mobile on macOS with Fastlane (production only)
+
+3. **`auto-deploy.yml`** — Runs on pushes to `claude/**` branches
+   - Auto-merges feature branches to main
+
 ## Branch Strategy
 - `main` — deployed branch (Vercel auto-deploys)
 - Feature branches — create from `main`, merge back via PR or sync script
@@ -238,3 +292,8 @@ When updating assets, update the commit SHA in `src/ui/components/StarforgeLogo.
 - All modules export through `index.ts` barrel files
 - The main `src/index.ts` re-exports the public API for the game engine
 - Use the existing event system (`EventEmitter`) for decoupled communication between systems
+
+## Other Documentation
+- `ROADMAP.md` — Launch strategy and development phases
+- `LAUNCH_READINESS.md` — Go/no-go assessment and gap analysis
+- `EMBELLISHMENT_ROADMAP.md` — Art and audio pipeline plan
