@@ -12,3 +12,6 @@ ios/App/Pods/
 ios/App/DerivedData/
 ios/App/App/public/
 android/app/src/main/assets/public/
+
+# Generated art export
+art-export/
