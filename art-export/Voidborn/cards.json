@@ -1,25 +1,25 @@
 [
   {
-    "id": "void_void_wisp",
-    "name": "Void Wisp",
+    "id": "voi_m1",
+    "name": "Voidborn Wisp",
     "faction": "Voidborn",
     "type": "Minion",
     "tribe": "Void",
     "rarity": "Common",
     "cost": 1,
     "attack": 1,
-    "health": 3,
+    "health": 2,
     "keywords": [
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Deal 1 damage to a random enemy",
-    "flavorText": "It sees all. It judges all. It's 1/2.",
+    "cardText": "DEPLOY: Look at the top 2 cards of your opponent's deck. BANISH one.",
+    "flavorText": "Tiny. Hungry. It peers into your future and EATS the part it doesn't like. The Voidborn start deleting reality before Turn 2.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_null_shard",
+    "id": "voi_s1",
     "name": "Null Shard",
     "faction": "Voidborn",
     "type": "Spell",
@@ -29,14 +29,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 1 damage. The target's owner discards a random card",
-    "flavorText": "Small cut. Big loss.",
+    "cardText": "Deal 1 damage. The target's owner discards a random card.",
+    "flavorText": "Small cut. Big loss. One damage to the body. One card to the abyss. The Voidborn exchange rate is BRUTAL.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_shadow_feeder",
+    "id": "voi_m2",
     "name": "Shadow Feeder",
     "faction": "Voidborn",
     "type": "Minion",
@@ -44,18 +44,16 @@
     "rarity": "Common",
     "cost": 1,
     "attack": 2,
-    "health": 2,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Gains +1/+1 whenever your opponent discards a card",
-    "flavorText": "Your loss is literally its lunch.",
+    "health": 1,
+    "keywords": [],
+    "cardText": "Gains +1/+1 whenever your opponent loses a card from any zone.",
+    "flavorText": "Your opponent's loss is literally its LUNCH. Discards, BANISHes, deck burns \u2014 every lost card is a meal. Feed it often.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_entropic_touch",
+    "id": "voi_s2",
     "name": "Entropic Touch",
     "faction": "Voidborn",
     "type": "Spell",
@@ -65,52 +63,50 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "A random card in your opponent's hand costs (2) more",
-    "flavorText": "Everything costs more in the Void.",
+    "cardText": "A random card in your opponent's hand costs (2) more. Draw a card.",
+    "flavorText": "Everything costs more near the Voidborn. Their 5-drop is now a 7-drop. Their plan just got TWO turns slower. You got a card. Fair.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_void_initiate",
-    "name": "Void Initiate",
+    "id": "voi_s3",
+    "name": "Whispers of Nothing",
     "faction": "Voidborn",
-    "type": "Minion",
+    "type": "Spell",
     "tribe": null,
     "rarity": "Common",
     "cost": 1,
-    "attack": 1,
-    "health": 3,
-    "keywords": [
-      "Last Words"
-    ],
-    "cardText": "LAST WORDS: Your opponent's next card costs (1) more",
-    "flavorText": "Stares into the abyss. The abyss stares back. Then charges rent.",
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "Your opponent's highest-cost card costs (3) more this turn.",
+    "flavorText": "The Void whispers. Their wallet SCREAMS. That finisher they've been holding? Delayed. Possibly forever.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_nullheim_stalker",
-    "name": "Nullheim Stalker",
+    "id": "voi_m3",
+    "name": "Voidborn Stalker",
     "faction": "Voidborn",
     "type": "Minion",
     "tribe": "Void",
     "rarity": "Common",
     "cost": 2,
     "attack": 3,
-    "health": 3,
+    "health": 2,
     "keywords": [
-      "Drain"
+      "CLOAK"
     ],
-    "cardText": "CLOAK",
-    "flavorText": "You can't see it. That's the point.",
+    "cardText": "CLOAK.",
+    "flavorText": "You can't see it. That's the POINT. It's 3/2 of invisible void energy. It's already behind you. The Voidborn don't announce themselves.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_mind_fracture",
+    "id": "voi_s4",
     "name": "Mind Fracture",
     "faction": "Voidborn",
     "type": "Spell",
@@ -120,34 +116,33 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 3 damage to a random enemy",
-    "flavorText": "Oops. Gone. Forever.",
+    "cardText": "Your opponent discards the highest-cost card in their hand.",
+    "flavorText": "Their best card. Gone. FOREVER. The Voidborn don't negotiate. They don't warn. They TAKE.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_rift_walker",
-    "name": "Rift Walker",
+    "id": "voi_m4",
+    "name": "Rift Crawler",
     "faction": "Voidborn",
     "type": "Minion",
     "tribe": "Void",
     "rarity": "Common",
     "cost": 2,
     "attack": 2,
-    "health": 4,
+    "health": 3,
     "keywords": [
-      "Cloak",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Deal 2 damage to a random enemy",
-    "flavorText": "Walks between dimensions. Ruins your economy.",
+    "cardText": "DEPLOY: Your opponent's next card costs (2) more.",
+    "flavorText": "Crawls between dimensions. Taxes your opponent's economy on arrival. The Voidborn IRS doesn't file extensions.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_void_drain",
+    "id": "voi_s5",
     "name": "Void Drain",
     "faction": "Voidborn",
     "type": "Spell",
@@ -157,14 +152,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 2 damage. the target if it dies",
-    "flavorText": "Not just dead. ERASED.",
+    "cardText": "Deal 2 damage. BANISH the target if it dies. (BANISHed cards can't be resummoned or returned.)",
+    "flavorText": "Not just dead. ERASED. No graveyard. No resurrection. No memory. The Voidborn definition of 'permanent.'",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_entropy_agent",
+    "id": "voi_m5",
     "name": "Entropy Agent",
     "faction": "Voidborn",
     "type": "Minion",
@@ -172,19 +167,18 @@
     "rarity": "Common",
     "cost": 2,
     "attack": 2,
-    "health": 3,
+    "health": 2,
     "keywords": [
-      "Lethal",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Deal 1 damage to a random enemy",
-    "flavorText": "Knowledge is power. Your opponent's knowledge is MY power.",
+    "cardText": "DEPLOY: Your opponent reveals their entire hand.",
+    "flavorText": "Knowledge is power. THEIR knowledge is YOUR power. He sees every card. He tells you EVERYTHING. Voidborn intelligence is thorough.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_abyssal_lurker",
+    "id": "voi_m6",
     "name": "Abyssal Lurker",
     "faction": "Voidborn",
     "type": "Minion",
@@ -192,18 +186,16 @@
     "rarity": "Common",
     "cost": 3,
     "attack": 3,
-    "health": 5,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Draw a card",
-    "flavorText": "Watches. Waits. Grows.",
+    "health": 4,
+    "keywords": [],
+    "cardText": "After your opponent plays a card, gain +1 Attack.",
+    "flavorText": "Watches. Waits. Grows. Every card your opponent plays makes it angrier. By Turn 8 it's a 10/4. Patience is a Voidborn virtue.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_thought_shredder",
+    "id": "voi_m7",
     "name": "Thought Shredder",
     "faction": "Voidborn",
     "type": "Minion",
@@ -211,19 +203,18 @@
     "rarity": "Common",
     "cost": 3,
     "attack": 2,
-    "health": 4,
+    "health": 3,
     "keywords": [
-      "Lethal",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Your opponent discards a random card. Draw a card",
-    "flavorText": "Your thoughts. My cards. Fair trade.",
+    "cardText": "DEPLOY: Your opponent discards a random card. Draw a card.",
+    "flavorText": "They lose one. You GAIN one. Net swing: two cards. The Voidborn call this 'balanced trade.' Nobody agrees.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_nullify",
+    "id": "voi_s6",
     "name": "Nullify",
     "faction": "Voidborn",
     "type": "Spell",
@@ -233,16 +224,16 @@
     "attack": null,
     "health": null,
     "keywords": [
-      "Cloak"
+      "BANISH"
     ],
-    "cardText": "Deal 2 damage",
-    "flavorText": "It was never here. Check the records.",
+    "cardText": "BANISH an enemy minion with 3 or less Attack.",
+    "flavorText": "It was never here. Check the records. There ARE no records. The Voidborn are very thorough with their un-filing.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_void_tendril",
+    "id": "voi_m8",
     "name": "Void Tendril",
     "faction": "Voidborn",
     "type": "Minion",
@@ -250,19 +241,19 @@
     "rarity": "Common",
     "cost": 3,
     "attack": 2,
-    "health": 5,
+    "health": 4,
     "keywords": [
-      "Barrier",
-      "Deploy"
+      "GUARDIAN",
+      "LAST WORDS"
     ],
-    "cardText": "Deal 3 damage to a random enemy",
-    "flavorText": "Even in death, it's annoying.",
+    "cardText": "GUARDIAN. LAST WORDS: Your opponent's next TWO cards cost (2) more.",
+    "flavorText": "Even in death it's insufferable. Kill it and your next two plays cost more. Leave it alive and nothing gets through. The Voidborn designed this SPECIFICALLY to be annoying.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_creeping_dread",
+    "id": "voi_s7",
     "name": "Creeping Dread",
     "faction": "Voidborn",
     "type": "Spell",
@@ -272,14 +263,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "All cards in your opponent's hand cost (1) more until your next turn",
-    "flavorText": "That sinking feeling? It's real. And it costs extra.",
+    "cardText": "All cards in your opponent's hand cost (1) more until your next turn. Draw a card.",
+    "flavorText": "That sinking feeling? It's real. And it costs extra. Their ENTIRE hand just got taxed. The Voidborn invented inflation.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_hollow_shade",
+    "id": "voi_m9",
     "name": "Hollow Shade",
     "faction": "Voidborn",
     "type": "Minion",
@@ -287,18 +278,18 @@
     "rarity": "Common",
     "cost": 3,
     "attack": 4,
-    "health": 3,
+    "health": 2,
     "keywords": [
-      "Swift"
+      "SWIFT"
     ],
-    "cardText": "Draw a card",
-    "flavorText": "Fast. Empty. Terrifying.",
+    "cardText": "SWIFT.",
+    "flavorText": "Fast. Empty. Terrifying. It used to be something. The Voidborn hollowed it out and gave it SWIFT. Somehow that's WORSE.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_reality_ripper",
+    "id": "voi_m10",
     "name": "Reality Ripper",
     "faction": "Voidborn",
     "type": "Minion",
@@ -306,19 +297,18 @@
     "rarity": "Common",
     "cost": 4,
     "attack": 4,
-    "health": 5,
+    "health": 4,
     "keywords": [
-      "Double Strike",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Draw a card",
-    "flavorText": "Rips cards out of EXISTENCE.",
+    "cardText": "DEPLOY: BANISH a random card from your opponent's hand.",
+    "flavorText": "Rips cards out of EXISTENCE. Not their hand. Not the discard. EXISTENCE. The Voidborn don't remove things. They un-MAKE them.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_void_sentinel",
+    "id": "voi_m11",
     "name": "Void Sentinel",
     "faction": "Voidborn",
     "type": "Minion",
@@ -326,19 +316,18 @@
     "rarity": "Common",
     "cost": 4,
     "attack": 3,
-    "health": 6,
+    "health": 5,
     "keywords": [
-      "Cloak",
-      "Deploy"
+      "GUARDIAN"
     ],
-    "cardText": "Deal 4 damage to a random enemy",
-    "flavorText": "The toll booth at the end of reality.",
+    "cardText": "GUARDIAN. Your opponent's cards cost (1) more.",
+    "flavorText": "The toll booth at the end of reality. Everything costs extra while it breathes. The Voidborn's favorite passive-aggressive tax collector.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_dimensional_rift",
+    "id": "voi_s8",
     "name": "Dimensional Rift",
     "faction": "Voidborn",
     "type": "Spell",
@@ -348,14 +337,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "an enemy minion. Your opponent draws a card",
-    "flavorText": "Gone, but they get a consolation prize.",
+    "cardText": "BANISH an enemy minion. Your opponent draws a card.",
+    "flavorText": "Gone forever. But they get a consolation card. The Voidborn are cruel but POLITE. One card for your loss. You're still losing.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_psychic_assault",
+    "id": "voi_s9",
     "name": "Psychic Assault",
     "faction": "Voidborn",
     "type": "Spell",
@@ -365,14 +354,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal damage to the enemy Hero equal to the number of cards they've lost this game. (Max 8.)",
-    "flavorText": "Every erased card leaves a scar.",
+    "cardText": "Deal damage to the enemy Hero equal to the number of cards they've lost this game. (Max 10.)",
+    "flavorText": "Every erased card leaves a scar. BANISHed five? Five to the face. The Voidborn keep receipts and the BILL arrives violently.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_abyssal_maw",
+    "id": "voi_m12",
     "name": "Abyssal Maw",
     "faction": "Voidborn",
     "type": "Minion",
@@ -380,19 +369,18 @@
     "rarity": "Common",
     "cost": 5,
     "attack": 5,
-    "health": 6,
+    "health": 5,
     "keywords": [
-      "Cloak",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Deal 2 damage to a random enemy",
-    "flavorText": "It eats cards. It eats FUTURES.",
+    "cardText": "DEPLOY: BANISH a random card from your opponent's deck.",
+    "flavorText": "It eats futures. Your opponent will NEVER know what they lost. The Voidborn's cruelest trick: you mourn what you never had.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_null_field",
+    "id": "voi_s10",
     "name": "Null Field",
     "faction": "Voidborn",
     "type": "Spell",
@@ -403,13 +391,13 @@
     "health": null,
     "keywords": [],
     "cardText": "Silence all enemy minions. (Remove all keywords and card text.)",
-    "flavorText": "Shh. No powers. Only Void now.",
+    "flavorText": "Shh. No powers. Only Void now. GUARDIAN? Gone. LETHAL? Gone. Hope? The Voidborn ate that first.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_void_harvester",
+    "id": "voi_m13",
     "name": "Void Harvester",
     "faction": "Voidborn",
     "type": "Minion",
@@ -417,18 +405,16 @@
     "rarity": "Common",
     "cost": 5,
     "attack": 4,
-    "health": 5,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Whenever your opponent discards a card, gain +2/+2",
-    "flavorText": "Your despair is its protein shake.",
+    "health": 4,
+    "keywords": [],
+    "cardText": "Whenever your opponent loses a card from any zone, gain +2/+2.",
+    "flavorText": "Your despair is its protein shake. Discards, BANISHes, deck burns \u2014 it's been bulking since Turn 1 and it's ENORMOUS.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_erasure",
+    "id": "voi_s11",
     "name": "Erasure",
     "faction": "Voidborn",
     "type": "Spell",
@@ -438,16 +424,16 @@
     "attack": null,
     "health": null,
     "keywords": [
-      "Cloak"
+      "BANISH"
     ],
-    "cardText": "Deal 3 damage to all enemy minions",
-    "flavorText": "Ctrl+Z doesn't work in the Void.",
+    "cardText": "BANISH an enemy minion.",
+    "flavorText": "Ctrl+Z doesn't work in the Void. There is no undo. There is only GONE. The Voidborn removed the undo button first.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_null_leviathan",
+    "id": "voi_m14",
     "name": "Null Leviathan",
     "faction": "Voidborn",
     "type": "Minion",
@@ -455,18 +441,16 @@
     "rarity": "Common",
     "cost": 6,
     "attack": 6,
-    "health": 7,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Deal 6 damage to a random enemy",
-    "flavorText": "Grows cheaper as reality gets thinner.",
+    "health": 6,
+    "keywords": [],
+    "cardText": "Your opponent's cards cost (1) more. Costs (1) less for each card BANISHed this game.",
+    "flavorText": "Grows cheaper as reality gets thinner. BANISHed five cards? It costs ONE. The Voidborn reward commitment to deletion.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_annihilate",
+    "id": "voi_s12",
     "name": "Annihilate",
     "faction": "Voidborn",
     "type": "Spell",
@@ -476,16 +460,16 @@
     "attack": null,
     "health": null,
     "keywords": [
-      "Lethal"
+      "BANISH"
     ],
-    "cardText": "Deal 4 damage to all enemy minions",
-    "flavorText": "Below the threshold? Below existence.",
+    "cardText": "BANISH all enemy minions with 4 or less Attack.",
+    "flavorText": "Below the threshold? Below EXISTENCE. The Voidborn set a minimum requirement for existing and enforced it.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_oblivion_wraith",
+    "id": "voi_m15",
     "name": "Oblivion Wraith",
     "faction": "Voidborn",
     "type": "Minion",
@@ -493,19 +477,18 @@
     "rarity": "Common",
     "cost": 7,
     "attack": 7,
-    "health": 8,
+    "health": 7,
     "keywords": [
-      "Guardian",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Deal 3 damage to a random enemy",
-    "flavorText": "It doesn't destroy your plans. It un-exists them.",
+    "cardText": "DEPLOY: BANISH all spells from your opponent's hand.",
+    "flavorText": "Doesn't destroy your plans. UN-EXISTS them. Every spell in hand: vanished. The Voidborn consider this 'decluttering.'",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_consume_reality",
+    "id": "voi_s13",
     "name": "Consume Reality",
     "faction": "Voidborn",
     "type": "Spell",
@@ -515,14 +498,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "the top 5 cards of your opponent's deck. Draw 2 cards",
-    "flavorText": "Five futures. Deleted.",
+    "cardText": "BANISH the top 5 cards of your opponent's deck. Draw 2 cards.",
+    "flavorText": "Five futures. Deleted. They'll never know what they lost. The Voidborn ate their tomorrow and you drew two cards from the crumbs.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_void_parasite",
+    "id": "voi_m16",
     "name": "Void Parasite",
     "faction": "Voidborn",
     "type": "Minion",
@@ -530,36 +513,35 @@
     "rarity": "Common",
     "cost": 2,
     "attack": 1,
-    "health": 2,
+    "health": 1,
     "keywords": [
-      "Double Strike",
-      "Deploy"
+      "LAST WORDS"
     ],
-    "cardText": "Deal 1 damage to a random enemy",
-    "flavorText": "Tiny. Deadly. Existentially threatening.",
+    "cardText": "LAST WORDS: BANISH a random card from your opponent's hand.",
+    "flavorText": "Tiny. Existentially threatening. Kill it and lose a card. Leave it alive and it stares at you. With ALL its eye. The Voidborn's cutest atrocity.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_whispers_of_null",
-    "name": "Whispers of Null",
+    "id": "voi_st1",
+    "name": "Null Anchor",
     "faction": "Voidborn",
-    "type": "Spell",
+    "type": "Structure",
     "tribe": null,
     "rarity": "Common",
-    "cost": 1,
+    "cost": 3,
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 1 damage to a random enemy",
-    "flavorText": "The Void whispers. Your wallet screams.",
+    "cardText": "Your opponent's first card each turn costs (2) more.",
+    "flavorText": "Going first each turn never felt so expensive. Their Turn 4 play costs 6. EVERY turn. The Voidborn anchored reality shut.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_entropy_weaver",
+    "id": "voi_m17",
     "name": "Entropy Weaver",
     "faction": "Voidborn",
     "type": "Minion",
@@ -567,18 +549,16 @@
     "rarity": "Rare",
     "cost": 4,
     "attack": 3,
-    "health": 5,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Whenever a card is ed, draw a card",
-    "flavorText": "Destruction is productive. If you're the right person.",
+    "health": 4,
+    "keywords": [],
+    "cardText": "Whenever a card is BANISHed, draw a card.",
+    "flavorText": "Destruction IS productive \u2014 if you're Voidborn. Every card erased from existence is a card drawn for you. The Voidborn invented recycling.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_void_mirror",
+    "id": "voi_m18",
     "name": "Void Mirror",
     "faction": "Voidborn",
     "type": "Minion",
@@ -586,19 +566,18 @@
     "rarity": "Rare",
     "cost": 3,
     "attack": 2,
-    "health": 4,
+    "health": 3,
     "keywords": [
-      "Cloak",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Draw a card",
-    "flavorText": "Imitation is the sincerest form of theft.",
+    "cardText": "DEPLOY: Copy a card from your opponent's hand. It costs (0). Then BANISH the original.",
+    "flavorText": "Copies it. DELETES the original. You get the card. They LOSE the card. The Voidborn version of 'sharing': take everything, give nothing.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_mindbreaker",
+    "id": "voi_m19",
     "name": "Mindbreaker",
     "faction": "Voidborn",
     "type": "Minion",
@@ -606,38 +585,35 @@
     "rarity": "Rare",
     "cost": 5,
     "attack": 4,
-    "health": 6,
+    "health": 5,
     "keywords": [
-      "Drain",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Deal 7 damage to a random enemy",
-    "flavorText": "Targets the extremes. Leaves the mediocre.",
+    "cardText": "DEPLOY: Your opponent discards their highest-cost AND lowest-cost cards.",
+    "flavorText": "Targets the extremes. Their bomb AND their cheap answer \u2014 both gone. The Voidborn cull from both ends of the menu.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_null_anchor",
-    "name": "Null Anchor",
+    "id": "voi_st2",
+    "name": "Voidborn Gate",
     "faction": "Voidborn",
     "type": "Structure",
     "tribe": null,
     "rarity": "Rare",
-    "cost": 3,
+    "cost": 5,
     "attack": null,
     "health": null,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Deal 3 damage to a random enemy",
-    "flavorText": "Going first never felt so expensive.",
+    "keywords": [],
+    "cardText": "Whenever you BANISH a card, deal 2 damage to the enemy Hero.",
+    "flavorText": "Every erasure echoes. BANISH a card? Two to the face. Three BANISHes in one turn? Six damage. Deletion has physical consequences.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_black_hole",
+    "id": "voi_s14",
     "name": "Black Hole",
     "faction": "Voidborn",
     "type": "Spell",
@@ -647,16 +623,16 @@
     "attack": null,
     "health": null,
     "keywords": [
-      "Drain"
+      "BANISH"
     ],
-    "cardText": "an enemy minion. a random card from your opponent's hand",
-    "flavorText": "Two-for-one deletion special.",
+    "cardText": "BANISH an enemy minion. BANISH a random card from your opponent's hand.",
+    "flavorText": "Two-for-one deletion special. Board AND hand \u2014 both diminished. The Voidborn are running a clearance sale on existence.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_void_siphon",
+    "id": "voi_s15",
     "name": "Void Siphon",
     "faction": "Voidborn",
     "type": "Spell",
@@ -666,14 +642,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Draw 2 cards",
-    "flavorText": "Finders keepers. Losers... lose.",
+    "cardText": "Steal 2 random cards from your opponent's hand. They cost (1) less.",
+    "flavorText": "Finders keepers. Losers literally LOSE. Two gone from them. Two gained by you. Four-card swing. Voidborn economics.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_abyss_walker",
+    "id": "voi_m20",
     "name": "Abyss Walker",
     "faction": "Voidborn",
     "type": "Minion",
@@ -681,19 +657,18 @@
     "rarity": "Rare",
     "cost": 5,
     "attack": 4,
-    "health": 5,
+    "health": 4,
     "keywords": [
-      "Cloak",
-      "Deploy"
+      "PHASE"
     ],
-    "cardText": "Deal 2 damage to a random enemy",
-    "flavorText": "Exists between dimensions. Untouchable. Insufferable.",
+    "cardText": "PHASE. Whenever this attacks, BANISH a random card from your opponent's hand.",
+    "flavorText": "Untargetable. Attacks freely. Every swing erases a card from existence. The Voidborn's favorite employee: can't be fired, can't be FOUND.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_reality_unraveler",
+    "id": "voi_m21",
     "name": "Reality Unraveler",
     "faction": "Voidborn",
     "type": "Minion",
@@ -701,37 +676,16 @@
     "rarity": "Rare",
     "cost": 6,
     "attack": 5,
-    "health": 7,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Deal 3 damage to a random enemy",
-    "flavorText": "Every night, one card disappears. Nobody knows why. Except it.",
+    "health": 6,
+    "keywords": [],
+    "cardText": "End of Turn: BANISH a random card from your opponent's hand.",
+    "flavorText": "Every turn, one card vanishes. They go to sleep with six. Wake up with five. Then four. The Voidborn unravel things slowly.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_nullheim_gate",
-    "name": "Nullheim Gate",
-    "faction": "Voidborn",
-    "type": "Structure",
-    "tribe": null,
-    "rarity": "Rare",
-    "cost": 5,
-    "attack": null,
-    "health": null,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Whenever you a card, deal 2 damage to the enemy Hero",
-    "flavorText": "Every erasure echoes.",
-    "collectible": true,
-    "set": "CORE",
-    "artPrompt": ""
-  },
-  {
-    "id": "void_devour_thoughts",
+    "id": "voi_s16",
     "name": "Devour Thoughts",
     "faction": "Voidborn",
     "type": "Spell",
@@ -741,14 +695,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Your opponent discards 2 random cards. For each spell discarded, draw a card",
-    "flavorText": "Your mind is an all-you-can-eat buffet.",
+    "cardText": "Your opponent discards 2 random cards. For each spell discarded, draw a card.",
+    "flavorText": "Two thoughts eaten. If either was a spell? Bonus draw. The Voidborn consider brains an all-you-can-eat buffet.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_dimensional_exile",
+    "id": "voi_s17",
     "name": "Dimensional Exile",
     "faction": "Voidborn",
     "type": "Spell",
@@ -758,16 +712,16 @@
     "attack": null,
     "health": null,
     "keywords": [
-      "Cloak"
+      "BANISH"
     ],
-    "cardText": "Deal 4 damage to all enemy minions",
-    "flavorText": "Too powerful to exist? Then don't.",
+    "cardText": "BANISH all enemy minions with 5 or more Attack.",
+    "flavorText": "Too powerful to exist? Then DON'T. The Voidborn set a ceiling on power and it's LOW.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_void_echo",
+    "id": "voi_m22",
     "name": "Void Echo",
     "faction": "Voidborn",
     "type": "Minion",
@@ -775,36 +729,19 @@
     "rarity": "Rare",
     "cost": 4,
     "attack": 3,
-    "health": 4,
+    "health": 3,
     "keywords": [
-      "Drain",
-      "Deploy"
+      "ECHO",
+      "DEPLOY"
     ],
-    "cardText": "Draw a card",
-    "flavorText": "Plays twice. Deletes twice. Smiles twice.",
+    "cardText": "ECHO. DEPLOY: BANISH a random card from your opponent's deck.",
+    "flavorText": "Plays twice. Deletes twice. Smiles twice. Two futures erased that they'll never even see. Preventative Voidborn deletion.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_existential_crisis",
-    "name": "Existential Crisis",
-    "faction": "Voidborn",
-    "type": "Spell",
-    "tribe": null,
-    "rarity": "Rare",
-    "cost": 5,
-    "attack": null,
-    "health": null,
-    "keywords": [],
-    "cardText": "Deal 5 damage to a random enemy",
-    "flavorText": "Am I real? Is this real? Is ANYTHING real?",
-    "collectible": true,
-    "set": "CORE",
-    "artPrompt": ""
-  },
-  {
-    "id": "void_null_assassin",
+    "id": "voi_m23",
     "name": "Null Assassin",
     "faction": "Voidborn",
     "type": "Minion",
@@ -812,20 +749,19 @@
     "rarity": "Rare",
     "cost": 3,
     "attack": 3,
-    "health": 3,
+    "health": 2,
     "keywords": [
-      "Lethal",
-      "Drain",
-      "Deploy"
+      "CLOAK",
+      "DEPLOY"
     ],
-    "cardText": "Draw a card",
-    "flavorText": "Kills cards before you even draw them.",
+    "cardText": "CLOAK. DEPLOY: BANISH a random card from your opponent's deck.",
+    "flavorText": "Invisible. Arrives. Deletes a card from their future. The Voidborn's subtlest operative. You won't see him. You won't see what he stole.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_entropic_cascade",
+    "id": "voi_st3",
     "name": "Entropic Cascade",
     "faction": "Voidborn",
     "type": "Structure",
@@ -834,37 +770,211 @@
     "cost": 6,
     "attack": null,
     "health": null,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Deal 6 damage to a random enemy",
-    "flavorText": "Drawing cards was supposed to be FUN.",
+    "keywords": [],
+    "cardText": "Whenever your opponent draws a card, it costs (1) more. Whenever your opponent discards, you draw a card.",
+    "flavorText": "Their draws cost more. Their losses fuel YOUR draws. Every turn the entropy increases. The Voidborn built a one-way valve on the universe.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_the_void_tyrant",
-    "name": "THE VOID TYRANT",
+    "id": "voi_s18",
+    "name": "Existential Crisis",
+    "faction": "Voidborn",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Rare",
+    "cost": 4,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "Silence an enemy minion. BANISH a random card from their hand. Draw a card.",
+    "flavorText": "Strip their powers. Delete a card. Draw one yourself. Three things for four mana. The Voidborn call this 'light existential therapy.'",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_s19",
+    "name": "Void Resonance",
+    "faction": "Voidborn",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Rare",
+    "cost": 4,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "Deal 3 damage to all enemy minions. Deal 1 extra for each card BANISHed this game.",
+    "flavorText": "The more you've erased, the harder this hits. BANISHed 5 cards? 8 damage AoE. The Voidborn remember what they ate.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_m24",
+    "name": "Oblivion Seed",
+    "faction": "Voidborn",
+    "type": "Minion",
+    "tribe": "Void",
+    "rarity": "Rare",
+    "cost": 2,
+    "attack": 0,
+    "health": 3,
+    "keywords": [
+      "LAST WORDS"
+    ],
+    "cardText": "LAST WORDS: BANISH the top 3 cards of your opponent's deck. If any were minions, summon a 2/2 Void Shade.",
+    "flavorText": "Plant it. Let it die. Three cards erased. Ghosts hatch from the ashes. The Voidborn garden grows DOWNWARD into nothing.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_m25",
+    "name": "Thought Leech",
+    "faction": "Voidborn",
+    "type": "Minion",
+    "tribe": "Void",
+    "rarity": "Rare",
+    "cost": 3,
+    "attack": 2,
+    "health": 4,
+    "keywords": [],
+    "cardText": "Whenever your opponent plays a spell, add a copy to your hand. It costs (1) less.",
+    "flavorText": "Sits. Listens. Copies every spell they cast \u2014 cheaper. It's not stealing. It's aggressive Voidborn LEARNING.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_s20",
+    "name": "Mana Collapse",
+    "faction": "Voidborn",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Rare",
+    "cost": 4,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "Your opponent loses 2 Crystals next turn. Draw a card.",
+    "flavorText": "Their Turn 7? Now it's Turn 5 again. Two crystals ripped away. The Voidborn don't just tax \u2014 they REGRESS your timeline.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_s21",
+    "name": "Fade to Black",
+    "faction": "Voidborn",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Rare",
+    "cost": 3,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "Give a friendly Void minion PHASE and +2/+2. BANISH a random card from your opponent's deck.",
+    "flavorText": "Your creature goes invisible AND grows. Their future loses a card. Two problems created in one spell. Voidborn efficiency.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_m26",
+    "name": "Void Collector",
+    "faction": "Voidborn",
+    "type": "Minion",
+    "tribe": "Void",
+    "rarity": "Rare",
+    "cost": 5,
+    "attack": 3,
+    "health": 6,
+    "keywords": [
+      "DEPLOY"
+    ],
+    "cardText": "DEPLOY: Discover a card that was BANISHed this game. Add it to YOUR hand. It costs (0).",
+    "flavorText": "What the Void takes, the Collector finds. That Legendary they lost? YOURS now. FREE. The Voidborn don't waste what they delete.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_s22",
+    "name": "ENTROPY BOMB",
+    "faction": "Voidborn",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Epic",
+    "cost": 2,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "BANISH a random card from your opponent's hand. Deal 1 damage to the enemy Hero for each card they've lost this game.",
+    "flavorText": "Two mana. One card erased. And a damage nuke that scales with EVERY card they've already lost. Turn 6 after a few deletions? 2-mana BANISH + 6 to face. The Voidborn built a bomb fueled by absence. The less your opponent HAS, the more it HURTS.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_s23",
+    "name": "THE HOLLOWING",
+    "faction": "Voidborn",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Epic",
+    "cost": 4,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "For the rest of the game, whenever your opponent draws a card, BANISH the top card of their deck.",
+    "flavorText": "Every draw costs them TWO cards. They draw one, they LOSE one. Thirty-card deck? Now it's fifteen. The Voidborn installed a leak in reality and the drip never stops. Their game just got a TIMER.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_m27",
+    "name": "NULL COLOSSUS",
     "faction": "Voidborn",
     "type": "Minion",
     "tribe": "Void",
     "rarity": "Epic",
     "cost": 5,
-    "attack": 5,
-    "health": 5,
+    "attack": 4,
+    "health": 8,
     "keywords": [
-      "Deploy"
+      "GUARDIAN"
     ],
-    "cardText": "Deal 2 damage to a random enemy",
-    "flavorText": "Every action you take costs you something you haven't lost yet.",
+    "cardText": "GUARDIAN. Has +1/+1 for each card BANISHed this game. Your opponent's cards cost (1) more.",
+    "flavorText": "BANISHed 6 cards? It's a 10/14 GUARDIAN with a passive tax aura. The more reality you've eaten, the bigger the wall. The Voidborn built their fortress out of things that no longer exist.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_oblivion_sphere",
-    "name": "Oblivion Sphere",
+    "id": "voi_m28",
+    "name": "MIND DEVOURER",
+    "faction": "Voidborn",
+    "type": "Minion",
+    "tribe": "Void",
+    "rarity": "Epic",
+    "cost": 6,
+    "attack": 4,
+    "health": 6,
+    "keywords": [
+      "DEPLOY"
+    ],
+    "cardText": "DEPLOY: Look at your opponent's hand. BANISH 2 cards of YOUR choice. Add Void copies to YOUR hand that cost (0).",
+    "flavorText": "Sees everything. Picks the two BEST cards. Deletes them. Gives YOU free copies. Their bomb is YOUR bomb. Their answer is YOUR answer. The Mind Devourer doesn't eat random thoughts. It has a MENU.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_s24",
+    "name": "OBLIVION SPHERE",
     "faction": "Voidborn",
     "type": "Spell",
     "tribe": null,
@@ -873,35 +983,16 @@
     "attack": null,
     "health": null,
     "keywords": [
-      "Double Strike"
+      "BANISH"
     ],
-    "cardText": "Deal 4 damage to all enemy minions",
-    "flavorText": "The board. The graveyard. The memory. All empty.",
+    "cardText": "BANISH all minions on both sides. For each enemy minion BANISHed, deal 2 damage to the enemy Hero. For each friendly minion BANISHed, draw a card.",
+    "flavorText": "Both boards gone. But THEIR losses deal face damage and YOUR losses draw cards. Full enemy board? Ten to face. Full your board? Seven cards drawn. The Sphere doesn't play favorites. It plays VOID.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_mind_devourer",
-    "name": "Mind Devourer",
-    "faction": "Voidborn",
-    "type": "Minion",
-    "tribe": "Void",
-    "rarity": "Epic",
-    "cost": 6,
-    "attack": 4,
-    "health": 7,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Deal 3 damage to a random enemy",
-    "flavorText": "It doesn't just eat your thoughts. It picks its favorites first.",
-    "collectible": true,
-    "set": "CORE",
-    "artPrompt": ""
-  },
-  {
-    "id": "void_prophet_of_the_endless_void",
+    "id": "voi_m29",
     "name": "PROPHET OF THE ENDLESS VOID",
     "faction": "Voidborn",
     "type": "Minion",
@@ -909,20 +1000,19 @@
     "rarity": "Legendary",
     "cost": 9,
     "attack": 7,
-    "health": 8,
+    "health": 7,
     "keywords": [
-      "Cloak",
-      "Double Strike",
-      "Deploy"
+      "DEPLOY",
+      "PHASE"
     ],
-    "cardText": "Deal 9 damage to a random enemy",
-    "flavorText": "He preaches one gospel: nothingness. His congregation? Everyone. Eventually.",
+    "cardText": "DEPLOY: BANISH your opponent's entire hand. They draw 3. PHASE. End of Turn: Your opponent's cards cost (2) more next turn.",
+    "flavorText": "He preaches one gospel: nothingness. Their hand? Erased. They draw three. Those three cost two more each. He can't be targeted. The Voidborn's high priest doesn't convert you. He SUBTRACTS you.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "void_nullheims_last_word",
+    "id": "voi_m30",
     "name": "NULLHEIM'S LAST WORD",
     "faction": "Voidborn",
     "type": "Minion",
@@ -930,13 +1020,65 @@
     "rarity": "Legendary",
     "cost": 8,
     "attack": 5,
+    "health": 5,
+    "keywords": [
+      "DEPLOY"
+    ],
+    "cardText": "DEPLOY: For the rest of the game, whenever your opponent draws a card, BANISH a random card from their deck. Your BANISH effects also deal 2 damage to the enemy Hero.",
+    "flavorText": "The Voidborn don't end things. They make things NEVER HAVE BEEN. Every draw your opponent makes deletes something else. Every BANISH burns face. Their deck dissolves. Their health dissolves. Existence dissolves.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_m31",
+    "name": "THE VOID TYRANT",
+    "faction": "Voidborn",
+    "type": "Minion",
+    "tribe": "Void",
+    "rarity": "Legendary",
+    "cost": 5,
+    "attack": 5,
+    "health": 4,
+    "keywords": [],
+    "cardText": "After your opponent plays a card, BANISH a random card from their hand. Gains +1/+1 for each card BANISHed this game.",
+    "flavorText": "Every action they take costs them something they haven't lost YET. Play a card? Lose a card. Fight back? Lose MORE. The Tyrant doesn't punish mistakes. It punishes PLAYING THE GAME.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_m32",
+    "name": "ARCHIVIST OF NOTHING",
+    "faction": "Voidborn",
+    "type": "Minion",
+    "tribe": null,
+    "rarity": "Legendary",
+    "cost": 4,
+    "attack": 2,
     "health": 6,
     "keywords": [
-      "Double Strike",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "For the rest of the game, whenever your opponent draws a card, a random card from their deck. Your effects also deal 2 damage to the enemy Hero",
-    "flavorText": "The Void doesn't end things. It makes them never have been.",
+    "cardText": "DEPLOY: For the rest of the game, you may look at your opponent's hand at any time. Whenever a card is BANISHed, add a 0-cost Void copy to your hand.",
+    "flavorText": "She catalogs everything the Void eats. Then USES it. BANISH a card? Free copy for you. Permanent hand vision. She knows what they have. She HAS what they DON'T. The Voidborn's librarian. The scariest librarian in the galaxy.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "voi_s25",
+    "name": "THE FINAL NOTHING",
+    "faction": "Voidborn",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Legendary",
+    "cost": 10,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "BANISH ALL cards in your opponent's hand, the top 10 cards of their deck, and all enemy minions. Deal 1 damage to the enemy Hero for each card BANISHed. Draw 5 cards.",
+    "flavorText": "Hand: gone. Board: gone. Deck: gutted. Health: burning. Five cards drawn. The Voidborn stopped whispering and SCREAMED. One spell. Everything deleted. The universe sent an invoice for every card ever lost and your opponent just PAID.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""

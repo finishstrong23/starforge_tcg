@@ -1,6 +1,6 @@
 [
   {
-    "id": "pyr_ember_imp",
+    "id": "pyr_m1",
     "name": "Ember Imp",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -8,19 +8,18 @@
     "rarity": "Common",
     "cost": 1,
     "attack": 2,
-    "health": 2,
+    "health": 1,
     "keywords": [
-      "Double Strike",
-      "Deploy"
+      "IMMOLATE"
     ],
-    "cardText": "Deal 1 damage to all enemies",
-    "flavorText": "Small. Angry. On fire.",
+    "cardText": "IMMOLATE: Deal 1 damage to all enemies.",
+    "flavorText": "Small. Angry. Literally on fire. The Pyroclast bred these as pets. The pets keep burning down the kennel. Nobody is surprised.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_cinder_sprite",
+    "id": "pyr_m2",
     "name": "Cinder Sprite",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -28,18 +27,18 @@
     "rarity": "Common",
     "cost": 1,
     "attack": 1,
-    "health": 3,
+    "health": 2,
     "keywords": [
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Deal 1 damage to the enemy Hero",
-    "flavorText": "It just wants to say hi. With fire.",
+    "cardText": "DEPLOY: Deal 1 damage to the enemy Hero.",
+    "flavorText": "It just wants to say hi. WITH FIRE. The Pyroclast definition of a handshake is first-degree burns.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_flamelick",
+    "id": "pyr_s1",
     "name": "Flamelick",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -49,14 +48,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 2 damage to the enemy Hero",
-    "flavorText": "Just a taste. Of FIRE.",
+    "cardText": "Deal 2 damage to the enemy Hero.",
+    "flavorText": "Just a taste. Of FIRE. One mana. Two to the face. The Pyroclast appetizer. The main course is ALSO fire.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_firestarter",
+    "id": "pyr_m3",
     "name": "Firestarter",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -64,20 +63,19 @@
     "rarity": "Common",
     "cost": 1,
     "attack": 1,
-    "health": 2,
+    "health": 1,
     "keywords": [
-      "Swift",
-      "Guardian",
-      "Deploy"
+      "BLITZ",
+      "IMMOLATE"
     ],
-    "cardText": "BLITZ. Deal 1 damage to the enemy Hero",
-    "flavorText": "Born to burn. Literally born burning.",
+    "cardText": "BLITZ. IMMOLATE: Deal 1 damage to the enemy Hero.",
+    "flavorText": "Born burning. Dies burning. The tiny window between those events is spent hitting your opponent's face. Pyroclast speedrun.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_ignite",
+    "id": "pyr_s2",
     "name": "Ignite",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -87,14 +85,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 1 damage to a minion. If it dies, deal 2 damage to the enemy Hero",
-    "flavorText": "One spark starts the inferno.",
+    "cardText": "Deal 1 damage to a minion. If it dies, deal 3 damage to the enemy Hero.",
+    "flavorText": "One spark starts the inferno. Snipe a 1-health minion and the fire JUMPS to face for 3. The Pyroclast call this 'efficiency.'",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_ashwalker",
+    "id": "pyr_m4",
     "name": "Ashwalker",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -102,19 +100,18 @@
     "rarity": "Common",
     "cost": 2,
     "attack": 3,
-    "health": 3,
+    "health": 2,
     "keywords": [
-      "Double Strike",
-      "Deploy"
+      "IMMOLATE"
     ],
-    "cardText": "Deal 2 damage to the enemy Hero",
-    "flavorText": "Walks through ash. Creates more ash.",
+    "cardText": "IMMOLATE: Deal 2 damage to the enemy Hero.",
+    "flavorText": "Walks through ash. Creates MORE ash. Every time it IMMOLATES, two damage hits face. The Pyroclast don't walk. They SCORCH.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_magma_hound",
+    "id": "pyr_m5",
     "name": "Magma Hound",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -122,18 +119,18 @@
     "rarity": "Common",
     "cost": 2,
     "attack": 2,
-    "health": 4,
+    "health": 3,
     "keywords": [
-      "Blitz"
+      "SWIFT"
     ],
-    "cardText": "SWIFT",
-    "flavorText": "Good boy. HOT boy. VERY hot boy.",
+    "cardText": "SWIFT.",
+    "flavorText": "Good boy. HOT boy. VERY hot boy. Fetch? No. SIT? No. BURN THINGS? YES. The Pyroclast's best-trained weapon.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_searing_touch",
+    "id": "pyr_s3",
     "name": "Searing Touch",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -143,14 +140,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 3 damage to a minion",
-    "flavorText": "Reach out and torch someone.",
+    "cardText": "Deal 3 damage to a minion. If it has BARRIER, destroy the BARRIER and deal 3 anyway.",
+    "flavorText": "Reach out and torch someone. BARRIER? The Pyroclast don't acknowledge shields. They acknowledge FIRE.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_fire_cultist",
+    "id": "pyr_m6",
     "name": "Fire Cultist",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -158,19 +155,18 @@
     "rarity": "Common",
     "cost": 2,
     "attack": 2,
-    "health": 3,
+    "health": 2,
     "keywords": [
-      "Swift",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Deal 1 damage to ALL characters",
-    "flavorText": "He doesn't discriminate. Everything burns equally.",
+    "cardText": "DEPLOY: Deal 1 damage to ALL characters. (Yes, including your own.)",
+    "flavorText": "Doesn't discriminate. Everything burns equally. Including himself. Including YOU. The Pyroclast consider this 'fair.'",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_pyro_bolt",
+    "id": "pyr_s4",
     "name": "Pyro Bolt",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -180,14 +176,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 3 damage to the enemy Hero",
-    "flavorText": "Point. Click. Incinerate.",
+    "cardText": "Deal 3 damage to the enemy Hero.",
+    "flavorText": "Point. Click. Incinerate. Three to face for two mana. The Pyroclast designed this spell in committee. The committee was on fire.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_lava_lurker",
+    "id": "pyr_m7",
     "name": "Lava Lurker",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -195,19 +191,18 @@
     "rarity": "Common",
     "cost": 3,
     "attack": 3,
-    "health": 4,
+    "health": 3,
     "keywords": [
-      "Blitz",
-      "Deploy"
+      "IMMOLATE"
     ],
-    "cardText": "Deal 2 damage to the minion that killed this",
-    "flavorText": "Surprise! You're on fire now too.",
+    "cardText": "IMMOLATE: Deal 2 damage to the minion that killed this.",
+    "flavorText": "Kill it. Go ahead. It explodes on whatever killed it. The Pyroclast designed it to punish trading. It punishes EVERYTHING.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_scorched_fanatic",
+    "id": "pyr_m8",
     "name": "Scorched Fanatic",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -215,19 +210,18 @@
     "rarity": "Common",
     "cost": 3,
     "attack": 4,
-    "health": 3,
+    "health": 2,
     "keywords": [
-      "Lethal",
-      "Deploy"
+      "IMMOLATE"
     ],
-    "cardText": "Deal 3 damage to the enemy Hero",
-    "flavorText": "His will is fire. His body is temporary.",
+    "cardText": "IMMOLATE: Deal 3 damage to the enemy Hero.",
+    "flavorText": "His will is fire. His body is temporary. Three damage to face when he IMMOLATES. The Pyroclast consider him a HERO. He's on fire.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_flame_geyser",
+    "id": "pyr_s5",
     "name": "Flame Geyser",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -237,14 +231,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 2 damage. Summon a 2/1 Ember Elemental",
-    "flavorText": "Two for one! Both are on fire.",
+    "cardText": "Deal 3 damage to a minion. Summon a 2/1 Ember Elemental with IMMOLATE: Deal 1 damage to all enemies.",
+    "flavorText": "Kills something. Leaves a flaming present behind. The present has IMMOLATE. The gift that keeps on burning.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_volcanic_shard",
+    "id": "pyr_m9",
     "name": "Volcanic Shard",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -252,19 +246,18 @@
     "rarity": "Common",
     "cost": 3,
     "attack": 2,
-    "health": 5,
+    "health": 4,
     "keywords": [
-      "Drain",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Deal 2 damage split randomly among all enemies",
-    "flavorText": "Shrapnel. But, like, LAVA shrapnel.",
+    "cardText": "DEPLOY: Deal 3 damage split randomly among all enemies.",
+    "flavorText": "LAVA shrapnel. Three hits. Random targets. The Pyroclast don't aim. They just ensure everything is within fire range.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_fuel_the_flames",
+    "id": "pyr_s6",
     "name": "Fuel the Flames",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -274,14 +267,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Your effects deal 2 extra damage this turn. Draw a card",
-    "flavorText": "More fuel. MORE. MOOORE.",
+    "cardText": "Your IMMOLATE effects deal 2 extra damage this turn. Draw a card.",
+    "flavorText": "More fuel. MORE. MOOORE. Every IMMOLATE this turn hits 2 harder. Plus a card. The Pyroclast's idea of 'support magic' is 'more fire.'",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_charred_berserker",
+    "id": "pyr_m10",
     "name": "Charred Berserker",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -289,20 +282,19 @@
     "rarity": "Common",
     "cost": 3,
     "attack": 5,
-    "health": 2,
+    "health": 1,
     "keywords": [
-      "Guardian",
-      "Drain",
-      "Deploy"
+      "SWIFT",
+      "IMMOLATE"
     ],
-    "cardText": "SWIFT. Deal 1 damage to all enemies",
-    "flavorText": "Already on fire. Doesn't care.",
+    "cardText": "SWIFT. IMMOLATE: Deal 2 damage to all enemies.",
+    "flavorText": "5/1 with SWIFT. It hits for 5 immediately. Dies to a sneeze. IMMOLATES for 2 to everything. The Pyroclast kamikaze lifestyle.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_inferno_caller",
+    "id": "pyr_m11",
     "name": "Inferno Caller",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -310,19 +302,18 @@
     "rarity": "Common",
     "cost": 4,
     "attack": 4,
-    "health": 4,
+    "health": 3,
     "keywords": [
-      "Lethal",
-      "Deploy"
+      "DEPLOY"
     ],
-    "cardText": "Deal 2 damage to two random enemies",
-    "flavorText": "Calls fire. Fire picks up EVERY time.",
+    "cardText": "DEPLOY: Deal 2 damage to two random enemies.",
+    "flavorText": "Calls fire. Fire picks up EVERY time. Four damage spread across two targets. The Pyroclast phone network has one ringtone: screaming.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_blazing_chariot",
+    "id": "pyr_m12",
     "name": "Blazing Chariot",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -330,20 +321,19 @@
     "rarity": "Common",
     "cost": 4,
     "attack": 4,
-    "health": 5,
+    "health": 4,
     "keywords": [
-      "Blitz",
-      "Double Strike",
-      "Deploy"
+      "BLITZ",
+      "IMMOLATE"
     ],
-    "cardText": "BLITZ. Deal 2 damage to the enemy Hero",
-    "flavorText": "It doesn't stop. It CAN'T stop. It's ON FIRE.",
+    "cardText": "BLITZ. IMMOLATE: Deal 2 damage to the enemy Hero.",
+    "flavorText": "Doesn't stop. CAN'T stop. It's ON FIRE. BLITZ means it hits immediately. IMMOLATE means it burns face when it dies. Coming AND going.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_wall_of_flame",
+    "id": "pyr_s7",
     "name": "Wall of Flame",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -353,14 +343,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 2 damage to all enemies",
-    "flavorText": "Some men just want to watch everything burn. This spell is for them.",
+    "cardText": "Deal 3 damage to all enemies.",
+    "flavorText": "Some people just want to watch everything burn. The Pyroclast ARE those people. Three to everything. No survivors. No apologies.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_eruption",
+    "id": "pyr_s8",
     "name": "Eruption",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -370,14 +360,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 4 damage to a minion. Deal 1 damage to adjacent minions",
-    "flavorText": "Collateral damage is the BEST damage.",
+    "cardText": "Deal 5 damage to a minion. Deal 2 damage to all other enemy minions.",
+    "flavorText": "Target goes down. Everything nearby catches fire. Collateral damage isn't a downside for the Pyroclast. It's the POINT.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_magma_giant",
+    "id": "pyr_m13",
     "name": "Magma Giant",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -385,19 +375,18 @@
     "rarity": "Common",
     "cost": 5,
     "attack": 5,
-    "health": 6,
+    "health": 5,
     "keywords": [
-      "Blitz",
-      "Deploy"
+      "IMMOLATE"
     ],
-    "cardText": "Deal 3 damage to the enemy Hero",
-    "flavorText": "Five tons of angry lava.",
+    "cardText": "IMMOLATE: Deal 3 damage to the enemy Hero.",
+    "flavorText": "Five tons of angry lava. Three damage to face when it IMMOLATES. The Pyroclast don't build statues. They build THREATS that melt.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_pyroclastic_flow",
+    "id": "pyr_s9",
     "name": "Pyroclastic Flow",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -407,14 +396,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 3 damage to all enemy minions",
-    "flavorText": "No escape. No survivors. No refunds.",
+    "cardText": "Deal 4 damage to all enemy minions.",
+    "flavorText": "No escape. No survivors. No refunds. The Pyroclast don't sell insurance because there's nothing LEFT to insure.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_furnace_fiend",
+    "id": "pyr_m14",
     "name": "Furnace Fiend",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -422,18 +411,16 @@
     "rarity": "Common",
     "cost": 5,
     "attack": 4,
-    "health": 5,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "After a friendly minion dies from , gain +2/+2",
-    "flavorText": "Feeds on the ashes of friends. It's a lifestyle.",
+    "health": 4,
+    "keywords": [],
+    "cardText": "Whenever ANY minion dies, deal 1 damage to the enemy Hero. Gains +1/+0 for each minion that died this game.",
+    "flavorText": "Feeds on death. Every corpse is fuel. Every funeral is a Pyroclast celebration. It's been counting bodies since Turn 1 and it's ENORMOUS.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_rain_of_fire",
+    "id": "pyr_s10",
     "name": "Rain of Fire",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -443,14 +430,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 1 damage to all enemies. Repeat for each friendly minion that died this turn",
-    "flavorText": "Step 1: Die. Step 2: VENGEANCE.",
+    "cardText": "Deal 1 damage to all enemies. Repeat for each friendly minion that died this turn.",
+    "flavorText": "Three minions died this turn? Three volleys. Everything gets hit three times. The Pyroclast don't mourn the dead. They WEAPONIZE them.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_infernal_juggernaut",
+    "id": "pyr_m15",
     "name": "Infernal Juggernaut",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -458,20 +445,19 @@
     "rarity": "Common",
     "cost": 6,
     "attack": 6,
-    "health": 6,
+    "health": 5,
     "keywords": [
-      "Blitz",
-      "Lethal",
-      "Deploy"
+      "SWIFT",
+      "IMMOLATE"
     ],
-    "cardText": "SWIFT. Deal 3 damage to all enemies",
-    "flavorText": "He IS the catastrophe.",
+    "cardText": "SWIFT. IMMOLATE: Deal 3 damage to all enemies.",
+    "flavorText": "HE is the catastrophe. 6/5 SWIFT that hits immediately. IMMOLATES for 3 to everything. The Pyroclast's idea of a 'subtle entrance.'",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_hellfire_breath",
+    "id": "pyr_s11",
     "name": "Hellfire Breath",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -481,14 +467,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 5 damage to all characters",
-    "flavorText": "Fair? No. Fun? ABSOLUTELY.",
+    "cardText": "Deal 5 damage to all characters. (Yes. ALL. Including yours.)",
+    "flavorText": "Fair? No. Fun? ABSOLUTELY. Five to everything. Your face too. The Pyroclast don't believe in 'friendly fire.' ALL fire is friendly.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_ashen_colossus",
+    "id": "pyr_m16",
     "name": "Ashen Colossus",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -496,19 +482,18 @@
     "rarity": "Common",
     "cost": 7,
     "attack": 7,
-    "health": 8,
+    "health": 7,
     "keywords": [
-      "Double Strike",
-      "Deploy"
+      "IMMOLATE"
     ],
-    "cardText": "Deal 4 damage to all enemies",
-    "flavorText": "When it falls, civilizations end.",
+    "cardText": "IMMOLATE: Deal 4 damage to all enemies.",
+    "flavorText": "When it falls, civilizations end. When it IMMOLATES, four damage hits everything on the other side. The Pyroclast built a 7/7 extinction event.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_doomsday_meteor",
+    "id": "pyr_s12",
     "name": "Doomsday Meteor",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -518,14 +503,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 7 damage to a minion and 3 damage to all other enemies",
-    "flavorText": "Extinction-level event in card form.",
+    "cardText": "Deal 8 damage to a minion and 4 damage to all other enemies.",
+    "flavorText": "Extinction-level event in card form. The primary target gets obliterated. Everything else burns. The Pyroclast submitted this to peer review. The peers are dead.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_kindling",
+    "id": "pyr_m17",
     "name": "Kindling",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -533,19 +518,18 @@
     "rarity": "Common",
     "cost": 1,
     "attack": 1,
-    "health": 2,
+    "health": 1,
     "keywords": [
-      "Swift",
-      "Deploy"
+      "LAST WORDS"
     ],
-    "cardText": "Deal 2 damage to the enemy Hero",
-    "flavorText": "Born to die. And burn.",
+    "cardText": "LAST WORDS: Deal 2 damage to the enemy Hero.",
+    "flavorText": "Born to die. And burn. One mana. Two face damage on death. The Pyroclast's cheapest and most enthusiastic employee.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_ash_pit",
+    "id": "pyr_st1",
     "name": "Ash Pit",
     "faction": "Pyroclast",
     "type": "Structure",
@@ -554,17 +538,15 @@
     "cost": 2,
     "attack": null,
     "health": null,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Whenever a friendly minion dies, deal 1 damage to the enemy Hero",
-    "flavorText": "Everything returns to ash. Ash returns to the face.",
+    "keywords": [],
+    "cardText": "Whenever a friendly minion dies, deal 1 damage to the enemy Hero.",
+    "flavorText": "Everything returns to ash. Ash returns to YOUR FACE. Every single death pings face for 1. Seven minions die? Seven damage. The Pit COUNTS.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_flamecaller_disciple",
+    "id": "pyr_m18",
     "name": "Flamecaller Disciple",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -572,18 +554,16 @@
     "rarity": "Rare",
     "cost": 3,
     "attack": 3,
-    "health": 4,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Draw a card",
-    "flavorText": "Teacher says always add more fire.",
+    "health": 3,
+    "keywords": [],
+    "cardText": "Your IMMOLATE effects deal 2 extra damage.",
+    "flavorText": "Teacher says always add more fire. PERMANENTLY. Every IMMOLATE on every minion hits 2 harder while she's alive. The Pyroclast's favorite tutor.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_volcanic_ritual",
+    "id": "pyr_s13",
     "name": "Volcanic Ritual",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -593,14 +573,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Destroy a friendly minion. Deal damage equal to its Attack to all enemies",
-    "flavorText": "Sacrifice accepted. Explosively.",
+    "cardText": "Destroy a friendly minion. Deal damage equal to its Attack to all enemies.",
+    "flavorText": "Sacrifice accepted. EXPLOSIVELY. Kill your 5/5? Five to everything on the other side. The Pyroclast worship through detonation.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_inferno_engine",
+    "id": "pyr_m19",
     "name": "Inferno Engine",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -608,18 +588,16 @@
     "rarity": "Rare",
     "cost": 5,
     "attack": 4,
-    "health": 6,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Whenever a friendly minion with dies, summon a 3/2 Flame Elemental with Deal 1 damage to the enemy Hero",
-    "flavorText": "The fire never ends. It just changes shape.",
+    "health": 5,
+    "keywords": [],
+    "cardText": "Whenever a friendly minion with IMMOLATE dies, summon a 3/2 Flame Elemental with IMMOLATE: Deal 2 damage to the enemy Hero.",
+    "flavorText": "The fire never ends. It just changes SHAPE. IMMOLATE minion dies? A replacement spawns with MORE IMMOLATE. The engine runs on death.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_pyromaniac",
+    "id": "pyr_m20",
     "name": "Pyromaniac",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -627,18 +605,16 @@
     "rarity": "Rare",
     "cost": 2,
     "attack": 2,
-    "health": 4,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Whenever you deal damage to the enemy Hero with a spell, gain +1/+1",
-    "flavorText": "Some people have hobbies. His is arson.",
+    "health": 3,
+    "keywords": [],
+    "cardText": "Whenever you deal damage to the enemy Hero with a spell or IMMOLATE, gain +1/+1.",
+    "flavorText": "His hobby is arson. His CAREER is arson. Every face damage makes him bigger. Pyroclast burn spells feed him. He's a 9/10 by Turn 6.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_backdraft",
+    "id": "pyr_s14",
     "name": "Backdraft",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -648,14 +624,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 4 damage to a minion. If it dies, deal 4 damage to the enemy Hero",
-    "flavorText": "Knock knock. WHO'S THERE? Fire.",
+    "cardText": "Deal 4 damage to a minion. If it dies, deal 4 damage to the enemy Hero.",
+    "flavorText": "Knock knock. Who's there? FIRE. Kill a minion, burn face for 4. The Pyroclast designed removal that ALSO goes face. Obviously.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_living_bomb",
+    "id": "pyr_m21",
     "name": "Living Bomb",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -665,18 +641,17 @@
     "attack": 0,
     "health": 5,
     "keywords": [
-      "Drain",
-      "Double Strike",
-      "Deploy"
+      "GUARDIAN",
+      "IMMOLATE"
     ],
-    "cardText": "GUARDIAN. Deal 4 damage to ALL characters",
-    "flavorText": "Please don't hit me. Actually, PLEASE hit me.",
+    "cardText": "GUARDIAN. IMMOLATE: Deal 4 damage to ALL characters. (Yes. Everyone. Including this.)",
+    "flavorText": "PLEASE hit me. Actually, PLEASE. It's a 0/5 GUARDIAN that explodes for 4 to EVERYTHING when triggered. The Pyroclast's politest weapon.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_cinder_storm",
+    "id": "pyr_s15",
     "name": "Cinder Storm",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -686,14 +661,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 8 damage randomly split among all enemies",
-    "flavorText": "Eight fireballs enter. Nobody leaves.",
+    "cardText": "Deal 8 damage randomly split among all enemies.",
+    "flavorText": "Eight fireballs enter. Random targets. Nobody leaves unburnt. The Pyroclast don't aim. They trust the chaos.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_forge_of_ignaros",
+    "id": "pyr_st2",
     "name": "Forge of Ignaros",
     "faction": "Pyroclast",
     "type": "Structure",
@@ -702,17 +677,15 @@
     "cost": 4,
     "attack": null,
     "health": null,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Start of Turn: Deal 2 damage to the enemy Hero",
-    "flavorText": "It forges swords. Out of hatred. And fire.",
+    "keywords": [],
+    "cardText": "Start of Turn: Deal 2 damage to the enemy Hero. Your IMMOLATE effects also deal their damage to the enemy Hero.",
+    "flavorText": "It forges swords out of hatred. And fire. Two passive face damage per turn AND all IMMOLATE redirected to face. The Pyroclast's holiest furnace.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_kamikaze_construct",
+    "id": "pyr_m22",
     "name": "Kamikaze Construct",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -720,20 +693,19 @@
     "rarity": "Rare",
     "cost": 4,
     "attack": 7,
-    "health": 2,
+    "health": 1,
     "keywords": [
-      "Swift",
-      "Double Strike",
-      "Deploy"
+      "BLITZ",
+      "IMMOLATE"
     ],
-    "cardText": "BLITZ. Deal 3 damage to all enemies",
-    "flavorText": "Its first mission is always its last. Worth it.",
+    "cardText": "BLITZ. IMMOLATE: Deal 3 damage to all enemies.",
+    "flavorText": "First mission. Last mission. SAME mission. 7/1 BLITZ hits for 7 immediately. Dies to a breeze. IMMOLATES for 3 to everything. WORTH IT.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_smoldering_remains",
+    "id": "pyr_s16",
     "name": "Smoldering Remains",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -743,14 +715,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Deal 3 damage to a random enemy",
-    "flavorText": "They come back. Briefly. Violently.",
+    "cardText": "Summon all friendly minions with IMMOLATE that died this turn. They die again at end of turn. (IMMOLATE triggers again.)",
+    "flavorText": "They come back. Briefly. VIOLENTLY. Die, come back, die AGAIN. Double IMMOLATE triggers. The Pyroclast invented the encore of DEATH.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_firestorm_drake",
+    "id": "pyr_m23",
     "name": "Firestorm Drake",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -758,20 +730,19 @@
     "rarity": "Rare",
     "cost": 6,
     "attack": 5,
-    "health": 6,
+    "health": 5,
     "keywords": [
-      "Double Strike",
-      "Swift",
-      "Deploy"
+      "SWIFT",
+      "DEPLOY"
     ],
-    "cardText": "SWIFT. Deal 3 damage to a minion. If it dies, deal excess to the enemy Hero",
-    "flavorText": "Breathes fire. Eats fire. IS fire.",
+    "cardText": "SWIFT. DEPLOY: Deal 3 damage to a minion. If it dies, deal excess damage to the enemy Hero.",
+    "flavorText": "Breathes fire. Eats fire. IS fire. Overkill damage GOES TO FACE. Kill a 1-health minion? 2 to face. The Pyroclast's favorite math.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_volcanic_heart",
+    "id": "pyr_s17",
     "name": "Volcanic Heart",
     "faction": "Pyroclast",
     "type": "Spell",
@@ -781,14 +752,14 @@
     "attack": null,
     "health": null,
     "keywords": [],
-    "cardText": "Give a minion \"Deal damage equal to this minion's Attack to all enemies.\"",
-    "flavorText": "Here. Hold this. Now die, please.",
+    "cardText": "Give a minion IMMOLATE: Deal damage equal to this minion's Attack to all enemies.",
+    "flavorText": "Strap a bomb onto ANYTHING. Your 7/7 now IMMOLATES for 7 to everything. The Pyroclast don't buff stats. They buff EXPLOSIONS.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_emberstrike_assassin",
+    "id": "pyr_m24",
     "name": "Emberstrike Assassin",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -796,37 +767,36 @@
     "rarity": "Rare",
     "cost": 3,
     "attack": 4,
-    "health": 2,
+    "health": 1,
     "keywords": [
-      "Double Strike",
-      "Guardian",
-      "Deploy"
+      "CLOAK",
+      "IMMOLATE"
     ],
-    "cardText": "CLOAK. Deal 3 damage to the enemy Hero",
-    "flavorText": "You won't see it coming. You WILL feel it burning.",
+    "cardText": "CLOAK. IMMOLATE: Deal 3 damage to the enemy Hero.",
+    "flavorText": "You won't see it coming. You WILL feel it burning. 4/1 invisible. Decloaks. Hits for 4. Dies. IMMOLATES for 3 to face. SEVEN total.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_molten_armor",
+    "id": "pyr_s18",
     "name": "Molten Armor",
     "faction": "Pyroclast",
     "type": "Spell",
     "tribe": null,
     "rarity": "Rare",
     "cost": 3,
-    "attack": 2,
-    "health": 2,
+    "attack": null,
+    "health": null,
     "keywords": [],
-    "cardText": "Give a minion +2/+2 and \"Deal 3 damage to the minion that killed this.\"",
-    "flavorText": "Warning: Do NOT hug the wearer.",
+    "cardText": "Give a minion +2/+3 and IMMOLATE: Deal 3 damage to the minion that killed this.",
+    "flavorText": "WARNING: Do NOT hug the wearer. Stats AND a revenge bomb. Kill the minion and the killer takes 3. The Pyroclast idea of 'armor.'",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_infernal_pact",
+    "id": "pyr_st3",
     "name": "Infernal Pact",
     "faction": "Pyroclast",
     "type": "Structure",
@@ -835,75 +805,195 @@
     "cost": 5,
     "attack": null,
     "health": null,
-    "keywords": [
-      "Deploy"
-    ],
-    "cardText": "Whenever you deal damage to the enemy Hero on your turn, deal 1 additional damage",
-    "flavorText": "Sign here. In fire. WITH fire.",
+    "keywords": [],
+    "cardText": "Whenever you deal damage to the enemy Hero on your turn, deal 1 additional damage. (Stacks with each instance.)",
+    "flavorText": "Sign here. In fire. WITH fire. Every face hit adds +1. Three separate face damage events? Three EXTRA damage. The Pyroclast's contract has ONE clause: MORE.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_magma_tyrant",
-    "name": "MAGMA TYRANT",
+    "id": "pyr_m25",
+    "name": "Scorchborn Twins",
+    "faction": "Pyroclast",
+    "type": "Minion",
+    "tribe": "Elemental",
+    "rarity": "Rare",
+    "cost": 4,
+    "attack": 3,
+    "health": 2,
+    "keywords": [
+      "DEPLOY",
+      "IMMOLATE"
+    ],
+    "cardText": "DEPLOY: Summon a 3/2 copy with IMMOLATE: Deal 2 damage to the enemy Hero. IMMOLATE: Deal 2 damage to the enemy Hero.",
+    "flavorText": "Two for one. Both on fire. Both IMMOLATE for 2 to face. Kill one? Two damage. Kill both? FOUR damage. Leave them alive? They hit for 6. The Pyroclast LOVE twins.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_s19",
+    "name": "Burnout",
+    "faction": "Pyroclast",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Rare",
+    "cost": 3,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "Deal damage to the enemy Hero equal to the number of friendly minions that died this game. (Max 10.)",
+    "flavorText": "Every dead minion counted. Every sacrifice tallied. Turn 8 after ten deaths? TEN to face for THREE mana. The Pyroclast keep a body count. It becomes a FIREBALL.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_s20",
+    "name": "Flashfire",
+    "faction": "Pyroclast",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Rare",
+    "cost": 2,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "Deal 2 damage to the enemy Hero. If you dealt damage to the enemy Hero already this turn, deal 4 instead.",
+    "flavorText": "First burn of the turn? Two damage. SECOND burn? FOUR. The Pyroclast reward momentum. Burn once, burn HARDER.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_s21",
+    "name": "Magma Rebirth",
+    "faction": "Pyroclast",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Rare",
+    "cost": 4,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "Destroy a friendly Elemental. Summon a random Elemental that costs (2) more from your deck. Give it IMMOLATE: Deal 3 damage to the enemy Hero.",
+    "flavorText": "Kill a 2-drop. Get a 4-drop. WITH IMMOLATE. Pyroclast evolution: sacrifice the small fire. Get a BIGGER fire.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_m26",
+    "name": "Pyroclast Warchief",
+    "faction": "Pyroclast",
+    "type": "Minion",
+    "tribe": null,
+    "rarity": "Rare",
+    "cost": 5,
+    "attack": 4,
+    "health": 5,
+    "keywords": [],
+    "cardText": "Your minions with IMMOLATE have +2 Attack. Whenever a friendly minion IMMOLATES, deal 1 damage to the enemy Hero.",
+    "flavorText": "Buffs every bomb. Pings face every time one goes off. The Pyroclast's field commander. His orders: BURN LOUDER.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_s22",
+    "name": "CHAIN DETONATION",
+    "faction": "Pyroclast",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Epic",
+    "cost": 3,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "Destroy a friendly minion. Trigger its IMMOLATE. Then trigger the IMMOLATE of every other friendly minion with IMMOLATE.",
+    "flavorText": "Kill one bomb. It explodes. Every other bomb on your board ALSO explodes. Four IMMOLATE minions? One sacrifice triggers FIVE explosions. The Pyroclast invented the chain reaction and they are NOT sorry. Three mana. Total board detonation.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_m27",
+    "name": "LIVING INFERNO",
+    "faction": "Pyroclast",
+    "type": "Minion",
+    "tribe": "Elemental",
+    "rarity": "Epic",
+    "cost": 4,
+    "attack": 3,
+    "health": 3,
+    "keywords": [
+      "IMMOLATE"
+    ],
+    "cardText": "IMMOLATE: Deal damage to all enemies equal to the total IMMOLATE damage you've dealt this game. (Max 8.)",
+    "flavorText": "It remembers every burn. Every IMMOLATE trigger this entire game. Dealt 6 IMMOLATE damage so far? It IMMOLATES for 6 to everything. The fire has a MEMORY and the memory is ANGRY. The Pyroclast's angriest creation.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_s23",
+    "name": "SUPERNOVA",
+    "faction": "Pyroclast",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Epic",
+    "cost": 6,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "Destroy ALL minions. Deal 2 damage to the enemy Hero for each minion destroyed. Trigger all friendly IMMOLATE effects first.",
+    "flavorText": "Everything dies. But YOUR minions IMMOLATE first, dealing their death damage. Then every destroyed minion deals 2 to face. Seven minions total? All IMMOLATES fire, then FOURTEEN to face. The Pyroclast's nuclear option. There is no board anymore. There is only FIRE.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_m28",
+    "name": "PYROCLAST AVATAR",
+    "faction": "Pyroclast",
+    "type": "Minion",
+    "tribe": "Elemental",
+    "rarity": "Epic",
+    "cost": 5,
+    "attack": 4,
+    "health": 4,
+    "keywords": [
+      "IMMOLATE",
+      "DEPLOY"
+    ],
+    "cardText": "DEPLOY: Give ALL friendly minions IMMOLATE: Deal 2 damage to the enemy Hero. IMMOLATE: Deal 4 damage to the enemy Hero.",
+    "flavorText": "Everything on your board is now a bomb. Your 1/1 tokens? Bombs. Your GUARDIAN? A bomb. ALL of them IMMOLATE for 2 to face. The Avatar itself hits for 4. The Pyroclast don't arm soldiers. They arm EVERYONE.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_m29",
+    "name": "DOOMFIRE SENTINEL",
     "faction": "Pyroclast",
     "type": "Minion",
     "tribe": "Elemental",
     "rarity": "Epic",
     "cost": 7,
-    "attack": 7,
-    "health": 7,
-    "keywords": [
-      "Double Strike",
-      "Deploy",
-      "Barrier"
-    ],
-    "cardText": "BARRIER. When ANY minion dies, deal 3 damage to all enemies. IMMOLATE: Deal 8 damage to all enemies.",
-    "flavorText": "He doesn't erupt. He DECIDES to erupt.",
-    "collectible": true,
-    "set": "CORE",
-    "artPrompt": ""
-  },
-  {
-    "id": "pyr_supernova",
-    "name": "Supernova",
-    "faction": "Pyroclast",
-    "type": "Spell",
-    "tribe": null,
-    "rarity": "Epic",
-    "cost": 8,
-    "attack": null,
-    "health": null,
-    "keywords": [],
-    "cardText": "Destroy ALL minions. Deal damage to the enemy Hero equal to the number of minions destroyed",
-    "flavorText": "The ultimate rage quit. In card form.",
-    "collectible": true,
-    "set": "CORE",
-    "artPrompt": ""
-  },
-  {
-    "id": "pyr_doomfire_sentinel",
-    "name": "Doomfire Sentinel",
-    "faction": "Pyroclast",
-    "type": "Minion",
-    "tribe": "Elemental",
-    "rarity": "Epic",
-    "cost": 6,
-    "attack": 5,
+    "attack": 6,
     "health": 6,
     "keywords": [
-      "Barrier",
-      "Deploy"
+      "BLITZ"
     ],
-    "cardText": "BLITZ. Whenever this attacks and kills a minion, deal its Attack as damage to the enemy Hero",
-    "flavorText": "Kills you. Then kills your boss. With your corpse.",
+    "cardText": "BLITZ. Whenever this attacks and kills a minion, deal its Attack as damage to the enemy Hero. IMMOLATE: Deal damage to all enemies equal to the number of minions that died this game.",
+    "flavorText": "Kills a 5/5? Five to face. IMMOLATE scales with every death this game. Ten minions died? IMMOLATES for TEN. The Pyroclast's executioner doesn't just kill \u2014 he sends the BILL to your opponent's face.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_phoenix_eternus",
+    "id": "pyr_m30",
     "name": "PHOENIX ETERNUS",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -911,21 +1001,19 @@
     "rarity": "Legendary",
     "cost": 6,
     "attack": 5,
-    "health": 6,
+    "health": 5,
     "keywords": [
-      "Swift",
-      "Deploy",
-      "Guardian",
-      "Blitz"
+      "BARRIER",
+      "LAST WORDS"
     ],
-    "cardText": "BARRIER, SWIFT. LAST WORDS: Return to play with full Health and +3/+3. Costs (0).",
-    "flavorText": "Death is not the end. It's the WARMUP.",
+    "cardText": "BARRIER. LAST WORDS: Deal 3 damage to all enemies. Return this to your hand. It costs (2) less.",
+    "flavorText": "Death is not the end. It's the WARMUP. Kill it. Three to everything. It comes back CHEAPER. Kill it again. Three MORE to everything. Even cheaper. The Pyroclast's immortal bird has died nine times. It's gotten BETTER at it.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
   },
   {
-    "id": "pyr_ashyr_the_world_burner",
+    "id": "pyr_m31",
     "name": "ASHYR, THE WORLD BURNER",
     "faction": "Pyroclast",
     "type": "Minion",
@@ -933,14 +1021,68 @@
     "rarity": "Legendary",
     "cost": 8,
     "attack": 6,
-    "health": 7,
+    "health": 6,
     "keywords": [
-      "Blitz",
-      "Guardian",
-      "Deploy"
+      "DEPLOY",
+      "IMMOLATE"
     ],
-    "cardText": "Deal 3 damage to all enemy minions",
-    "flavorText": "Ignaros had one rule: burn everything. Ashyr added a second: burn it AGAIN.",
+    "cardText": "DEPLOY: Deal 3 damage to all enemies. IMMOLATE: Deal 5 damage to all enemies. End of Turn: Deal 2 damage to the enemy Hero.",
+    "flavorText": "The Pyroclast had one rule: burn everything. Ashyr added a second: burn it AGAIN. Three damage on entry. Five on IMMOLATE. Two to face every turn. She doesn't stop burning. She CAN'T stop burning. She IS burning.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_m32",
+    "name": "MAGMA TYRANT",
+    "faction": "Pyroclast",
+    "type": "Minion",
+    "tribe": "Elemental",
+    "rarity": "Legendary",
+    "cost": 7,
+    "attack": 7,
+    "health": 6,
+    "keywords": [
+      "IMMOLATE"
+    ],
+    "cardText": "IMMOLATE: Deal 5 damage to all enemies. Your other IMMOLATE effects trigger twice.",
+    "flavorText": "He doesn't erupt. He DECIDES to erupt. Five to everything when he IMMOLATES. And every OTHER IMMOLATE on your board fires TWICE. Two Ember Imps die? Four triggers instead of two. The Tyrant doubles the apocalypse.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_m33",
+    "name": "GRAND INCINERATOR VOLK",
+    "faction": "Pyroclast",
+    "type": "Minion",
+    "tribe": null,
+    "rarity": "Legendary",
+    "cost": 5,
+    "attack": 3,
+    "health": 4,
+    "keywords": [
+      "DEPLOY"
+    ],
+    "cardText": "DEPLOY: For the rest of the game, whenever a friendly minion dies, deal 2 damage to the enemy Hero. Your IMMOLATE effects deal double damage.",
+    "flavorText": "The Pyroclast's high priest. His sermon: every death is 2 to face. PERMANENTLY. And all IMMOLATE damage? DOUBLED. Ember Imp's 1 damage? Now 2. Scorched Fanatic's 3? Now SIX. He turned the entire faction into a face-damage MACHINE.",
+    "collectible": true,
+    "set": "CORE",
+    "artPrompt": ""
+  },
+  {
+    "id": "pyr_s24",
+    "name": "THE FINAL ERUPTION",
+    "faction": "Pyroclast",
+    "type": "Spell",
+    "tribe": null,
+    "rarity": "Legendary",
+    "cost": 10,
+    "attack": null,
+    "health": null,
+    "keywords": [],
+    "cardText": "Deal 5 damage to ALL characters. Then deal 5 MORE to all characters. Then deal 5 MORE to all characters. (Three waves. 15 total to everything.)",
+    "flavorText": "Three waves. Fifteen damage. To EVERYTHING. Your face too. Their face too. Every minion on both sides: DEAD. The Pyroclast's final argument is not a debate. It's a VOLCANO. Three eruptions. One card. Zero survivors.",
     "collectible": true,
     "set": "CORE",
     "artPrompt": ""
