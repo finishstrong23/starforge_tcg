@@ -5,12 +5,13 @@
  * zones, cards, and provides querying utilities.
  */
 
-import { CardZone, hasKeyword } from '../types/Card';
+import { CardZone, CardType, hasKeyword } from '../types/Card';
 import type { CardInstance } from '../types/Card';
 import { BoardSizeLimit } from '../types/Player';
 import type { PlayerState } from '../types/Player';
 import { CombatKeyword } from '../types/Keywords';
 import { DeckZone, HandZone, BoardZone, SimpleZone } from './Zone';
+import { globalCardDatabase } from '../cards/CardDatabase';
 
 /**
  * Complete zone set for a single player
@@ -187,8 +188,14 @@ export class GameBoard {
   getAttackableTargets(attackingPlayerId: string, defendingPlayerId: string): CardInstance[] {
     const defenderBoard = this.getBoardCards(defendingPlayerId);
 
+    // Filter out structures — they can't be attacked
+    const attackable = defenderBoard.filter((card) => {
+      const def = globalCardDatabase.getCard(card.definitionId);
+      return def?.type !== CardType.STRUCTURE;
+    });
+
     // Check for GUARDIAN minions
-    const guardians = defenderBoard.filter(
+    const guardians = attackable.filter(
       (card) => hasKeyword(card, CombatKeyword.GUARDIAN) && !card.isCloaked
     );
 
@@ -198,7 +205,7 @@ export class GameBoard {
     }
 
     // Can attack any non-cloaked minion
-    return defenderBoard.filter((card) => !card.isCloaked);
+    return attackable.filter((card) => !card.isCloaked);
   }
 
   /**
@@ -206,9 +213,12 @@ export class GameBoard {
    */
   canAttackHero(defendingPlayerId: string): boolean {
     const defenderBoard = this.getBoardCards(defendingPlayerId);
-    const guardians = defenderBoard.filter(
-      (card) => hasKeyword(card, CombatKeyword.GUARDIAN) && !card.isCloaked
-    );
+    // Only minions (not structures) with GUARDIAN can block hero attacks
+    const guardians = defenderBoard.filter((card) => {
+      const def = globalCardDatabase.getCard(card.definitionId);
+      return def?.type !== CardType.STRUCTURE &&
+        hasKeyword(card, CombatKeyword.GUARDIAN) && !card.isCloaked;
+    });
     return guardians.length === 0;
   }
 

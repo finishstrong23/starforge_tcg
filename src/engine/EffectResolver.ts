@@ -304,6 +304,14 @@ export class EffectResolver {
           : [];
       }
 
+      case TargetType.FRIENDLY_MINION:
+        // Player/AI must provide a targetId for a friendly minion
+        return context.targetId ? [context.targetId] : [];
+
+      case TargetType.ENEMY_MINION:
+        // Player/AI must provide a targetId for an enemy minion
+        return context.targetId ? [context.targetId] : [];
+
       case TargetType.CHOSEN:
         // Player/AI must provide a targetId
         return context.targetId ? [context.targetId] : [];
