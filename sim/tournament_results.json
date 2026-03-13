@@ -1,0 +1,303 @@
+{
+  "games_per_matchup": 1000,
+  "total_games": 45000,
+  "rankings": [
+    {
+      "rank": 1,
+      "faction": "Hivemind",
+      "win_rate": 79.48,
+      "wins": 7153,
+      "games": 9000
+    },
+    {
+      "rank": 2,
+      "faction": "Cogsmiths",
+      "win_rate": 78.03,
+      "wins": 7023,
+      "games": 9000
+    },
+    {
+      "rank": 3,
+      "faction": "Biotitans",
+      "win_rate": 72.51,
+      "wins": 6526,
+      "games": 9000
+    },
+    {
+      "rank": 4,
+      "faction": "Pyroclast",
+      "win_rate": 68.19,
+      "wins": 6137,
+      "games": 9000
+    },
+    {
+      "rank": 5,
+      "faction": "Luminar",
+      "win_rate": 65.18,
+      "wins": 5866,
+      "games": 9000
+    },
+    {
+      "rank": 6,
+      "faction": "Chronobound",
+      "win_rate": 37.76,
+      "wins": 3398,
+      "games": 9000
+    },
+    {
+      "rank": 7,
+      "faction": "PhantomCorsairs",
+      "win_rate": 33.87,
+      "wins": 3048,
+      "games": 9000
+    },
+    {
+      "rank": 8,
+      "faction": "Crystalline",
+      "win_rate": 24.41,
+      "wins": 2197,
+      "games": 9000
+    },
+    {
+      "rank": 9,
+      "faction": "Voidborn",
+      "win_rate": 20.64,
+      "wins": 1858,
+      "games": 9000
+    },
+    {
+      "rank": 10,
+      "faction": "Astromancers",
+      "win_rate": 19.93,
+      "wins": 1794,
+      "games": 9000
+    }
+  ],
+  "matchups": {
+    "Astromancers_vs_Biotitans": {
+      "Astromancers": 50,
+      "Biotitans": 950,
+      "draws": 0
+    },
+    "Astromancers_vs_Chronobound": {
+      "Astromancers": 355,
+      "Chronobound": 645,
+      "draws": 0
+    },
+    "Astromancers_vs_Cogsmiths": {
+      "Astromancers": 54,
+      "Cogsmiths": 946,
+      "draws": 0
+    },
+    "Astromancers_vs_Crystalline": {
+      "Astromancers": 313,
+      "Crystalline": 687,
+      "draws": 0
+    },
+    "Astromancers_vs_Hivemind": {
+      "Astromancers": 35,
+      "Hivemind": 965,
+      "draws": 0
+    },
+    "Astromancers_vs_Luminar": {
+      "Astromancers": 44,
+      "Luminar": 956,
+      "draws": 0
+    },
+    "Astromancers_vs_PhantomCorsairs": {
+      "Astromancers": 426,
+      "PhantomCorsairs": 574,
+      "draws": 0
+    },
+    "Astromancers_vs_Pyroclast": {
+      "Astromancers": 141,
+      "Pyroclast": 859,
+      "draws": 0
+    },
+    "Astromancers_vs_Voidborn": {
+      "Astromancers": 376,
+      "Voidborn": 624,
+      "draws": 0
+    },
+    "Biotitans_vs_Chronobound": {
+      "Biotitans": 840,
+      "Chronobound": 160,
+      "draws": 0
+    },
+    "Biotitans_vs_Cogsmiths": {
+      "Biotitans": 386,
+      "Cogsmiths": 614,
+      "draws": 0
+    },
+    "Biotitans_vs_Crystalline": {
+      "Biotitans": 964,
+      "Crystalline": 36,
+      "draws": 0
+    },
+    "Biotitans_vs_Hivemind": {
+      "Biotitans": 385,
+      "Hivemind": 615,
+      "draws": 0
+    },
+    "Biotitans_vs_Luminar": {
+      "Biotitans": 682,
+      "Luminar": 318,
+      "draws": 0
+    },
+    "Biotitans_vs_PhantomCorsairs": {
+      "Biotitans": 824,
+      "PhantomCorsairs": 176,
+      "draws": 0
+    },
+    "Biotitans_vs_Pyroclast": {
+      "Biotitans": 505,
+      "Pyroclast": 495,
+      "draws": 0
+    },
+    "Biotitans_vs_Voidborn": {
+      "Biotitans": 990,
+      "Voidborn": 10,
+      "draws": 0
+    },
+    "Chronobound_vs_Cogsmiths": {
+      "Chronobound": 99,
+      "Cogsmiths": 901,
+      "draws": 0
+    },
+    "Chronobound_vs_Crystalline": {
+      "Chronobound": 663,
+      "Crystalline": 337,
+      "draws": 0
+    },
+    "Chronobound_vs_Hivemind": {
+      "Chronobound": 122,
+      "Hivemind": 878,
+      "draws": 0
+    },
+    "Chronobound_vs_Luminar": {
+      "Chronobound": 162,
+      "Luminar": 838,
+      "draws": 0
+    },
+    "Chronobound_vs_PhantomCorsairs": {
+      "Chronobound": 550,
+      "PhantomCorsairs": 450,
+      "draws": 0
+    },
+    "Chronobound_vs_Pyroclast": {
+      "Chronobound": 236,
+      "Pyroclast": 764,
+      "draws": 0
+    },
+    "Chronobound_vs_Voidborn": {
+      "Chronobound": 761,
+      "Voidborn": 239,
+      "draws": 0
+    },
+    "Cogsmiths_vs_Crystalline": {
+      "Cogsmiths": 970,
+      "Crystalline": 30,
+      "draws": 0
+    },
+    "Cogsmiths_vs_Hivemind": {
+      "Cogsmiths": 511,
+      "Hivemind": 489,
+      "draws": 0
+    },
+    "Cogsmiths_vs_Luminar": {
+      "Cogsmiths": 700,
+      "Luminar": 300,
+      "draws": 0
+    },
+    "Cogsmiths_vs_PhantomCorsairs": {
+      "Cogsmiths": 841,
+      "PhantomCorsairs": 159,
+      "draws": 0
+    },
+    "Cogsmiths_vs_Pyroclast": {
+      "Cogsmiths": 557,
+      "Pyroclast": 443,
+      "draws": 0
+    },
+    "Cogsmiths_vs_Voidborn": {
+      "Cogsmiths": 983,
+      "Voidborn": 17,
+      "draws": 0
+    },
+    "Crystalline_vs_Hivemind": {
+      "Crystalline": 52,
+      "Hivemind": 948,
+      "draws": 0
+    },
+    "Crystalline_vs_Luminar": {
+      "Crystalline": 80,
+      "Luminar": 920,
+      "draws": 0
+    },
+    "Crystalline_vs_PhantomCorsairs": {
+      "Crystalline": 388,
+      "PhantomCorsairs": 612,
+      "draws": 0
+    },
+    "Crystalline_vs_Pyroclast": {
+      "Crystalline": 66,
+      "Pyroclast": 934,
+      "draws": 0
+    },
+    "Crystalline_vs_Voidborn": {
+      "Crystalline": 521,
+      "Voidborn": 479,
+      "draws": 0
+    },
+    "Hivemind_vs_Luminar": {
+      "Hivemind": 608,
+      "Luminar": 392,
+      "draws": 0
+    },
+    "Hivemind_vs_PhantomCorsairs": {
+      "Hivemind": 915,
+      "PhantomCorsairs": 85,
+      "draws": 0
+    },
+    "Hivemind_vs_Pyroclast": {
+      "Hivemind": 759,
+      "Pyroclast": 241,
+      "draws": 0
+    },
+    "Hivemind_vs_Voidborn": {
+      "Hivemind": 976,
+      "Voidborn": 24,
+      "draws": 0
+    },
+    "Luminar_vs_PhantomCorsairs": {
+      "Luminar": 827,
+      "PhantomCorsairs": 173,
+      "draws": 0
+    },
+    "Luminar_vs_Pyroclast": {
+      "Luminar": 423,
+      "Pyroclast": 577,
+      "draws": 0
+    },
+    "Luminar_vs_Voidborn": {
+      "Luminar": 892,
+      "Voidborn": 108,
+      "draws": 0
+    },
+    "PhantomCorsairs_vs_Pyroclast": {
+      "PhantomCorsairs": 151,
+      "Pyroclast": 849,
+      "draws": 0
+    },
+    "PhantomCorsairs_vs_Voidborn": {
+      "PhantomCorsairs": 668,
+      "Voidborn": 332,
+      "draws": 0
+    },
+    "Pyroclast_vs_Voidborn": {
+      "Pyroclast": 975,
+      "Voidborn": 25,
+      "draws": 0
+    }
+  }
+}
