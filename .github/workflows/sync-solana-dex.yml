@@ -1,0 +1,33 @@
+name: Sync SolanaDEX to standalone repo
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'claude/solana-dex-amm-*'
+    paths:
+      - 'solana-dex/**'
+
+jobs:
+  sync:
+    name: Push solana-dex/ to finishstrong23/solana-dex
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push subtree to solana-dex repo
+        env:
+          SOLANA_DEX_TOKEN: ${{ secrets.SOLANA_DEX_PAT }}
+        run: |
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Split out only the solana-dex/ directory
+          SPLIT_SHA=$(git subtree split --prefix=solana-dex -b solana-dex-split)
+
+          # Push to the standalone solana-dex repo
+          git remote add solana-dex https://x-access-token:${SOLANA_DEX_TOKEN}@github.com/finishstrong23/solana-dex.git
+          git push solana-dex solana-dex-split:main --force
