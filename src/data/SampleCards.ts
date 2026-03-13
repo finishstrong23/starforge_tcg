@@ -989,6 +989,17 @@ export const ALL_SAMPLE_CARDS: CardDefinition[] = [
   ...ASTROMANCERS_CARDS,
   ...CHRONOBOUND_CARDS,
   ...NEUTRAL_CARDS,
+  // v2 starter deck cards (unique IDs with _sd_ prefix)
+  ...STARTER_DECK_COGSMITHS,
+  ...STARTER_DECK_LUMINAR,
+  ...STARTER_DECK_PYROCLAST,
+  ...STARTER_DECK_VOIDBORN,
+  ...STARTER_DECK_BIOTITANS,
+  ...STARTER_DECK_CRYSTALLINE,
+  ...STARTER_DECK_PHANTOM_CORSAIRS,
+  ...STARTER_DECK_HIVEMIND,
+  ...STARTER_DECK_ASTROMANCERS,
+  ...STARTER_DECK_CHRONOBOUND,
 ];
 
 export function getStarterDeck(race: Race): CardDefinition[] {
