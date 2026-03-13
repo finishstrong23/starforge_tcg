@@ -111,11 +111,15 @@ interface GameProviderProps {
 }
 
 /**
- * Check if a card definition has any CHOSEN targeting effects
+ * Check if a card definition has any effects that require player targeting
  */
 function hasChosenTarget(def: any): boolean {
   if (!def?.effects?.length) return false;
-  return def.effects.some((e: any) => e.targetType === TargetType.CHOSEN || e.targetType === 'CHOSEN');
+  return def.effects.some((e: any) =>
+    e.targetType === TargetType.CHOSEN || e.targetType === 'CHOSEN' ||
+    e.targetType === TargetType.FRIENDLY_MINION || e.targetType === 'FRIENDLY_MINION' ||
+    e.targetType === TargetType.ENEMY_MINION || e.targetType === 'ENEMY_MINION'
+  );
 }
 
 /**
@@ -130,6 +134,31 @@ function computeSpellTargets(
   if (!def?.effects?.length) return [];
 
   const targets: string[] = [];
+
+  // Check for FRIENDLY_MINION targeting first (DEPLOY buffs on friendlies)
+  const friendlyMinionEffect = def.effects.find(
+    (e: any) => e.targetType === TargetType.FRIENDLY_MINION || e.targetType === 'FRIENDLY_MINION'
+  );
+  if (friendlyMinionEffect) {
+    const friendlyMinions = board.getBoardCards(playerId);
+    for (const m of friendlyMinions) {
+      targets.push(m.instanceId);
+    }
+    return targets;
+  }
+
+  // Check for ENEMY_MINION targeting
+  const enemyMinionEffect = def.effects.find(
+    (e: any) => e.targetType === TargetType.ENEMY_MINION || e.targetType === 'ENEMY_MINION'
+  );
+  if (enemyMinionEffect) {
+    const enemyMinions = board.getBoardCards(opponentId);
+    for (const m of enemyMinions) {
+      targets.push(m.instanceId);
+    }
+    return targets;
+  }
+
   // Find the first CHOSEN effect to determine valid targets
   const chosenEffect = def.effects.find(
     (e: any) => e.targetType === TargetType.CHOSEN || e.targetType === 'CHOSEN'
@@ -695,12 +724,14 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         // Detect self-buff DEPLOY cards ("Gain +1/+1") — play instantly, no targeting
         const cardText = (def?.cardText || '').toLowerCase();
         const chosenEffect = def?.effects?.find(
-          (e: any) => e.targetType === TargetType.CHOSEN || e.targetType === 'CHOSEN'
+          (e: any) => e.targetType === TargetType.CHOSEN || e.targetType === 'CHOSEN' ||
+            e.targetType === TargetType.FRIENDLY_MINION || e.targetType === 'FRIENDLY_MINION' ||
+            e.targetType === TargetType.ENEMY_MINION || e.targetType === 'ENEMY_MINION'
         );
         const effectType = chosenEffect ? String(chosenEffect.type) : '';
         const isBuff = effectType === 'BUFF' || effectType === 'GRANT_KEYWORD';
         const isSelfBuff = isBuff && isMinion && (
-          cardText.includes('gain +') || cardText.includes('gain +')
+          cardText.includes('gain +') || cardText.includes('gains +')
         );
 
         // Self-buff DEPLOY: play instantly with self as target, no UI prompt
