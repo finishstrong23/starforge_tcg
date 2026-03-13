@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useSwap } from "@/hooks/useSwap";
+import { usePools } from "@/hooks/usePools";
+import { useTokenBalances } from "@/hooks/useTokenBalances";
+import { useToast } from "./Toast";
 import TokenSelector from "./TokenSelector";
 import SlippageSettings from "./SlippageSettings";
-import TransactionModal from "./TransactionModal";
 
 export default function SwapCard() {
   const { connected } = useWallet();
@@ -15,46 +17,98 @@ export default function SwapCard() {
   const [amountOut, setAmountOut] = useState("");
   const [slippage, setSlippage] = useState(0.5);
   const [showSlippage, setShowSlippage] = useState(false);
-  const [showTxModal, setShowTxModal] = useState(false);
-  const [txSignature, setTxSignature] = useState("");
   const [direction, setDirection] = useState<"AtoB" | "BtoA">("AtoB");
 
   const { swap, estimateOutput, loading, priceImpact } = useSwap();
+  const { pools } = usePools();
+  const { getBalance } = useTokenBalances();
+  const { showToast, updateToast } = useToast();
+
+  // Find the matching pool for the selected token pair
+  const matchedPool = useMemo(() => {
+    if (!tokenA || !tokenB) return null;
+    return pools.find(
+      (p) =>
+        (p.tokenAMint === tokenA && p.tokenBMint === tokenB) ||
+        (p.tokenAMint === tokenB && p.tokenBMint === tokenA)
+    );
+  }, [tokenA, tokenB, pools]);
+
+  // Calculate effective direction based on pool token ordering
+  const effectiveDirection = useMemo(() => {
+    if (!matchedPool) return direction;
+    if (matchedPool.tokenAMint === tokenA) return "AtoB";
+    return "BtoA";
+  }, [matchedPool, tokenA, direction]);
 
   // Estimate output when input changes
   useEffect(() => {
-    if (amountIn && tokenA && tokenB) {
+    if (amountIn && matchedPool) {
+      const reserveIn =
+        effectiveDirection === "AtoB"
+          ? matchedPool.reserveA
+          : matchedPool.reserveB;
+      const reserveOut =
+        effectiveDirection === "AtoB"
+          ? matchedPool.reserveB
+          : matchedPool.reserveA;
       const estimate = estimateOutput(
-        tokenA,
-        tokenB,
+        reserveIn,
+        reserveOut,
         parseFloat(amountIn),
-        direction
+        matchedPool.feeRate
       );
       setAmountOut(estimate > 0 ? estimate.toFixed(6) : "");
     } else {
       setAmountOut("");
     }
-  }, [amountIn, tokenA, tokenB, direction, estimateOutput]);
+  }, [amountIn, matchedPool, effectiveDirection, estimateOutput]);
+
+  const balanceA = tokenA ? getBalance(tokenA) : 0;
+  const balanceB = tokenB ? getBalance(tokenB) : 0;
 
   const handleSwap = useCallback(async () => {
-    if (!amountIn || !tokenA || !tokenB) return;
+    if (!amountIn || !matchedPool) return;
+
+    const toastId = showToast("loading", "Confirming swap...");
 
     try {
+      const decimalsIn =
+        effectiveDirection === "AtoB"
+          ? matchedPool.tokenADecimals
+          : matchedPool.tokenBDecimals;
+      const minOut = parseFloat(amountOut) * (1 - slippage / 100);
+
       const sig = await swap(
-        tokenA,
-        tokenB,
+        matchedPool.address,
+        matchedPool.tokenAMint,
+        matchedPool.tokenBMint,
+        matchedPool.tokenAVault,
+        matchedPool.tokenBVault,
         parseFloat(amountIn),
-        slippage,
-        direction
+        minOut,
+        decimalsIn,
+        effectiveDirection
       );
-      setTxSignature(sig);
-      setShowTxModal(true);
+
+      updateToast(toastId, "success", "Swap confirmed!", sig);
       setAmountIn("");
       setAmountOut("");
     } catch (err) {
-      console.error("Swap failed:", err);
+      const message =
+        err instanceof Error ? err.message : "Swap failed";
+      updateToast(toastId, "error", message);
     }
-  }, [amountIn, tokenA, tokenB, slippage, direction, swap]);
+  }, [
+    amountIn,
+    amountOut,
+    matchedPool,
+    slippage,
+    effectiveDirection,
+    swap,
+    showToast,
+    updateToast,
+  ]);
 
   const handleFlip = () => {
     setTokenA(tokenB);
@@ -62,6 +116,14 @@ export default function SwapCard() {
     setAmountIn(amountOut);
     setDirection(direction === "AtoB" ? "BtoA" : "AtoB");
   };
+
+  const handleMaxA = () => {
+    if (balanceA > 0) {
+      setAmountIn(balanceA.toString());
+    }
+  };
+
+  const noPool = tokenA && tokenB && !matchedPool;
 
   return (
     <div className="w-full max-w-md">
@@ -104,7 +166,15 @@ export default function SwapCard() {
         <div className="bg-dark-800 rounded-xl p-4 mb-2">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-dark-400">From</span>
-            <span className="text-sm text-dark-400">Balance: --</span>
+            <button
+              onClick={handleMaxA}
+              className="text-sm text-dark-400 hover:text-primary-400 transition-colors"
+            >
+              Balance: {connected ? balanceA.toFixed(4) : "--"}
+              {connected && balanceA > 0 && (
+                <span className="ml-1 text-primary-400 text-xs">MAX</span>
+              )}
+            </button>
           </div>
           <div className="flex items-center gap-3">
             <input
@@ -148,7 +218,9 @@ export default function SwapCard() {
         <div className="bg-dark-800 rounded-xl p-4 mt-2">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-dark-400">To</span>
-            <span className="text-sm text-dark-400">Balance: --</span>
+            <span className="text-sm text-dark-400">
+              Balance: {connected ? balanceB.toFixed(4) : "--"}
+            </span>
           </div>
           <div className="flex items-center gap-3">
             <input
@@ -166,9 +238,16 @@ export default function SwapCard() {
           </div>
         </div>
 
-        {/* Price Impact */}
-        {priceImpact > 0 && (
-          <div className="mt-4 p-3 bg-dark-800 rounded-lg">
+        {/* No pool warning */}
+        {noPool && (
+          <div className="mt-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-sm text-yellow-400">
+            No liquidity pool exists for this token pair
+          </div>
+        )}
+
+        {/* Price Impact & Info */}
+        {priceImpact > 0 && matchedPool && (
+          <div className="mt-4 p-3 bg-dark-800 rounded-lg space-y-1">
             <div className="flex justify-between text-sm">
               <span className="text-dark-400">Price Impact</span>
               <span
@@ -183,9 +262,20 @@ export default function SwapCard() {
                 {priceImpact.toFixed(2)}%
               </span>
             </div>
-            <div className="flex justify-between text-sm mt-1">
+            {priceImpact > 5 && (
+              <p className="text-xs text-red-400">
+                High price impact! Consider reducing your trade size.
+              </p>
+            )}
+            <div className="flex justify-between text-sm">
               <span className="text-dark-400">Slippage Tolerance</span>
               <span className="text-dark-300">{slippage}%</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-dark-400">Fee</span>
+              <span className="text-dark-300">
+                {(matchedPool.feeRate / 100).toFixed(2)}%
+              </span>
             </div>
           </div>
         )}
@@ -193,9 +283,21 @@ export default function SwapCard() {
         {/* Swap Button */}
         <button
           onClick={handleSwap}
-          disabled={!connected || !amountIn || !tokenA || !tokenB || loading}
+          disabled={
+            !connected ||
+            !amountIn ||
+            !tokenA ||
+            !tokenB ||
+            !matchedPool ||
+            loading
+          }
           className={`w-full mt-4 py-4 rounded-xl font-semibold text-lg transition-all ${
-            connected && amountIn && tokenA && tokenB && !loading
+            connected &&
+            amountIn &&
+            tokenA &&
+            tokenB &&
+            matchedPool &&
+            !loading
               ? "bg-primary-600 hover:bg-primary-700 text-white glow-primary"
               : "bg-dark-700 text-dark-400 cursor-not-allowed"
           }`}
@@ -203,22 +305,16 @@ export default function SwapCard() {
           {!connected
             ? "Connect Wallet"
             : loading
-            ? "Swapping..."
+            ? "Confirming..."
             : !tokenA || !tokenB
             ? "Select Tokens"
+            : noPool
+            ? "No Pool Available"
             : !amountIn
             ? "Enter Amount"
             : "Swap"}
         </button>
       </div>
-
-      {/* Transaction Modal */}
-      {showTxModal && (
-        <TransactionModal
-          signature={txSignature}
-          onClose={() => setShowTxModal(false)}
-        />
-      )}
     </div>
   );
 }

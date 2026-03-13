@@ -2,7 +2,14 @@
 
 import { useState, useCallback } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js";
+import {
+  getAssociatedTokenAddressSync,
+  createAssociatedTokenAccountInstruction,
+  TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
+import { BN } from "@coral-xyz/anchor";
 import { getProgram } from "@/utils/program";
 
 export function useSwap() {
@@ -13,19 +20,12 @@ export function useSwap() {
 
   const estimateOutput = useCallback(
     (
-      tokenAMint: string,
-      tokenBMint: string,
+      reserveIn: number,
+      reserveOut: number,
       amountIn: number,
-      direction: "AtoB" | "BtoA"
+      feeRate: number
     ): number => {
-      // In production, fetch pool state from chain
-      // For now, use a mock calculation
-      const mockReserveA = 1000;
-      const mockReserveB = 100000;
-      const feeRate = 25; // 0.25%
-
-      const reserveIn = direction === "AtoB" ? mockReserveA : mockReserveB;
-      const reserveOut = direction === "AtoB" ? mockReserveB : mockReserveA;
+      if (reserveIn <= 0 || reserveOut <= 0 || amountIn <= 0) return 0;
 
       const fee = (amountIn * feeRate) / 10000;
       const effectiveAmountIn = amountIn - fee;
@@ -45,10 +45,14 @@ export function useSwap() {
 
   const swap = useCallback(
     async (
+      poolAddress: string,
       tokenAMint: string,
       tokenBMint: string,
+      tokenAVault: string,
+      tokenBVault: string,
       amountIn: number,
-      slippage: number,
+      minAmountOut: number,
+      decimalsIn: number,
       direction: "AtoB" | "BtoA"
     ): Promise<string> => {
       if (!wallet.publicKey || !wallet.signTransaction) {
@@ -57,48 +61,76 @@ export function useSwap() {
 
       setLoading(true);
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const program = getProgram(connection, wallet as any);
 
-        // Calculate min output with slippage
-        const estimatedOut = estimateOutput(
-          tokenAMint,
-          tokenBMint,
-          amountIn,
-          direction
+        const userPubkey = wallet.publicKey;
+        const mintA = new PublicKey(tokenAMint);
+        const mintB = new PublicKey(tokenBMint);
+
+        // Get or create user token accounts
+        const userTokenA = getAssociatedTokenAddressSync(mintA, userPubkey);
+        const userTokenB = getAssociatedTokenAddressSync(mintB, userPubkey);
+
+        // Check if ATAs exist, create if needed
+        const preInstructions = [];
+        const ataA = await connection.getAccountInfo(userTokenA);
+        if (!ataA) {
+          preInstructions.push(
+            createAssociatedTokenAccountInstruction(
+              userPubkey,
+              userTokenA,
+              userPubkey,
+              mintA,
+              TOKEN_PROGRAM_ID,
+              ASSOCIATED_TOKEN_PROGRAM_ID
+            )
+          );
+        }
+        const ataB = await connection.getAccountInfo(userTokenB);
+        if (!ataB) {
+          preInstructions.push(
+            createAssociatedTokenAccountInstruction(
+              userPubkey,
+              userTokenB,
+              userPubkey,
+              mintB,
+              TOKEN_PROGRAM_ID,
+              ASSOCIATED_TOKEN_PROGRAM_ID
+            )
+          );
+        }
+
+        const amountInBN = new BN(
+          Math.floor(amountIn * Math.pow(10, decimalsIn))
         );
-        const minOut = Math.floor(estimatedOut * (1 - slippage / 100));
-
-        // Find pool PDA
-        const [poolPda] = PublicKey.findProgramAddressSync(
-          [
-            Buffer.from("pool"),
-            new PublicKey(tokenAMint).toBuffer(),
-            new PublicKey(tokenBMint).toBuffer(),
-          ],
-          program.programId
+        const minOutBN = new BN(
+          Math.floor(minAmountOut * Math.pow(10, decimalsIn))
         );
 
-        // In production, fetch actual pool account to get vault addresses
-        // For now, return a mock signature
-        console.log("Swap params:", {
-          pool: poolPda.toBase58(),
-          amountIn,
-          minOut,
-          direction,
-        });
+        const swapDirection =
+          direction === "AtoB" ? { aToB: {} } : { bToA: {} };
 
-        // TODO: Build and send actual transaction
-        // const tx = await program.methods
-        //   .swap(new BN(amountIn * 1e6), new BN(minOut * 1e6), { [direction === "AtoB" ? "aToB" : "bToA"]: {} })
-        //   .accounts({...})
-        //   .rpc();
+        const tx = await program.methods
+          .swap(amountInBN, minOutBN, swapDirection)
+          .accounts({
+            pool: new PublicKey(poolAddress),
+            userTokenA,
+            userTokenB,
+            tokenAVault: new PublicKey(tokenAVault),
+            tokenBVault: new PublicKey(tokenBVault),
+            user: userPubkey,
+            tokenProgram: TOKEN_PROGRAM_ID,
+          })
+          .preInstructions(preInstructions)
+          .rpc({ commitment: "confirmed" });
 
-        return "mock_signature_" + Date.now();
+        return tx;
       } finally {
         setLoading(false);
       }
     },
-    [connection, wallet, estimateOutput]
+    [connection, wallet]
   );
 
   return { swap, estimateOutput, loading, priceImpact };

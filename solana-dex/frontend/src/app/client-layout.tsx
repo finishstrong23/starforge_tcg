@@ -1,6 +1,7 @@
 "use client";
 
 import { WalletProviders } from "@/components/WalletProvider";
+import { ToastProvider } from "@/components/Toast";
 import { Sidebar } from "@/components/Sidebar";
 
 export default function ClientLayout({
@@ -10,10 +11,12 @@ export default function ClientLayout({
 }) {
   return (
     <WalletProviders>
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <main className="flex-1 ml-64 p-8">{children}</main>
-      </div>
+      <ToastProvider>
+        <div className="flex min-h-screen">
+          <Sidebar />
+          <main className="flex-1 ml-64 p-8">{children}</main>
+        </div>
+      </ToastProvider>
     </WalletProviders>
   );
 }
