@@ -14,29 +14,92 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="fixed left-0 top-0 h-full w-64 bg-dark-900 border-r border-dark-700 flex flex-col">
-      {/* Logo */}
-      <div className="p-6 border-b border-dark-700">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0">
-            <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+    <>
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-dark-900 border-r border-dark-700 flex-col z-40">
+        {/* Logo */}
+        <div className="p-6 border-b border-dark-700">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M4 17h16M4 12h16M4 7h16" />
+                <circle cx="18" cy="7" r="2" fill="currentColor" />
+                <circle cx="10" cy="12" r="2" fill="currentColor" />
+                <circle cx="16" cy="17" r="2" fill="currentColor" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
+                SolanaDEX
+              </h1>
+              <p className="text-[10px] text-dark-500 uppercase tracking-wider">Decentralized Exchange</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2">
+          {navItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== "/" && pathname.startsWith(item.href));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                  isActive
+                    ? "bg-primary-600/20 text-primary-400 border border-primary-600/30"
+                    : "text-dark-300 hover:bg-dark-800 hover:text-white"
+                }`}
+              >
+                <item.icon active={isActive} />
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Wallet Connection */}
+        <div className="p-4 border-t border-dark-700">
+          <WalletMultiButton className="w-full !justify-center" />
+        </div>
+
+        {/* Network Badge */}
+        <div className="px-4 pb-4">
+          <div className="flex items-center gap-2 text-xs text-dark-400">
+            <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+            Devnet
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Top Bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-dark-900 border-b border-dark-700 flex items-center justify-between px-4 z-40">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center">
+            <svg className="w-4 h-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M4 17h16M4 12h16M4 7h16" />
               <circle cx="18" cy="7" r="2" fill="currentColor" />
               <circle cx="10" cy="12" r="2" fill="currentColor" />
               <circle cx="16" cy="17" r="2" fill="currentColor" />
             </svg>
           </div>
-          <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
-              SolanaDEX
-            </h1>
-            <p className="text-[10px] text-dark-500 uppercase tracking-wider">Decentralized Exchange</p>
+          <span className="text-sm font-bold bg-gradient-to-r from-primary-400 to-primary-600 bg-clip-text text-transparent">
+            SolanaDEX
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 text-[10px] text-dark-400">
+            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500"></div>
+            Devnet
           </div>
+          <WalletMultiButton className="!py-1 !px-3 !text-xs !h-8" />
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-dark-900 border-t border-dark-700 flex items-center justify-around z-40">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -45,32 +108,17 @@ export function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                isActive
-                  ? "bg-primary-600/20 text-primary-400 border border-primary-600/30"
-                  : "text-dark-300 hover:bg-dark-800 hover:text-white"
+              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors ${
+                isActive ? "text-primary-400" : "text-dark-400"
               }`}
             >
               <item.icon active={isActive} />
-              <span className="font-medium">{item.label}</span>
+              <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
           );
         })}
       </nav>
-
-      {/* Wallet Connection */}
-      <div className="p-4 border-t border-dark-700">
-        <WalletMultiButton className="w-full !justify-center" />
-      </div>
-
-      {/* Network Badge */}
-      <div className="px-4 pb-4">
-        <div className="flex items-center gap-2 text-xs text-dark-400">
-          <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-          Devnet
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
 

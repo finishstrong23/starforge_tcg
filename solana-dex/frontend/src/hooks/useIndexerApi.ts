@@ -63,24 +63,37 @@ interface FetchState<T> {
   error: string | null;
 }
 
-// --- Generic fetcher ---
+// Simple in-memory cache: url → { data, timestamp }
+const cache = new Map<string, { data: unknown; timestamp: number }>();
+const CACHE_TTL = 5_000; // 5 seconds stale-while-revalidate
+
+// --- Generic fetcher with visibility-aware polling + caching ---
 
 function useAutoFetch<T>(
   url: string | null,
   refreshInterval: number
 ): FetchState<T> & { refresh: () => void } {
-  const [state, setState] = useState<FetchState<T>>({
-    data: null,
-    loading: true,
-    error: null,
+  const [state, setState] = useState<FetchState<T>>(() => {
+    // Initialize from cache if available
+    if (url) {
+      const cached = cache.get(url);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        return { data: cached.data as T, loading: false, error: null };
+      }
+    }
+    return { data: null, loading: true, error: null };
   });
   const abortRef = useRef<AbortController | null>(null);
+  const visibleRef = useRef(true);
 
   const fetchData = useCallback(async () => {
     if (!url) {
       setState({ data: null, loading: false, error: null });
       return;
     }
+
+    // Skip fetch if tab is hidden
+    if (!visibleRef.current) return;
 
     try {
       abortRef.current?.abort();
@@ -90,8 +103,11 @@ function useAutoFetch<T>(
       const res = await fetch(url, { signal: controller.signal });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
-      // API wraps responses in { data: ... }, unwrap if present
       const result = json.data !== undefined ? json.data : json;
+
+      // Update cache
+      cache.set(url, { data: result, timestamp: Date.now() });
+
       setState({ data: result, loading: false, error: null });
     } catch (err: unknown) {
       if (err instanceof Error && err.name === "AbortError") return;
@@ -102,6 +118,21 @@ function useAutoFetch<T>(
       }));
     }
   }, [url]);
+
+  // Page Visibility: pause polling when hidden, resume when visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      visibleRef.current = !document.hidden;
+      // Refresh immediately when becoming visible again
+      if (!document.hidden) {
+        fetchData();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [fetchData]);
 
   useEffect(() => {
     fetchData();
@@ -149,12 +180,12 @@ export function useUserSwaps(walletAddress: string | null) {
 
 export function useCandles(poolAddress: string, interval: string) {
   const lookbackMs: Record<string, number> = {
-    "1m": 24 * 60 * 60 * 1000, // 1 day
-    "5m": 2 * 24 * 60 * 60 * 1000, // 2 days
-    "15m": 4 * 24 * 60 * 60 * 1000, // 4 days
-    "1h": 7 * 24 * 60 * 60 * 1000, // 7 days
-    "4h": 30 * 24 * 60 * 60 * 1000, // 30 days
-    "1D": 180 * 24 * 60 * 60 * 1000, // 180 days
+    "1m": 24 * 60 * 60 * 1000,
+    "5m": 2 * 24 * 60 * 60 * 1000,
+    "15m": 4 * 24 * 60 * 60 * 1000,
+    "1h": 7 * 24 * 60 * 60 * 1000,
+    "4h": 30 * 24 * 60 * 60 * 1000,
+    "1D": 180 * 24 * 60 * 60 * 1000,
   };
 
   const now = Date.now();

@@ -1,42 +1,39 @@
 "use client";
 
+import { useMemo } from "react";
 import { usePools } from "@/hooks/usePools";
 import { useProtocolStats } from "@/hooks/useIndexerApi";
 
 export default function Dashboard() {
-  const { pools } = usePools();
-  const { data: protocolStats } = useProtocolStats();
+  const { pools, loading: poolsLoading } = usePools();
+  const { data: protocolStats, loading: statsLoading } = useProtocolStats();
 
-  // Use indexer data when available, fall back to local calculations
-  const totalTvl = protocolStats?.total_tvl ?? pools.reduce((sum, p) => sum + p.tvl, 0);
-  const totalVolume24h = protocolStats?.total_24h_volume ?? pools.reduce((sum, p) => sum + p.volume24h, 0);
-  const totalFees24h = protocolStats?.total_24h_fees ?? pools.reduce(
-    (sum, p) => sum + (p.volume24h * p.feeRate) / 10000,
-    0
-  );
+  const loading = poolsLoading || statsLoading;
+
+  const totalTvl =
+    protocolStats?.total_tvl ?? pools.reduce((sum, p) => sum + p.tvl, 0);
+  const totalVolume24h =
+    protocolStats?.total_24h_volume ??
+    pools.reduce((sum, p) => sum + p.volume24h, 0);
+  const totalFees24h =
+    protocolStats?.total_24h_fees ??
+    pools.reduce((sum, p) => sum + (p.volume24h * p.feeRate) / 10000, 0);
   const totalPools = protocolStats?.total_pools ?? pools.length;
   const totalSwaps = protocolStats?.total_swaps ?? 0;
+
+  const sortedPools = useMemo(
+    () => [...pools].sort((a, b) => b.volume24h - a.volume24h).slice(0, 10),
+    [pools]
+  );
 
   return (
     <div>
       {/* Top Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <MetricCard
-          title="Total Value Locked"
-          value={`$${totalTvl.toLocaleString()}`}
-        />
-        <MetricCard
-          title="24h Volume"
-          value={`$${totalVolume24h.toLocaleString()}`}
-        />
-        <MetricCard
-          title="24h Fees Earned"
-          value={`$${totalFees24h.toLocaleString()}`}
-        />
-        <MetricCard
-          title="Total Swaps"
-          value={totalSwaps.toLocaleString()}
-        />
+        <MetricCard title="Total Value Locked" value={`$${totalTvl.toLocaleString()}`} loading={loading} />
+        <MetricCard title="24h Volume" value={`$${totalVolume24h.toLocaleString()}`} loading={loading} />
+        <MetricCard title="24h Fees Earned" value={`$${totalFees24h.toLocaleString()}`} loading={loading} />
+        <MetricCard title="Total Swaps" value={totalSwaps.toLocaleString()} loading={loading} />
       </div>
 
       {/* Protocol Overview */}
@@ -76,16 +73,25 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Top Pools by Volume */}
+      {/* Top Pools */}
       <div className="bg-dark-900 border border-dark-700 rounded-2xl p-6">
         <h3 className="text-lg font-semibold mb-4">Top Pools by 24h Volume</h3>
-        {pools.length === 0 ? (
-          <p className="text-dark-400 text-center py-8">
-            No pools created yet
-          </p>
+        {poolsLoading ? (
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="grid grid-cols-5 gap-4 px-4 py-3">
+                <div className="h-5 w-6 bg-dark-700 rounded animate-pulse" />
+                <div className="h-5 w-24 bg-dark-700 rounded animate-pulse" />
+                <div className="h-5 w-20 bg-dark-700 rounded animate-pulse ml-auto" />
+                <div className="h-5 w-20 bg-dark-700 rounded animate-pulse ml-auto" />
+                <div className="h-5 w-14 bg-dark-700 rounded animate-pulse ml-auto" />
+              </div>
+            ))}
+          </div>
+        ) : pools.length === 0 ? (
+          <p className="text-dark-400 text-center py-8">No pools created yet</p>
         ) : (
           <div>
-            {/* Header */}
             <div className="grid grid-cols-5 gap-4 px-4 py-2 text-xs text-dark-400 font-medium border-b border-dark-700">
               <span>#</span>
               <span>Pool</span>
@@ -94,29 +100,20 @@ export default function Dashboard() {
               <span className="text-right">APR</span>
             </div>
             <div className="space-y-1 mt-1">
-              {[...pools]
-                .sort((a, b) => b.volume24h - a.volume24h)
-                .slice(0, 10)
-                .map((pool, i) => (
-                  <div
-                    key={pool.address}
-                    className="grid grid-cols-5 gap-4 px-4 py-3 rounded-lg hover:bg-dark-800/50 transition-colors"
-                  >
-                    <span className="text-dark-500 text-sm">#{i + 1}</span>
-                    <span className="font-medium">
-                      {pool.tokenASymbol}/{pool.tokenBSymbol}
-                    </span>
-                    <span className="text-right">
-                      ${pool.tvl.toLocaleString()}
-                    </span>
-                    <span className="text-right text-dark-300">
-                      ${pool.volume24h.toLocaleString()}
-                    </span>
-                    <span className="text-right text-green-400 font-medium">
-                      {pool.apr.toFixed(1)}%
-                    </span>
-                  </div>
-                ))}
+              {sortedPools.map((pool, i) => (
+                <div
+                  key={pool.address}
+                  className="grid grid-cols-5 gap-4 px-4 py-3 rounded-lg hover:bg-dark-800/50 transition-colors"
+                >
+                  <span className="text-dark-500 text-sm">#{i + 1}</span>
+                  <span className="font-medium">
+                    {pool.tokenASymbol}/{pool.tokenBSymbol}
+                  </span>
+                  <span className="text-right">${pool.tvl.toLocaleString()}</span>
+                  <span className="text-right text-dark-300">${pool.volume24h.toLocaleString()}</span>
+                  <span className="text-right text-green-400 font-medium">{pool.apr.toFixed(1)}%</span>
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -125,17 +122,15 @@ export default function Dashboard() {
   );
 }
 
-function MetricCard({
-  title,
-  value,
-}: {
-  title: string;
-  value: string;
-}) {
+function MetricCard({ title, value, loading }: { title: string; value: string; loading?: boolean }) {
   return (
     <div className="bg-dark-900 border border-dark-700 rounded-2xl p-6">
       <div className="text-sm text-dark-400 mb-1">{title}</div>
-      <div className="text-2xl font-bold">{value}</div>
+      {loading ? (
+        <div className="h-8 w-28 bg-dark-700 rounded animate-pulse" />
+      ) : (
+        <div className="text-2xl font-bold">{value}</div>
+      )}
     </div>
   );
 }
