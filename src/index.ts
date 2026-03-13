@@ -48,7 +48,7 @@ import { GameEngine } from './engine';
 import { CardFactory, CardDatabase, globalCardDatabase, globalCardFactory } from './cards';
 import { PlayerSetup } from './game';
 import { Race } from './types';
-import { ALL_SAMPLE_CARDS, getSampleCardsByRace, ALL_EXPANSION_CARDS, resolveCardIds, getBalancedStarterDeck } from './data';
+import { ALL_SAMPLE_CARDS, getSampleCardsByRace, ALL_EXPANSION_CARDS, resolveCardIds, getBalancedStarterDeck, getStarterDeck } from './data';
 import { getHeroByRace } from './heroes';
 
 /**
@@ -88,31 +88,20 @@ export function createSampleDeck(
   playerId: string,
   cardFactory: CardFactory = globalCardFactory
 ): { cards: ReturnType<CardFactory['createInstance']>[], heroId: string } {
-  const raceCards = getSampleCardsByRace(race);
-  const neutralCards = getSampleCardsByRace(Race.NEUTRAL);
+  // Use the v2 curated starter decks (25 cards from Excel)
+  const starterCards = getStarterDeck(race);
+  const deckCardIds: string[] = starterCards.map(c => c.id);
 
-  // Build a 30-card deck
-  const deckCardIds: string[] = [];
-
-  // Add race cards (2 copies each, up to 15 unique)
-  for (const card of raceCards.slice(0, 15)) {
-    if (card.collectible) {
-      deckCardIds.push(card.id);
-      deckCardIds.push(card.id); // 2 copies
+  // Pad to 30 cards by adding duplicates of low-cost commons
+  if (deckCardIds.length < 30) {
+    const commons = starterCards.filter(c => c.rarity === 'COMMON' && c.cost <= 3);
+    let i = 0;
+    while (deckCardIds.length < 30 && commons.length > 0) {
+      deckCardIds.push(commons[i % commons.length].id);
+      i++;
     }
   }
 
-  // Fill with neutrals
-  for (const card of neutralCards) {
-    if (card.collectible && deckCardIds.length < 30) {
-      deckCardIds.push(card.id);
-      if (deckCardIds.length < 30) {
-        deckCardIds.push(card.id); // 2 copies
-      }
-    }
-  }
-
-  // Trim to 30
   const finalDeckIds = deckCardIds.slice(0, 30);
 
   // Create card instances
