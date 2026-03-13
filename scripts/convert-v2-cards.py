@@ -526,7 +526,8 @@ def card_to_ts(card, faction_info, card_num, counters):
     # STARFORGE
     if starforge and str(starforge).strip():
         sf_text = escape_ts_string(str(starforge))
-        parts.append(f"starforge: {{ type: StarforgeType.PROGRESSIVE, conditions: [], forgedForm: {{ name: \\'{name} (Forged)\\', cost: {cost}, keywords: [], effects: [], cardText: \\'{sf_text}\\' }} }}")
+        sf_name = escape_ts_string(f"{name} (Forged)")
+        parts.append(f"starforge: {{ type: StarforgeType.PROGRESSIVE, conditions: [], isReversible: false, transformationText: '', forgedForm: {{ name: '{sf_name}', cost: {cost}, keywords: [], effects: [], cardText: '{sf_text}' }} }}")
 
     parts.append(f"flavorText: '{escape_ts_string(flavor)}'")
     parts.append(f"cardText: '{escape_ts_string(card_text)}'")
