@@ -338,6 +338,9 @@ export class GameEngine {
         });
       }
 
+      // ECHO: create a copy in hand before moving spell to graveyard
+      this.processEchoCopy(card, action.playerId);
+
       // Move to graveyard
       board.moveCard(
         data.cardInstanceId,
@@ -450,6 +453,9 @@ export class GameEngine {
 
     // Clear temporary buffs from the ending player's board
     this.effectResolver.clearTemporaryBuffs(action.playerId);
+
+    // Remove echo copies from hand at end of turn
+    this.cleanupEchoCopies(action.playerId);
 
     this.stateManager.endTurn();
 
@@ -752,6 +758,16 @@ export class GameEngine {
   /**
    * Create an ECHO copy in hand when an ECHO card is played
    */
+  private cleanupEchoCopies(playerId: string): void {
+    const board = this.stateManager.getBoard();
+    const handCards = board.getHandCards(playerId);
+    for (const card of handCards) {
+      if (card.isEchoInstance) {
+        board.moveCard(card.instanceId, playerId, playerId, CardZone.GRAVEYARD);
+      }
+    }
+  }
+
   private processEchoCopy(card: CardInstance, playerId: string): void {
     if (!hasKeyword(card, OriginalKeyword.ECHO)) return;
 

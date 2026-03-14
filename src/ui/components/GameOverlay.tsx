@@ -139,6 +139,33 @@ const DrawIcon: React.FC = () => (
   </svg>
 );
 
+// Rewards calculation
+function calculateRewards(isVictory: boolean, isDraw: boolean) {
+  const baseXP = isVictory ? 120 : isDraw ? 60 : 30;
+  const baseGold = isVictory ? 50 : isDraw ? 20 : 10;
+  const bonusXP = isVictory ? Math.floor(Math.random() * 30) + 10 : 0;
+  const bonusGold = isVictory ? Math.floor(Math.random() * 15) + 5 : 0;
+
+  const rewards: { label: string; value: string; color: string }[] = [
+    { label: 'XP Earned', value: `+${baseXP + bonusXP}`, color: '#44ddff' },
+    { label: 'Gold', value: `+${baseGold + bonusGold}`, color: '#ffcc00' },
+  ];
+
+  if (isVictory) {
+    const bonusRewards = [
+      { label: 'Card Back', value: 'Nebula Swirl', color: '#cc88ff' },
+      { label: 'Board Skin', value: 'Volcanic Rift', color: '#ff8844' },
+      { label: 'Card Sleeve', value: 'Quantum Shift', color: '#44ff88' },
+      { label: 'Title', value: 'Star Forger', color: '#ffaa44' },
+      { label: 'Emote', value: 'Victory Salute', color: '#88ccff' },
+    ];
+    const pick = bonusRewards[Math.floor(Math.random() * bonusRewards.length)];
+    rewards.push(pick);
+  }
+
+  return rewards;
+}
+
 export const GameOverlay: React.FC<GameOverlayProps> = ({
   winnerId,
   onPlayAgain,
@@ -147,6 +174,7 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
   const isVictory = winnerId === 'player';
   const isDraw = !winnerId;
   const particles = useMemo(() => generateParticles(20, isVictory || isDraw), [isVictory, isDraw]);
+  const rewards = useMemo(() => calculateRewards(isVictory, isDraw), [isVictory, isDraw]);
 
   useEffect(() => {
     hapticHeavy();
@@ -246,6 +274,21 @@ export const GameOverlay: React.FC<GameOverlayProps> = ({
           {isDraw ? <DrawIcon /> : isVictory ? <VictoryIcon /> : <DefeatIcon />}
         </div>
 
+        {/* Rewards */}
+        <div style={{
+          ...styles.rewardsContainer,
+          animation: 'go-content-fade 0.6s ease-out 0.5s forwards',
+          opacity: 0,
+        }}>
+          <div style={styles.rewardsTitle}>Rewards</div>
+          {rewards.map((reward, i) => (
+            <div key={i} style={styles.rewardRow}>
+              <span style={styles.rewardLabel}>{reward.label}</span>
+              <span style={{ ...styles.rewardValue, color: reward.color }}>{reward.value}</span>
+            </div>
+          ))}
+        </div>
+
         {/* Play Again button */}
         <button style={{
           ...styles.button,
@@ -314,5 +357,39 @@ const styles: { [key: string]: React.CSSProperties } = {
     transition: 'transform 0.15s ease, filter 0.15s ease',
     letterSpacing: '1px',
     textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+  },
+  rewardsContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+    width: '100%',
+    maxWidth: '280px',
+    padding: '12px 16px',
+    background: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '12px',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+  },
+  rewardsTitle: {
+    fontSize: '13px',
+    fontWeight: 'bold',
+    color: '#888899',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '2px',
+    textAlign: 'center',
+    marginBottom: '4px',
+  },
+  rewardRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '4px 0',
+  },
+  rewardLabel: {
+    fontSize: '14px',
+    color: '#aaaabb',
+  },
+  rewardValue: {
+    fontSize: '15px',
+    fontWeight: 'bold',
   },
 };

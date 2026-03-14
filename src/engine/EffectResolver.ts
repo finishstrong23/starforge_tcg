@@ -169,7 +169,7 @@ export class EffectResolver {
         break;
 
       case EffectType.DISCARD:
-        this.executeDiscard(effect.data as GenericEffectData, context);
+        this.executeDiscard(effect.data as GenericEffectData, context, effect.targetType);
         break;
 
       case EffectType.SHUFFLE_INTO_DECK:
@@ -768,21 +768,26 @@ export class EffectResolver {
   /**
    * DISCARD: Remove cards from the source player's hand randomly
    */
-  private executeDiscard(data: GenericEffectData, context: EffectContext): void {
+  private executeDiscard(data: GenericEffectData, context: EffectContext, targetType?: TargetType): void {
     const count = data.value || 1;
-    const hand = this.board.getHandCards(context.sourceOwnerId);
+    // Determine who discards: if targeting enemy, discard from opponent's hand
+    const isEnemyTarget = targetType === TargetType.ENEMY_HERO || targetType === TargetType.ENEMY_MINION || targetType === TargetType.ALL_ENEMIES;
+    const discardPlayerId = isEnemyTarget
+      ? this.stateManager.getOpponentId(context.sourceOwnerId)
+      : context.sourceOwnerId;
+    const hand = this.board.getHandCards(discardPlayerId);
     const toDiscard = Math.min(count, hand.length);
 
     for (let i = 0; i < toDiscard; i++) {
-      const remaining = this.board.getHandCards(context.sourceOwnerId);
+      const remaining = this.board.getHandCards(discardPlayerId);
       if (remaining.length === 0) break;
 
       const idx = Math.floor(Math.random() * remaining.length);
       const card = remaining[idx];
       this.board.moveCard(
         card.instanceId,
-        context.sourceOwnerId,
-        context.sourceOwnerId,
+        discardPlayerId,
+        discardPlayerId,
         CardZone.GRAVEYARD
       );
     }
@@ -993,6 +998,15 @@ export class EffectResolver {
         }
       }
       card.temporaryBuffs = [];
+    }
+
+    // Reset temporary cost reductions on hand cards
+    const handCards = this.board.getHandCards(playerId);
+    for (const card of handCards) {
+      const def = globalCardDatabase.getCard(card.definitionId);
+      if (def && card.currentCost !== def.cost) {
+        card.currentCost = def.cost;
+      }
     }
   }
 

@@ -13,7 +13,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { hasKeyword } from '../../types/Card';
+import { hasKeyword, CardType } from '../../types/Card';
 import type { CardInstance } from '../../types/Card';
 import { CombatKeyword, OriginalKeyword, TriggerKeyword } from '../../types/Keywords';
 import { globalCardDatabase } from '../../cards/CardDatabase';
@@ -365,8 +365,20 @@ export const Card: React.FC<CardProps> = ({
           <div style={styles.forgedBadge}>STARFORGED</div>
         )}
 
-        {/* Cost */}
-        <div style={styles.costBadge}>
+        {/* Cost - green when reduced, red when increased */}
+        <div style={{
+          ...styles.costBadge,
+          ...(definition && card.currentCost < definition.cost ? {
+            background: 'linear-gradient(135deg, #00aa44 0%, #008833 100%)',
+            border: '2px solid #44ff88',
+            color: '#ccffdd',
+          } : {}),
+          ...(definition && card.currentCost > definition.cost ? {
+            background: 'linear-gradient(135deg, #cc2222 0%, #aa0000 100%)',
+            border: '2px solid #ff6666',
+            color: '#ffcccc',
+          } : {}),
+        }}>
           {card.currentCost}
         </div>
 
@@ -401,13 +413,6 @@ export const Card: React.FC<CardProps> = ({
           )}
         </div>
 
-        {/* Keywords row */}
-        {cardKeywords.length > 0 && (
-          <div style={styles.keywordRow}>
-            {cardKeywords.slice(0, 3).map(kw => keywordIcons[kw] || '').join('')}
-          </div>
-        )}
-
         {/* Card text for spells (simplified) */}
         {!isMinion && isInHand && (
           <div style={styles.spellText}>
@@ -439,6 +444,25 @@ export const Card: React.FC<CardProps> = ({
           </>
         )}
       </div>
+
+      {/* Keywords row - below card on board */}
+      {isOnBoard && cardKeywords.length > 0 && (
+        <div style={styles.keywordRowBelow}>
+          {cardKeywords.slice(0, 4).map(kw => keywordIcons[kw] || '').join(' ')}
+        </div>
+      )}
+
+      {/* Keywords row - inside card in hand */}
+      {isInHand && cardKeywords.length > 0 && (
+        <div style={styles.keywordRow}>
+          {cardKeywords.slice(0, 3).map(kw => keywordIcons[kw] || '').join('')}
+        </div>
+      )}
+
+      {/* Structure glow */}
+      {isOnBoard && definition?.type === CardType.STRUCTURE && (
+        <div style={styles.structureGlow} />
+      )}
 
       {/* Full Card Preview Overlay — portaled to body to escape transform containers */}
       {showPreview && createPortal(
@@ -699,6 +723,27 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '15px',
     textAlign: 'center',
     padding: '3px 0',
+  },
+  keywordRowBelow: {
+    fontSize: '14px',
+    textAlign: 'center',
+    padding: '2px 4px',
+    marginTop: '2px',
+    background: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: '4px',
+    letterSpacing: '2px',
+  },
+  structureGlow: {
+    position: 'absolute',
+    top: '-4px',
+    left: '-4px',
+    right: '-4px',
+    bottom: '-4px',
+    borderRadius: '12px',
+    border: '2px solid rgba(255, 136, 0, 0.5)',
+    boxShadow: '0 0 12px rgba(255, 136, 0, 0.4), inset 0 0 8px rgba(255, 136, 0, 0.15)',
+    pointerEvents: 'none',
+    zIndex: -1,
   },
   // Hearthstone-style stat badges - absolute positioned, overlapping card edges
   attackBadge: {

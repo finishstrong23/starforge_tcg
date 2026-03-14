@@ -263,9 +263,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
         <div style={styles.opponentHand}>
           {Array.from({ length: opponentHandCount }, (_, index) => (
             <div key={index} style={styles.cardBack}>
-              <CardBack width={60} height={85} />
+              <CardBack width={50} height={70} />
             </div>
           ))}
+          {/* Hand count badge */}
+          <div style={styles.handCountBadge}>
+            {opponentHandCount}
+          </div>
         </div>
 
         {/* Opponent Info */}
@@ -276,7 +280,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
             isOpponent
           />
           <div style={styles.deckCount}>
-            Deck: {opponentDeckCount}
+            <span style={{ fontSize: '14px' }}>📚</span> {opponentDeckCount}
           </div>
         </div>
       </div>
@@ -668,6 +672,20 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     gap: '20px',
     marginTop: '5px',
+  },
+  handCountBadge: {
+    background: 'rgba(0, 0, 0, 0.8)',
+    border: '1px solid rgba(255, 255, 255, 0.3)',
+    borderRadius: '50%',
+    width: '24px',
+    height: '24px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginLeft: '4px',
   },
   battlefield: {
     flex: 1,
