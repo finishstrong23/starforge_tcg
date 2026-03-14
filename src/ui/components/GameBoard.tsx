@@ -27,6 +27,7 @@ import { BoardBackground } from './BoardBackground';
 import { EmoteWheel, EmoteBubble, type Emote } from './EmoteWheel';
 import { CardArt } from './CardArt';
 import { HeroIntro } from './HeroIntro';
+import { KeywordGlossary } from './KeywordGlossary';
 import { getHeroById } from '../../heroes';
 import { globalCardDatabase } from '../../cards/CardDatabase';
 import { hapticTap, hapticImpact } from '../capacitor';
@@ -97,6 +98,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
   // ── Emote state ──
   const [playerEmote, setPlayerEmote] = useState<string | null>(null);
   const [opponentEmote, setOpponentEmote] = useState<string | null>(null);
+  const [showGlossary, setShowGlossary] = useState(false);
 
   // Timer callback - auto end turn when time runs out
   const handleTimeUp = useCallback(() => {
@@ -497,10 +499,24 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       {/* Sound toggle */}
       <SoundToggle />
 
+      {/* Keyword Glossary button */}
+      <button
+        style={styles.glossaryButton}
+        onClick={() => setShowGlossary(true)}
+        title="Keyword Reference"
+      >
+        {'?'}
+      </button>
+
       {/* Back button */}
       <button style={styles.backButton} onClick={onBackToMenu}>
         {'\u2715'}
       </button>
+
+      {/* Keyword Glossary Overlay */}
+      {showGlossary && (
+        <KeywordGlossary onClose={() => setShowGlossary(false)} />
+      )}
 
       {/* Card Flight Animation Overlay */}
       {flightCard && (
@@ -764,6 +780,24 @@ const styles: { [key: string]: React.CSSProperties } = {
     transform: 'translateX(-50%)',
     fontSize: '14px',
     color: '#666688',
+  },
+  glossaryButton: {
+    position: 'absolute',
+    top: '10px',
+    right: '62px',
+    width: '44px',
+    height: '44px',
+    background: 'rgba(0, 0, 0, 0.5)',
+    border: '1px solid #4488ff',
+    borderRadius: '50%',
+    color: '#4488ff',
+    fontSize: '20px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
   },
   backButton: {
     position: 'absolute',
