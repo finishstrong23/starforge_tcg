@@ -88,13 +88,10 @@ export interface KeywordInstance {
  * Adapt options that can be chosen
  */
 export enum AdaptOption {
-  ATTACK_PLUS_3 = 'ATTACK_PLUS_3',
-  HEALTH_PLUS_3 = 'HEALTH_PLUS_3',
-  GUARDIAN = 'GUARDIAN',
-  BARRIER = 'BARRIER',
+  BLITZ = 'BLITZ',
   SWIFT = 'SWIFT',
-  DRAIN = 'DRAIN',
-  LETHAL = 'LETHAL',
+  BARRIER = 'BARRIER',
+  DOUBLE_STRIKE = 'DOUBLE_STRIKE',
 }
 
 /**

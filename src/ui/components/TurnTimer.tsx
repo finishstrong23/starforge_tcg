@@ -1,7 +1,7 @@
 /**
  * STARFORGE TCG - Turn Timer Component
  *
- * 30 second countdown timer that auto-ends turn when it expires
+ * 60 second countdown timer that auto-ends turn when it expires
  */
 
 import React, { useEffect, useState } from 'react';
@@ -62,9 +62,9 @@ export const TurnTimer: React.FC<TurnTimerProps> = ({
 
   // Color changes as time runs out
   let color = '#00ff88';
-  if (timeLeft <= 10) {
+  if (timeLeft <= 15) {
     color = '#ff3333';
-  } else if (timeLeft <= 20) {
+  } else if (timeLeft <= 30) {
     color = '#ffcc00';
   }
 

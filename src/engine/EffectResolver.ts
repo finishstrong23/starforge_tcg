@@ -1061,16 +1061,14 @@ export class EffectResolver {
    */
   private applyAdaptOption(card: CardInstance, option: AdaptOption): void {
     switch (option) {
-      case AdaptOption.ATTACK_PLUS_3:
-        if (card.currentAttack !== undefined) card.currentAttack += 3;
+      case AdaptOption.BLITZ:
+        if (!hasKeyword(card, CombatKeyword.BLITZ)) {
+          card.keywords.push({ keyword: CombatKeyword.BLITZ });
+        }
         break;
-      case AdaptOption.HEALTH_PLUS_3:
-        if (card.currentHealth !== undefined) card.currentHealth += 3;
-        if (card.maxHealth !== undefined) card.maxHealth += 3;
-        break;
-      case AdaptOption.GUARDIAN:
-        if (!hasKeyword(card, CombatKeyword.GUARDIAN)) {
-          card.keywords.push({ keyword: CombatKeyword.GUARDIAN });
+      case AdaptOption.SWIFT:
+        if (!hasKeyword(card, CombatKeyword.SWIFT)) {
+          card.keywords.push({ keyword: CombatKeyword.SWIFT });
         }
         break;
       case AdaptOption.BARRIER:
@@ -1079,19 +1077,9 @@ export class EffectResolver {
           card.hasBarrier = true;
         }
         break;
-      case AdaptOption.SWIFT:
-        if (!hasKeyword(card, CombatKeyword.SWIFT)) {
-          card.keywords.push({ keyword: CombatKeyword.SWIFT });
-        }
-        break;
-      case AdaptOption.DRAIN:
-        if (!hasKeyword(card, CombatKeyword.DRAIN)) {
-          card.keywords.push({ keyword: CombatKeyword.DRAIN });
-        }
-        break;
-      case AdaptOption.LETHAL:
-        if (!hasKeyword(card, CombatKeyword.LETHAL)) {
-          card.keywords.push({ keyword: CombatKeyword.LETHAL });
+      case AdaptOption.DOUBLE_STRIKE:
+        if (!hasKeyword(card, CombatKeyword.DOUBLE_STRIKE)) {
+          card.keywords.push({ keyword: CombatKeyword.DOUBLE_STRIKE });
         }
         break;
     }

@@ -64,7 +64,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     title: 'Trigger & Unique Keywords',
-    text: 'Cards also have trigger abilities and Starforge-original keywords:\n• DEPLOY — effect happens when played from hand\n• LAST WORDS — effect triggers when destroyed\n• ADAPT — choose 1 of 3 random bonuses (BioTitans specialty)\n• PHASE — can\'t be targeted by spells or Hero Powers\n• RESONATE — triggers each time you cast a spell\n• SALVAGE — draws a card when destroyed',
+    text: 'Cards also have trigger abilities and Starforge-original keywords:\n• DEPLOY — effect happens when played from hand\n• LAST WORDS — effect triggers when destroyed\n• ADAPT — gain a random basic keyword: Blitz, Swift, Barrier, or Double Strike (BioTitans specialty)\n• PHASE — can\'t be targeted by spells or Hero Powers\n• RESONATE — triggers each time you cast a spell\n• SALVAGE — draws a card when destroyed',
     highlight: 'none',
     tip: 'Hover over any card to see all its keyword descriptions in the tooltip!',
   },
