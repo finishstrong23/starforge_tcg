@@ -586,7 +586,9 @@ export class EffectResolver {
       if (targetId.startsWith('hero_')) continue;
 
       const card = this.board.getCard(targetId);
-      if (!card || card.zone !== CardZone.BOARD) continue;
+      if (!card) continue;
+      // Allow bouncing from BOARD or GRAVEYARD (for LAST_WORDS triggers)
+      if (card.zone !== CardZone.BOARD && card.zone !== CardZone.GRAVEYARD) continue;
 
       this.board.moveCard(
         targetId,
