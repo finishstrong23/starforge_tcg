@@ -75,13 +75,6 @@ const TEST_CARDS: CardDefinition[] = [
     cardText: 'Salvage', collectible: true, set: 'TEST',
   },
 
-  // IMMOLATE(2) minion (deal 2 dmg on death)
-  {
-    id: 'test_immolate', name: 'Test Immolate', cost: 2, type: CardType.MINION,
-    rarity: CardRarity.COMMON, attack: 2, health: 1,
-    keywords: [{ keyword: OriginalKeyword.IMMOLATE, value: 2 }], effects: [],
-    cardText: 'Immolate(2)', collectible: true, set: 'TEST',
-  },
 
   // SWARM minion (+1/+1 per other friendly)
   {
@@ -318,48 +311,6 @@ describe('SALVAGE Keyword', () => {
   });
 });
 
-describe('IMMOLATE Keyword', () => {
-  it('should deal damage to all enemy minions when dying', () => {
-    const engine = setupTestGame();
-
-    const immolateMinion = placeOnBoard(engine, 'test_immolate', 'player1');
-    const enemy = placeOnBoard(engine, 'test_vanilla_5_5', 'player2');
-    const enemyHpBefore = enemy.currentHealth!;
-
-    killMinion(immolateMinion);
-    engine.getDeathProcessor().processDeaths();
-
-    expect(enemy.currentHealth).toBe(enemyHpBefore - 2);
-  });
-
-  it('should kill weak enemies and cascade', () => {
-    const engine = setupTestGame();
-
-    const immolateMinion = placeOnBoard(engine, 'test_immolate', 'player1');
-    const weakEnemy = placeOnBoard(engine, 'test_vanilla_1_1', 'player2');
-
-    killMinion(immolateMinion);
-    engine.getDeathProcessor().processDeaths();
-
-    expect(weakEnemy.zone).toBe(CardZone.GRAVEYARD);
-  });
-
-  it('should NOT trigger when silenced', () => {
-    const engine = setupTestGame();
-
-    const immolateMinion = placeOnBoard(engine, 'test_immolate', 'player1');
-    immolateMinion.keywords = [];
-    immolateMinion.isSilenced = true;
-
-    const enemy = placeOnBoard(engine, 'test_vanilla_5_5', 'player2');
-    const enemyHpBefore = enemy.currentHealth!;
-
-    killMinion(immolateMinion);
-    engine.getDeathProcessor().processDeaths();
-
-    expect(enemy.currentHealth).toBe(enemyHpBefore);
-  });
-});
 
 describe('Silence Keyword Interaction', () => {
   it('should remove all keywords from a minion', () => {

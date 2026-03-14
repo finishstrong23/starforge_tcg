@@ -744,7 +744,7 @@ describe('LAST_WORDS Keyword', () => {
     });
   });
 
-  describe('SALVAGE and IMMOLATE keywords (death-related)', () => {
+  describe('SALVAGE keyword (death-related)', () => {
     it('should process SALVAGE (draw a card) on death', () => {
       const engine = setupTestGame();
       const board = engine.getStateManager().getBoard();
@@ -761,25 +761,6 @@ describe('LAST_WORDS Keyword', () => {
       // SALVAGE should have drawn a card
       expect(result.cardsDrawn.length).toBe(1);
       expect(board.getHandCount('player1')).toBe(handBefore + 1);
-    });
-
-    it('should process IMMOLATE (deal damage) on death', () => {
-      const engine = setupTestGame();
-
-      // Create card with IMMOLATE(2) keyword
-      const card = placeOnBoard(engine, 'test_vanilla_2_2', 'player1');
-      card.keywords.push({ keyword: 'IMMOLATE' as any, value: 2 });
-
-      // Place enemy minion
-      const enemy = placeOnBoard(engine, 'test_vanilla_5_5', 'player2');
-      const healthBefore = enemy.currentHealth!;
-
-      killMinion(card);
-      const result = engine.getDeathProcessor().processDeaths();
-
-      // IMMOLATE should have dealt 2 damage to enemy
-      expect(enemy.currentHealth).toBe(healthBefore - 2);
-      expect(result.immolateDamage.size).toBeGreaterThan(0);
     });
   });
 });
