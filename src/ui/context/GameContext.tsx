@@ -309,7 +309,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   }, []);
 
   // Helper: add an entry to the combat log
-  const addLogEntry = useCallback((text: string, type: CombatLogEntry['type'], isPlayer: boolean, turn: number) => {
+  const addLogEntry = useCallback((text: string, type: CombatLogEntry['type'], isPlayer: boolean, turn: number, cardId?: string) => {
     const entry: CombatLogEntry = {
       id: logIdRef.current++,
       turn,
@@ -317,6 +317,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       type,
       isPlayer,
       timestamp: Date.now(),
+      cardId,
     };
     setCombatLog(prev => [...prev, entry]);
   }, []);
@@ -338,7 +339,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const data = event.data as CardEventData;
         const def = globalCardDatabase.getCard(data.cardDefinitionId);
         const name = def?.name || data.cardDefinitionId;
-        addLogEntry(`${who} played ${name}`, 'play', isPlayer, event.turn);
+        addLogEntry(`${who} played ${name}`, 'play', isPlayer, event.turn, data.cardDefinitionId);
         if (def?.rarity === 'LEGENDARY') {
           SoundManager.play('legendaryPlay');
         } else if (def?.type === CardType.SPELL) {
@@ -380,7 +381,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const def = globalCardDatabase.getCard(data.cardDefinitionId);
         const name = def?.name || data.cardDefinitionId;
         const owner = data.playerId === 'player' ? 'Your' : "Opponent's";
-        addLogEntry(`${owner} ${name} was destroyed`, 'death', data.playerId !== 'player', event.turn);
+        addLogEntry(`${owner} ${name} was destroyed`, 'death', data.playerId !== 'player', event.turn, data.cardDefinitionId);
         if (data.cardInstanceId) emitVFX('death', data.cardInstanceId);
         SoundManager.play('minionDeath');
         break;
@@ -414,7 +415,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const owner = data.playerId === 'player' ? 'Your' : "Opponent's";
         // Extract the Last Words portion of the card text
         const lwText = data.effectDescription.match(/LAST WORDS:\s*(.*?)(?:\.|$)/i)?.[1] || 'effect triggered';
-        addLogEntry(`${owner} ${name}'s Last Words: ${lwText}`, 'effect', data.playerId !== 'player', event.turn);
+        addLogEntry(`${owner} ${name}'s Last Words: ${lwText}`, 'effect', data.playerId !== 'player', event.turn, data.cardDefinitionId);
         if (data.cardInstanceId) emitVFX('last_words', data.cardInstanceId, undefined, 'LAST WORDS');
         break;
       }
@@ -614,11 +615,20 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           const stateManager = engine.getStateManager();
           const board = stateManager.getBoard();
           let actionsTaken = 0;
-          const maxActions = 20;
+          const maxActions = 15;
+          const turnStartTime = Date.now();
+          const maxTurnDurationMs = 20000; // Safety: 20 second max for AI turn
 
           while (actionsTaken < maxActions) {
+            // Safety timeout — never let AI turn run longer than 20 seconds
+            if (Date.now() - turnStartTime > maxTurnDurationMs) {
+              console.warn('AI turn safety timeout reached, ending turn');
+              break;
+            }
+
             const state = stateManager.getState();
             if (state.activePlayerId !== 'opponent' || state.phase !== GamePhase.MAIN) break;
+            if (state.status !== GameStatus.ACTIVE) break;
 
             const action = (ai as any).decideAction(stateManager, board, engine);
             if (!action) break;
@@ -631,7 +641,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             forceUpdateRef.current();
 
             // Wait between actions so player can see each move (Hearthstone-style pacing)
-            await new Promise(resolve => setTimeout(resolve, 2500));
+            await new Promise(resolve => setTimeout(resolve, 1200));
           }
 
           // End turn
@@ -646,6 +656,17 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         }
       } catch (err) {
         console.error('AI turn error:', err);
+        // On error, force end the AI turn so game doesn't get stuck
+        try {
+          if (engineRef.current) {
+            engineRef.current.processAction({
+              type: ActionType.END_TURN,
+              playerId: 'opponent',
+              timestamp: Date.now(),
+              data: {},
+            });
+          }
+        } catch { /* ignore */ }
       } finally {
         aiTurnInProgressRef.current = false;
         forceUpdateRef.current();

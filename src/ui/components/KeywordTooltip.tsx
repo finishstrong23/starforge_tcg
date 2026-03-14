@@ -27,7 +27,7 @@ export const KEYWORD_DESCRIPTIONS: Record<string, { name: string; description: s
   UPGRADE: { name: 'Upgrade', description: 'Pay extra Crystals when playing for a bonus effect.' },
   ILLUMINATE: { name: 'Illuminate', description: 'Triggers a bonus effect when you heal any target.' },
   BANISH: { name: 'Banish', description: 'Removes a card from the game permanently.' },
-  ADAPT: { name: 'Adapt', description: 'Choose 1 of 3 random bonuses.' },
+  ADAPT: { name: 'Adapt', description: 'Gain a random basic keyword: Blitz, Swift, Barrier, or Double Strike.' },
   RESONATE: { name: 'Resonate', description: 'Triggers when you cast a spell.' },
   PHASE: { name: 'Phase', description: "Can't be targeted by spells or Hero Powers." },
   SWARM: { name: 'Swarm', description: 'Gets +1/+1 for each other friendly minion.' },

@@ -100,11 +100,11 @@ export const HeroIntro: React.FC<HeroIntroProps> = ({
       <div style={introStyles.bgSplit}>
         <div style={{
           ...introStyles.bgHalf,
-          background: `linear-gradient(135deg, ${playerColor.primary}15 0%, transparent 60%)`,
+          background: `linear-gradient(180deg, ${playerColor.primary}15 0%, transparent 60%)`,
         }} />
         <div style={{
           ...introStyles.bgHalf,
-          background: `linear-gradient(315deg, ${opponentColor.primary}15 0%, transparent 60%)`,
+          background: `linear-gradient(0deg, ${opponentColor.primary}15 0%, transparent 60%)`,
         }} />
       </div>
 
@@ -115,11 +115,11 @@ export const HeroIntro: React.FC<HeroIntroProps> = ({
         boxShadow: phase >= 3 ? '0 0 40px rgba(255, 255, 255, 0.3)' : 'none',
       }} />
 
-      {/* Player Hero (left side) */}
+      {/* Player Hero (top) */}
       <div style={{
         ...introStyles.heroPanel,
         ...introStyles.playerPanel,
-        transform: phase >= 1 ? 'translateX(0)' : 'translateX(-100%)',
+        transform: phase >= 1 ? 'translateY(0)' : 'translateY(-100%)',
         opacity: phase >= 1 ? 1 : 0,
       }}>
         <div style={{
@@ -175,11 +175,11 @@ export const HeroIntro: React.FC<HeroIntroProps> = ({
         <span style={introStyles.vsText}>VS</span>
       </div>
 
-      {/* Opponent Hero (right side) */}
+      {/* Opponent Hero (bottom) */}
       <div style={{
         ...introStyles.heroPanel,
         ...introStyles.opponentPanel,
-        transform: phase >= 2 ? 'translateX(0)' : 'translateX(100%)',
+        transform: phase >= 2 ? 'translateY(0)' : 'translateY(100%)',
         opacity: phase >= 2 ? 1 : 0,
       }}>
         <div style={{
@@ -255,6 +255,7 @@ const introStyles: { [key: string]: React.CSSProperties } = {
     right: 0,
     bottom: 0,
     display: 'flex',
+    flexDirection: 'column',
   },
   bgHalf: {
     flex: 1,
@@ -262,31 +263,31 @@ const introStyles: { [key: string]: React.CSSProperties } = {
   },
   centerBeam: {
     position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: '50%',
-    width: '2px',
-    background: 'linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.4) 70%, transparent 100%)',
-    transform: 'translateX(-50%)',
+    left: 0,
+    right: 0,
+    top: '50%',
+    height: '2px',
+    background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 30%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.4) 70%, transparent 100%)',
+    transform: 'translateY(-50%)',
     transition: 'opacity 0.5s ease',
   },
   heroPanel: {
     position: 'absolute',
-    top: '50%',
-    transform: 'translateY(-50%)',
+    left: '50%',
+    transform: 'translateX(-50%)',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '16px',
+    gap: '12px',
     transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease',
-    width: '40%',
+    width: '90%',
     maxWidth: '350px',
   },
   playerPanel: {
-    left: '5%',
+    top: '8%',
   },
   opponentPanel: {
-    right: '5%',
+    bottom: '8%',
   },
   heroPortraitFrame: {
     width: '110px',
