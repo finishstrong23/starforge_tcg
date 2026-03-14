@@ -35,7 +35,6 @@ const KEYWORDS: KeywordEntry[] = [
   { name: 'SALVAGE', category: 'original', description: 'Last Words: Draw a card when this minion dies.', example: 'Trade your Salvage minion for a card draw.', color: '#88ccff' },
   { name: 'UPGRADE', category: 'original', description: 'Pay X extra mana when playing for a bonus effect.', example: 'Upgrade(3): Gain +3/+3 if you pay 3 extra mana.', color: '#ffcc00' },
   { name: 'ILLUMINATE', category: 'original', description: 'Triggers a bonus effect whenever you heal any target.', example: 'Illuminate: Deal 1 damage to a random enemy when you heal.', color: '#ffffff' },
-  { name: 'IMMOLATE', category: 'original', description: 'Deals X damage to all enemies when this minion dies.', example: 'Immolate(3): Deals 3 AoE damage on death.', color: '#ff6600' },
   { name: 'BANISH', category: 'original', description: 'Removes a card from the game entirely (exile).', example: 'Banish the enemy\'s key combo piece permanently.', color: '#cc00ff' },
   { name: 'ADAPT', category: 'original', description: 'Choose 1 of 3 random bonuses when played.', example: 'Adapt might offer +3 Attack, Barrier, or Lethal.', color: '#00ffcc' },
   { name: 'RESONATE', category: 'original', description: 'Triggers an effect whenever you cast a spell.', example: 'Resonate: Gain +1 Attack each time you cast a spell.', color: '#ff44aa' },
