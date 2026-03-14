@@ -207,7 +207,7 @@ export const Card: React.FC<CardProps> = ({
   const currentAttack = card.currentAttack ?? 0;
   const currentHealth = card.currentHealth ?? 0;
   const attackColor = currentAttack > baseAttack ? '#00ff44' : currentAttack < baseAttack ? '#ff4444' : '#000000';
-  const healthTextColor = currentHealth < baseHealth ? '#ffffff' : currentHealth > baseHealth ? '#00ff44' : '#ffffff';
+  const healthTextColor = currentHealth < baseHealth ? '#ff4444' : currentHealth > baseHealth ? '#00ff44' : '#ffffff';
 
   // Determine border/glow style
   let borderColor = '#444466';
@@ -240,7 +240,7 @@ export const Card: React.FC<CardProps> = ({
   };
   const rarityColor = rarityColors[definition?.rarity || 'COMMON'];
 
-  // Get keywords for display
+  // Get keywords for display (from card's keyword array)
   const cardKeywords: string[] = [];
   if (hasKeyword(card, CombatKeyword.GUARDIAN)) cardKeywords.push('GUARDIAN');
   if (hasKeyword(card, CombatKeyword.BARRIER)) cardKeywords.push('BARRIER');
@@ -253,6 +253,20 @@ export const Card: React.FC<CardProps> = ({
   if (hasKeyword(card, TriggerKeyword.DEPLOY)) cardKeywords.push('DEPLOY');
   if (hasKeyword(card, TriggerKeyword.LAST_WORDS)) cardKeywords.push('LAST_WORDS');
   if (hasKeyword(card, OriginalKeyword.SALVAGE)) cardKeywords.push('SALVAGE');
+
+  // Extract keywords mentioned in card text (for tooltip display)
+  const allKeywordNames = Object.keys(KEYWORD_DESCRIPTIONS);
+  const textKeywords: string[] = [];
+  if (definition?.cardText) {
+    const text = definition.cardText.toUpperCase();
+    for (const kw of allKeywordNames) {
+      const kwDisplay = kw.replace(/_/g, ' ');
+      if (text.includes(kwDisplay) && !cardKeywords.includes(kw)) {
+        textKeywords.push(kw);
+      }
+    }
+  }
+  const allDisplayKeywords = [...cardKeywords, ...textKeywords];
 
   const keywordIcons: Record<string, string> = {
     GUARDIAN: '🛡️',
@@ -407,7 +421,19 @@ export const Card: React.FC<CardProps> = ({
             <div style={{ ...styles.attackBadge, color: attackColor }}>
               {currentAttack}
             </div>
-            <div style={{ ...styles.healthBadge, color: healthTextColor }}>
+            <div style={{
+              ...styles.healthBadge,
+              color: healthTextColor,
+              ...(currentHealth < baseHealth ? {
+                background: 'linear-gradient(135deg, #ff2222 0%, #cc0000 100%)',
+                border: '2px solid #ff6666',
+                fontSize: '18px',
+              } : {}),
+              ...(currentHealth > baseHealth ? {
+                background: 'linear-gradient(135deg, #22aa22 0%, #008800 100%)',
+                border: '2px solid #66ff66',
+              } : {}),
+            }}>
               {currentHealth}
             </div>
           </>
@@ -466,13 +492,13 @@ export const Card: React.FC<CardProps> = ({
               <div style={styles.previewText}>{definition.cardText}</div>
             )}
 
-            {cardKeywords.length > 0 && (
+            {allDisplayKeywords.length > 0 && (
               <div style={styles.previewKeywords}>
-                {cardKeywords.map(kw => {
+                {allDisplayKeywords.map(kw => {
                   const info = KEYWORD_DESCRIPTIONS[kw];
                   return info ? (
                     <div key={kw} style={{ marginBottom: '8px' }}>
-                      <span style={{ fontSize: '17px', color: '#ffcc00', fontWeight: 'bold' }}>{keywordIcons[kw]} {info.name}</span>
+                      <span style={{ fontSize: '17px', color: '#ffcc00', fontWeight: 'bold' }}>{keywordIcons[kw] || '📖'} {info.name}</span>
                       <span style={{ display: 'block', fontSize: '14px', color: '#aaa', lineHeight: '1.5' }}>{info.description}</span>
                     </div>
                   ) : null;
@@ -560,14 +586,14 @@ export const Card: React.FC<CardProps> = ({
             <div style={styles.popupText}>{definition.cardText}</div>
           )}
 
-          {/* Keyword explanations */}
-          {cardKeywords.length > 0 && (
+          {/* Keyword explanations — includes keywords from card text */}
+          {allDisplayKeywords.length > 0 && (
             <div style={styles.popupKeywords}>
-              {cardKeywords.map(kw => {
+              {allDisplayKeywords.map(kw => {
                 const info = KEYWORD_DESCRIPTIONS[kw];
                 return info ? (
                   <div key={kw} style={styles.keywordItem}>
-                    <span style={styles.keywordName}>{keywordIcons[kw]} {info.name}</span>
+                    <span style={styles.keywordName}>{keywordIcons[kw] || '📖'} {info.name}</span>
                     <span style={styles.keywordDesc}>{info.description}</span>
                   </div>
                 ) : null;
