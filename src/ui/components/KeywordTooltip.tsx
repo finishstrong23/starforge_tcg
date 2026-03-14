@@ -26,7 +26,6 @@ export const KEYWORD_DESCRIPTIONS: Record<string, { name: string; description: s
   SALVAGE: { name: 'Salvage', description: 'Last Words: Draw a card.' },
   UPGRADE: { name: 'Upgrade', description: 'Pay extra Crystals when playing for a bonus effect.' },
   ILLUMINATE: { name: 'Illuminate', description: 'Triggers a bonus effect when you heal any target.' },
-  IMMOLATE: { name: 'Immolate', description: 'Deals damage to all enemies when this dies.' },
   BANISH: { name: 'Banish', description: 'Removes a card from the game permanently.' },
   ADAPT: { name: 'Adapt', description: 'Choose 1 of 3 random bonuses.' },
   RESONATE: { name: 'Resonate', description: 'Triggers when you cast a spell.' },

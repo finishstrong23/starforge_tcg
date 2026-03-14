@@ -68,8 +68,8 @@ export enum StarforgeConditionType {
   SCRY_COUNT = 'SCRY_COUNT',
   /** After playing X ECHO cards */
   ECHO_CARDS_PLAYED = 'ECHO_CARDS_PLAYED',
-  /** After dealing X IMMOLATE damage */
-  IMMOLATE_DAMAGE = 'IMMOLATE_DAMAGE',
+  /** After dealing X Last Words damage */
+  LAST_WORDS_DAMAGE = 'LAST_WORDS_DAMAGE',
 }
 
 /**

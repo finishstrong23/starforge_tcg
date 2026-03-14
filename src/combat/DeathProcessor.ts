@@ -37,12 +37,10 @@ export interface DeathEvent {
 export interface DeathProcessResult {
   /** Cards that died */
   deaths: DeathEvent[];
-  /** Effects that triggered (LAST_WORDS, IMMOLATE, SALVAGE) */
+  /** Effects that triggered (LAST_WORDS, SALVAGE) */
   triggeredEffects: Effect[];
   /** Cards drawn from SALVAGE */
   cardsDrawn: string[];
-  /** IMMOLATE damage dealt */
-  immolateDamage: Map<string, number>;
 }
 
 /**
@@ -108,7 +106,6 @@ export class DeathProcessor {
       deaths: [],
       triggeredEffects: [],
       cardsDrawn: [],
-      immolateDamage: new Map(),
     };
 
     // Collect deaths from both players
@@ -188,41 +185,17 @@ export class DeathProcessor {
         }
       }
 
-      // Process IMMOLATE
-      const immolateKeyword = death.keywords.find(
-        (k) => k.keyword === OriginalKeyword.IMMOLATE
-      );
-      if (immolateKeyword && immolateKeyword.value) {
-        const damage = immolateKeyword.value;
-        // Deal damage to all enemy minions
-        const opponentId = this.gameState.getOpponentId(death.ownerId);
-        const enemyMinions = this.board.getBoardCards(opponentId);
-
-        for (const enemy of enemyMinions) {
-          if (enemy.currentHealth !== undefined) {
-            enemy.currentHealth -= damage;
-            const current = result.immolateDamage.get(enemy.instanceId) || 0;
-            result.immolateDamage.set(enemy.instanceId, current + damage);
-          }
-        }
-      }
 
       // Update player stats
       const player = this.gameState.getPlayer(death.ownerId);
       // Track friendly minion deaths (for various triggers)
     }
 
-    // Recursively check for more deaths (from IMMOLATE, etc.)
+    // Recursively check for more deaths (from Last Words effects, etc.)
     const additionalDeaths = this.processDeaths();
     result.deaths.push(...additionalDeaths.deaths);
     result.triggeredEffects.push(...additionalDeaths.triggeredEffects);
     result.cardsDrawn.push(...additionalDeaths.cardsDrawn);
-
-    // Merge immolate damage
-    for (const [id, damage] of additionalDeaths.immolateDamage) {
-      const current = result.immolateDamage.get(id) || 0;
-      result.immolateDamage.set(id, current + damage);
-    }
 
     return result;
   }

@@ -46,8 +46,6 @@ export enum OriginalKeyword {
   UPGRADE = 'UPGRADE',
   /** Trigger bonus when you heal any target */
   ILLUMINATE = 'ILLUMINATE',
-  /** Deal damage when this dies */
-  IMMOLATE = 'IMMOLATE',
   /** Exile card permanently (removed from game) */
   BANISH = 'BANISH',
   /** Choose 1 of 3 random bonuses */
@@ -83,7 +81,7 @@ export const AllKeywords = {
  */
 export interface KeywordInstance {
   keyword: Keyword;
-  value?: number; // For UPGRADE(X), IMMOLATE(X), SCRY(X)
+  value?: number; // For UPGRADE(X), SCRY(X)
 }
 
 /**
@@ -130,7 +128,6 @@ export function isOriginalKeyword(keyword: Keyword): keyword is OriginalKeyword 
  */
 export const KeywordsWithValue: Keyword[] = [
   OriginalKeyword.UPGRADE,
-  OriginalKeyword.IMMOLATE,
   OriginalKeyword.SCRY,
 ];
 

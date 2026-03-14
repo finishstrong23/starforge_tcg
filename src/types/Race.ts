@@ -70,7 +70,7 @@ export const RaceData: Record<Race, RaceInfo> = {
     planet: 'Ignaros',
     theme: 'Fire worship, aggressive damage, burn',
     playstyle: 'Aggressive face damage and suicide minions',
-    winCondition: 'Burn opponent down with direct damage and IMMOLATE triggers',
+    winCondition: 'Burn opponent down with direct damage and Last Words triggers',
   },
   [Race.VOIDBORN]: {
     race: Race.VOIDBORN,

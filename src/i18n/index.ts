@@ -70,7 +70,6 @@ export interface TranslationMap {
   'keyword.salvage': string;
   'keyword.upgrade': string;
   'keyword.illuminate': string;
-  'keyword.immolate': string;
   'keyword.banish': string;
   'keyword.adapt': string;
   'keyword.resonate': string;
@@ -214,7 +213,6 @@ const EN: TranslationMap = {
   'keyword.salvage': 'Last Words: Draw a card.',
   'keyword.upgrade': 'Pay extra crystals for a bonus effect.',
   'keyword.illuminate': 'Triggers whenever any healing occurs.',
-  'keyword.immolate': 'Deals damage to all enemies when this dies.',
   'keyword.banish': 'Removes a card from the game permanently.',
   'keyword.adapt': 'Choose 1 of 3 random bonuses.',
   'keyword.resonate': 'Triggers whenever a spell is cast.',
