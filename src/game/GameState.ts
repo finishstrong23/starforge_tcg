@@ -198,6 +198,13 @@ export class GameStateManager {
   }
 
   /**
+   * Get card instance (returns undefined if not found)
+   */
+  tryGetCard(instanceId: string): CardInstance | undefined {
+    return this.state.cards.get(instanceId);
+  }
+
+  /**
    * Get card instance
    */
   getCard(instanceId: string): CardInstance {

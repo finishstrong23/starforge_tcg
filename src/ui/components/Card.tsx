@@ -175,6 +175,7 @@ export const Card: React.FC<CardProps> = ({
       const timer = setTimeout(() => setShowPreview(false), delay);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [showPreview, isInHand]);
 
   // Close preview when targeting state changes, card zone changes, or any game state shift

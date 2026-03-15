@@ -369,7 +369,11 @@ export class GameEngine {
     const data = action.data as AttackData;
 
     // Fire ON_ATTACK effects on the attacker before combat resolves
-    const attacker = this.stateManager.getCard(data.attackerId);
+    const attackerExists = this.stateManager.tryGetCard(data.attackerId);
+    if (!attackerExists) {
+      return { success: false, error: 'Attacker no longer exists', events: [] };
+    }
+    const attacker = attackerExists;
     if (attacker && !attacker.isSilenced) {
       const attackerDef = this.cardDatabase.getCard(attacker.definitionId);
       if (attackerDef) {

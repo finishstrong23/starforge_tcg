@@ -236,7 +236,7 @@ export class AIPlayer {
 
   private decideMedium(board: GameBoard, player: PlayerState, opponent: PlayerState, opponentId: string, engine?: GameEngine): GameAction | null {
     // 0. STARFORGE ASCENSION: If we have a legendary on board and enough mana, consider forging
-    const starforgeAction = this.tryStarforge(engine, board, player, opponent);
+    const starforgeAction = this.tryStarforge(engine, board, player, opponent, opponentId);
     if (starforgeAction) return starforgeAction;
 
     // 1. Play cards — try to spend all mana, prefer higher value
@@ -274,7 +274,7 @@ export class AIPlayer {
     // ── Step 0: STARFORGE ASCENSION — ultimate power spike ─────────────
     // Sacrifice ALL mana + next turn's mana to ascend a legendary.
     // Only when the payoff is overwhelming and we're not about to die.
-    const starforgeAction = this.tryStarforge(engine, board, player, opponent);
+    const starforgeAction = this.tryStarforge(engine, board, player, opponent, opponentId);
     if (starforgeAction) return starforgeAction;
 
     // ── Step 1: Check lethal (always — every deck should win when it can) ──
@@ -857,7 +857,7 @@ export class AIPlayer {
   //   - Value keyword synergies (bonus keyword is granted automatically)
   //   - Prefer forging when opponent can't easily remove the threat
 
-  private tryStarforge(engine: GameEngine | undefined, board: GameBoard, player: PlayerState, opponent: PlayerState): GameAction | null {
+  private tryStarforge(engine: GameEngine | undefined, board: GameBoard, player: PlayerState, opponent: PlayerState, opponentId?: string): GameAction | null {
     if (!engine) return null;
 
     const targets = engine.getStarforgeTargets(this.playerId);
@@ -871,8 +871,8 @@ export class AIPlayer {
     }
 
     // Don't STARFORGE if opponent has a massive board (we need mana to respond)
-    const opponentId = this.playerId === 'player' ? 'opponent' : 'player';
-    const oppBoardSize = board.getBoardCards(opponentId).length;
+    const oppId = opponentId || (this.playerId === 'p1' ? 'p2' : 'p1');
+    const oppBoardSize = board.getBoardCards(oppId).length;
     if (oppBoardSize >= 5 && player.hero.currentHealth <= 15) {
       return null;
     }

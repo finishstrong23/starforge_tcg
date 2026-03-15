@@ -20,7 +20,10 @@
     "test:e2e": "npx playwright test",
     "test:e2e:headed": "npx playwright test --headed",
     "test:e2e:ui": "npx playwright test --ui",
-    "test:e2e:report": "npx playwright show-report reports/playwright-html"
+    "test:e2e:report": "npx playwright show-report reports/playwright-html",
+    "stress-test": "node stress-test.mjs",
+    "stress-test:1000": "node stress-test.mjs 1000",
+    "stress-test:5000": "node stress-test.mjs 5000"
   },
   "keywords": [
     "tcg",
