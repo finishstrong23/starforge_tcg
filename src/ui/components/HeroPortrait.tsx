@@ -203,7 +203,7 @@ export const HeroPortrait: React.FC<HeroPortraitProps> = ({
         </div>
 
         {/* Health number */}
-        <div style={styles.healthNumber}>
+        <div data-testid={isOpponent ? 'opponent-hero-health' : 'player-hero-health'} style={styles.healthNumber}>
           <span style={isDamaged ? styles.damagedHealth : undefined}>
             {health}
           </span>

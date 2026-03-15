@@ -12,3 +12,11 @@ ios/App/Pods/
 ios/App/DerivedData/
 ios/App/App/public/
 android/app/src/main/assets/public/
+
+# Playwright
+reports/playwright-html/
+reports/playwright-results.json
+reports/test-results/
+reports/screenshots/
+/test-results/
+/playwright-report/

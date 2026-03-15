@@ -208,7 +208,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     : null;
 
   return (
-    <div className="game-board" style={styles.container}>
+    <div className="game-board" data-testid="game-board" style={styles.container}>
       {/* Animated starfield background */}
       <BoardBackground />
 
@@ -258,9 +258,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       <CombatLog entries={combatLog} />
 
       {/* Opponent Area */}
-      <div style={styles.opponentArea}>
+      <div data-testid="opponent-area" style={styles.opponentArea}>
         {/* Opponent Hand (face down) — use actual Board zone count */}
-        <div style={styles.opponentHand}>
+        <div data-testid="opponent-hand" style={styles.opponentHand}>
           {Array.from({ length: opponentHandCount }, (_, index) => (
             <div key={index} style={styles.cardBack}>
               <CardBack width={50} height={70} />
@@ -286,10 +286,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       </div>
 
       {/* Battlefield */}
-      <div style={styles.battlefield} onClick={handleBoardClick}>
+      <div data-testid="battlefield" style={styles.battlefield} onClick={handleBoardClick}>
         {/* Opponent Board */}
         <div style={styles.boardRow}>
-          <div data-card-id="hero_opponent" style={{ position: 'relative' }} onClick={(e) => {
+          <div data-testid="hero-opponent" data-card-id="hero_opponent" style={{ position: 'relative' }} onClick={(e) => {
             e.stopPropagation();
             onTargetClick('hero_opponent');
           }}>
@@ -310,7 +310,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
               />
             )}
           </div>
-          <div style={styles.minionsRow}>
+          <div data-testid="opponent-board" style={styles.minionsRow}>
             {opponentBoard.map((card) => (
               <div key={card.instanceId} data-card-id={card.instanceId} onClick={(e) => e.stopPropagation()}>
                 <Card
@@ -338,7 +338,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
 
         {/* Player Board */}
         <div style={styles.boardRow}>
-          <div data-card-id="hero_player" style={{ position: 'relative' }} onClick={(e) => {
+          <div data-testid="hero-player" data-card-id="hero_player" style={{ position: 'relative' }} onClick={(e) => {
             e.stopPropagation();
             onTargetClick('hero_player');
           }}>
@@ -377,6 +377,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            data-testid="player-board"
           >
             {playerBoard.map((card) => (
               <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative' }}>
@@ -397,6 +398,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
                 {/* STARFORGE ASCENSION Button */}
                 {canStarforge(card) && (
                   <button
+                    data-testid="starforge-button"
                     style={styles.starforgeButton}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -417,14 +419,14 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       </div>
 
       {/* Mana Crystal Bar — left side, below battle log */}
-      <div style={styles.manaBarFixed}>
+      <div data-testid="player-mana-bar" style={styles.manaBarFixed}>
         <CrystalBar
           current={playerState.crystals.current}
           max={playerState.crystals.maximum}
           overloaded={playerState.crystals.overloaded}
           compact
         />
-        <div style={styles.deckCountLeft}>
+        <div data-testid="player-deck-count" style={styles.deckCountLeft}>
           Deck: {playerDeckCount}
         </div>
       </div>
@@ -445,6 +447,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       >
         {/* Player Hand */}
         <div
+          data-testid="player-hand"
           data-hand-zone
           style={{
             ...styles.playerHand,
@@ -496,7 +499,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       </div>
 
       {/* Turn number display */}
-      <div style={styles.turnNumber}>
+      <div data-testid="turn-number" style={styles.turnNumber}>
         Turn {turnNumber}
       </div>
 

@@ -333,6 +333,12 @@ export const Card: React.FC<CardProps> = ({
     >
       {/* Main Card */}
       <div
+        data-testid={`card-${card.definitionId}`}
+        data-card-cost={card.currentCost}
+        data-card-attack={currentAttack}
+        data-card-health={currentHealth}
+        data-card-playable={canPlay || undefined}
+        data-card-forged={card.isForged || undefined}
         style={{
           ...cardStyles,
           ...(isForged ? {
@@ -366,7 +372,7 @@ export const Card: React.FC<CardProps> = ({
         )}
 
         {/* Cost - green when reduced, red when increased */}
-        <div style={{
+        <div data-testid="card-cost" style={{
           ...styles.costBadge,
           ...(definition && card.currentCost < definition.cost ? {
             background: 'linear-gradient(135deg, #00aa44 0%, #008833 100%)',
@@ -384,7 +390,7 @@ export const Card: React.FC<CardProps> = ({
 
         {/* Card name */}
         <div style={styles.nameArea}>
-          <div style={{ ...styles.cardName, borderBottom: `2px solid ${rarityColor}` }}>
+          <div data-testid="card-name" style={{ ...styles.cardName, borderBottom: `2px solid ${rarityColor}` }}>
             {definition?.name || 'Unknown'}
           </div>
         </div>
@@ -423,10 +429,10 @@ export const Card: React.FC<CardProps> = ({
         {/* Attack/Health badges - absolute positioned, Hearthstone-style */}
         {isMinion && (
           <>
-            <div style={{ ...styles.attackBadge, color: attackColor }}>
+            <div data-testid="card-attack" style={{ ...styles.attackBadge, color: attackColor }}>
               {currentAttack}
             </div>
-            <div style={{
+            <div data-testid="card-health" style={{
               ...styles.healthBadge,
               color: healthTextColor,
               ...(currentHealth < baseHealth ? {

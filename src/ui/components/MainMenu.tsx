@@ -120,7 +120,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
 
           {/* Action Buttons */}
           <div style={s.playActions}>
-            <button style={s.goBtn} onClick={() => { hapticTap(); onStartGame(selectedRace, selectedDifficulty); }}>
+            <button data-testid="quick-play-button" style={s.goBtn} onClick={() => { hapticTap(); onStartGame(selectedRace, selectedDifficulty); }}>
               Quick Play
             </button>
             {onDeckbuilder && (
@@ -166,7 +166,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
               <span style={s.modeBtnLabel}>Story Mode</span>
             </button>
           )}
-          <button style={{ ...s.modeBtn, ...s.modeBtnAlt }} onClick={() => { hapticTap(); setView('play'); }}>
+          <button data-testid="menu-quick-play" style={{ ...s.modeBtn, ...s.modeBtnAlt }} onClick={() => { hapticTap(); setView('play'); }}>
             <span style={s.modeBtnIcon}>&#x269B;</span>
             <span style={s.modeBtnLabel}>Quick Play</span>
           </button>

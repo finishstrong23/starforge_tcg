@@ -16,6 +16,7 @@ export const EndTurnButton: React.FC = () => {
 
   return (
     <button
+      data-testid="end-turn-button"
       style={{
         ...styles.button,
         ...(isPlayerTurn ? styles.buttonActive : styles.buttonDisabled),

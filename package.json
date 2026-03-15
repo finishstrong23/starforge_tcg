@@ -16,7 +16,11 @@
     "cap:sync": "vite build && capacitor sync",
     "cap:android": "vite build && capacitor sync android && capacitor open android",
     "cap:ios": "vite build && capacitor sync ios && capacitor open ios",
-    "cap:copy": "capacitor copy"
+    "cap:copy": "capacitor copy",
+    "test:e2e": "npx playwright test",
+    "test:e2e:headed": "npx playwright test --headed",
+    "test:e2e:ui": "npx playwright test --ui",
+    "test:e2e:report": "npx playwright show-report reports/playwright-html"
   },
   "keywords": [
     "tcg",
@@ -29,6 +33,7 @@
   "license": "MIT",
   "devDependencies": {
     "@esbuild/linux-x64": "^0.27.3",
+    "@playwright/test": "^1.58.2",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.48",

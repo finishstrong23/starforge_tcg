@@ -67,7 +67,7 @@ export const CrystalBar: React.FC<CrystalBarProps> = ({
   }
 
   return (
-    <div style={{
+    <div data-testid={isOpponent ? 'opponent-crystal-bar' : 'player-crystal-bar'} style={{
       ...styles.container,
       ...(compact ? { padding: '6px 10px', gap: '8px' } : {}),
     }}>
@@ -77,7 +77,7 @@ export const CrystalBar: React.FC<CrystalBarProps> = ({
       }}>
         {crystals}
       </div>
-      <div style={{
+      <div data-testid="crystal-count" style={{
         ...styles.countText,
         ...(compact ? { fontSize: '16px', minWidth: '36px' } : {}),
       }}>
