@@ -141,7 +141,7 @@ export class EffectResolver {
         break;
 
       case EffectType.RETURN_TO_HAND:
-        this.executeReturnToHand(targets, context);
+        this.executeReturnToHand(targets, context, effect.data as GenericEffectData);
         break;
 
       case EffectType.DEBUFF:
@@ -593,7 +593,9 @@ export class EffectResolver {
   /**
    * RETURN_TO_HAND: Bounce a minion back to its owner's hand
    */
-  private executeReturnToHand(targets: string[], context: EffectContext): void {
+  private executeReturnToHand(targets: string[], context: EffectContext, data?: GenericEffectData): void {
+    const returnData = data as { costReduction?: number; attackBuff?: number; healthBuff?: number } | undefined;
+
     for (const targetId of targets) {
       if (targetId.startsWith('hero_')) continue;
 
@@ -622,6 +624,18 @@ export class EffectResolver {
         card.isCloaked = false;
         card.summonedThisTurn = false;
         card.attacksMadeThisTurn = 0;
+
+        // Apply cost reduction and stat buffs if specified (e.g., Eternity Engine)
+        if (returnData?.costReduction) {
+          card.currentCost = Math.max(0, card.currentCost - returnData.costReduction);
+        }
+        if (returnData?.attackBuff) {
+          card.currentAttack = (card.currentAttack ?? 0) + returnData.attackBuff;
+        }
+        if (returnData?.healthBuff) {
+          card.currentHealth = (card.currentHealth ?? 0) + returnData.healthBuff;
+          card.maxHealth = (card.maxHealth ?? 0) + returnData.healthBuff;
+        }
       }
     }
   }
