@@ -287,6 +287,9 @@ export class GameStateManager {
 
     const player = this.getPlayer(playerId);
 
+    // Reset turn timer
+    this.state.turnTimer = this.state.turnTimeLimit;
+
     // Reset turn-based state
     player.cardsPlayedThisTurn = 0;
     player.spellsCastThisTurn = 0;

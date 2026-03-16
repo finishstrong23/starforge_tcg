@@ -272,7 +272,7 @@ export enum GameMode {
  * Default game configuration
  */
 export const DefaultGameConfig: GameConfig = {
-  turnTimeLimit: 90,
+  turnTimeLimit: 60,
   maxTurns: 50,
   allowSpectators: false,
   mode: GameMode.CASUAL,
