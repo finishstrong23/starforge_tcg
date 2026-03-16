@@ -22,6 +22,7 @@ import { TurnTimer } from './TurnTimer';
 import { CombatLog } from './CombatLog';
 import { AttackAnimation } from './AttackAnimation';
 import { VFXOverlay } from './VFXOverlay';
+import { BoardVFXOverlay } from './BoardVFX';
 import { CardBack } from './CardBack';
 import { BoardBackground } from './BoardBackground';
 import { EmoteWheel, EmoteBubble, type Emote } from './EmoteWheel';
@@ -73,6 +74,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     onAnimationComplete,
     vfxEvents,
     dismissVFX,
+    boardVFXEvents,
+    dismissBoardVFX,
+    boardShakeClass,
   } = useGame();
 
   // ── Drag-and-drop state ──
@@ -208,7 +212,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     : null;
 
   return (
-    <div className="game-board" data-testid="game-board" style={styles.container}>
+    <div className={`game-board ${boardShakeClass}`} data-testid="game-board" style={styles.container}>
       {/* Animated starfield background */}
       <BoardBackground />
 
@@ -223,6 +227,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
 
       {/* VFX Overlay - floating damage/heal numbers, death bursts, spell rings */}
       <VFXOverlay events={vfxEvents} onEventDone={dismissVFX} />
+
+      {/* Board VFX Overlay - screen shake, board cracks, supernova, shatter */}
+      <BoardVFXOverlay events={boardVFXEvents} onEventDone={dismissBoardVFX} />
 
       {/* Attack Animation Overlay */}
       <AttackAnimation

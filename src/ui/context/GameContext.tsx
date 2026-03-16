@@ -31,6 +31,7 @@ import {
 } from '../../index';
 import { SoundManager } from '../../audio';
 import type { VFXEvent } from '../components/VFXOverlay';
+import type { BoardVFXEvent } from '../components/BoardVFX';
 
 type TargetingMode = 'none' | 'attack' | 'spell' | 'heropower';
 
@@ -88,6 +89,11 @@ interface GameContextValue {
   // VFX
   vfxEvents: VFXEvent[];
   dismissVFX: (id: number) => void;
+
+  // Board VFX (screen shake, cracks, supernova, shatter)
+  boardVFXEvents: BoardVFXEvent[];
+  dismissBoardVFX: (id: number) => void;
+  boardShakeClass: string;
 }
 
 export const GameContext = createContext<GameContextValue | null>(null);
@@ -256,6 +262,34 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     setVfxEvents(prev => prev.filter(e => e.id !== id));
   }, []);
 
+  // Board VFX state (screen shake, cracks, supernova, shatter)
+  const [boardVFXEvents, setBoardVFXEvents] = useState<BoardVFXEvent[]>([]);
+  const [boardShakeClass, setBoardShakeClass] = useState('');
+  const boardVFXIdRef = useRef(0);
+  const shakeTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const emitBoardVFX = useCallback((type: BoardVFXEvent['type'], intensity: number = 0.5, duration: number = 300) => {
+    const event: BoardVFXEvent = {
+      id: boardVFXIdRef.current++,
+      type,
+      intensity: Math.min(1, Math.max(0, intensity)),
+      duration,
+      createdAt: Date.now(),
+    };
+    setBoardVFXEvents(prev => [...prev, event]);
+    if (type === 'screen_shake') {
+      if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current);
+      const cls = intensity > 0.8 ? 'board-shake-extreme'
+        : intensity > 0.5 ? 'board-shake-heavy'
+        : intensity > 0.25 ? 'board-shake-medium'
+        : 'board-shake-light';
+      setBoardShakeClass(cls);
+      shakeTimerRef.current = setTimeout(() => setBoardShakeClass(''), duration);
+    }
+  }, []);
+  const dismissBoardVFX = useCallback((id: number) => {
+    setBoardVFXEvents(prev => prev.filter(e => e.id !== id));
+  }, []);
+
   // Attack animation state
   const [currentAnimation, setCurrentAnimation] = useState<AttackAnimationData | null>(null);
   const pendingAttackRef = useRef<{ attacker: CardInstance; targetId: string } | null>(null);
@@ -368,6 +402,21 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const data = event.data as DamageEventData;
         if (data.amount > 0) {
           emitVFX('damage', data.targetId, data.amount);
+          // Board VFX: scale shake + crack with damage
+          if (data.amount >= 15) {
+            emitBoardVFX('screen_shake', 1, 400);
+            emitBoardVFX('board_crack', 1, 1500);
+            emitBoardVFX('impact_flash', 0.8, 200);
+          } else if (data.amount >= 10) {
+            emitBoardVFX('screen_shake', 0.7, 300);
+            emitBoardVFX('board_crack', 0.6, 1500);
+            emitBoardVFX('impact_flash', 0.5, 200);
+          } else if (data.amount >= 6) {
+            emitBoardVFX('screen_shake', 0.4, 200);
+            emitBoardVFX('impact_flash', 0.3, 150);
+          } else if (data.amount >= 3) {
+            emitBoardVFX('screen_shake', 0.2, 150);
+          }
         }
         if (data.targetType === 'hero') {
           const targetHero = data.targetId === 'hero_player' ? 'Your Hero' : "Opponent's Hero";
@@ -420,7 +469,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         break;
       }
     }
-  }, [getCardName, addLogEntry, emitVFX]);
+  }, [getCardName, addLogEntry, emitVFX, emitBoardVFX]);
 
   // Ref for stable access in init effect subscription
   const handleGameEventForLogRef = useRef(handleGameEventForLog);
@@ -568,6 +617,19 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const isPlayerTurn = activePlayerId === 'player' && gameState?.phase === GamePhase.MAIN;
   const isGameOver = gameState?.status === GameStatus.FINISHED || gameState?.status === GameStatus.DRAW;
   const turnNumber = gameState?.turn || 0;
+
+  // Board shatter VFX on game over
+  const gameOverFiredRef = useRef(false);
+  useEffect(() => {
+    if (isGameOver && !gameOverFiredRef.current) {
+      gameOverFiredRef.current = true;
+      emitBoardVFX('board_shatter', 1, 2000);
+      emitBoardVFX('screen_shake', 1, 500);
+    }
+    if (!isGameOver) {
+      gameOverFiredRef.current = false;
+    }
+  }, [isGameOver, emitBoardVFX]);
 
   // Get cards from zones — depends on updateCounter to refresh after engine state changes
   const getCardsFromZone = useCallback((playerId: string, zone: CardZone): CardInstance[] => {
@@ -978,6 +1040,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     console.log('STARFORGE ASCENSION:', card.definitionId);
     SoundManager.play('starforge');
     emitVFX('starforge', card.instanceId);
+    emitBoardVFX('supernova', 1, 1500);
+    emitBoardVFX('screen_shake', 0.8, 300);
 
     engineRef.current.processAction({
       type: ActionType.ACTIVATE_STARFORGE,
@@ -1042,6 +1106,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     onAnimationComplete,
     vfxEvents,
     dismissVFX,
+    boardVFXEvents,
+    dismissBoardVFX,
+    boardShakeClass,
   };
 
   return (

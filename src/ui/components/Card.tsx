@@ -20,6 +20,7 @@ import { globalCardDatabase } from '../../cards/CardDatabase';
 import { KEYWORD_DESCRIPTIONS } from './KeywordTooltip';
 import { CardArt } from './CardArt';
 import type { Race } from '../../types/Race';
+import { getCardTier, getCardCosmeticStyles, injectCosmeticStyles, CosmeticTier, TIER_INFO } from '../../progression/CardCosmetics';
 
 // Card art mapping (emoji-based for now, can be replaced with actual images)
 const CARD_ART: Record<string, string> = {
@@ -285,6 +286,14 @@ export const Card: React.FC<CardProps> = ({
 
   const cardArt = getCardArt(card.definitionId, definition?.type);
 
+  // Cosmetic tier (Golden/Prismatic/Astral)
+  const cosmeticTier = getCardTier(card.definitionId);
+  const cosmeticStyles = cosmeticTier !== CosmeticTier.STANDARD
+    ? getCardCosmeticStyles(cosmeticTier) : {};
+
+  // Inject cosmetic keyframes once
+  useEffect(() => { injectCosmeticStyles(); }, []);
+
   const cardStyles: React.CSSProperties = {
     ...styles.card,
     ...(isInHand ? styles.cardInHand : {}),
@@ -292,6 +301,10 @@ export const Card: React.FC<CardProps> = ({
     border: `3px solid ${borderColor}`,
     boxShadow,
     cursor: onClick ? 'pointer' : 'default',
+    ...cosmeticStyles,
+    // Active game state glows override cosmetic border/shadow
+    ...(boxShadow !== 'none' ? { boxShadow } : {}),
+    ...(borderColor !== '#444466' ? { borderColor } : {}),
     ...style,
   };
 
@@ -395,6 +408,23 @@ export const Card: React.FC<CardProps> = ({
             {definition?.name || 'Unknown'}
           </div>
         </div>
+
+        {/* Cosmetic tier badge */}
+        {cosmeticTier !== CosmeticTier.STANDARD && (
+          <div style={{
+            position: 'absolute',
+            top: 2,
+            right: 2,
+            fontSize: '8px',
+            fontWeight: 'bold',
+            color: TIER_INFO[cosmeticTier].color,
+            textShadow: `0 0 4px ${TIER_INFO[cosmeticTier].color}`,
+            letterSpacing: '0.5px',
+            zIndex: 10,
+          }}>
+            {TIER_INFO[cosmeticTier].label.charAt(0)}
+          </div>
+        )}
 
         {/* Tribe badge */}
         {showTribe && (

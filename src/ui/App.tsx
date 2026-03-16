@@ -303,6 +303,10 @@ export const App: React.FC = () => {
           onLeaderboard={() => setScreen('leaderboard')}
           onMetaDashboard={() => setScreen('meta-dashboard')}
           onSpectate={() => setScreen('spectate')}
+          onDungeonRun={() => setScreen('dungeon-run')}
+          onPuzzles={() => setScreen('puzzles')}
+          onTagTeam={() => setScreen('tag-team')}
+          onFactionWars={() => setScreen('faction-wars')}
         />
       )}
 

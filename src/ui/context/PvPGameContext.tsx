@@ -705,6 +705,9 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     onAnimationComplete,
     vfxEvents: [],
     dismissVFX: () => {},
+    boardVFXEvents: [],
+    dismissBoardVFX: () => {},
+    boardShakeClass: '',
   };
 
   return (

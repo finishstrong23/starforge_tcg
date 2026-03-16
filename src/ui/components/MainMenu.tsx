@@ -177,6 +177,34 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
             </button>
           )}
         </div>
+
+        {/* Game Modes Row */}
+        <div style={s.modesRow}>
+          {onDungeonRun && (
+            <button style={s.modeChip} onClick={() => { hapticTap(); onDungeonRun(); }}>
+              <span style={s.modeChipIcon}>&#x1F3F0;</span>
+              <span>Dungeon</span>
+            </button>
+          )}
+          {onPuzzles && (
+            <button style={s.modeChip} onClick={() => { hapticTap(); onPuzzles(); }}>
+              <span style={s.modeChipIcon}>&#x1F9E9;</span>
+              <span>Puzzles</span>
+            </button>
+          )}
+          {onTagTeam && (
+            <button style={s.modeChip} onClick={() => { hapticTap(); onTagTeam(); }}>
+              <span style={s.modeChipIcon}>&#x1F91D;</span>
+              <span>2v2</span>
+            </button>
+          )}
+          {onFactionWars && (
+            <button style={s.modeChip} onClick={() => { hapticTap(); onFactionWars(); }}>
+              <span style={s.modeChipIcon}>&#x2694;</span>
+              <span>Wars</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Bottom Nav Bar */}
@@ -345,6 +373,33 @@ const s: Record<string, React.CSSProperties> = {
   },
   modeBtnLabel: {
     flex: 1,
+  },
+
+  // Game modes row (Dungeon, Puzzles, etc.)
+  modesRow: {
+    display: 'flex',
+    gap: '8px',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+  },
+  modeChip: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    border: '1px solid rgba(255,255,255,0.15)',
+    background: 'rgba(255,255,255,0.06)',
+    color: '#ccc',
+    fontSize: '13px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    backdropFilter: 'blur(6px)',
+    transition: 'all 0.15s',
+    minHeight: '44px',
+  },
+  modeChipIcon: {
+    fontSize: '16px',
   },
 
   // Bottom nav bar
