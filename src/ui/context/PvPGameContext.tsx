@@ -708,6 +708,9 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     boardVFXEvents: [],
     dismissBoardVFX: () => {},
     boardShakeClass: '',
+    legendaryCinematic: null,
+    dismissLegendaryCinematic: () => {},
+    voicelineBubble: null,
   };
 
   return (

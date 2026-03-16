@@ -23,6 +23,8 @@ import { CombatLog } from './CombatLog';
 import { AttackAnimation } from './AttackAnimation';
 import { VFXOverlay } from './VFXOverlay';
 import { BoardVFXOverlay } from './BoardVFX';
+import { LegendaryCinematic } from './LegendaryCinematic';
+import { BoardPet } from './BoardPet';
 import { CardBack } from './CardBack';
 import { BoardBackground } from './BoardBackground';
 import { EmoteWheel, EmoteBubble, type Emote } from './EmoteWheel';
@@ -77,6 +79,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     boardVFXEvents,
     dismissBoardVFX,
     boardShakeClass,
+    legendaryCinematic,
+    dismissLegendaryCinematic,
+    voicelineBubble,
   } = useGame();
 
   // ── Drag-and-drop state ──
@@ -230,6 +235,47 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
 
       {/* Board VFX Overlay - screen shake, board cracks, supernova, shatter */}
       <BoardVFXOverlay events={boardVFXEvents} onEventDone={dismissBoardVFX} />
+
+      {/* Board Pets */}
+      <BoardPet side="player" />
+      <BoardPet side="opponent" />
+
+      {/* Legendary Card Entrance Cinematic */}
+      {legendaryCinematic && (
+        <LegendaryCinematic
+          cardName={legendaryCinematic.cardName}
+          cardRace={legendaryCinematic.cardRace}
+          attack={legendaryCinematic.attack}
+          health={legendaryCinematic.health}
+          cost={legendaryCinematic.cost}
+          onComplete={dismissLegendaryCinematic}
+        />
+      )}
+
+      {/* Voiceline Bubble */}
+      {voicelineBubble && (
+        <div style={{
+          position: 'absolute',
+          [voicelineBubble.side === 'player' ? 'bottom' : 'top']: '20%',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.9)',
+          border: '1px solid rgba(255,215,0,0.4)',
+          borderRadius: 12,
+          padding: '8px 18px',
+          color: '#ffd700',
+          fontSize: 13,
+          fontStyle: 'italic',
+          zIndex: 600,
+          maxWidth: '80%',
+          textAlign: 'center' as const,
+          pointerEvents: 'none' as const,
+          animation: 'fadeIn 0.3s ease-out',
+          textShadow: '0 0 8px rgba(255,215,0,0.3)',
+        }}>
+          &ldquo;{voicelineBubble.text}&rdquo;
+        </div>
+      )}
 
       {/* Attack Animation Overlay */}
       <AttackAnimation

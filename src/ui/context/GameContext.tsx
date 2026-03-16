@@ -32,6 +32,10 @@ import {
 import { SoundManager } from '../../audio';
 import type { VFXEvent } from '../components/VFXOverlay';
 import type { BoardVFXEvent } from '../components/BoardVFX';
+import { firePetEvent } from '../components/BoardPet';
+import { PetGameEvent } from '../../cosmetics/BoardPets';
+import { getCardVoiceline, VoiceEvent, getInteractionLine } from '../../lore/CardVoicelines';
+import { loadFactionWars, recordWinContribution, saveFactionWars } from '../../events/FactionWars';
 
 type TargetingMode = 'none' | 'attack' | 'spell' | 'heropower';
 
@@ -94,6 +98,19 @@ interface GameContextValue {
   boardVFXEvents: BoardVFXEvent[];
   dismissBoardVFX: (id: number) => void;
   boardShakeClass: string;
+
+  // Legendary cinematic
+  legendaryCinematic: {
+    cardName: string;
+    cardRace: Race;
+    attack?: number;
+    health?: number;
+    cost: number;
+  } | null;
+  dismissLegendaryCinematic: () => void;
+
+  // Voiceline bubble
+  voicelineBubble: { text: string; side: 'player' | 'opponent' } | null;
 }
 
 export const GameContext = createContext<GameContextValue | null>(null);
@@ -265,6 +282,19 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   // Board VFX state (screen shake, cracks, supernova, shatter)
   const [boardVFXEvents, setBoardVFXEvents] = useState<BoardVFXEvent[]>([]);
   const [boardShakeClass, setBoardShakeClass] = useState('');
+
+  // Legendary cinematic state
+  const [legendaryCinematic, setLegendaryCinematic] = useState<GameContextValue['legendaryCinematic']>(null);
+  const dismissLegendaryCinematic = useCallback(() => setLegendaryCinematic(null), []);
+
+  // Voiceline bubble state
+  const [voicelineBubble, setVoicelineBubble] = useState<GameContextValue['voicelineBubble']>(null);
+  const voicelineTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const showVoiceline = useCallback((text: string, side: 'player' | 'opponent') => {
+    setVoicelineBubble({ text, side });
+    if (voicelineTimerRef.current) clearTimeout(voicelineTimerRef.current);
+    voicelineTimerRef.current = setTimeout(() => setVoicelineBubble(null), 3000);
+  }, []);
   const boardVFXIdRef = useRef(0);
   const shakeTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const emitBoardVFX = useCallback((type: BoardVFXEvent['type'], intensity: number = 0.5, duration: number = 300) => {
@@ -376,11 +406,26 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         addLogEntry(`${who} played ${name}`, 'play', isPlayer, event.turn, data.cardDefinitionId);
         if (def?.rarity === 'LEGENDARY') {
           SoundManager.play('legendaryPlay');
+          // Legendary entrance cinematic
+          setLegendaryCinematic({
+            cardName: name,
+            cardRace: (def as any).race || Race.NEUTRAL,
+            attack: (def as any).attack,
+            health: (def as any).health,
+            cost: def.cost,
+          });
         } else if (def?.type === CardType.SPELL) {
           SoundManager.play('spellCast');
           if (data.cardInstanceId) emitVFX('spell', data.cardInstanceId);
         } else {
           SoundManager.play('cardPlay');
+        }
+        // Pet reacts to card play
+        firePetEvent(def?.type === CardType.SPELL ? PetGameEvent.SPELL_CAST : PetGameEvent.CARD_PLAYED);
+        // Voiceline on card play
+        const playVoiceline = getCardVoiceline(data.cardDefinitionId, VoiceEvent.PLAY);
+        if (playVoiceline) {
+          showVoiceline(playVoiceline.text, isPlayer ? 'player' : 'opponent');
         }
         break;
       }
@@ -392,15 +437,28 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const attacker = data.attackerOwnerId === 'player' ? 'Your' : "Opponent's";
         addLogEntry(`${attacker} ${attackerName} attacks ${defenderName}`, 'attack', data.attackerOwnerId === 'player', event.turn);
         SoundManager.play('attack');
+        firePetEvent(PetGameEvent.ATTACK);
         // Queue animation for opponent attacks
         if (data.attackerOwnerId === 'opponent') {
           queueAiAttackRef.current?.(data);
         }
+        // Attack voiceline — look up definition from instance
+        try {
+          const attackerCard = engineRef.current?.getStateManager().getBoard().getCard(data.attackerId);
+          if (attackerCard) {
+            const atkVoiceline = getCardVoiceline(attackerCard.definitionId, VoiceEvent.ATTACK);
+            if (atkVoiceline) {
+              showVoiceline(atkVoiceline.text, data.attackerOwnerId === 'player' ? 'player' : 'opponent');
+            }
+          }
+        } catch { /* card may not be on board */ }
         break;
       }
       case GameEventType.DAMAGE_DEALT: {
         const data = event.data as DamageEventData;
         if (data.amount > 0) {
+          firePetEvent(data.targetType === 'hero' && data.targetId === 'hero_player'
+            ? PetGameEvent.DAMAGE_TAKEN : PetGameEvent.ATTACK);
           emitVFX('damage', data.targetId, data.amount);
           // Board VFX: scale shake + crack with damage
           if (data.amount >= 15) {
@@ -433,11 +491,18 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         addLogEntry(`${owner} ${name} was destroyed`, 'death', data.playerId !== 'player', event.turn, data.cardDefinitionId);
         if (data.cardInstanceId) emitVFX('death', data.cardInstanceId);
         SoundManager.play('minionDeath');
+        firePetEvent(PetGameEvent.MINION_KILLED);
+        // Death voiceline
+        const deathVoiceline = getCardVoiceline(data.cardDefinitionId, VoiceEvent.DEATH);
+        if (deathVoiceline) {
+          showVoiceline(deathVoiceline.text, data.playerId === 'player' ? 'player' : 'opponent');
+        }
         break;
       }
       case GameEventType.HEALING_DONE: {
         const data = event.data as HealEventData;
         if (data.actualHealing > 0) {
+          firePetEvent(PetGameEvent.HEAL);
           const targetName = data.targetType === 'hero'
             ? (data.targetId === 'hero_player' ? 'Your Hero' : "Opponent's Hero")
             : getCardName(data.targetId);
@@ -469,7 +534,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         break;
       }
     }
-  }, [getCardName, addLogEntry, emitVFX, emitBoardVFX]);
+  }, [getCardName, addLogEntry, emitVFX, emitBoardVFX, showVoiceline]);
 
   // Ref for stable access in init effect subscription
   const handleGameEventForLogRef = useRef(handleGameEventForLog);
@@ -625,6 +690,19 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       gameOverFiredRef.current = true;
       emitBoardVFX('board_shatter', 1, 2000);
       emitBoardVFX('screen_shake', 1, 500);
+      // Pet reacts to game over
+      const playerWon = gameState?.winnerId === 'player';
+      firePetEvent(playerWon ? PetGameEvent.VICTORY : PetGameEvent.DEFEAT);
+      // Record faction wars contribution on win
+      if (playerWon) {
+        try {
+          const season = loadFactionWars();
+          if (season.playerPledge) {
+            const updated = recordWinContribution(season);
+            saveFactionWars(updated);
+          }
+        } catch (_e) { /* faction wars not initialized */ }
+      }
     }
     if (!isGameOver) {
       gameOverFiredRef.current = false;
@@ -1042,6 +1120,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     emitVFX('starforge', card.instanceId);
     emitBoardVFX('supernova', 1, 1500);
     emitBoardVFX('screen_shake', 0.8, 300);
+    firePetEvent(PetGameEvent.STARFORGE);
+    // STARFORGE voiceline
+    const sfVoiceline = getCardVoiceline(card.definitionId, VoiceEvent.STARFORGE);
+    if (sfVoiceline) showVoiceline(sfVoiceline.text, 'player');
 
     engineRef.current.processAction({
       type: ActionType.ACTIVATE_STARFORGE,
@@ -1109,6 +1191,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     boardVFXEvents,
     dismissBoardVFX,
     boardShakeClass,
+    legendaryCinematic,
+    dismissLegendaryCinematic,
+    voicelineBubble,
   };
 
   return (
