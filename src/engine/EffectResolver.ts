@@ -267,6 +267,18 @@ export class EffectResolver {
             .map(c => c.instanceId),
         ];
 
+      case TargetType.ALL_CHARACTERS:
+        return [
+          `hero_${context.sourceOwnerId}`,
+          `hero_${opponentId}`,
+          ...this.board.getBoardCards(context.sourceOwnerId)
+            .filter(c => this.matchesFilter(c, effect.targetFilter))
+            .map(c => c.instanceId),
+          ...this.board.getBoardCards(opponentId)
+            .filter(c => this.matchesFilter(c, effect.targetFilter))
+            .map(c => c.instanceId),
+        ];
+
       case TargetType.ALL_FRIENDLIES:
         return [
           `hero_${context.sourceOwnerId}`,

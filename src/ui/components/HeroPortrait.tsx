@@ -225,58 +225,57 @@ export const HeroPortrait: React.FC<HeroPortraitProps> = ({
         <div style={styles.frameBevel} />
       </div>
 
-      {/* Hero power button (player only) */}
-      {!isOpponent && (
+      {/* Hero power button */}
+      <div
+        style={{ position: 'relative', display: 'inline-block' }}
+        onMouseEnter={() => setHeroPowerHovered(true)}
+        onMouseLeave={() => setHeroPowerHovered(false)}
+      >
         <div
-          style={{ position: 'relative', display: 'inline-block' }}
-          onMouseEnter={() => setHeroPowerHovered(true)}
-          onMouseLeave={() => setHeroPowerHovered(false)}
+          style={{
+            ...styles.heroPowerButton,
+            ...(isOpponent ? styles.heroPowerUsed : {}),
+            ...(!isOpponent && heroPowerUsed ? styles.heroPowerUsed : {}),
+            ...(!isOpponent && canUseHeroPower ? styles.heroPowerAvailable : {}),
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isOpponent && canUseHeroPower && onHeroPowerClick) {
+              onHeroPowerClick();
+            }
+          }}
         >
-          <div
-            style={{
-              ...styles.heroPowerButton,
-              ...(heroPowerUsed ? styles.heroPowerUsed : {}),
-              ...(canUseHeroPower ? styles.heroPowerAvailable : {}),
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (canUseHeroPower && onHeroPowerClick) {
-                onHeroPowerClick();
-              }
-            }}
-          >
-            <div style={styles.heroPowerCost}>2</div>
-            {/* SVG lightning bolt icon */}
-            <svg width="24" height="24" viewBox="0 0 24 24" style={{ zIndex: 1 }}>
-              <path d="M 13 2 L 4 14 L 11 14 L 10 22 L 20 10 L 13 10 Z"
-                fill={canUseHeroPower ? '#ffcc00' : '#666688'}
-                stroke={canUseHeroPower ? '#ffee66' : '#555566'}
-                strokeWidth="0.5" opacity="0.9" />
-            </svg>
-            {/* Inner glow ring */}
-            {canUseHeroPower && (
-              <div style={styles.heroPowerRing} />
-            )}
-          </div>
-
-          {/* Hero Power Tooltip */}
-          {heroPowerHovered && heroPowerName && (
-            <div style={styles.heroPowerTooltip}>
-              <div style={styles.tooltipName}>
-                <svg width="12" height="12" viewBox="0 0 24 24" style={{ marginRight: '4px', verticalAlign: 'middle' }}>
-                  <path d="M 13 2 L 4 14 L 11 14 L 10 22 L 20 10 L 13 10 Z"
-                    fill="#ffcc00" strokeWidth="0" />
-                </svg>
-                {heroPowerName}
-              </div>
-              <div style={styles.tooltipCostLine}>Cost: 2 crystals</div>
-              {heroPowerDescription && (
-                <div style={styles.tooltipDesc}>{heroPowerDescription}</div>
-              )}
-            </div>
+          <div style={styles.heroPowerCost}>2</div>
+          {/* SVG lightning bolt icon */}
+          <svg width="24" height="24" viewBox="0 0 24 24" style={{ zIndex: 1 }}>
+            <path d="M 13 2 L 4 14 L 11 14 L 10 22 L 20 10 L 13 10 Z"
+              fill={!isOpponent && canUseHeroPower ? '#ffcc00' : '#666688'}
+              stroke={!isOpponent && canUseHeroPower ? '#ffee66' : '#555566'}
+              strokeWidth="0.5" opacity="0.9" />
+          </svg>
+          {/* Inner glow ring */}
+          {!isOpponent && canUseHeroPower && (
+            <div style={styles.heroPowerRing} />
           )}
         </div>
-      )}
+
+        {/* Hero Power Tooltip */}
+        {heroPowerHovered && heroPowerName && (
+          <div style={isOpponent ? styles.heroPowerTooltipBelow : styles.heroPowerTooltip}>
+            <div style={styles.tooltipName}>
+              <svg width="12" height="12" viewBox="0 0 24 24" style={{ marginRight: '4px', verticalAlign: 'middle' }}>
+                <path d="M 13 2 L 4 14 L 11 14 L 10 22 L 20 10 L 13 10 Z"
+                  fill="#ffcc00" strokeWidth="0" />
+              </svg>
+              {heroPowerName}
+            </div>
+            <div style={styles.tooltipCostLine}>Cost: 2 crystals</div>
+            {heroPowerDescription && (
+              <div style={styles.tooltipDesc}>{heroPowerDescription}</div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -433,6 +432,20 @@ const styles: { [key: string]: React.CSSProperties } = {
   heroPowerTooltip: {
     position: 'absolute',
     bottom: '110%',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: '210px',
+    background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%)',
+    border: '2px solid #c89b3c',
+    borderRadius: '10px',
+    padding: '10px',
+    zIndex: 1000,
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.8)',
+    pointerEvents: 'none' as const,
+  },
+  heroPowerTooltipBelow: {
+    position: 'absolute',
+    top: '110%',
     left: '50%',
     transform: 'translateX(-50%)',
     width: '210px',

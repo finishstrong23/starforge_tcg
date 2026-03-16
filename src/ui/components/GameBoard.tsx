@@ -351,6 +351,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
               maxHealth={opponentState.hero.maxHealth}
               armor={opponentState.hero.armor}
               isOpponent
+              heroPowerName={opponentHeroDef?.heroPower?.name}
+              heroPowerDescription={opponentHeroDef?.heroPower?.description}
               isValidTarget={validTargets.includes('hero_opponent')}
               onClick={() => onTargetClick('hero_opponent')}
             />

@@ -87,14 +87,14 @@ export const CombatLog: React.FC<CombatLogProps> = ({ entries }) => {
   const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when new entries arrive
+  // Auto-scroll to top when new entries arrive (newest entries shown first)
   useEffect(() => {
     if (scrollRef.current && isExpanded) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollTop = 0;
     }
   }, [entries.length, isExpanded]);
 
-  const visibleEntries = entries.slice(-30);
+  const visibleEntries = entries.slice(-30).reverse();
 
   const handleMouseEnter = (e: React.MouseEvent, cardId?: string) => {
     if (!cardId) return;
