@@ -36,8 +36,6 @@ interface MainMenuProps {
   onSpectate?: () => void;
   onDungeonRun?: () => void;
   onPuzzles?: () => void;
-  onTagTeam?: () => void;
-  onFactionWars?: () => void;
 }
 
 type MenuView = 'main' | 'play';
@@ -48,7 +46,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
     onTutorial, onSettings, onStats, onCollection, onCrafting,
     onBattlePass, onPacks, onAchievements, onDaily,
     onTournament, onReplays, onLeaderboard, onMetaDashboard, onSpectate,
-    onDungeonRun, onPuzzles, onTagTeam, onFactionWars,
+    onDungeonRun, onPuzzles,
   } = props;
 
   const [view, setView] = useState<MenuView>('main');
@@ -190,18 +188,6 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
             <button style={s.modeChip} onClick={() => { hapticTap(); onPuzzles(); }}>
               <span style={s.modeChipIcon}>&#x1F9E9;</span>
               <span>Puzzles</span>
-            </button>
-          )}
-          {onTagTeam && (
-            <button style={s.modeChip} onClick={() => { hapticTap(); onTagTeam(); }}>
-              <span style={s.modeChipIcon}>&#x1F91D;</span>
-              <span>2v2</span>
-            </button>
-          )}
-          {onFactionWars && (
-            <button style={s.modeChip} onClick={() => { hapticTap(); onFactionWars(); }}>
-              <span style={s.modeChipIcon}>&#x2694;</span>
-              <span>Wars</span>
             </button>
           )}
         </div>

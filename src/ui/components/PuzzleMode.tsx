@@ -313,6 +313,8 @@ const s: Record<string, React.CSSProperties> = {
   header: {
     textAlign: 'center',
     marginBottom: 16,
+    position: 'relative',
+    zIndex: 2,
   },
   title: {
     fontSize: 28,
@@ -341,6 +343,8 @@ const s: Record<string, React.CSSProperties> = {
     marginBottom: 16,
     flexWrap: 'wrap',
     justifyContent: 'center',
+    position: 'relative',
+    zIndex: 2,
   },
   tierTab: {
     padding: '8px 14px',
@@ -358,6 +362,8 @@ const s: Record<string, React.CSSProperties> = {
     width: '100%',
     maxWidth: 600,
     marginBottom: 16,
+    position: 'relative',
+    zIndex: 2,
   },
   puzzleCard: {
     padding: '12px 16px',
@@ -403,6 +409,8 @@ const s: Record<string, React.CSSProperties> = {
     display: 'flex',
     gap: 20,
     justifyContent: 'center',
+    position: 'relative',
+    zIndex: 2,
   },
   statBox: {
     textAlign: 'center',
@@ -419,6 +427,8 @@ const s: Record<string, React.CSSProperties> = {
     marginBottom: 12,
     width: '100%',
     maxWidth: 600,
+    position: 'relative',
+    zIndex: 2,
   },
   boardVisual: {
     background: 'rgba(255,255,255,0.03)',
@@ -428,6 +438,8 @@ const s: Record<string, React.CSSProperties> = {
     width: '100%',
     maxWidth: 600,
     marginBottom: 16,
+    position: 'relative',
+    zIndex: 2,
   },
   sideLabel: {
     display: 'flex',
@@ -543,6 +555,8 @@ const s: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     marginBottom: 12,
     flexWrap: 'wrap',
+    position: 'relative',
+    zIndex: 2,
   },
   hintBtn: {
     background: 'rgba(251,191,36,0.1)',
@@ -582,6 +596,8 @@ const s: Record<string, React.CSSProperties> = {
     width: '100%',
     maxWidth: 600,
     marginBottom: 8,
+    position: 'relative',
+    zIndex: 2,
   },
   solutionBox: {
     background: 'rgba(192,132,252,0.1)',
@@ -592,5 +608,7 @@ const s: Record<string, React.CSSProperties> = {
     color: '#c084fc',
     width: '100%',
     maxWidth: 600,
+    position: 'relative',
+    zIndex: 2,
   },
 };

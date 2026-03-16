@@ -569,6 +569,8 @@ const s: Record<string, React.CSSProperties> = {
   header: {
     textAlign: 'center',
     marginBottom: 20,
+    position: 'relative',
+    zIndex: 2,
   },
   title: {
     fontSize: 32,
@@ -598,6 +600,8 @@ const s: Record<string, React.CSSProperties> = {
     width: '100%',
     maxWidth: 700,
     marginBottom: 16,
+    position: 'relative',
+    zIndex: 2,
   },
   factionCard: {
     padding: '12px 8px',
@@ -632,6 +636,8 @@ const s: Record<string, React.CSSProperties> = {
   selectedInfo: {
     textAlign: 'center',
     marginBottom: 16,
+    position: 'relative',
+    zIndex: 2,
   },
   startBtn: {
     background: 'linear-gradient(135deg, #ffd700 0%, #ff8c00 100%)',
@@ -642,11 +648,15 @@ const s: Record<string, React.CSSProperties> = {
     fontSize: 16,
     fontWeight: 'bold',
     cursor: 'pointer',
+    position: 'relative',
+    zIndex: 2,
   },
   historySection: {
     width: '100%',
     maxWidth: 500,
     marginTop: 8,
+    position: 'relative',
+    zIndex: 2,
   },
   historyList: {
     display: 'flex',
@@ -670,6 +680,8 @@ const s: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     gap: 6,
     marginBottom: 16,
+    position: 'relative',
+    zIndex: 2,
   },
   runInfo: {
     display: 'flex',
@@ -708,6 +720,8 @@ const s: Record<string, React.CSSProperties> = {
     maxWidth: 400,
     width: '100%',
     marginBottom: 20,
+    position: 'relative',
+    zIndex: 2,
   },
   bossIcon: {
     fontSize: 48,
@@ -757,6 +771,8 @@ const s: Record<string, React.CSSProperties> = {
     display: 'flex',
     gap: 12,
     justifyContent: 'center',
+    position: 'relative',
+    zIndex: 2,
   },
   fightBtn: {
     background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
@@ -784,12 +800,16 @@ const s: Record<string, React.CSSProperties> = {
     color: '#ffd700',
     margin: '0 0 4px',
     textAlign: 'center',
+    position: 'relative',
+    zIndex: 2,
   },
   choiceSubtitle: {
     color: '#aaa',
     fontSize: 14,
     margin: '0 0 20px',
     textAlign: 'center',
+    position: 'relative',
+    zIndex: 2,
   },
   bundleGrid: {
     display: 'grid',
@@ -797,6 +817,8 @@ const s: Record<string, React.CSSProperties> = {
     gap: 12,
     width: '100%',
     maxWidth: 700,
+    position: 'relative',
+    zIndex: 2,
   },
   bundleCard: {
     background: 'rgba(255,255,255,0.05)',
@@ -839,6 +861,8 @@ const s: Record<string, React.CSSProperties> = {
     gap: 12,
     width: '100%',
     maxWidth: 600,
+    position: 'relative',
+    zIndex: 2,
   },
   relicCard: {
     background: 'rgba(255,255,255,0.05)',
@@ -879,6 +903,8 @@ const s: Record<string, React.CSSProperties> = {
     width: '100%',
     maxWidth: 700,
     marginBottom: 16,
+    position: 'relative',
+    zIndex: 2,
   },
   removeCard: {
     padding: '8px 12px',
@@ -921,6 +947,8 @@ const s: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     flex: 1,
     textAlign: 'center',
+    position: 'relative',
+    zIndex: 2,
   },
   resultIcon: {
     fontSize: 64,
