@@ -189,6 +189,28 @@ export class DeathProcessor {
       // Update player stats
       const player = this.gameState.getPlayer(death.ownerId);
       // Track friendly minion deaths (for various triggers)
+
+      // Process ON_ENEMY_DEATH triggers on the opponent's board
+      // (e.g., Queen Parasithra gains stats when enemy minions die)
+      if (this.effectResolver) {
+        const opponentId = this.getOpponentId(death.ownerId);
+        const opponentBoard = this.board.getBoardCards(opponentId);
+        for (const card of opponentBoard) {
+          if (card.isSilenced && !card.isForged) continue;
+          const cardDef = globalCardDatabase.getCard(card.definitionId);
+          if (!cardDef) continue;
+          const enemyDeathEffects = (cardDef.effects || []).filter(
+            (e: any) => e.trigger === EffectTrigger.ON_ENEMY_DEATH
+          );
+          if (enemyDeathEffects.length > 0) {
+            this.effectResolver.resolveEffects(enemyDeathEffects, {
+              sourceCardId: card.instanceId,
+              sourceOwnerId: opponentId,
+              triggerEvent: 'ON_ENEMY_DEATH',
+            });
+          }
+        }
+      }
     }
 
     // Recursively check for more deaths (from Last Words effects, etc.)
@@ -251,6 +273,14 @@ export class DeathProcessor {
     } as CardEventData);
 
     return true;
+  }
+
+  /**
+   * Get the opponent's player ID
+   */
+  private getOpponentId(playerId: string): string {
+    const players = Array.from(this.gameState.getState().players.keys());
+    return players.find(id => id !== playerId) || players[0];
   }
 
   /**
