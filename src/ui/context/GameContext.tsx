@@ -36,6 +36,8 @@ import { firePetEvent } from '../components/BoardPet';
 import { PetGameEvent } from '../../cosmetics/BoardPets';
 import { getCardVoiceline, VoiceEvent, getInteractionLine } from '../../lore/CardVoicelines';
 import { loadFactionWars, recordWinContribution, saveFactionWars } from '../../events/FactionWars';
+import { AdaptOption } from '../../types/Keywords';
+import type { PendingAdaptChoice } from '../../engine/EffectResolver';
 
 type TargetingMode = 'none' | 'attack' | 'spell' | 'heropower';
 
@@ -111,6 +113,10 @@ interface GameContextValue {
 
   // Voiceline bubble
   voicelineBubble: { text: string; side: 'player' | 'opponent' } | null;
+
+  // Adapt choice
+  pendingAdaptChoice: PendingAdaptChoice | null;
+  resolveAdaptChoice: (option: AdaptOption) => void;
 }
 
 export const GameContext = createContext<GameContextValue | null>(null);
@@ -264,6 +270,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const [pendingSpell, setPendingSpell] = useState<CardInstance | null>(null);
   const [pendingHeroPower, setPendingHeroPower] = useState(false);
 
+  // Adapt choice state
+  const [pendingAdaptChoice, setPendingAdaptChoice] = useState<PendingAdaptChoice | null>(null);
+
   // Combat log state
   const [combatLog, setCombatLog] = useState<CombatLogEntry[]>([]);
   const logIdRef = useRef(0);
@@ -356,6 +365,32 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     setValidTargets([]);
     setSelectedCard(null);
     setAttackingMinion(null);
+  }, []);
+
+  // Resolve an adapt choice made by the player
+  const resolveAdaptChoice = useCallback((option: AdaptOption) => {
+    if (!engineRef.current) return;
+    const resolver = engineRef.current.getEffectResolver();
+    resolver.resolveAdapt(option);
+    setPendingAdaptChoice(null);
+    forceUpdateRef.current();
+  }, []);
+
+  // Check if the engine has a pending adapt choice after an action
+  const checkPendingAdapt = useCallback(() => {
+    if (!engineRef.current) return;
+    const resolver = engineRef.current.getEffectResolver();
+    if (resolver.pendingAdapt) {
+      // For AI (opponent), auto-pick a random option
+      if (resolver.pendingAdapt.sourceOwnerId !== 'player') {
+        const options = resolver.pendingAdapt.options;
+        const randomChoice = options[Math.floor(Math.random() * options.length)];
+        resolver.resolveAdapt(randomChoice);
+      } else {
+        // For player, show the choice UI
+        setPendingAdaptChoice({ ...resolver.pendingAdapt });
+      }
+    }
   }, []);
 
   // Helper: get a card's display name from instance ID
@@ -777,6 +812,14 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             if (!result.success) break;
             actionsTaken++;
 
+            // Auto-resolve adapt choices for AI
+            const aiResolver = engine.getEffectResolver();
+            if (aiResolver.pendingAdapt) {
+              const aiOptions = aiResolver.pendingAdapt.options;
+              const aiChoice = aiOptions[Math.floor(Math.random() * aiOptions.length)];
+              aiResolver.resolveAdapt(aiChoice);
+            }
+
             // Force UI update so the player can SEE each AI action
             forceUpdateRef.current();
 
@@ -959,8 +1002,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     });
 
     cancelTargeting();
+    checkPendingAdapt();
     forceUpdate();
-  }, [canPlayCard, forceUpdate, cancelTargeting]);
+  }, [canPlayCard, forceUpdate, cancelTargeting, checkPendingAdapt]);
 
   // Attack action — plays animation first, then resolves
   const attack = useCallback((attacker: CardInstance, targetId: string) => {
@@ -1194,6 +1238,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     legendaryCinematic,
     dismissLegendaryCinematic,
     voicelineBubble,
+    pendingAdaptChoice,
+    resolveAdaptChoice,
   };
 
   return (

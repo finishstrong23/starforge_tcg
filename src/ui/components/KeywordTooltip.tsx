@@ -16,7 +16,7 @@ export const KEYWORD_DESCRIPTIONS: Record<string, { name: string; description: s
   CLOAK: { name: 'Cloak', description: "Can't be attacked or targeted until it attacks." },
   DOUBLE_STRIKE: { name: 'Double Strike', description: 'Can attack twice per turn.' },
   DRAIN: { name: 'Drain', description: 'Damage dealt by this minion heals your hero.' },
-  LETHAL: { name: 'Lethal', description: 'Destroys any minion this damages.' },
+  BANE: { name: 'Bane', description: 'Destroys any minion this damages.' },
 
   // Trigger Keywords
   DEPLOY: { name: 'Deploy', description: 'Effect triggers when played from hand.' },
@@ -27,7 +27,7 @@ export const KEYWORD_DESCRIPTIONS: Record<string, { name: string; description: s
   UPGRADE: { name: 'Upgrade', description: 'Pay extra Crystals when playing for a bonus effect.' },
   ILLUMINATE: { name: 'Illuminate', description: 'Triggers a bonus effect when you heal any target.' },
   BANISH: { name: 'Banish', description: 'Removes a card from the game permanently.' },
-  ADAPT: { name: 'Adapt', description: 'Gain a random basic keyword: Blitz, Swift, Barrier, or Double Strike.' },
+  ADAPT: { name: 'Adapt', description: 'Choose a keyword bonus: Blitz, Swift, Barrier, or Double Strike.' },
   RESONATE: { name: 'Resonate', description: 'Triggers when you cast a spell.' },
   PHASE: { name: 'Phase', description: "Can't be targeted by spells or Hero Powers." },
   SWARM: { name: 'Swarm', description: 'Gets +1/+1 for each other friendly minion.' },

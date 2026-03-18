@@ -25,7 +25,7 @@ const KEYWORDS: KeywordEntry[] = [
   { name: 'CLOAK', category: 'combat', description: 'Cannot be attacked or targeted until this minion attacks.', example: 'A cloaked assassin can safely wait for the perfect moment.', color: '#8844ff' },
   { name: 'DOUBLE STRIKE', category: 'combat', description: 'Can attack twice per turn.', example: 'A 3/5 Double Strike deals 6 total damage per turn.', color: '#ff8800' },
   { name: 'DRAIN', category: 'combat', description: 'Damage dealt by this minion heals your hero.', example: 'A 4/3 Drain that hits face heals you for 4.', color: '#44ff88' },
-  { name: 'LETHAL', category: 'combat', description: 'Destroys any minion it deals damage to, regardless of health.', example: 'A 1/1 Lethal can kill a 10/10.', color: '#ff0066' },
+  { name: 'BANE', category: 'combat', description: 'Destroys any minion it deals damage to, regardless of health.', example: 'A 1/1 Bane minion can kill a 10/10.', color: '#ff0066' },
 
   // Trigger Keywords
   { name: 'DEPLOY', category: 'trigger', description: 'Triggers an effect when played from your hand.', example: 'Deploy: Deal 2 damage to a random enemy.', color: '#44aaff' },
@@ -36,7 +36,7 @@ const KEYWORDS: KeywordEntry[] = [
   { name: 'UPGRADE', category: 'original', description: 'Pay X extra mana when playing for a bonus effect.', example: 'Upgrade(3): Gain +3/+3 if you pay 3 extra mana.', color: '#ffcc00' },
   { name: 'ILLUMINATE', category: 'original', description: 'Triggers a bonus effect whenever you heal any target.', example: 'Illuminate: Deal 1 damage to a random enemy when you heal.', color: '#ffffff' },
   { name: 'BANISH', category: 'original', description: 'Removes a card from the game entirely (exile).', example: 'Banish the enemy\'s key combo piece permanently.', color: '#cc00ff' },
-  { name: 'ADAPT', category: 'original', description: 'Choose 1 of 3 random bonuses when played.', example: 'Adapt might offer +3 Attack, Barrier, or Lethal.', color: '#00ffcc' },
+  { name: 'ADAPT', category: 'original', description: 'Choose 1 of 4 keyword bonuses when played: Blitz, Swift, Barrier, or Double Strike.', example: 'Playing an Adapt card lets you pick one of four keywords to add.', color: '#00ffcc' },
   { name: 'RESONATE', category: 'original', description: 'Triggers an effect whenever you cast a spell.', example: 'Resonate: Gain +1 Attack each time you cast a spell.', color: '#ff44aa' },
   { name: 'PHASE', category: 'original', description: 'Cannot be targeted by spells or Hero Powers.', example: 'A Phased minion can only be removed through combat.', color: '#6644ff' },
   { name: 'SWARM', category: 'original', description: 'Gets +1/+1 for each other friendly minion on the board.', example: 'With 3 allies, a base 1/1 Swarm becomes 4/4.', color: '#88ff44' },

@@ -23,7 +23,7 @@ export enum CombatKeyword {
   /** Damage dealt heals your Hero */
   DRAIN = 'DRAIN',
   /** Destroy any minion this damages */
-  LETHAL = 'LETHAL',
+  BANE = 'BANE',
 }
 
 /**

@@ -54,6 +54,13 @@ export interface EffectContext {
 /**
  * Effect Resolver — the bridge between Effect definitions and game state mutations
  */
+/** Pending adapt choice awaiting player input */
+export interface PendingAdaptChoice {
+  targetIds: string[];
+  options: AdaptOption[];
+  sourceOwnerId: string;
+}
+
 export class EffectResolver {
   private stateManager: GameStateManager;
   private combatResolver: CombatResolver;
@@ -63,6 +70,9 @@ export class EffectResolver {
   /** Recursion depth guard to prevent infinite loops */
   private resolveDepth = 0;
   private static MAX_DEPTH = 10;
+
+  /** Pending adapt choice awaiting player/AI input */
+  public pendingAdapt: PendingAdaptChoice | null = null;
 
   constructor(
     stateManager: GameStateManager,
@@ -1067,33 +1077,46 @@ export class EffectResolver {
   // ─── ADAPT ────────────────────────────────────────────────────────
 
   /**
-   * ADAPT: Choose 1 of 3 random bonuses and apply to the target.
-   * Without UI choice flow, auto-picks the first random option.
+   * ADAPT: Present all 4 keyword options for the player to choose from.
+   * Sets pendingAdapt so the UI/AI can resolve the choice.
    */
-  private executeAdapt(targets: string[], data: AdaptData, context: EffectContext): void {
-    const optionCount = data.optionCount || 3;
-
-    // Pick random options from the adapt pool
-    const available = [...AllAdaptOptions];
-    const options: AdaptOption[] = [];
-    for (let i = 0; i < optionCount && available.length > 0; i++) {
-      const idx = Math.floor(Math.random() * available.length);
-      options.push(available.splice(idx, 1)[0]);
-    }
+  private executeAdapt(targets: string[], _data: AdaptData, context: EffectContext): void {
+    // All 4 adapt options are always available to choose from
+    const options = [...AllAdaptOptions];
 
     if (options.length === 0) return;
 
-    // Auto-select first option (AI or engine picks randomly)
-    const chosen = options[0];
+    // Filter to valid board targets
+    const validTargets = targets.filter(id => {
+      if (id.startsWith('hero_')) return false;
+      const card = this.board.getCard(id);
+      return card && card.zone === CardZone.BOARD;
+    });
 
-    for (const targetId of targets) {
-      if (targetId.startsWith('hero_')) continue;
+    if (validTargets.length === 0) return;
 
+    // Store pending adapt for UI/AI to resolve
+    this.pendingAdapt = {
+      targetIds: validTargets,
+      options,
+      sourceOwnerId: context.sourceOwnerId,
+    };
+  }
+
+  /**
+   * Resolve a pending adapt choice by applying the chosen option
+   */
+  public resolveAdapt(chosen: AdaptOption): void {
+    if (!this.pendingAdapt) return;
+
+    const { targetIds } = this.pendingAdapt;
+    for (const targetId of targetIds) {
       const card = this.board.getCard(targetId);
       if (!card || card.zone !== CardZone.BOARD) continue;
-
       this.applyAdaptOption(card, chosen);
     }
+
+    this.pendingAdapt = null;
   }
 
   /**

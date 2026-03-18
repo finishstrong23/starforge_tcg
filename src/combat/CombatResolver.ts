@@ -33,7 +33,7 @@ export interface CombatResult {
   error?: string;
   /** Whether BARRIER was broken */
   barrierBroken: boolean;
-  /** Whether LETHAL killed the target */
+  /** Whether BANE killed the target */
   lethalTriggered: boolean;
 }
 
@@ -356,8 +356,8 @@ export class CombatResolver {
         sourceType: 'minion',
       } as DamageEventData);
 
-      // Check LETHAL
-      if (damage > 0 && hasKeyword(source, CombatKeyword.LETHAL)) {
+      // Check BANE
+      if (damage > 0 && hasKeyword(source, CombatKeyword.BANE)) {
         target.currentHealth = 0;
         lethal = true;
       }

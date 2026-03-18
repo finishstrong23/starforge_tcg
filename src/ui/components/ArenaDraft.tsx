@@ -43,7 +43,7 @@ function generateMockChoices(pickNumber: number): ArenaCard[] {
   const races = ['Pyroclast', 'Verdani', 'Mechara', 'Voidborn', 'Celestari',
                  'Nethari', 'Draconid', 'Hivemind', 'Crystari', 'Aetherian'];
 
-  const keywords = ['GUARDIAN', 'BARRIER', 'SWIFT', 'BLITZ', 'DRAIN', 'LETHAL',
+  const keywords = ['GUARDIAN', 'BARRIER', 'SWIFT', 'BLITZ', 'DRAIN', 'BANE',
                     'DEPLOY', 'SALVAGE', 'ADAPT', 'PHASE', 'SWARM'];
 
   return rarities.map((rarity, i) => {

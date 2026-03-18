@@ -58,7 +58,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     title: 'Core Keywords',
-    text: 'Minions can have powerful keyword abilities:\n• GUARDIAN — enemies must attack this first\n• BARRIER — blocks the first hit completely\n• SWIFT — can attack enemy minions immediately\n• BLITZ — can attack anything immediately\n• DRAIN — damage dealt heals your Hero\n• LETHAL — instantly destroys any minion it damages\n• DOUBLE STRIKE — attacks twice per turn',
+    text: 'Minions can have powerful keyword abilities:\n• GUARDIAN — enemies must attack this first\n• BARRIER — blocks the first hit completely\n• SWIFT — can attack enemy minions immediately\n• BLITZ — can attack anything immediately\n• DRAIN — damage dealt heals your Hero\n• BANE — instantly destroys any minion it damages\n• DOUBLE STRIKE — attacks twice per turn',
     highlight: 'none',
     tip: 'Hover over any card to see what its keywords do! Tooltips explain everything.',
   },

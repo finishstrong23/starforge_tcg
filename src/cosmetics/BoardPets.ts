@@ -69,7 +69,7 @@ export enum PetGameEvent {
   MINION_KILLED = 'MINION_KILLED',
   SPELL_CAST = 'SPELL_CAST',
   HEAL = 'HEAL',
-  LETHAL = 'LETHAL',
+  BANE = 'BANE',
   STARFORGE = 'STARFORGE',
   LOW_HEALTH = 'LOW_HEALTH',
   TURN_START = 'TURN_START',
@@ -313,7 +313,7 @@ export function getPetReaction(event: PetGameEvent): PetMood {
     case PetGameEvent.MINION_KILLED: return PetMood.EXCITED;
     case PetGameEvent.SPELL_CAST: return PetMood.HAPPY;
     case PetGameEvent.HEAL: return PetMood.HAPPY;
-    case PetGameEvent.LETHAL: return PetMood.CELEBRATING;
+    case PetGameEvent.BANE: return PetMood.CELEBRATING;
     case PetGameEvent.STARFORGE: return PetMood.CHEERING;
     case PetGameEvent.LOW_HEALTH: return PetMood.SCARED;
     case PetGameEvent.TURN_START: return PetMood.IDLE;

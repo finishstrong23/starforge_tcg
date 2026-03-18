@@ -249,7 +249,7 @@ export const Card: React.FC<CardProps> = ({
   if (hasKeyword(card, CombatKeyword.SWIFT)) cardKeywords.push('SWIFT');
   if (hasKeyword(card, CombatKeyword.BLITZ)) cardKeywords.push('BLITZ');
   if (hasKeyword(card, CombatKeyword.DRAIN)) cardKeywords.push('DRAIN');
-  if (hasKeyword(card, CombatKeyword.LETHAL)) cardKeywords.push('LETHAL');
+  if (hasKeyword(card, CombatKeyword.BANE)) cardKeywords.push('BANE');
   if (hasKeyword(card, CombatKeyword.CLOAK)) cardKeywords.push('CLOAK');
   if (hasKeyword(card, CombatKeyword.DOUBLE_STRIKE)) cardKeywords.push('DOUBLE_STRIKE');
   if (hasKeyword(card, TriggerKeyword.DEPLOY)) cardKeywords.push('DEPLOY');
@@ -276,7 +276,7 @@ export const Card: React.FC<CardProps> = ({
     SWIFT: '⚡',
     BLITZ: '💨',
     DRAIN: '💜',
-    LETHAL: '☠️',
+    BANE: '☠️',
     CLOAK: '👻',
     DOUBLE_STRIKE: '⚔️',
     DEPLOY: '📥',

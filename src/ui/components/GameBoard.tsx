@@ -31,6 +31,7 @@ import { EmoteWheel, EmoteBubble, type Emote } from './EmoteWheel';
 import { CardArt } from './CardArt';
 import { HeroIntro } from './HeroIntro';
 import { KeywordGlossary } from './KeywordGlossary';
+import { AdaptChoiceOverlay } from './AdaptChoiceOverlay';
 import { getHeroById } from '../../heroes';
 import { globalCardDatabase } from '../../cards/CardDatabase';
 import { hapticTap, hapticImpact } from '../capacitor';
@@ -82,6 +83,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     legendaryCinematic,
     dismissLegendaryCinematic,
     voicelineBubble,
+    pendingAdaptChoice,
+    resolveAdaptChoice,
   } = useGame();
 
   // ── Drag-and-drop state ──
@@ -239,6 +242,14 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       {/* Board Pets */}
       <BoardPet side="player" />
       <BoardPet side="opponent" />
+
+      {/* Adapt Choice Overlay */}
+      {pendingAdaptChoice && (
+        <AdaptChoiceOverlay
+          options={pendingAdaptChoice.options}
+          onChoose={resolveAdaptChoice}
+        />
+      )}
 
       {/* Legendary Card Entrance Cinematic */}
       {legendaryCinematic && (

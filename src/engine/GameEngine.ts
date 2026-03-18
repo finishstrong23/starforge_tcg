@@ -554,10 +554,10 @@ export class GameEngine {
 
     if (has(CombatKeyword.GUARDIAN))       return CombatKeyword.DRAIN;         // Unkillable tank
     if (has(CombatKeyword.DRAIN))          return CombatKeyword.DOUBLE_STRIKE; // Massive lifesteal
-    if (has(CombatKeyword.LETHAL))         return CombatKeyword.CLOAK;         // Invisible assassin
+    if (has(CombatKeyword.BANE))         return CombatKeyword.CLOAK;         // Invisible assassin
     if (has(CombatKeyword.CLOAK))          return CombatKeyword.DOUBLE_STRIKE; // Sneaky double damage
-    if (has(CombatKeyword.SWIFT))          return CombatKeyword.LETHAL;        // Instant killer
-    if (has(CombatKeyword.BLITZ))          return CombatKeyword.LETHAL;        // Unstoppable force
+    if (has(CombatKeyword.SWIFT))          return CombatKeyword.BANE;        // Instant killer
+    if (has(CombatKeyword.BLITZ))          return CombatKeyword.BANE;        // Unstoppable force
     if (has(CombatKeyword.DOUBLE_STRIKE))  return CombatKeyword.DRAIN;         // Double drain
     if (has(CombatKeyword.BARRIER))        return CombatKeyword.DOUBLE_STRIKE; // Protected powerhouse
     return CombatKeyword.DOUBLE_STRIKE; // Default: raw power
@@ -910,5 +910,12 @@ export class GameEngine {
    */
   getDeathProcessor(): DeathProcessor {
     return this.deathProcessor;
+  }
+
+  /**
+   * Get effect resolver (for adapt choices, etc.)
+   */
+  getEffectResolver(): EffectResolver {
+    return this.effectResolver;
   }
 }

@@ -64,7 +64,7 @@ export interface TranslationMap {
   'keyword.cloak': string;
   'keyword.doubleStrike': string;
   'keyword.drain': string;
-  'keyword.lethal': string;
+  'keyword.bane': string;
   'keyword.deploy': string;
   'keyword.lastWords': string;
   'keyword.salvage': string;
@@ -207,7 +207,7 @@ const EN: TranslationMap = {
   'keyword.cloak': "Can't be targeted until it attacks.",
   'keyword.doubleStrike': 'Can attack twice per turn.',
   'keyword.drain': 'Damage dealt heals your hero.',
-  'keyword.lethal': 'Any damage dealt to a minion destroys it.',
+  'keyword.bane': 'Any damage dealt to a minion destroys it.',
   'keyword.deploy': 'Effect triggers when played from hand.',
   'keyword.lastWords': 'Effect triggers when this minion dies.',
   'keyword.salvage': 'Last Words: Draw a card.',

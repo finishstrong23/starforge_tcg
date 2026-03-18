@@ -175,15 +175,15 @@ export const PUZZLES: PuzzleDefinition[] = [
   },
   {
     id: 'p_n06',
-    name: 'Lethal Keyword',
+    name: 'Bane Keyword',
     tier: 'novice',
-    description: 'LETHAL destroys any minion it damages. Clear the path!',
-    hint: 'Use the LETHAL minion to kill the big taunt.',
+    description: 'BANE destroys any minion it damages. Clear the path!',
+    hint: 'Use the BANE minion to kill the big taunt.',
     playerHP: 6,
     playerCrystals: 0,
     playerRace: Race.VOIDBORN,
     playerBoard: [
-      { name: 'Void Assassin', attack: 1, health: 1, keywords: ['LETHAL'], canAttack: true },
+      { name: 'Void Assassin', attack: 1, health: 1, keywords: ['BANE'], canAttack: true },
       { name: 'Void Terror', attack: 5, health: 3, keywords: [], canAttack: true },
     ],
     playerHand: [],
@@ -191,7 +191,7 @@ export const PUZZLES: PuzzleDefinition[] = [
     opponentBoard: [
       { name: 'Ancient of War', attack: 5, health: 10, keywords: ['GUARDIAN'], canAttack: false },
     ],
-    solutionSteps: ['Attack Ancient of War with Void Assassin (LETHAL kills it)', 'Attack hero with Void Terror (5 damage)', 'Total: 5 = lethal'],
+    solutionSteps: ['Attack Ancient of War with Void Assassin (BANE kills it)', 'Attack hero with Void Terror (5 damage)', 'Total: 5 = lethal'],
   },
   {
     id: 'p_n07',

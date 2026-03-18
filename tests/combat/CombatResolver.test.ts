@@ -2,7 +2,7 @@
  * STARFORGE TCG - Combat Resolver Tests
  *
  * Tests the CombatResolver class: attack resolution, damage calculation,
- * keyword interactions (GUARDIAN, BARRIER, LETHAL, DRAIN, DOUBLE_STRIKE,
+ * keyword interactions (GUARDIAN, BARRIER, BANE, DRAIN, DOUBLE_STRIKE,
  * SWIFT, BLITZ, CLOAK), and combat validation rules.
  */
 
@@ -108,7 +108,7 @@ const TEST_CARDS: CardDefinition[] = [
     collectible: true,
     set: 'TEST',
   },
-  // LETHAL 1/1
+  // BANE 1/1
   {
     id: 'test_lethal',
     name: 'Test Lethal',
@@ -117,7 +117,7 @@ const TEST_CARDS: CardDefinition[] = [
     rarity: CardRarity.COMMON,
     attack: 1,
     health: 1,
-    keywords: [{ keyword: CombatKeyword.LETHAL }],
+    keywords: [{ keyword: CombatKeyword.BANE }],
     effects: [],
     cardText: 'Lethal',
     collectible: true,
@@ -492,7 +492,7 @@ describe('CombatResolver', () => {
       const barrierMinion = placeOnBoard(engine, 'test_barrier', 'player1');
       barrierMinion.hasBarrier = true;
 
-      // Place a LETHAL minion on player2's board
+      // Place a BANE minion on player2's board
       const lethalMinion = placeOnBoard(engine, 'test_lethal', 'player2');
 
       // Ensure player2 is the active player
@@ -538,24 +538,24 @@ describe('CombatResolver', () => {
     });
   });
 
-  // ─── LETHAL Tests ──────────────────────────────────────────────────
+  // ─── BANE Tests ──────────────────────────────────────────────────
 
-  describe('LETHAL', () => {
-    it('any damage from LETHAL minion kills target (even 1 damage to 5 health)', () => {
+  describe('BANE', () => {
+    it('any damage from BANE minion kills target (even 1 damage to 5 health)', () => {
       const engine = setupTestGame();
       const stateManager = engine.getStateManager();
 
       // Place a big minion (5/5) on player1's board
       const bigMinion = placeOnBoard(engine, 'test_vanilla_5_5', 'player1');
 
-      // Place a LETHAL minion (1/1) on player2's board
+      // Place a BANE minion (1/1) on player2's board
       const lethalMinion = placeOnBoard(engine, 'test_lethal', 'player2');
 
       // Ensure player2 is the active player
       ensureActivePlayer(engine, 'player2');
       lethalMinion.summonedThisTurn = false;
 
-      // Attack the 5/5 with LETHAL 1/1
+      // Attack the 5/5 with BANE 1/1
       engine.processAction({
         type: ActionType.ATTACK,
         playerId: 'player2',
@@ -563,16 +563,16 @@ describe('CombatResolver', () => {
         data: { attackerId: lethalMinion.instanceId, defenderId: bigMinion.instanceId },
       });
 
-      // Big minion should be dead (LETHAL kills it despite only 1 damage)
+      // Big minion should be dead (BANE kills it despite only 1 damage)
       expect(bigMinion.currentHealth).toBe(0);
       expect(bigMinion.zone).toBe(CardZone.GRAVEYARD);
     });
 
-    it('LETHAL works on counter-attack (target has LETHAL, attacker dies)', () => {
+    it('BANE works on counter-attack (target has BANE, attacker dies)', () => {
       const engine = setupTestGame();
       const stateManager = engine.getStateManager();
 
-      // Place a LETHAL minion (1/1) on player1's board (defender)
+      // Place a BANE minion (1/1) on player1's board (defender)
       const lethalDefender = placeOnBoard(engine, 'test_lethal', 'player1');
 
       // Place a big minion (5/5) on player2's board (attacker)
@@ -582,7 +582,7 @@ describe('CombatResolver', () => {
       ensureActivePlayer(engine, 'player2');
       bigAttacker.summonedThisTurn = false;
 
-      // Attack the LETHAL 1/1 with the 5/5
+      // Attack the BANE 1/1 with the 5/5
       engine.processAction({
         type: ActionType.ATTACK,
         playerId: 'player2',
@@ -590,12 +590,12 @@ describe('CombatResolver', () => {
         data: { attackerId: bigAttacker.instanceId, defenderId: lethalDefender.instanceId },
       });
 
-      // Attacker (5/5) should die from LETHAL counter-attack
+      // Attacker (5/5) should die from BANE counter-attack
       expect(bigAttacker.currentHealth).toBe(0);
       expect(bigAttacker.zone).toBe(CardZone.GRAVEYARD);
     });
 
-    it('LETHAL does not affect BARRIER (absorbed)', () => {
+    it('BANE does not affect BARRIER (absorbed)', () => {
       const engine = setupTestGame();
       const stateManager = engine.getStateManager();
 
@@ -603,14 +603,14 @@ describe('CombatResolver', () => {
       const barrierMinion = placeOnBoard(engine, 'test_barrier', 'player1');
       barrierMinion.hasBarrier = true;
 
-      // Place a LETHAL minion (1/1) on player2's board
+      // Place a BANE minion (1/1) on player2's board
       const lethalMinion = placeOnBoard(engine, 'test_lethal', 'player2');
 
       // Ensure player2 is the active player
       ensureActivePlayer(engine, 'player2');
       lethalMinion.summonedThisTurn = false;
 
-      // Attack the BARRIER minion with LETHAL
+      // Attack the BARRIER minion with BANE
       engine.processAction({
         type: ActionType.ATTACK,
         playerId: 'player2',
@@ -618,27 +618,27 @@ describe('CombatResolver', () => {
         data: { attackerId: lethalMinion.instanceId, defenderId: barrierMinion.instanceId },
       });
 
-      // BARRIER absorbs the hit, minion survives, LETHAL does not kill
+      // BARRIER absorbs the hit, minion survives, BANE does not kill
       expect(barrierMinion.currentHealth).toBe(3);
       expect(barrierMinion.zone).toBe(CardZone.BOARD);
       expect(barrierMinion.hasBarrier).toBe(false);
     });
 
-    it('both LETHAL minions kill each other', () => {
+    it('both BANE minions kill each other', () => {
       const engine = setupTestGame();
       const stateManager = engine.getStateManager();
 
-      // Place a LETHAL minion (1/1) on player1's board
+      // Place a BANE minion (1/1) on player1's board
       const lethalDefender = placeOnBoard(engine, 'test_lethal', 'player1');
 
-      // Place another LETHAL minion (1/1) on player2's board
+      // Place another BANE minion (1/1) on player2's board
       const lethalAttacker = placeOnBoard(engine, 'test_lethal', 'player2');
 
       // Ensure player2 is the active player
       ensureActivePlayer(engine, 'player2');
       lethalAttacker.summonedThisTurn = false;
 
-      // Attack LETHAL vs LETHAL
+      // Attack BANE vs BANE
       engine.processAction({
         type: ActionType.ATTACK,
         playerId: 'player2',

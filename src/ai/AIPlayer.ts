@@ -110,14 +110,14 @@ export class AIPlayer {
       if (hasKeyword(card, CombatKeyword.GUARDIAN as Keyword)) guardianCount++;
       if (hasKeyword(card, CombatKeyword.BARRIER as Keyword)) barrierCount++;
       if (hasKeyword(card, CombatKeyword.DRAIN as Keyword)) drainCount++;
-      if (hasKeyword(card, CombatKeyword.LETHAL as Keyword)) lethalCount++;
+      if (hasKeyword(card, CombatKeyword.BANE as Keyword)) lethalCount++;
       if (hasKeyword(card, CombatKeyword.DOUBLE_STRIKE as Keyword)) dsCount++;
     }
 
     const avgCost = minionCount > 0 ? totalCost / minionCount : 4;
     // Composite score: positive = aggro, negative = control
-    // BLITZ/SWIFT/DOUBLE_STRIKE push aggro; GUARDIAN/BARRIER/DRAIN/LETHAL push control
-    // DOUBLE_STRIKE is offensive burst; LETHAL is efficient removal (control tool)
+    // BLITZ/SWIFT/DOUBLE_STRIKE push aggro; GUARDIAN/BARRIER/DRAIN/BANE push control
+    // DOUBLE_STRIKE is offensive burst; BANE is efficient removal (control tool)
     // Lower mana curve pushes toward aggro, higher toward control
     const aggroSignals = blitzCount * 3 + swiftCount + dsCount;
     const controlSignals = guardianCount * 2 + barrierCount * 2 + drainCount + lethalCount;
@@ -184,6 +184,14 @@ export class AIPlayer {
       const result = engine.processAction(action);
       if (!result.success) break;
       actionsTaken++;
+
+      // Auto-resolve adapt choices for AI
+      const resolver = engine.getEffectResolver();
+      if (resolver.pendingAdapt) {
+        const opts = resolver.pendingAdapt.options;
+        const pick = opts[Math.floor(Math.random() * opts.length)];
+        resolver.resolveAdapt(pick);
+      }
     }
 
     engine.processAction({
@@ -576,7 +584,7 @@ export class AIPlayer {
       // CLOAK: Stealth — can't be attacked. Guarantees one attack.
       score += 2;
       if ((card.currentAttack || 0) >= 4) score += 2;
-      if (hasKeyword(card, CombatKeyword.LETHAL as Keyword)) score += 2;
+      if (hasKeyword(card, CombatKeyword.BANE as Keyword)) score += 2;
     }
     if (hasKeyword(card, CombatKeyword.DOUBLE_STRIKE as Keyword)) {
       // DOUBLE_STRIKE: 2 attacks per turn. Great for both board and face.
@@ -584,7 +592,7 @@ export class AIPlayer {
       score += atkVal + 2; // Slightly lower base (from +3)
       if (oppBoardCount >= 2) score += 2; // Board control: kill two things
       if (isControl && oppBoardCount > 0) score += 2; // Control values double-trading
-      if (hasKeyword(card, CombatKeyword.LETHAL as Keyword)) score += 4;
+      if (hasKeyword(card, CombatKeyword.BANE as Keyword)) score += 4;
     }
     if (hasKeyword(card, CombatKeyword.DRAIN as Keyword)) {
       // DRAIN: Heals hero by damage dealt. Sustain keyword.
@@ -594,15 +602,15 @@ export class AIPlayer {
       if (isControl) score += 2; // Control game plan IS sustain
       score += Math.floor((card.currentAttack || 0) * 0.5);
     }
-    if (hasKeyword(card, CombatKeyword.LETHAL as Keyword)) {
-      // LETHAL: Kills ANY minion regardless of health. Premium removal.
+    if (hasKeyword(card, CombatKeyword.BANE as Keyword)) {
+      // BANE: Kills ANY minion regardless of health. Premium removal.
       score += 4;
       if (oppBoardCount > 0) score += 3;
-      // Scale bonus with how big the enemy threats are — LETHAL excels vs big minions
+      // Scale bonus with how big the enemy threats are — BANE excels vs big minions
       const biggestEnemy = oppBoard.reduce((max, m) => Math.max(max, m.currentHealth || 0), 0);
       if (biggestEnemy >= 5) score += Math.min(biggestEnemy - 2, 6);
       if (isControl) score += 2; // Control needs efficient removal
-      // LETHAL + SWIFT combo: immediately removes a minion on play
+      // BANE + SWIFT combo: immediately removes a minion on play
       if (hasKeyword(card, CombatKeyword.SWIFT as Keyword)) score += 3;
     }
 
@@ -724,7 +732,7 @@ export class AIPlayer {
     const atkHP = attacker.currentHealth || 0;
     const defHP = target.currentHealth || 0;
 
-    const hasLethal = hasKeyword(attacker, CombatKeyword.LETHAL as Keyword);
+    const hasLethal = hasKeyword(attacker, CombatKeyword.BANE as Keyword);
     const hasDS = hasKeyword(attacker, CombatKeyword.DOUBLE_STRIKE as Keyword);
     const killsTarget = hasLethal || atkDmg >= defHP || (target.hasBarrier ? false : atkDmg >= defHP);
     const targetHasBarrier = target.hasBarrier;
@@ -741,7 +749,7 @@ export class AIPlayer {
       // Bonus for killing dangerous keywords
       if (hasKeyword(target, CombatKeyword.GUARDIAN as Keyword)) score += 5; // Removes their taunt wall
       if (hasKeyword(target, CombatKeyword.DOUBLE_STRIKE as Keyword)) score += 5;
-      if (hasKeyword(target, CombatKeyword.LETHAL as Keyword)) score += 5;
+      if (hasKeyword(target, CombatKeyword.BANE as Keyword)) score += 5;
       if (hasKeyword(target, CombatKeyword.DRAIN as Keyword)) score += 3;
       if (hasKeyword(target, CombatKeyword.BLITZ as Keyword)) score += 2;
 
@@ -755,8 +763,8 @@ export class AIPlayer {
         if (targetText.includes('all friendly')) score -= 2; // Their whole board gets buffed
       }
 
-      // LETHAL value scales with how much HP we'd otherwise need to punch through
-      // A 1-ATK LETHAL killing a 7-HP minion saves 6 damage worth of value
+      // BANE value scales with how much HP we'd otherwise need to punch through
+      // A 1-ATK BANE killing a 7-HP minion saves 6 damage worth of value
       if (hasLethal && defHP > atkDmg) score += Math.min(defHP - atkDmg, 10);
 
       // DOUBLE_STRIKE bonus: we can still attack again this turn!
@@ -766,7 +774,7 @@ export class AIPlayer {
       score = 2;
       // Use cheap/low-value attackers to pop barrier
       if (atkDmg <= 2) score += 1;
-      // LETHAL minions should NOT waste their attack on barrier
+      // BANE minions should NOT waste their attack on barrier
       if (hasLethal) score -= 5;
       // Cloaked minions shouldn't waste their stealth popping barriers
       if (attacker.isCloaked) score -= 2;
@@ -777,8 +785,8 @@ export class AIPlayer {
       score = theirValue - ourValue + 1;
       // Prioritize killing GUARDIAN even in even trades
       if (hasKeyword(target, CombatKeyword.GUARDIAN as Keyword)) score += 3;
-      if (hasKeyword(target, CombatKeyword.LETHAL as Keyword)) score += 3;
-      // LETHAL even-trades are actually favorable — our cheap minion kills their big one
+      if (hasKeyword(target, CombatKeyword.BANE as Keyword)) score += 3;
+      // BANE even-trades are actually favorable — our cheap minion kills their big one
       if (hasLethal && defHP > atkDmg) score += Math.min(defHP - atkDmg, 8);
       // LAST_WORDS bonus: our minion dying triggers our death effects — it's like a free spell!
       if (hasKeyword(attacker, TriggerKeyword.LAST_WORDS as Keyword)) score += 3;
@@ -804,7 +812,7 @@ export class AIPlayer {
   private findFaceAttack(board: GameBoard, player: PlayerState, opponentId: string): GameAction | null {
     const attackers = this.getAvailableAttackers(board, player);
     // Prioritize face attacks: cloaked first (safe to send), then highest attack
-    // But LETHAL minions should trade instead of going face (their value is removing big minions)
+    // But BANE minions should trade instead of going face (their value is removing big minions)
     const faceAttackers = attackers
       .filter(atk => {
         const targets = this.getValidTargets(board, opponentId, atk);
@@ -815,9 +823,9 @@ export class AIPlayer {
         const aCloaked = a.isCloaked ? 1 : 0;
         const bCloaked = b.isCloaked ? 1 : 0;
         if (aCloaked !== bCloaked) return bCloaked - aCloaked;
-        // LETHAL minions go face last (their value is trades, not face)
-        const aLethal = hasKeyword(a, CombatKeyword.LETHAL as Keyword) ? 1 : 0;
-        const bLethal = hasKeyword(b, CombatKeyword.LETHAL as Keyword) ? 1 : 0;
+        // BANE minions go face last (their value is trades, not face)
+        const aLethal = hasKeyword(a, CombatKeyword.BANE as Keyword) ? 1 : 0;
+        const bLethal = hasKeyword(b, CombatKeyword.BANE as Keyword) ? 1 : 0;
         if (aLethal !== bLethal) return aLethal - bLethal;
         // Higher attack goes face first
         return (getEffectiveAttack(b)) - (getEffectiveAttack(a));
@@ -837,7 +845,7 @@ export class AIPlayer {
       for (const m of minions) {
         let v = (m.currentAttack || 0) + (m.currentHealth || 0);
         if (hasKeyword(m, CombatKeyword.GUARDIAN as Keyword)) v += 4; // Taunt is huge
-        if (hasKeyword(m, CombatKeyword.LETHAL as Keyword)) v += 4;  // Kills anything
+        if (hasKeyword(m, CombatKeyword.BANE as Keyword)) v += 4;  // Kills anything
         if (hasKeyword(m, CombatKeyword.DOUBLE_STRIKE as Keyword)) v += (m.currentAttack || 0) + 2; // 2 attacks/turn
         if (hasKeyword(m, CombatKeyword.DRAIN as Keyword)) v += 2;
         if (m.hasBarrier) v += 3; // Full hit absorption
@@ -891,9 +899,9 @@ export class AIPlayer {
       if (hasKeyword(card, CombatKeyword.DOUBLE_STRIKE as Keyword)) score += atk * 3; // 4x effective attack!
       if (hasKeyword(card, CombatKeyword.DRAIN as Keyword)) score += atk * 2; // Doubled drain healing
       if (hasKeyword(card, CombatKeyword.GUARDIAN as Keyword)) score += hp;     // Bigger wall + gains DRAIN
-      if (hasKeyword(card, CombatKeyword.LETHAL as Keyword)) score += 8;        // LETHAL + gains CLOAK = invisible assassin
-      if (hasKeyword(card, CombatKeyword.BLITZ as Keyword)) score += atk;       // Immediate doubled damage + gains LETHAL
-      if (hasKeyword(card, CombatKeyword.SWIFT as Keyword)) score += atk;       // Gains LETHAL
+      if (hasKeyword(card, CombatKeyword.BANE as Keyword)) score += 8;        // BANE + gains CLOAK = invisible assassin
+      if (hasKeyword(card, CombatKeyword.BLITZ as Keyword)) score += atk;       // Immediate doubled damage + gains BANE
+      if (hasKeyword(card, CombatKeyword.SWIFT as Keyword)) score += atk;       // Gains BANE
       if (hasKeyword(card, CombatKeyword.CLOAK as Keyword)) score += 6;         // Gains DOUBLE_STRIKE, untargetable
       if (hasKeyword(card, CombatKeyword.BARRIER as Keyword)) score += 4;       // Gains DOUBLE_STRIKE, already protected
 
