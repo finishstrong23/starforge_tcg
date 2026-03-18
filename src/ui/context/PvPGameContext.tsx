@@ -711,6 +711,8 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     legendaryCinematic: null,
     dismissLegendaryCinematic: () => {},
     voicelineBubble: null,
+    pendingAdaptChoice: null,
+    resolveAdaptChoice: () => {},
   };
 
   return (
