@@ -511,21 +511,21 @@ export const CARD_BUNDLES: CardBundle[] = [
     id: 'bundle_fire_rush',
     name: 'Fire Rush',
     description: 'Fast, aggressive minions that hit hard.',
-    cardIds: ['pyro_flame_imp', 'pyro_emberblade', 'pyro_fire_elemental'],
+    cardIds: ['pyr_sd_m1', 'pyr_sd_m2', 'pyr_sd_m4'],
     theme: 'aggro',
   },
   {
     id: 'bundle_swarm_wave',
     name: 'Swarm Wave',
     description: 'Flood the board with tokens.',
-    cardIds: ['hive_drone_caller', 'hive_spawn_pool', 'hive_queen_guard'],
+    cardIds: ['hiv_sd_m1', 'hiv_sd_s1', 'hiv_sd_m4'],
     theme: 'tokens',
   },
   {
     id: 'bundle_quick_strike',
     name: 'Quick Strike',
     description: 'SWIFT and BLITZ minions for immediate impact.',
-    cardIds: ['pc_shadow_blade', 'n_swift_runner', 'n_blitz_trooper'],
+    cardIds: ['phc_sd_m1', 'phc_sd_m5', 'phc_sd_m7'],
     theme: 'tempo',
   },
 
@@ -534,21 +534,21 @@ export const CARD_BUNDLES: CardBundle[] = [
     id: 'bundle_shield_wall',
     name: 'Shield Wall',
     description: 'Tough GUARDIAN minions to protect your hero.',
-    cardIds: ['lum_light_guardian', 'n_stone_wall', 'cog_iron_defender'],
+    cardIds: ['lum_sd_m6', 'bio_sd_m6', 'neut_ex5'],
     theme: 'defense',
   },
   {
     id: 'bundle_healing_light',
     name: 'Healing Light',
     description: 'Sustain and outlast with healing.',
-    cardIds: ['lum_healer_acolyte', 'lum_radiant_protector', 'n_medic_bot'],
+    cardIds: ['lum_sd_m1', 'lum_sd_m4', 'lum_sd_s1'],
     theme: 'heal',
   },
   {
     id: 'bundle_void_control',
     name: 'Void Control',
     description: 'Disruption and removal spells.',
-    cardIds: ['void_siphon', 'void_exile', 'void_terror'],
+    cardIds: ['voi_sd_s1', 'voi_sd_s3', 'voi_sd_m5'],
     theme: 'removal',
   },
 
@@ -557,21 +557,21 @@ export const CARD_BUNDLES: CardBundle[] = [
     id: 'bundle_card_draw',
     name: 'Knowledge Seeker',
     description: 'Draw more cards, find more answers.',
-    cardIds: ['astro_star_reader', 'n_loot_hoarder', 'astro_cosmic_insight'],
+    cardIds: ['ast_sd_m1', 'ast_sd_s1', 'ast_sd_m3'],
     theme: 'draw',
   },
   {
     id: 'bundle_mech_synergy',
     name: 'Mech Army',
     description: 'Mechs that buff each other.',
-    cardIds: ['cog_gear_grinder', 'cog_upgrade_bot', 'cog_war_machine'],
+    cardIds: ['cog_sd_m1', 'cog_sd_m4', 'cog_sd_m8'],
     theme: 'synergy',
   },
   {
     id: 'bundle_big_beasts',
     name: 'Big Beasts',
     description: 'Massive creatures to dominate the late game.',
-    cardIds: ['bio_thornback', 'bio_apex_predator', 'n_war_golem'],
+    cardIds: ['bio_sd_m8', 'bio_sd_m10', 'neut_ex4'],
     theme: 'big',
   },
 
@@ -580,21 +580,21 @@ export const CARD_BUNDLES: CardBundle[] = [
     id: 'bundle_death_rattle',
     name: 'Last Words',
     description: 'Minions with powerful death effects.',
-    cardIds: ['n_harvest_golem', 'void_dark_soul', 'hive_exploding_drone'],
+    cardIds: ['voi_sd_m3', 'hiv_sd_m2', 'bio_sd_m2'],
     theme: 'deathrattle',
   },
   {
     id: 'bundle_spell_power',
     name: 'Spell Power',
     description: 'Boost your spell damage.',
-    cardIds: ['crys_spell_amplifier', 'crys_mana_wyrm', 'crys_arcane_bolt'],
+    cardIds: ['cry_sd_m10', 'cry_sd_m2', 'cry_sd_s1'],
     theme: 'spellpower',
   },
   {
     id: 'bundle_echo_combo',
     name: 'Echo Combo',
     description: 'ECHO cards that can be played twice.',
-    cardIds: ['chrono_time_walker', 'chrono_echo_blast', 'n_echo_slime'],
+    cardIds: ['chr_sd_m4', 'chr_sd_s1', 'chr_sd_m6'],
     theme: 'echo',
   },
 ];
@@ -616,74 +616,74 @@ export function getCardBundleChoices(alreadyChosen: string[], seed?: number): Ca
 export function getDungeonStarterDeck(race: Race): string[] {
   const starters: Partial<Record<Race, string[]>> = {
     [Race.PYROCLAST]: [
-      'pyro_flame_imp', 'pyro_flame_imp',
-      'pyro_emberblade', 'pyro_emberblade',
-      'pyro_fire_bolt', 'pyro_fire_bolt',
-      'n_recruit', 'n_recruit',
-      'n_wisp', 'n_wisp',
+      'pyr_sd_m1', 'pyr_sd_m1',   // Ember Imp (1)
+      'pyr_sd_s1', 'pyr_sd_s1',   // Flamelick (1)
+      'pyr_sd_m2', 'pyr_sd_m2',   // Firestarter (1)
+      'pyr_sd_m3', 'pyr_sd_m3',   // Ashwalker (2)
+      'pyr_sd_s3', 'pyr_sd_s3',   // Pyro Bolt (2)
     ],
     [Race.LUMINAR]: [
-      'lum_healer_acolyte', 'lum_healer_acolyte',
-      'lum_light_guardian', 'lum_light_guardian',
-      'lum_holy_smite', 'lum_holy_smite',
-      'n_recruit', 'n_recruit',
-      'n_wisp', 'n_wisp',
+      'lum_sd_m1', 'lum_sd_m1',   // Luminar Acolyte (1)
+      'lum_sd_m2', 'lum_sd_m2',   // Sunbeam Sprite (1)
+      'lum_sd_s1', 'lum_sd_s1',   // Sanctify (2)
+      'lum_sd_m4', 'lum_sd_m4',   // Dawn Priest (2)
+      'lum_sd_s2', 'lum_sd_s2',   // Blessed Arrow (2)
     ],
     [Race.HIVEMIND]: [
-      'hive_drone_caller', 'hive_drone_caller',
-      'hive_spawn_pool', 'hive_spawn_pool',
-      'hive_stinger', 'hive_stinger',
-      'n_recruit', 'n_recruit',
-      'n_wisp', 'n_wisp',
+      'hiv_sd_m1', 'hiv_sd_m1',   // Worker Drone (1)
+      'hiv_sd_s1', 'hiv_sd_s1',   // Spawning Pit (1)
+      'hiv_sd_m2', 'hiv_sd_m2',   // Hatchling Burst (1)
+      'hiv_sd_m4', 'hiv_sd_m4',   // Brood Tender (2)
+      'hiv_sd_s2', 'hiv_sd_s2',   // Infest (2)
     ],
     [Race.COGSMITHS]: [
-      'cog_gear_grinder', 'cog_gear_grinder',
-      'cog_iron_defender', 'cog_iron_defender',
-      'cog_repair_bot', 'cog_repair_bot',
-      'n_recruit', 'n_recruit',
-      'n_wisp', 'n_wisp',
+      'cog_sd_m1', 'cog_sd_m1',   // Sparktinkerer (1)
+      'cog_sd_m2', 'cog_sd_m2',   // Blast Beetle (1)
+      'cog_sd_s1', 'cog_sd_s1',   // Scrap Grenade (1)
+      'cog_sd_m4', 'cog_sd_m4',   // Boom Cog (2)
+      'cog_sd_s2', 'cog_sd_s2',   // Volatile Payload (2)
     ],
     [Race.VOIDBORN]: [
-      'void_siphon', 'void_siphon',
-      'void_terror', 'void_terror',
-      'void_shadow_bolt', 'void_shadow_bolt',
-      'n_recruit', 'n_recruit',
-      'n_wisp', 'n_wisp',
+      'voi_sd_m1', 'voi_sd_m1',   // Voidborn Wisp (1)
+      'voi_sd_s1', 'voi_sd_s1',   // Null Shard (1)
+      'voi_sd_m2', 'voi_sd_m2',   // Shadow Feeder (1)
+      'voi_sd_m3', 'voi_sd_m3',   // Voidborn Stalker (2)
+      'voi_sd_s3', 'voi_sd_s3',   // Mind Fracture (2)
     ],
     [Race.BIOTITANS]: [
-      'bio_seedling', 'bio_seedling',
-      'bio_thornback', 'bio_thornback',
-      'bio_wild_growth', 'bio_wild_growth',
-      'n_recruit', 'n_recruit',
-      'n_wisp', 'n_wisp',
+      'bio_sd_m1', 'bio_sd_m1',   // Genestock Runt (1)
+      'bio_sd_s1', 'bio_sd_s1',   // Biocelerate (1)
+      'bio_sd_m2', 'bio_sd_m2',   // Spore Sac (1)
+      'bio_sd_m3', 'bio_sd_m3',   // Genome Stalker (2)
+      'bio_sd_m4', 'bio_sd_m4',   // Venombrood Larva (2)
     ],
     [Race.CRYSTALLINE]: [
-      'crys_mana_wyrm', 'crys_mana_wyrm',
-      'crys_arcane_bolt', 'crys_arcane_bolt',
-      'crys_spell_amplifier', 'crys_spell_amplifier',
-      'n_recruit', 'n_recruit',
-      'n_wisp', 'n_wisp',
+      'cry_sd_m1', 'cry_sd_m1',   // Prism Shard (1)
+      'cry_sd_s1', 'cry_sd_s1',   // Crystal Spark (1)
+      'cry_sd_s2', 'cry_sd_s2',   // Arcane Missile (1)
+      'cry_sd_m2', 'cry_sd_m2',   // Geode Apprentice (2)
+      'cry_sd_s4', 'cry_sd_s4',   // Refraction Bolt (2)
     ],
     [Race.PHANTOM_CORSAIRS]: [
-      'pc_shadow_blade', 'pc_shadow_blade',
-      'pc_pickpocket', 'pc_pickpocket',
-      'pc_smoke_bomb', 'pc_smoke_bomb',
-      'n_recruit', 'n_recruit',
-      'n_wisp', 'n_wisp',
+      'phc_sd_m1', 'phc_sd_m1',   // Deckhand Specter (1)
+      'phc_sd_m2', 'phc_sd_m2',   // Phantom Parrot (1)
+      'phc_sd_s1', 'phc_sd_s1',   // Plunder (1)
+      'phc_sd_m5', 'phc_sd_m5',   // Ghost Gunner (2)
+      'phc_sd_s2', 'phc_sd_s2',   // Smoke Bomb (2)
     ],
     [Race.ASTROMANCERS]: [
-      'astro_star_reader', 'astro_star_reader',
-      'astro_cosmic_insight', 'astro_cosmic_insight',
-      'astro_nova_bolt', 'astro_nova_bolt',
-      'n_recruit', 'n_recruit',
-      'n_wisp', 'n_wisp',
+      'ast_sd_m1', 'ast_sd_m1',   // Stargazer Initiate (1)
+      'ast_sd_s1', 'ast_sd_s1',   // Cosmic Insight (1)
+      'ast_sd_s2', 'ast_sd_s2',   // Stellar Compass (1)
+      'ast_sd_m3', 'ast_sd_m3',   // Celestial Scribe (2)
+      'ast_sd_s3', 'ast_sd_s3',   // Star Chart (2)
     ],
     [Race.CHRONOBOUND]: [
-      'chrono_time_walker', 'chrono_time_walker',
-      'chrono_echo_blast', 'chrono_echo_blast',
-      'chrono_rewind', 'chrono_rewind',
-      'n_recruit', 'n_recruit',
-      'n_wisp', 'n_wisp',
+      'chr_sd_m1', 'chr_sd_m1',   // Temporal Conscript (1)
+      'chr_sd_s1', 'chr_sd_s1',   // Chrono Spark (1)
+      'chr_sd_m2', 'chr_sd_m2',   // Recall Agent (1)
+      'chr_sd_m4', 'chr_sd_m4',   // Stutter Step (2)
+      'chr_sd_s2', 'chr_sd_s2',   // Accelerate (2)
     ],
   };
 

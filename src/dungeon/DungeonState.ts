@@ -248,6 +248,13 @@ export function loadDungeonRun(): DungeonRunSave | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as DungeonRunSave;
     if (!parsed.race || !parsed.bossRoster) return null;
+    // Clear stale saves that used old fake card IDs (pre-fix)
+    const validPrefixes = ['pyr_sd_', 'lum_sd_', 'hiv_sd_', 'cog_sd_', 'voi_sd_', 'bio_sd_', 'cry_sd_', 'phc_sd_', 'ast_sd_', 'chr_sd_', 'neut_ex'];
+    const hasValidDeck = parsed.deck.every(id => validPrefixes.some(p => id.startsWith(p)));
+    if (!hasValidDeck) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
     return parsed;
   } catch {
     return null;
