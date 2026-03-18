@@ -35,7 +35,6 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@esbuild/linux-x64": "^0.27.3",
     "@playwright/test": "^1.58.2",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.0",
