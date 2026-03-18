@@ -760,6 +760,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '15px',
     textAlign: 'center',
     padding: '3px 0',
+    position: 'absolute',
+    bottom: '-18px',
+    left: 0,
+    right: 0,
   },
   keywordRowBelow: {
     fontSize: '14px',
