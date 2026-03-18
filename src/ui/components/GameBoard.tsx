@@ -325,27 +325,30 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       <div data-testid="opponent-area" style={styles.opponentArea}>
         {/* Opponent Hand (face down) — use actual Board zone count */}
         <div data-testid="opponent-hand" style={styles.opponentHand}>
-          {Array.from({ length: opponentHandCount }, (_, index) => (
+          {/* Hand count badge (left) */}
+          <div style={styles.opponentCountBadge} title="Cards in hand">
+            <span style={{ fontSize: '11px' }}>&#9995;</span>
+            <span>{opponentHandCount}</span>
+          </div>
+          {Array.from({ length: Math.min(opponentHandCount, 10) }, (_, index) => (
             <div key={index} style={styles.cardBack}>
               <CardBack width={50} height={70} />
             </div>
           ))}
-          {/* Hand count badge */}
-          <div style={styles.handCountBadge}>
-            {opponentHandCount}
+          {/* Deck count badge (right) */}
+          <div style={styles.opponentCountBadge} title="Cards in deck">
+            <span style={{ fontSize: '11px' }}>&#128218;</span>
+            <span>{opponentDeckCount}</span>
           </div>
         </div>
 
-        {/* Opponent Info */}
+        {/* Opponent Mana */}
         <div style={styles.opponentInfo}>
           <CrystalBar
             current={opponentState.crystals.current}
             max={opponentState.crystals.maximum}
             isOpponent
           />
-          <div style={styles.deckCount}>
-            <span style={{ fontSize: '14px' }}>📚</span> {opponentDeckCount}
-          </div>
         </div>
       </div>
 
@@ -536,6 +539,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
                   transition: 'transform 0.25s ease, margin-left 0.3s ease, z-index 0s',
                   zIndex: isHovered ? 100 : index,
                   position: 'relative',
+                  height: '115px',
+                  display: 'flex',
+                  alignItems: 'flex-end',
                 }}
                 onMouseEnter={() => setHoveredHandCard(card.instanceId)}
                 onMouseLeave={() => setHoveredHandCard(null)}
@@ -726,7 +732,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   opponentHand: {
     display: 'flex',
     justifyContent: 'center',
-    gap: '5px',
+    alignItems: 'center',
+    gap: '4px',
   },
   cardBack: {
     width: 'var(--opponent-card-w, 50px)',
@@ -742,19 +749,20 @@ const styles: { [key: string]: React.CSSProperties } = {
     gap: '20px',
     marginTop: '5px',
   },
-  handCountBadge: {
-    background: 'rgba(0, 0, 0, 0.8)',
-    border: '1px solid rgba(255, 255, 255, 0.3)',
-    borderRadius: '50%',
-    width: '24px',
-    height: '24px',
+  opponentCountBadge: {
+    background: 'rgba(0, 0, 0, 0.85)',
+    border: '1px solid rgba(255, 255, 255, 0.25)',
+    borderRadius: '8px',
+    padding: '4px 8px',
     display: 'flex',
+    flexDirection: 'column' as const,
     justifyContent: 'center',
     alignItems: 'center',
-    fontSize: '12px',
+    fontSize: '14px',
     fontWeight: 'bold',
     color: '#ffffff',
-    marginLeft: '4px',
+    gap: '2px',
+    minWidth: '32px',
   },
   battlefield: {
     flex: 1,
@@ -826,7 +834,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     pointerEvents: 'auto',
   },
   deckCount: {
-    fontSize: '16px',
+    fontSize: '14px',
     color: '#888888',
     background: 'rgba(0, 10, 30, 0.85)',
     borderRadius: '10px',
@@ -848,7 +856,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     paddingBottom: '4px',
     maxWidth: '100%',
     overflow: 'visible',
-    gap: '4px',
+    gap: '0px',
     flexWrap: 'nowrap' as const,
     position: 'relative',
     zIndex: 1,

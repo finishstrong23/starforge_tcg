@@ -234,7 +234,7 @@ export const HeroPortrait: React.FC<HeroPortraitProps> = ({
         <div
           style={{
             ...styles.heroPowerButton,
-            ...(isOpponent ? styles.heroPowerUsed : {}),
+            ...(isOpponent ? styles.heroPowerOpponent : {}),
             ...(!isOpponent && heroPowerUsed ? styles.heroPowerUsed : {}),
             ...(!isOpponent && canUseHeroPower ? styles.heroPowerAvailable : {}),
           }}
@@ -395,6 +395,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     opacity: 0.4,
     cursor: 'not-allowed',
     filter: 'grayscale(0.6)',
+  },
+  heroPowerOpponent: {
+    opacity: 0.85,
+    cursor: 'default',
+    border: '2px solid #cc2244',
+    boxShadow: '0 0 8px rgba(204, 34, 68, 0.3), 0 2px 8px rgba(0, 0, 0, 0.4)',
   },
   heroPowerAvailable: {
     border: '2px solid #00ff88',
