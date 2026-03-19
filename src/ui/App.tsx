@@ -277,6 +277,8 @@ export const App: React.FC = () => {
       width: '100%',
       height: '100%',
       background: 'linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f2040 100%)',
+      overflow: 'hidden',
+      position: 'relative',
     }}>
       {/* Main Menu */}
       {screen === 'menu' && (

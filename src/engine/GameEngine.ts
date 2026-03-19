@@ -39,7 +39,7 @@ import { CardFactory, globalCardFactory } from '../cards/CardFactory';
 import { CardDatabase, globalCardDatabase } from '../cards/CardDatabase';
 import { EffectResolver } from './EffectResolver';
 import type { EffectContext } from './EffectResolver';
-import { EffectTrigger } from '../types/Effects';
+import { EffectTrigger, EffectType } from '../types/Effects';
 import { getHeroById } from '../heroes';
 
 /**
@@ -302,6 +302,12 @@ export class GameEngine {
         });
       }
 
+      // Dawn's Last Prophet: permanently modify hero power (heal 5 instead of 3, cost 0)
+      if (card.definitionId === 'lum_m33' || card.definitionId === 'lum_sd_m33') {
+        player.hero.heroPowerCostOverride = 0;
+        player.hero.heroPowerHealOverride = 5;
+      }
+
       this.emitEvent(GameEventType.CARD_SUMMONED, action.playerId, {
         cardInstanceId: data.cardInstanceId,
         cardDefinitionId: card.definitionId,
@@ -415,8 +421,9 @@ export class GameEngine {
     const data = action.data as HeroPowerData;
     const player = this.stateManager.getPlayer(action.playerId);
 
-    // Spend crystals
-    player.crystals.current -= 2;
+    // Spend crystals (check for cost override from cards like Dawn's Last Prophet)
+    const heroPowerCost = player.hero.heroPowerCostOverride ?? 2;
+    player.crystals.current -= heroPowerCost;
     player.hero.heroPowerUsedThisTurn = true;
 
     this.emitEvent(GameEventType.HERO_POWER_USED, action.playerId, {
@@ -427,7 +434,17 @@ export class GameEngine {
     // Process hero power effects
     const heroDefinition = getHeroById(player.hero.definitionId);
     if (heroDefinition && heroDefinition.heroPower.effects.length > 0) {
-      this.effectResolver.resolveEffects(heroDefinition.heroPower.effects, {
+      // Clone effects and apply heal override if set (e.g., Dawn's Last Prophet)
+      let effects = heroDefinition.heroPower.effects;
+      if (player.hero.heroPowerHealOverride !== undefined) {
+        effects = effects.map(e => {
+          if (e.type === EffectType.HEAL) {
+            return { ...e, data: { ...(e.data as any), amount: player.hero.heroPowerHealOverride } };
+          }
+          return e;
+        });
+      }
+      this.effectResolver.resolveEffects(effects, {
         sourceCardId: heroDefinition.heroPower.id,
         sourceOwnerId: action.playerId,
         targetId: data.targetId,

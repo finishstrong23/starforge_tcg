@@ -1042,7 +1042,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const useHeroPower = useCallback((targetId?: string) => {
     if (!engineRef.current || !isPlayerTurn || !playerState) return;
     if (playerState.hero.heroPowerUsedThisTurn) return;
-    if (!canAffordCard(playerState, 2)) return;
+    const heroPowerCost = playerState.hero.heroPowerCostOverride ?? 2;
+    if (!canAffordCard(playerState, heroPowerCost)) return;
 
     // Check if hero power requires a target
     const heroDef = getHeroById(playerState.hero.definitionId);
@@ -1104,7 +1105,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     } else if (targetingMode === 'heropower' && pendingHeroPower) {
       if (!engineRef.current || !isPlayerTurn || !playerState) return;
       if (playerState.hero.heroPowerUsedThisTurn) return;
-      if (!canAffordCard(playerState, 2)) return;
+      const hpCost = playerState.hero.heroPowerCostOverride ?? 2;
+      if (!canAffordCard(playerState, hpCost)) return;
 
       engineRef.current.processAction({
         type: ActionType.HERO_POWER,

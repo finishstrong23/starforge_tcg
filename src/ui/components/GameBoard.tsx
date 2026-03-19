@@ -381,7 +381,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
           </div>
           <div data-testid="opponent-board" style={styles.minionsRow}>
             {opponentBoard.map((card) => (
-              <div key={card.instanceId} data-card-id={card.instanceId} onClick={(e) => e.stopPropagation()}>
+              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative', overflow: 'visible', padding: '4px' }} onClick={(e) => e.stopPropagation()}>
                 <Card
                   card={card}
                   isOnBoard
@@ -416,7 +416,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
               maxHealth={playerState.hero.maxHealth}
               armor={playerState.hero.armor}
               heroPowerUsed={playerState.hero.heroPowerUsedThisTurn}
-              canUseHeroPower={isPlayerTurn && !playerState.hero.heroPowerUsedThisTurn && playerState.crystals.current >= 2}
+              canUseHeroPower={isPlayerTurn && !playerState.hero.heroPowerUsedThisTurn && playerState.crystals.current >= (playerState.hero.heroPowerCostOverride ?? 2)}
               heroPowerName={playerHeroDef?.heroPower?.name}
               heroPowerDescription={playerHeroDef?.heroPower?.description}
               onHeroPowerClick={() => useHeroPower()}
@@ -449,7 +449,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
             data-testid="player-board"
           >
             {playerBoard.map((card) => (
-              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative' }}>
+              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative', overflow: 'visible', padding: '4px' }}>
                 <Card
                   card={card}
                   isOnBoard
@@ -794,6 +794,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRadius: '12px',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     flexWrap: 'wrap' as const,
+    overflow: 'visible',
   },
   centerDivider: {
     display: 'flex',
@@ -811,6 +812,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'relative',
     cursor: 'pointer',
     overflow: 'visible',
+    maxHeight: '40vh',
   },
   playerInfo: {
     display: 'flex',

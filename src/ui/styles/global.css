@@ -81,6 +81,8 @@
 html, body {
   width: 100%;
   height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
   overflow: hidden;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: var(--color-text);
@@ -92,6 +94,10 @@ html, body {
 #root {
   width: 100%;
   height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
+  overflow: hidden;
+  position: relative;
 }
 
 /* Utility classes */

@@ -74,6 +74,10 @@ export interface HeroState {
   hasAttackedThisTurn: boolean;
   /** Whether the hero is immune to damage */
   isImmune: boolean;
+  /** Override hero power cost (e.g., Dawn's Last Prophet sets it to 0) */
+  heroPowerCostOverride?: number;
+  /** Override hero power heal amount (e.g., Dawn's Last Prophet sets it to 5) */
+  heroPowerHealOverride?: number;
 }
 
 /**

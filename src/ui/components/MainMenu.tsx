@@ -304,7 +304,7 @@ const s: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     gap: '16px',
     padding: '0 20px',
-    overflowY: 'hidden',
+    overflowY: 'auto',
     minHeight: 0,
     position: 'relative',
     zIndex: 5,
