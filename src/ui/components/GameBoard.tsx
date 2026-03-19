@@ -381,7 +381,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
           </div>
           <div data-testid="opponent-board" style={styles.minionsRow}>
             {opponentBoard.map((card) => (
-              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative', overflow: 'visible', padding: '4px' }} onClick={(e) => e.stopPropagation()}>
+              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative', overflow: 'visible', padding: '4px', flexShrink: 1, minWidth: 0 }} onClick={(e) => e.stopPropagation()}>
                 <Card
                   card={card}
                   isOnBoard
@@ -449,7 +449,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
             data-testid="player-board"
           >
             {playerBoard.map((card) => (
-              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative', overflow: 'visible', padding: '4px' }}>
+              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative', overflow: 'visible', padding: '4px', flexShrink: 1, minWidth: 0 }}>
                 <Card
                   card={card}
                   isOnBoard
@@ -722,6 +722,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   opponentArea: {
     height: '8%',
+    flexShrink: 0,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -766,35 +767,37 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   battlefield: {
     flex: 1,
+    minHeight: 0,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
     padding: '10px 20px',
     background: 'transparent',
     position: 'relative',
+    overflow: 'hidden',
   },
   boardRow: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '14px',
-    minHeight: '120px',
-    flexWrap: 'wrap' as const,
+    flexShrink: 1,
+    overflow: 'hidden',
   },
   minionsRow: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: '12px',
+    gap: '8px',
     width: '100%',
     maxWidth: '900px',
-    minHeight: '130px',
-    padding: '10px 16px',
+    minHeight: 0,
+    padding: '6px 12px',
     background: 'rgba(0, 0, 0, 0.2)',
     borderRadius: '12px',
     border: '1px solid rgba(255, 255, 255, 0.1)',
-    flexWrap: 'wrap' as const,
-    overflow: 'visible',
+    flexWrap: 'nowrap' as const,
+    overflow: 'hidden',
   },
   centerDivider: {
     display: 'flex',
@@ -812,7 +815,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'relative',
     cursor: 'pointer',
     overflow: 'visible',
-    maxHeight: '40vh',
+    flexShrink: 0,
   },
   playerInfo: {
     display: 'flex',
