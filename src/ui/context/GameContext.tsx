@@ -626,9 +626,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           defenderId: pending.targetId,
         },
       });
+      checkPendingAdapt();
       forceUpdate();
     }
-  }, [forceUpdate]);
+  }, [forceUpdate, checkPendingAdapt]);
 
   // Initialize game
   useEffect(() => {
@@ -1090,8 +1091,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     });
 
     cancelTargeting();
+    checkPendingAdapt();
     forceUpdate();
-  }, [isPlayerTurn, playerState, forceUpdate, cancelTargeting]);
+  }, [isPlayerTurn, playerState, forceUpdate, cancelTargeting, checkPendingAdapt]);
 
   // Handle clicking a target (used for attack, spell, and hero power targeting)
   const handleTargetClick = useCallback((targetId: string) => {
@@ -1112,9 +1114,10 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       });
 
       cancelTargeting();
+      checkPendingAdapt();
       forceUpdate();
     }
-  }, [targetingMode, attackingMinion, pendingSpell, pendingHeroPower, attack, playCard, isPlayerTurn, playerState, forceUpdate, cancelTargeting]);
+  }, [targetingMode, attackingMinion, pendingSpell, pendingHeroPower, attack, playCard, isPlayerTurn, playerState, forceUpdate, cancelTargeting, checkPendingAdapt]);
 
   // End turn action
   const endTurn = useCallback(() => {
@@ -1135,8 +1138,9 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     });
 
     cancelTargeting();
+    checkPendingAdapt();
     forceUpdate();
-  }, [forceUpdate, cancelTargeting]);
+  }, [forceUpdate, cancelTargeting, checkPendingAdapt]);
 
   // STARFORGE: Check if a minion can be Starforged
   const canStarforge = useCallback((card: CardInstance): boolean => {

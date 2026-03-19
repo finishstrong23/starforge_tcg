@@ -289,19 +289,17 @@ export class GameEngine {
       card.summonedThisTurn = true;
       card.turnPlayed = this.stateManager.getCurrentTurn();
 
-      // Process DEPLOY effects
-      if (hasKeyword(card, TriggerKeyword.DEPLOY)) {
-        const deployEffects = definition.effects.filter(
-          (e: any) => e.trigger === EffectTrigger.ON_PLAY || e.trigger === EffectTrigger.ON_ENTER
-        );
-        if (deployEffects.length > 0) {
-          this.effectResolver.resolveEffects(deployEffects, {
-            sourceCardId: card.instanceId,
-            sourceOwnerId: action.playerId,
-            targetId: data.targetId,
-            triggerEvent: 'ON_PLAY',
-          });
-        }
+      // Process ON_PLAY / ON_ENTER effects (DEPLOY, ADAPT, and other on-play triggers)
+      const onPlayEffects = definition.effects.filter(
+        (e: any) => e.trigger === EffectTrigger.ON_PLAY || e.trigger === EffectTrigger.ON_ENTER
+      );
+      if (onPlayEffects.length > 0) {
+        this.effectResolver.resolveEffects(onPlayEffects, {
+          sourceCardId: card.instanceId,
+          sourceOwnerId: action.playerId,
+          targetId: data.targetId,
+          triggerEvent: 'ON_PLAY',
+        });
       }
 
       this.emitEvent(GameEventType.CARD_SUMMONED, action.playerId, {
