@@ -878,6 +878,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   const canAttack = useCallback((minion: CardInstance): boolean => {
     if (!isPlayerTurn) return false;
     if (minion.controllerId !== 'player') return false;
+    // Minions with 0 attack cannot attack
+    if (minion.currentAttack === undefined || minion.currentAttack <= 0) return false;
     // DOUBLE_STRIKE allows 2 attacks per turn; check attacksMadeThisTurn instead of hasAttackedThisTurn
     const hasDoubleStrike = minion.keywords.some(k => k.keyword === 'DOUBLE_STRIKE');
     const maxAttacks = hasDoubleStrike ? 2 : 1;

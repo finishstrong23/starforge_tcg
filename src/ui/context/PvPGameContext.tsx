@@ -440,6 +440,8 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
   const canAttack = useCallback((minion: CardInstance): boolean => {
     if (!isPlayerTurn) return false;
     if (minion.controllerId !== myPlayerId) return false;
+    // Minions with 0 attack cannot attack
+    if (minion.currentAttack === undefined || minion.currentAttack <= 0) return false;
     if (minion.hasAttackedThisTurn) return false;
     if (minion.summonedThisTurn && !minion.keywords.some(k =>
       k.keyword === 'SWIFT' || k.keyword === 'BLITZ'
