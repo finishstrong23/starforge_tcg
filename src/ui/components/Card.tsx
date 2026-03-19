@@ -209,7 +209,7 @@ export const Card: React.FC<CardProps> = ({
   const currentAttack = card.currentAttack ?? 0;
   const currentHealth = card.currentHealth ?? 0;
   const attackColor = currentAttack > baseAttack ? '#00ff44' : currentAttack < baseAttack ? '#ff4444' : '#000000';
-  const healthTextColor = currentHealth < baseHealth ? '#ff4444' : currentHealth > baseHealth ? '#00ff44' : '#ffffff';
+  const healthTextColor = currentHealth < baseHealth ? '#ffffff' : currentHealth > baseHealth ? '#00ff44' : '#ffffff';
 
   // Determine border/glow style
   let borderColor = '#444466';
