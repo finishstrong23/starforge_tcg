@@ -37,8 +37,7 @@ export const Lobby: React.FC<LobbyProps> = ({ onGameReady, onBack }) => {
   const rank = useMemo(() => getRankTitle(pvpProfile.rating), [pvpProfile.rating]);
 
   const availableRaces = [
-    Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN, Race.BIOTITANS,
-    Race.PHANTOM_CORSAIRS, Race.CRYSTALLINE, Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND,
+    Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS,
   ];
 
   const cleanup = useCallback(() => {

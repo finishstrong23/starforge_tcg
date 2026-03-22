@@ -34,9 +34,7 @@ interface CraftingScreenProps {
 
 const ALL_RACES: (Race | 'NEUTRAL')[] = [
   'NEUTRAL' as any,
-  Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN,
-  Race.BIOTITANS, Race.CRYSTALLINE, Race.PHANTOM_CORSAIRS,
-  Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND,
+  Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS,
 ];
 
 const RARITY_ORDER: CardRarity[] = [CardRarity.COMMON, CardRarity.RARE, CardRarity.EPIC, CardRarity.LEGENDARY];

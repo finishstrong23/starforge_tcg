@@ -28,7 +28,7 @@ interface TutorialStep {
 const TUTORIAL_STEPS: TutorialStep[] = [
   {
     title: 'Welcome to Starforge TCG!',
-    text: 'You are a galactic commander leading one of 10 alien races in strategic card combat. Reduce your opponent\'s Hero to 0 health to win. Let\'s learn how!',
+    text: 'You are a galactic commander leading one of 4 alien factions in strategic card combat. Reduce your opponent\'s Hero to 0 health to win. Let\'s learn how!',
     highlight: 'none',
     tip: 'This tutorial takes about 3 minutes. You can skip at any time.',
   },
@@ -87,10 +87,10 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     tip: 'Look for the STARFORGE button under your legendary minions when conditions are met.',
   },
   {
-    title: 'The 10 Galactic Races',
-    text: 'Each race has a unique playstyle and Hero Power:\n• Cogsmiths — Mech synergy, artifact engines\n• Luminar — healing, divine protection\n• Pyroclast — aggressive burn damage\n• Voidborn — disruption, hand manipulation\n• Biotitans — ramp into giant adaptive Beasts\n• Crystalline — spell combos, mana manipulation\n• Phantom Corsairs — stealth, card theft\n• Hivemind — insectoid token swarms\n• Astromancers — card draw, deck manipulation\n• Chronobound — time recursion, replay effects',
+    title: 'The 4 Galactic Factions',
+    text: 'Each faction has a unique playstyle and Hero Power:\n• Pyroclast — aggressive burn damage, Last Words suicide minions\n• Cogsmiths — Mech synergy, Salvage card advantage\n• Luminar — healing, Guardian walls, Illuminate combos\n• Phantom Corsairs — Cloak stealth, Phase evasion, card theft',
     highlight: 'none',
-    tip: 'Try all 10 races to find your playstyle! Each one feels completely different.',
+    tip: 'Try all 4 factions to find your playstyle! Each one feels completely different.',
   },
   {
     title: 'Ready for Battle!',

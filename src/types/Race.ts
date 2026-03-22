@@ -150,25 +150,27 @@ export function canUseCard(playerRace: Race, cardRace: Race | undefined): boolea
 }
 
 /**
- * MVP Races (Phase 1 implementation)
+ * Launch Factions — the 4 core playable races for launch
  */
-export const MVPRaces: Race[] = [
+export const LaunchFactions: Race[] = [
+  Race.PYROCLAST,
   Race.COGSMITHS,
   Race.LUMINAR,
-  Race.PYROCLAST,
-  Race.VOIDBORN,
-  Race.BIOTITANS,
   Race.PHANTOM_CORSAIRS,
-  Race.CRYSTALLINE,
-  Race.HIVEMIND,
 ];
 
 /**
- * Phase 2 Races (Alpha implementation)
+ * MVP Races (Phase 1 implementation) — currently launch factions only
+ */
+export const MVPRaces: Race[] = LaunchFactions;
+
+/**
+ * Phase 2 Races (future expansion)
  */
 export const Phase2Races: Race[] = [
   Race.VOIDBORN,
-  Race.PHANTOM_CORSAIRS,
+  Race.BIOTITANS,
+  Race.CRYSTALLINE,
   Race.HIVEMIND,
   Race.ASTROMANCERS,
   Race.CHRONOBOUND,

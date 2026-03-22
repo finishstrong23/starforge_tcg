@@ -363,7 +363,17 @@ export const HERO_CHRONOBOUND: HeroDefinition = {
 };
 
 /**
- * All hero definitions
+ * Launch faction heroes (4 core factions)
+ */
+export const LAUNCH_HEROES: HeroDefinition[] = [
+  HERO_PYROCLAST,
+  HERO_COGSMITHS,
+  HERO_LUMINAR,
+  HERO_PHANTOM_CORSAIRS,
+];
+
+/**
+ * All hero definitions (includes future expansion heroes)
  */
 export const ALL_HEROES: HeroDefinition[] = [
   HERO_COGSMITHS,

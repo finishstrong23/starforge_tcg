@@ -51,9 +51,7 @@ export const DeckBuilder: React.FC<DeckBuilderProps> = ({
       return completeCampaign({
         ...c,
         unlockedRaces: [
-          Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN,
-          Race.BIOTITANS, Race.CRYSTALLINE, Race.PHANTOM_CORSAIRS,
-          Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND,
+          Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS,
         ],
       });
     }

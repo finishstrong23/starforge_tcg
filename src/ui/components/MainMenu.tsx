@@ -50,14 +50,12 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
   } = props;
 
   const [view, setView] = useState<MenuView>('main');
-  const [selectedRace, setSelectedRace] = useState<Race>(Race.COGSMITHS);
+  const [selectedRace, setSelectedRace] = useState<Race>(Race.PYROCLAST);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
 
 
   const availableRaces = [
-    Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN,
-    Race.BIOTITANS, Race.PHANTOM_CORSAIRS, Race.CRYSTALLINE,
-    Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND,
+    Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS,
   ];
 
   const difficulties = [

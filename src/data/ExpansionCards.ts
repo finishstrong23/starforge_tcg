@@ -371,17 +371,12 @@ export const NEUTRAL_EXPANSION: CardDefinition[] = [
 // ============================================================================
 // Combined expansion exports
 // ============================================================================
+// Launch factions: Pyroclast, Cogsmiths, Luminar, Phantom Corsairs
 export const ALL_EXPANSION_CARDS: CardDefinition[] = [
   ...COGSMITHS_EXPANSION,
   ...LUMINAR_EXPANSION,
   ...PYROCLAST_EXPANSION,
-  ...VOIDBORN_EXPANSION,
-  ...BIOTITANS_EXPANSION,
-  ...CRYSTALLINE_EXPANSION,
   ...PHANTOM_CORSAIRS_EXPANSION,
-  ...HIVEMIND_EXPANSION,
-  ...ASTROMANCERS_EXPANSION,
-  ...CHRONOBOUND_EXPANSION,
   ...NEUTRAL_EXPANSION,
 ];
 
@@ -391,13 +386,7 @@ export function getExpansionCardsByRace(race: Race): CardDefinition[] {
     case Race.COGSMITHS: return COGSMITHS_EXPANSION;
     case Race.LUMINAR: return LUMINAR_EXPANSION;
     case Race.PYROCLAST: return PYROCLAST_EXPANSION;
-    case Race.VOIDBORN: return VOIDBORN_EXPANSION;
-    case Race.BIOTITANS: return BIOTITANS_EXPANSION;
-    case Race.CRYSTALLINE: return CRYSTALLINE_EXPANSION;
     case Race.PHANTOM_CORSAIRS: return PHANTOM_CORSAIRS_EXPANSION;
-    case Race.HIVEMIND: return HIVEMIND_EXPANSION;
-    case Race.ASTROMANCERS: return ASTROMANCERS_EXPANSION;
-    case Race.CHRONOBOUND: return CHRONOBOUND_EXPANSION;
     case Race.NEUTRAL: return NEUTRAL_EXPANSION;
     default: return [];
   }

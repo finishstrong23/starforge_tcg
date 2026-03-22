@@ -650,8 +650,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         : createSampleDeck(playerRace, 'player');
 
       // Create AI deck — use forced race for campaign, random otherwise
-      const allRaces = [Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.BIOTITANS, Race.CRYSTALLINE,
-                        Race.VOIDBORN, Race.PHANTOM_CORSAIRS, Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND];
+      // Launch factions only
+      const allRaces = [Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS];
       const aiRace = forcedOpponentRace || allRaces.filter(r => r !== playerRace)[Math.floor(Math.random() * (allRaces.length - 1))];
       const aiDeck = createSampleDeck(aiRace, 'opponent');
 

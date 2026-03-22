@@ -43,20 +43,13 @@ export const STARTER_PLANETS: [Race, Race] = [Race.PYROCLAST, Race.LUMINAR];
 
 /**
  * Campaign encounter order — the galaxy conquest path.
- * Starts easy, ramps difficulty, ends with the hardest planets.
- * Player's home planet is skipped (you already own it).
+ * Launch version: 4 factions. Player picks a home, fights the other 3.
  */
 export const CAMPAIGN_ORDER: Race[] = [
-  Race.HIVEMIND,         // Wave 1: Swarm is straightforward to fight
-  Race.COGSMITHS,        // Wave 2: Mechs teach board trading
-  Race.BIOTITANS,        // Wave 3: Big creatures teach tempo
-  Race.PHANTOM_CORSAIRS, // Wave 4: Evasion teaches targeting
-  Race.CRYSTALLINE,      // Wave 5: Spells teach resource management
-  Race.ASTROMANCERS,     // Wave 6: Card draw teaches hand management
-  Race.VOIDBORN,         // Wave 7: Disruption is a skill check
-  Race.CHRONOBOUND,      // Wave 8: Time tricks are the ultimate test
-  Race.PYROCLAST,        // Included for Luminar starters
-  Race.LUMINAR,          // Included for Pyroclast starters
+  Race.COGSMITHS,        // Wave 1: Mechs teach board trading
+  Race.PHANTOM_CORSAIRS, // Wave 2: Evasion teaches targeting
+  Race.PYROCLAST,        // Included for non-Pyroclast starters
+  Race.LUMINAR,          // Included for non-Luminar starters
 ];
 
 /**

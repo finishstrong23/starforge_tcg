@@ -21,10 +21,11 @@ import { CardZone, CardType, hasKeyword, getEffectiveAttack } from '../types/Car
 import type { CardInstance } from '../types/Card';
 import { canAffordCard } from '../types/Player';
 import type { PlayerState } from '../types/Player';
-import { CombatKeyword, TriggerKeyword } from '../types/Keywords';
+import { CombatKeyword, TriggerKeyword, OriginalKeyword } from '../types/Keywords';
 import type { Keyword } from '../types/Keywords';
 import { globalCardDatabase } from '../cards/CardDatabase';
 import { getHeroById } from '../heroes/HeroDefinitions';
+import { Race } from '../types/Race';
 
 // ─── Difficulty ────────────────────────────────────────────────────────────
 
@@ -629,6 +630,55 @@ export class AIPlayer {
       if (cardText.includes('all friendly')) score += 2;
       // Last Words minions are better when we're behind (opponent must trade into them)
       if (oppBoardCount >= 3) score += 2;
+    }
+
+    // ── Faction-specific keyword scoring ───────────────────────────────
+    // Each launch faction has signature keywords the AI should prioritize.
+    const cardRace = def?.race;
+
+    // PYROCLAST: Values aggressive LAST_WORDS chains, burn damage, and suicide trading
+    if (cardRace === Race.PYROCLAST || player.race === Race.PYROCLAST) {
+      if (hasKeyword(card, TriggerKeyword.LAST_WORDS as Keyword)) {
+        score += 2; // Pyroclast Last Words are usually burn damage
+        if (cardText.includes('deal') && cardText.includes('damage')) score += 3;
+      }
+      if (cardText.includes('immolate') || cardText.includes('burn')) score += 2;
+      // Pyroclast wants to go face — value cheap aggressive minions
+      if (isMinion && card.currentCost <= 3 && (card.currentAttack || 0) >= 2) score += 1;
+    }
+
+    // COGSMITHS: Values SALVAGE (draw on death), UPGRADE, Mech synergy
+    if (cardRace === Race.COGSMITHS || player.race === Race.COGSMITHS) {
+      if (hasKeyword(card, OriginalKeyword.SALVAGE as Keyword)) {
+        score += 3; // Card advantage on death is great
+      }
+      if (hasKeyword(card, OriginalKeyword.UPGRADE as Keyword)) {
+        // UPGRADE value scales with available mana
+        const upgradeCost = card.keywords?.find(k => k.keyword === OriginalKeyword.UPGRADE)?.value || 2;
+        if (player.crystals.current >= card.currentCost + upgradeCost) score += 4;
+      }
+      if (def?.tribe === ('MECH' as any)) score += 1; // Mech synergy
+    }
+
+    // LUMINAR: Values healing, ILLUMINATE triggers, GUARDIAN walls, sustain
+    if (cardRace === Race.LUMINAR || player.race === Race.LUMINAR) {
+      if (hasKeyword(card, OriginalKeyword.ILLUMINATE as Keyword)) {
+        score += 3; // Illuminate combos with hero power healing
+      }
+      if (cardText.includes('restore') || cardText.includes('heal')) {
+        const missingHp = player.hero.maxHealth - player.hero.currentHealth;
+        if (missingHp > 5) score += 2;
+      }
+      if (hasKeyword(card, CombatKeyword.GUARDIAN as Keyword)) score += 2;
+      if (hasKeyword(card, CombatKeyword.DRAIN as Keyword)) score += 2;
+    }
+
+    // PHANTOM CORSAIRS: Values CLOAK, PHASE, card theft, tempo
+    if (cardRace === Race.PHANTOM_CORSAIRS || player.race === Race.PHANTOM_CORSAIRS) {
+      if (hasKeyword(card, CombatKeyword.CLOAK as Keyword)) score += 2;
+      if (hasKeyword(card, OriginalKeyword.PHASE as Keyword)) score += 3; // Untargetable = very sticky
+      if (cardText.includes('steal') || cardText.includes('copy')) score += 3;
+      if (cardText.includes('pirate')) score += 1;
     }
 
     // ── Board context bonuses (archetype-aware) ──────────────────────

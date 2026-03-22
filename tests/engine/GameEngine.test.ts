@@ -59,8 +59,8 @@ describe('GameEngine', () => {
       initializeSampleDatabase();
 
       expect(globalCardDatabase.size).toBeGreaterThan(0);
-      expect(globalCardDatabase.hasCard('neutral_stellar_scout')).toBe(true);
-      expect(globalCardDatabase.hasCard('cog_cog_worker')).toBe(true);
+      // Check that launch faction cards are registered
+      expect(globalCardDatabase.hasCard('cog_m1')).toBe(true);
     });
 
     it('should query cards by race', () => {
@@ -209,15 +209,15 @@ describe('Card Factory', () => {
   });
 
   it('should create card instances from definitions', () => {
-    const instance = globalCardFactory.createInstance('neutral_stellar_scout', {
+    const instance = globalCardFactory.createInstance('cog_m1', {
       ownerId: 'player1',
     });
 
-    expect(instance.definitionId).toBe('neutral_stellar_scout');
+    expect(instance.definitionId).toBe('cog_m1');
     expect(instance.ownerId).toBe('player1');
     expect(instance.currentCost).toBe(1);
     expect(instance.currentAttack).toBe(1);
-    expect(instance.currentHealth).toBe(3);
+    expect(instance.currentHealth).toBe(2);
   });
 
   it('should create deck with correct number of cards', () => {
@@ -249,7 +249,7 @@ describe('Keywords', () => {
   });
 
   it('should track BARRIER state', () => {
-    const card = globalCardFactory.createInstance('cog_cog_worker', {
+    const card = globalCardFactory.createInstance('cog_m11', {
       ownerId: 'player1',
     });
 
@@ -257,7 +257,7 @@ describe('Keywords', () => {
   });
 
   it('should track CLOAK state', () => {
-    const card = globalCardFactory.createInstance('void_rift_walker', {
+    const card = globalCardFactory.createInstance('phc_m1', {
       ownerId: 'player1',
     });
 

@@ -48,9 +48,7 @@ export const TagTeamMode: React.FC<TagTeamModeProps> = ({ onBack }) => {
   const stats = useMemo(() => getTagTeamStats(), []);
 
   const availableRaces = [
-    Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN,
-    Race.BIOTITANS, Race.PHANTOM_CORSAIRS, Race.CRYSTALLINE,
-    Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND,
+    Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS,
   ];
 
   const synergy = useMemo(() => {

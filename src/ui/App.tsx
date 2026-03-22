@@ -18,6 +18,7 @@ import { PostBattle } from './components/PostBattle';
 import { CampaignGame } from './components/CampaignGame';
 import { DeckBuilder } from './components/DeckBuilder';
 import { Tutorial } from './components/Tutorial';
+import { TutorialMatch } from './components/TutorialMatch';
 import { Settings } from './components/Settings';
 import { StatsScreen } from './components/StatsScreen';
 import { PackOpening } from './components/PackOpening';
@@ -80,7 +81,8 @@ type GameScreen =
   | 'meta-dashboard'
   | 'spectate'
   | 'dungeon-run'
-  | 'puzzles';
+  | 'puzzles'
+  | 'tutorial-match';
 
 export const App: React.FC = () => {
   const [screen, setScreen] = useState<GameScreen>('menu');
@@ -306,12 +308,19 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* Tutorial */}
+      {/* Tutorial (read-through) */}
       {screen === 'tutorial' && (
         <Tutorial
-          onComplete={() => setScreen('menu')}
+          onComplete={() => setScreen('tutorial-match')}
           onSkip={() => setScreen('menu')}
         />
+      )}
+
+      {/* Tutorial Match (interactive guided game) */}
+      {screen === 'tutorial-match' && (
+        <ErrorBoundary onReset={handleBackToMenu}>
+          <TutorialMatch onComplete={() => setScreen('menu')} onSkip={() => setScreen('menu')} />
+        </ErrorBoundary>
       )}
 
       {/* Settings */}

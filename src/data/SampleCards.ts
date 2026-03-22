@@ -1027,29 +1027,18 @@ export const STARTER_DECK_CHRONOBOUND: CardDefinition[] = [
 // ============================================================================
 // COMBINED EXPORTS
 // ============================================================================
+// Launch factions: Pyroclast, Cogsmiths, Luminar, Phantom Corsairs
 export const ALL_SAMPLE_CARDS: CardDefinition[] = [
   ...COGSMITHS_CARDS,
   ...LUMINAR_CARDS,
   ...PYROCLAST_CARDS,
-  ...VOIDBORN_CARDS,
-  ...BIOTITANS_CARDS,
-  ...CRYSTALLINE_CARDS,
   ...PHANTOM_CORSAIRS_CARDS,
-  ...HIVEMIND_CARDS,
-  ...ASTROMANCERS_CARDS,
-  ...CHRONOBOUND_CARDS,
   ...NEUTRAL_CARDS,
   // v2 starter deck cards (unique IDs with _sd_ prefix)
   ...STARTER_DECK_COGSMITHS,
   ...STARTER_DECK_LUMINAR,
   ...STARTER_DECK_PYROCLAST,
-  ...STARTER_DECK_VOIDBORN,
-  ...STARTER_DECK_BIOTITANS,
-  ...STARTER_DECK_CRYSTALLINE,
   ...STARTER_DECK_PHANTOM_CORSAIRS,
-  ...STARTER_DECK_HIVEMIND,
-  ...STARTER_DECK_ASTROMANCERS,
-  ...STARTER_DECK_CHRONOBOUND,
 ];
 
 export function getStarterDeck(race: Race): CardDefinition[] {
@@ -1057,14 +1046,8 @@ export function getStarterDeck(race: Race): CardDefinition[] {
     case Race.COGSMITHS: return STARTER_DECK_COGSMITHS;
     case Race.LUMINAR: return STARTER_DECK_LUMINAR;
     case Race.PYROCLAST: return STARTER_DECK_PYROCLAST;
-    case Race.VOIDBORN: return STARTER_DECK_VOIDBORN;
-    case Race.BIOTITANS: return STARTER_DECK_BIOTITANS;
-    case Race.CRYSTALLINE: return STARTER_DECK_CRYSTALLINE;
     case Race.PHANTOM_CORSAIRS: return STARTER_DECK_PHANTOM_CORSAIRS;
-    case Race.HIVEMIND: return STARTER_DECK_HIVEMIND;
-    case Race.ASTROMANCERS: return STARTER_DECK_ASTROMANCERS;
-    case Race.CHRONOBOUND: return STARTER_DECK_CHRONOBOUND;
-    default: return STARTER_DECK_COGSMITHS;
+    default: return STARTER_DECK_PYROCLAST;
   }
 }
 
@@ -1074,12 +1057,7 @@ export function getSampleCardsByRace(race: Race): CardDefinition[] {
     case Race.LUMINAR: return LUMINAR_CARDS;
     case Race.PYROCLAST: return PYROCLAST_CARDS;
     case Race.VOIDBORN: return VOIDBORN_CARDS;
-    case Race.BIOTITANS: return BIOTITANS_CARDS;
-    case Race.CRYSTALLINE: return CRYSTALLINE_CARDS;
     case Race.PHANTOM_CORSAIRS: return PHANTOM_CORSAIRS_CARDS;
-    case Race.HIVEMIND: return HIVEMIND_CARDS;
-    case Race.ASTROMANCERS: return ASTROMANCERS_CARDS;
-    case Race.CHRONOBOUND: return CHRONOBOUND_CARDS;
     case Race.NEUTRAL: return NEUTRAL_CARDS;
     default: return [];
   }

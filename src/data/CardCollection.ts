@@ -26,13 +26,7 @@ import {
   COGSMITHS_CARDS,
   LUMINAR_CARDS,
   PYROCLAST_CARDS,
-  VOIDBORN_CARDS,
-  BIOTITANS_CARDS,
-  CRYSTALLINE_CARDS,
   PHANTOM_CORSAIRS_CARDS,
-  HIVEMIND_CARDS,
-  ASTROMANCERS_CARDS,
-  CHRONOBOUND_CARDS,
   NEUTRAL_CARDS,
 } from './SampleCards';
 import { getExpansionCardsByRace, ALL_EXPANSION_CARDS } from './ExpansionCards';
@@ -89,13 +83,7 @@ function getCardsForRace(race: Race): CardDefinition[] {
     case Race.COGSMITHS: base = COGSMITHS_CARDS; break;
     case Race.LUMINAR: base = LUMINAR_CARDS; break;
     case Race.PYROCLAST: base = PYROCLAST_CARDS; break;
-    case Race.VOIDBORN: base = VOIDBORN_CARDS; break;
-    case Race.BIOTITANS: base = BIOTITANS_CARDS; break;
-    case Race.CRYSTALLINE: base = CRYSTALLINE_CARDS; break;
     case Race.PHANTOM_CORSAIRS: base = PHANTOM_CORSAIRS_CARDS; break;
-    case Race.HIVEMIND: base = HIVEMIND_CARDS; break;
-    case Race.ASTROMANCERS: base = ASTROMANCERS_CARDS; break;
-    case Race.CHRONOBOUND: base = CHRONOBOUND_CARDS; break;
     case Race.NEUTRAL: base = NEUTRAL_CARDS; break;
     default: return [];
   }

@@ -36,9 +36,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ onBack, onSt
   const [gold, setGold] = useState(() => loadDailyState().gold);
 
   const availableRaces = [
-    Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN,
-    Race.BIOTITANS, Race.PHANTOM_CORSAIRS, Race.CRYSTALLINE,
-    Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND,
+    Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS,
   ];
 
   const handleEnterTournament = useCallback(() => {
