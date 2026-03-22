@@ -34,6 +34,7 @@ import { MetaDashboard } from './components/MetaDashboard';
 import { SpectateScreen } from './components/SpectateScreen';
 import { ScreenTransition } from './components/ScreenTransition';
 import { DungeonRun } from './components/DungeonRun';
+import { CoopDungeon } from './components/CoopDungeon';
 import { PuzzleMode } from './components/PuzzleMode';
 import { recordGameResult } from '../stats/GameStats';
 import type { CampaignBattleResult } from './components/CampaignGame';
@@ -81,6 +82,7 @@ type GameScreen =
   | 'meta-dashboard'
   | 'spectate'
   | 'dungeon-run'
+  | 'coop-dungeon'
   | 'puzzles'
   | 'tutorial-match';
 
@@ -304,6 +306,7 @@ export const App: React.FC = () => {
           onMetaDashboard={() => setScreen('meta-dashboard')}
           onSpectate={() => setScreen('spectate')}
           onDungeonRun={() => setScreen('dungeon-run')}
+          onCoopDungeon={() => setScreen('coop-dungeon')}
           onPuzzles={() => setScreen('puzzles')}
         />
       )}
@@ -536,6 +539,13 @@ export const App: React.FC = () => {
       {screen === 'dungeon-run' && (
         <ScreenTransition screenKey="dungeon-run">
           <DungeonRun onBack={() => setScreen('menu')} />
+        </ScreenTransition>
+      )}
+
+      {/* Co-op Dungeon */}
+      {screen === 'coop-dungeon' && (
+        <ScreenTransition screenKey="coop-dungeon">
+          <CoopDungeon onBack={() => setScreen('menu')} />
         </ScreenTransition>
       )}
 

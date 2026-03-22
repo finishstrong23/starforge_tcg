@@ -35,6 +35,7 @@ interface MainMenuProps {
   onMetaDashboard?: () => void;
   onSpectate?: () => void;
   onDungeonRun?: () => void;
+  onCoopDungeon?: () => void;
   onPuzzles?: () => void;
 }
 
@@ -46,7 +47,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
     onTutorial, onSettings, onStats, onCollection, onCrafting,
     onBattlePass, onPacks, onAchievements, onDaily,
     onTournament, onReplays, onLeaderboard, onMetaDashboard, onSpectate,
-    onDungeonRun, onPuzzles,
+    onDungeonRun, onCoopDungeon, onPuzzles,
   } = props;
 
   const [view, setView] = useState<MenuView>('main');
@@ -180,6 +181,12 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
             <button style={s.modeChip} onClick={() => { hapticTap(); onDungeonRun(); }}>
               <span style={s.modeChipIcon}>&#x1F3F0;</span>
               <span>Dungeon</span>
+            </button>
+          )}
+          {onCoopDungeon && (
+            <button style={s.modeChip} onClick={() => { hapticTap(); onCoopDungeon(); }}>
+              <span style={s.modeChipIcon}>&#x1F91D;</span>
+              <span>Co-op</span>
             </button>
           )}
           {onPuzzles && (
