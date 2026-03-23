@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-const boardImg = 'https://raw.githubusercontent.com/finishstrong23/starforge_tcg/main/src/assets/board.png';
+const boardImg = 'https://raw.githubusercontent.com/finishstrong23/starforge_tcg/e2266d7/src/assets/board.png';
 
 export const BoardBackground: React.FC = () => {
   return (

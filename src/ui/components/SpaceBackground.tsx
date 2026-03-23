@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-const backgroundImg = 'https://raw.githubusercontent.com/finishstrong23/starforge_tcg/main/src/assets/background.png';
+const backgroundImg = 'https://raw.githubusercontent.com/finishstrong23/starforge_tcg/e2266d7/src/assets/background.png';
 
 export const SpaceBackground: React.FC = () => {
   return (
