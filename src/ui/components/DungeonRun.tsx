@@ -30,6 +30,7 @@ import {
 import type { DungeonRunSave, DungeonRunRecord } from '../../dungeon/DungeonState';
 import type { DungeonBoss, DungeonRelic as RelicType, CardBundle } from '../../dungeon/DungeonData';
 import { SpaceBackground } from './SpaceBackground';
+import { DungeonBackground, tierToTheme, type DungeonTheme } from './DungeonBackground';
 
 interface DungeonRunProps {
   onBack: () => void;
@@ -161,7 +162,7 @@ const FactionSelect: React.FC<{
 
   return (
     <div style={s.container}>
-      <SpaceBackground />
+      <DungeonBackground theme="select" />
       <div style={s.header}>
         <button onClick={onBack} style={s.backBtn}>Back</button>
         <h1 style={s.title}>Dungeon Run</h1>
@@ -233,13 +234,17 @@ const PreBossScreen: React.FC<{
 }> = ({ save, onFight, onAbandon }) => {
   const boss = getCurrentBoss(save);
   if (!boss) return null;
+  const theme = tierToTheme(boss.tier);
+  const actNames: Record<number, string> = { 1: 'The Abandoned Outpost', 2: 'The Corrupted Depths', 3: 'The Starforge Core' };
+  const actName = actNames[boss.tier] || 'Unknown Sector';
+  const tierColors: Record<number, string> = { 1: '#60a5fa', 2: '#c084fc', 3: '#f97316' };
 
   return (
     <div style={s.container}>
-      <SpaceBackground />
+      <DungeonBackground theme={theme} />
       <div style={s.runHeader}>
         <div style={s.runInfo}>
-          <span style={s.runStat}>HP: {save.currentHP}/{save.maxHP}</span>
+          <span style={s.runStat}>HP: <span style={{ color: save.currentHP > 10 ? '#4ade80' : '#f87171' }}>{save.currentHP}</span>/{save.maxHP}</span>
           <span style={s.runStat}>Boss {save.currentBossIndex + 1}/8</span>
           <span style={s.runStat}>Deck: {save.deck.length} cards</span>
           <span style={s.runStat}>Relics: {save.relics.length}</span>
@@ -256,11 +261,31 @@ const PreBossScreen: React.FC<{
         </div>
       )}
 
-      <div style={s.bossCard}>
+      {/* Act banner */}
+      <div style={{
+        ...s.actBanner,
+        borderColor: tierColors[boss.tier] || '#888',
+        background: `linear-gradient(90deg, transparent 0%, ${tierColors[boss.tier]}15 50%, transparent 100%)`,
+      }}>
+        <div style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 2 }}>
+          Act {boss.tier}
+        </div>
+        <div style={{ fontSize: 16, color: tierColors[boss.tier], fontWeight: 'bold' }}>
+          {actName}
+        </div>
+      </div>
+
+      <div style={{
+        ...s.bossCard,
+        borderColor: `${tierColors[boss.tier]}60`,
+        boxShadow: `0 0 30px ${tierColors[boss.tier]}15`,
+      }}>
         <div style={s.bossIcon}>{boss.icon}</div>
         <h2 style={s.bossName}>{boss.name}</h2>
         <div style={s.bossTitle}>{boss.title}</div>
-        <div style={s.bossTier}>Tier {boss.tier} Boss</div>
+        <div style={{ ...s.bossTier, color: tierColors[boss.tier] }}>
+          {boss.tier === 3 ? 'FINAL BOSS' : `Tier ${boss.tier} Boss`}
+        </div>
         <div style={s.bossHP}>HP: {boss.startingHealth}</div>
         <div style={s.bossHeroPower}>
           <strong>{boss.heroPowerName}:</strong> {boss.heroPowerDescription}
@@ -330,11 +355,14 @@ const ChooseCardsScreen: React.FC<{
   bundles: CardBundle[];
   onChoose: (bundle: CardBundle) => void;
 }> = ({ save, bundles, onChoose }) => {
+  const boss = getCurrentBoss(save);
+  const theme: DungeonTheme = boss ? tierToTheme(boss.tier) : 'outpost';
+
   return (
     <div style={s.container}>
-      <SpaceBackground />
+      <DungeonBackground theme={theme} />
       <RunStatus save={save} />
-      <h2 style={s.choiceTitle}>Choose a Card Bundle</h2>
+      <h2 style={s.choiceTitle}>Victory! Choose Your Reward</h2>
       <p style={s.choiceSubtitle}>Add 3 cards to your deck ({save.deck.length} cards currently)</p>
 
       <div style={s.bundleGrid}>
@@ -365,30 +393,37 @@ const ChooseRelicScreen: React.FC<{
   relics: RelicType[];
   onChoose: (relic: RelicType) => void;
 }> = ({ save, relics, onChoose }) => {
+  const boss = getCurrentBoss(save);
+  const relicTheme: DungeonTheme = boss ? tierToTheme(boss.tier) : 'outpost';
+
   return (
     <div style={s.container}>
-      <SpaceBackground />
+      <DungeonBackground theme={relicTheme} />
       <RunStatus save={save} />
-      <h2 style={s.choiceTitle}>Choose a Relic</h2>
+      <h2 style={s.choiceTitle}>Ancient Relic Found</h2>
       <p style={s.choiceSubtitle}>Permanent passive bonus for the rest of this run</p>
 
       <div style={s.relicGrid}>
-        {relics.map((relic) => (
-          <button
-            key={relic.id}
-            onClick={() => onChoose(relic)}
-            style={{
-              ...s.relicCard,
-              borderColor: relic.tier === 'legendary' ? '#ffd700'
-                : relic.tier === 'rare' ? '#60a5fa' : '#888',
-            }}
-          >
-            <div style={s.relicBigIcon}>{relic.icon}</div>
-            <h3 style={s.relicName}>{relic.name}</h3>
-            <div style={s.relicTier}>{relic.tier}</div>
-            <p style={s.relicDesc}>{relic.description}</p>
-          </button>
-        ))}
+        {relics.map((relic) => {
+          const tierColor = relic.tier === 'legendary' ? '#ffd700'
+            : relic.tier === 'rare' ? '#60a5fa' : '#888';
+          return (
+            <button
+              key={relic.id}
+              onClick={() => onChoose(relic)}
+              style={{
+                ...s.relicCard,
+                borderColor: tierColor,
+                boxShadow: relic.tier === 'legendary' ? `0 0 20px ${tierColor}30` : 'none',
+              }}
+            >
+              <div style={s.relicBigIcon}>{relic.icon}</div>
+              <h3 style={s.relicName}>{relic.name}</h3>
+              <div style={{ ...s.relicTier, color: tierColor }}>{relic.tier}</div>
+              <p style={s.relicDesc}>{relic.description}</p>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -422,11 +457,12 @@ const RemoveCardsScreen: React.FC<{
     cardCounts.set(id, (cardCounts.get(id) || 0) + 1);
   }
 
+  const removeTheme: DungeonTheme = 'depths';
   return (
     <div style={s.container}>
-      <SpaceBackground />
+      <DungeonBackground theme={removeTheme} />
       <RunStatus save={save} />
-      <h2 style={s.choiceTitle}>Remove Cards</h2>
+      <h2 style={s.choiceTitle}>Purge Your Deck</h2>
       <p style={s.choiceSubtitle}>
         Remove up to {maxRemove} cards from your deck to streamline it
         ({selected.size}/{maxRemove} selected)
@@ -477,7 +513,7 @@ const RunResultScreen: React.FC<{
   // onContinue triggers deletion + reset to faction select
   return (
     <div style={s.container}>
-      <SpaceBackground />
+      <DungeonBackground theme={won ? 'victory' : 'defeat'} />
       <div style={s.resultScreen}>
         <div style={s.resultIcon}>{won ? '🏆' : '💀'}</div>
         <h1 style={{ ...s.resultTitle, color: won ? '#ffd700' : '#f87171' }}>
@@ -708,6 +744,20 @@ const s: Record<string, React.CSSProperties> = {
     background: 'rgba(255,215,0,0.1)',
     borderRadius: 4,
     padding: '2px 6px',
+  },
+
+  // Act banner
+  actBanner: {
+    textAlign: 'center',
+    padding: '10px 24px',
+    borderTop: '1px solid',
+    borderBottom: '1px solid',
+    borderColor: '#888',
+    marginBottom: 16,
+    position: 'relative',
+    zIndex: 2,
+    width: '100%',
+    maxWidth: 400,
   },
 
   // Boss card

@@ -338,7 +338,7 @@ export const DUNGEON_BOSSES: DungeonBoss[] = [
     heroPowerName: 'Assimilate',
     heroPowerDescription: 'Copy an enemy minion to your board (as a 1/1).',
     startingHealth: 40,
-    specialRule: 'Starts each turn by summoning a 2/2 Drone. Board limit: 10.',
+    specialRule: 'Starts each turn by summoning a 2/2 Drone.',
     introQuote: '"Resistance is... suboptimal. Join the collective."',
     defeatQuote: '"The signal... fades... but the swarm... remembers..."',
     icon: '🧠',
@@ -596,6 +596,65 @@ export const CARD_BUNDLES: CardBundle[] = [
     description: 'ECHO cards that can be played twice.',
     cardIds: ['chr_sd_m4', 'chr_sd_s1', 'chr_sd_m6'],
     theme: 'echo',
+  },
+
+  // ── New Dungeon-Exclusive Bundles ──────────────────────────
+
+  {
+    id: 'bundle_dungeon_scavenger',
+    name: 'Dungeon Scavenger',
+    description: 'Resourceful survivors that draw and discover.',
+    cardIds: ['neut_ex1', 'neut_ex6', 'neut_ex11'],
+    theme: 'value',
+  },
+  {
+    id: 'bundle_void_assassins',
+    name: 'Void Assassins',
+    description: 'Deadly strike-and-fade attackers.',
+    cardIds: ['voi_sd_m5', 'phc_sd_m7', 'neut_ex4'],
+    theme: 'burst',
+  },
+  {
+    id: 'bundle_titan_force',
+    name: 'Titan Force',
+    description: 'Unstoppable late-game powerhouses.',
+    cardIds: ['neut_ex8', 'neut_ex9', 'bio_sd_m10'],
+    theme: 'lategame',
+  },
+  {
+    id: 'bundle_crystal_storm',
+    name: 'Crystal Storm',
+    description: 'Unleash devastating spell combos.',
+    cardIds: ['cry_sd_s4', 'cry_sd_m10', 'neut_ex10'],
+    theme: 'spells',
+  },
+  {
+    id: 'bundle_war_machines',
+    name: 'War Machines',
+    description: 'Heavy Mech units with board-clearing power.',
+    cardIds: ['cog_sd_m8', 'cog_sd_m4', 'neut_ex5'],
+    theme: 'mech',
+  },
+  {
+    id: 'bundle_cosmic_power',
+    name: 'Cosmic Power',
+    description: 'Channel the stars for overwhelming advantage.',
+    cardIds: ['ast_sd_m3', 'ast_sd_s3', 'ast_sd_m1'],
+    theme: 'cosmic',
+  },
+  {
+    id: 'bundle_chrono_surge',
+    name: 'Chrono Surge',
+    description: 'Bend time to replay and recycle cards.',
+    cardIds: ['chr_sd_m2', 'chr_sd_m4', 'chr_sd_s2'],
+    theme: 'temporal',
+  },
+  {
+    id: 'bundle_natures_wrath',
+    name: "Nature's Wrath",
+    description: 'Rapidly growing beasts that overwhelm.',
+    cardIds: ['bio_sd_m3', 'bio_sd_m4', 'bio_sd_m6'],
+    theme: 'growth',
   },
 ];
 

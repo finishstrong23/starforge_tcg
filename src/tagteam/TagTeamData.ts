@@ -15,7 +15,7 @@ import { Race, RaceData } from '../types/Race';
 export interface TagTeamConfig {
   /** Combined team health pool */
   teamHealth: number;
-  /** Board slots per player (7 each = 14 total per team) */
+  /** Board slots per player (5 each = 10 total per team) */
   boardSlotsPerPlayer: number;
   /** Maximum hand size per player */
   handSizePerPlayer: number;
@@ -29,7 +29,7 @@ export interface TagTeamConfig {
 
 export const DEFAULT_TAG_TEAM_CONFIG: TagTeamConfig = {
   teamHealth: 50,
-  boardSlotsPerPlayer: 7,
+  boardSlotsPerPlayer: 5,
   handSizePerPlayer: 10,
   turnOrder: 'alternating',
   allowPings: true,

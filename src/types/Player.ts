@@ -112,7 +112,7 @@ export interface PlayerState {
   hand: string[];
   /** Cards in deck (instance IDs, top of deck = index 0) */
   deck: string[];
-  /** Cards on board (instance IDs, positions 0-6) */
+  /** Cards on board (instance IDs, positions 0-4) */
   board: (string | null)[];
   /** Destroyed cards (instance IDs) */
   graveyard: string[];
@@ -168,7 +168,7 @@ export const HandSizeLimit = 10;
 /**
  * Board size limit (minions per player)
  */
-export const BoardSizeLimit = 7;
+export const BoardSizeLimit = 5;
 
 /**
  * Starting health for heroes
@@ -218,7 +218,7 @@ export function createInitialPlayerState(
     },
     hand: [],
     deck: [...deckCardIds], // Copy the array
-    board: [null, null, null, null, null, null, null], // 7 slots
+    board: [null, null, null, null, null], // 5 slots
     graveyard: [],
     banished: [],
     cardsPlayedThisTurn: 0,

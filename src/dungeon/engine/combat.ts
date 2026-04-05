@@ -52,7 +52,7 @@ export function shuffleArray<T>(array: T[], seed?: string): T[] {
 // ─── Constants ─────────────────────────────────────────────
 
 const OPENING_HAND_SIZE = 5;
-const MAX_BOARD_SIZE = 7;
+const MAX_BOARD_SIZE = 5;
 const MAX_STRUCTURES = 3;
 
 // ─── Combat Initialization ─────────────────────────────────
