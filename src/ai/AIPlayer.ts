@@ -19,7 +19,7 @@ import type {
 } from '../types/Game';
 import { CardZone, CardType, hasKeyword, getEffectiveAttack } from '../types/Card';
 import type { CardInstance } from '../types/Card';
-import { canAffordCard } from '../types/Player';
+import { canAffordCard, BoardSizeLimit } from '../types/Player';
 import type { PlayerState } from '../types/Player';
 import { CombatKeyword, TriggerKeyword, OriginalKeyword } from '../types/Keywords';
 import type { Keyword } from '../types/Keywords';
@@ -384,7 +384,7 @@ export class AIPlayer {
         if (s.card.currentCost <= remainingMana && !used.has(s.card.instanceId)) {
           // Check board space for minions
           const minionCount = plan.cardsToPlay.filter(c => c.currentAttack !== undefined).length;
-          if (s.card.currentAttack !== undefined && board.getBoardCount(this.playerId) + minionCount >= 7) continue;
+          if (s.card.currentAttack !== undefined && board.getBoardCount(this.playerId) + minionCount >= BoardSizeLimit) continue;
 
           plan.cardsToPlay.push(s.card);
           plan.totalCost += s.card.currentCost;
@@ -405,7 +405,7 @@ export class AIPlayer {
       for (const s of sorted) {
         if (s.card.currentCost <= remainingMana && s.score > 0) {
           const minionCount = plan.cardsToPlay.filter(c => c.currentAttack !== undefined).length;
-          if (s.card.currentAttack !== undefined && board.getBoardCount(this.playerId) + minionCount >= 7) continue;
+          if (s.card.currentAttack !== undefined && board.getBoardCount(this.playerId) + minionCount >= BoardSizeLimit) continue;
           plan.cardsToPlay.push(s.card);
           plan.totalCost += s.card.currentCost;
           plan.totalScore += s.score;
@@ -427,7 +427,7 @@ export class AIPlayer {
       for (const s of sorted) {
         if (s.card.currentCost <= remainingMana && s.score > 0) {
           const minionCount = plan.cardsToPlay.filter(c => c.currentAttack !== undefined).length;
-          if (s.card.currentAttack !== undefined && board.getBoardCount(this.playerId) + minionCount >= 7) continue;
+          if (s.card.currentAttack !== undefined && board.getBoardCount(this.playerId) + minionCount >= BoardSizeLimit) continue;
           plan.cardsToPlay.push(s.card);
           plan.totalCost += s.card.currentCost;
           plan.totalScore += s.score;
