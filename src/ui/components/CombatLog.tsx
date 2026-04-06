@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { globalCardDatabase } from '../../cards/CardDatabase';
 
 export interface CombatLogEntry {
@@ -153,17 +154,18 @@ export const CombatLog: React.FC<CombatLogProps> = ({ entries }) => {
       )}
 
       {/* Card tooltip portal */}
-      {hoveredCardId && (
+      {hoveredCardId && createPortal(
         <div style={{
           position: 'fixed',
           top: tooltipPos.top,
           left: tooltipPos.left,
-          zIndex: 9999,
+          zIndex: 10000,
           pointerEvents: 'none',
           transform: 'translateY(-100%)',
         }}>
           <CardTooltip cardId={hoveredCardId} />
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

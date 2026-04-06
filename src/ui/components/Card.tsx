@@ -575,13 +575,27 @@ export const Card: React.FC<CardProps> = ({
         document.body
       )}
 
-      {/* Hover Popup - Large card with details */}
-      {isHovered && !showPreview && (
+      {/* Hover Popup - Large card with details (portaled to body to avoid overflow clipping) */}
+      {isHovered && !showPreview && cardRef.current && createPortal(
         <div style={{
           ...styles.hoverPopup,
-          ...(popupSide === 'below' ? { top: '100%', bottom: 'auto', marginTop: '10px', marginBottom: 0 } : {}),
-          ...(popupAlign === 'left' ? { left: 0, transform: 'none' } : {}),
-          ...(popupAlign === 'right' ? { left: 'auto', right: 0, transform: 'none' } : {}),
+          position: 'fixed',
+          ...((() => {
+            const rect = cardRef.current!.getBoundingClientRect();
+            const popupWidth = 280;
+            const showBelow = popupSide === 'below';
+            let leftPos = rect.left + rect.width / 2 - popupWidth / 2;
+            if (popupAlign === 'left') leftPos = rect.left;
+            else if (popupAlign === 'right') leftPos = rect.right - popupWidth;
+            // Clamp to viewport
+            leftPos = Math.max(10, Math.min(leftPos, window.innerWidth - popupWidth - 10));
+            return {
+              left: leftPos,
+              ...(showBelow
+                ? { top: rect.bottom + 10 }
+                : { bottom: window.innerHeight - rect.top + 10 }),
+            };
+          })()),
         }}>
           <div style={styles.popupHeader}>
             <span style={styles.popupCost}>{card.currentCost}</span>
@@ -661,7 +675,8 @@ export const Card: React.FC<CardProps> = ({
               })}
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
@@ -945,18 +960,14 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   // Hover popup styles
   hoverPopup: {
-    position: 'absolute',
-    bottom: '100%',
-    left: '50%',
-    transform: 'translateX(-50%)',
+    position: 'fixed',
     width: '280px',
     maxWidth: 'calc(100vw - 20px)',
     background: '#0a0a2a',
     border: '2px solid #ffcc00',
     borderRadius: '12px',
     padding: '14px',
-    zIndex: 1000,
-    marginBottom: '10px',
+    zIndex: 10000,
     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.95), 0 0 60px rgba(0, 0, 0, 0.8)',
     pointerEvents: 'none',
   },

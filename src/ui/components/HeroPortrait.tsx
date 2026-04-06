@@ -10,7 +10,8 @@
  * - Valid target highlight ring
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 
 interface HeroPortraitProps {
   health: number;
@@ -160,6 +161,7 @@ export const HeroPortrait: React.FC<HeroPortraitProps> = ({
   heroPowerDescription,
 }) => {
   const [heroPowerHovered, setHeroPowerHovered] = useState(false);
+  const heroPowerRef = useRef<HTMLDivElement>(null);
   const healthPercent = Math.max(0, health / maxHealth) * 100;
   const isDamaged = health < maxHealth;
   const healthColor = healthPercent > 50
@@ -227,6 +229,7 @@ export const HeroPortrait: React.FC<HeroPortraitProps> = ({
 
       {/* Hero power button */}
       <div
+        ref={heroPowerRef}
         style={{ position: 'relative', display: 'inline-block' }}
         onMouseEnter={() => setHeroPowerHovered(true)}
         onMouseLeave={() => setHeroPowerHovered(false)}
@@ -259,9 +262,22 @@ export const HeroPortrait: React.FC<HeroPortraitProps> = ({
           )}
         </div>
 
-        {/* Hero Power Tooltip */}
-        {heroPowerHovered && heroPowerName && (
-          <div style={isOpponent ? styles.heroPowerTooltipBelow : styles.heroPowerTooltip}>
+        {/* Hero Power Tooltip (portaled to body to avoid overflow clipping) */}
+        {heroPowerHovered && heroPowerName && heroPowerRef.current && createPortal(
+          <div style={{
+            ...styles.heroPowerTooltipPortal,
+            ...((() => {
+              const rect = heroPowerRef.current!.getBoundingClientRect();
+              const tooltipWidth = 210;
+              const leftPos = Math.max(10, Math.min(
+                rect.left + rect.width / 2 - tooltipWidth / 2,
+                window.innerWidth - tooltipWidth - 10
+              ));
+              return isOpponent
+                ? { top: rect.bottom + 8, left: leftPos }
+                : { bottom: window.innerHeight - rect.top + 8, left: leftPos };
+            })()),
+          }}>
             <div style={styles.tooltipName}>
               <svg width="12" height="12" viewBox="0 0 24 24" style={{ marginRight: '4px', verticalAlign: 'middle' }}>
                 <path d="M 13 2 L 4 14 L 11 14 L 10 22 L 20 10 L 13 10 Z"
@@ -273,7 +289,8 @@ export const HeroPortrait: React.FC<HeroPortraitProps> = ({
             {heroPowerDescription && (
               <div style={styles.tooltipDesc}>{heroPowerDescription}</div>
             )}
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>
@@ -435,31 +452,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 5,
     boxShadow: '0 1px 4px rgba(0, 0, 0, 0.5)',
   },
-  heroPowerTooltip: {
-    position: 'absolute',
-    bottom: '110%',
-    left: '50%',
-    transform: 'translateX(-50%)',
+  heroPowerTooltipPortal: {
+    position: 'fixed' as const,
     width: '210px',
     background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%)',
     border: '2px solid #c89b3c',
     borderRadius: '10px',
     padding: '10px',
-    zIndex: 1000,
-    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.8)',
-    pointerEvents: 'none' as const,
-  },
-  heroPowerTooltipBelow: {
-    position: 'absolute',
-    top: '110%',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: '210px',
-    background: 'linear-gradient(135deg, #1a1a3a 0%, #0a0a2a 100%)',
-    border: '2px solid #c89b3c',
-    borderRadius: '10px',
-    padding: '10px',
-    zIndex: 1000,
+    zIndex: 10000,
     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.8)',
     pointerEvents: 'none' as const,
   },

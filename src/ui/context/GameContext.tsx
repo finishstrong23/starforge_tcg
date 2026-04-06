@@ -407,6 +407,17 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     return 'Unknown';
   }, []);
 
+  // Helper: get a card's definition ID from instance ID
+  const getCardDefId = useCallback((instanceId: string): string | undefined => {
+    if (!engineRef.current) return undefined;
+    try {
+      const board = engineRef.current.getStateManager().getBoard();
+      const card = board.getCard(instanceId);
+      return card?.definitionId;
+    } catch { /* card may have been destroyed */ }
+    return undefined;
+  }, []);
+
   // Helper: add an entry to the combat log
   const addLogEntry = useCallback((text: string, type: CombatLogEntry['type'], isPlayer: boolean, turn: number, cardId?: string) => {
     const entry: CombatLogEntry = {
@@ -470,7 +481,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const isHeroTarget = data.defenderId.startsWith('hero_');
         const defenderName = isHeroTarget ? 'Hero' : getCardName(data.defenderId);
         const attacker = data.attackerOwnerId === 'player' ? 'Your' : "Opponent's";
-        addLogEntry(`${attacker} ${attackerName} attacks ${defenderName}`, 'attack', data.attackerOwnerId === 'player', event.turn);
+        addLogEntry(`${attacker} ${attackerName} attacks ${defenderName}`, 'attack', data.attackerOwnerId === 'player', event.turn, getCardDefId(data.attackerId));
         SoundManager.play('attack');
         firePetEvent(PetGameEvent.ATTACK);
         // Queue animation for opponent attacks
@@ -513,7 +524,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         }
         if (data.targetType === 'hero') {
           const targetHero = data.targetId === 'hero_player' ? 'Your Hero' : "Opponent's Hero";
-          addLogEntry(`${targetHero} takes ${data.amount} damage`, 'damage', data.targetId === 'hero_opponent', event.turn);
+          const sourceDefId = data.sourceId ? getCardDefId(data.sourceId) : undefined;
+          addLogEntry(`${targetHero} takes ${data.amount} damage`, 'damage', data.targetId === 'hero_opponent', event.turn, sourceDefId);
           SoundManager.play('heroDamage');
         }
         break;
@@ -541,7 +553,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
           const targetName = data.targetType === 'hero'
             ? (data.targetId === 'hero_player' ? 'Your Hero' : "Opponent's Hero")
             : getCardName(data.targetId);
-          addLogEntry(`${targetName} healed for ${data.actualHealing}`, 'heal', data.targetId.includes('player'), event.turn);
+          const healSourceDefId = data.targetType !== 'hero' ? getCardDefId(data.targetId) : undefined;
+          addLogEntry(`${targetName} healed for ${data.actualHealing}`, 'heal', data.targetId.includes('player'), event.turn, healSourceDefId);
           emitVFX('heal', data.targetId, data.actualHealing);
           SoundManager.play('heal');
         }
@@ -569,7 +582,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         break;
       }
     }
-  }, [getCardName, addLogEntry, emitVFX, emitBoardVFX, showVoiceline]);
+  }, [getCardName, getCardDefId, addLogEntry, emitVFX, emitBoardVFX, showVoiceline]);
 
   // Ref for stable access in init effect subscription
   const handleGameEventForLogRef = useRef(handleGameEventForLog);
