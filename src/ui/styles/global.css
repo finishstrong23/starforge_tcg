@@ -195,10 +195,11 @@ html, body {
 
 /* Card play from hand to board */
 @keyframes card-play {
-  0% { transform: scale(1); opacity: 1; }
-  30% { transform: scale(1.15); opacity: 1; }
-  60% { transform: scale(0.95); opacity: 0.9; }
-  100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(0.5); opacity: 0; filter: brightness(2); }
+  25% { transform: scale(1.2); opacity: 1; filter: brightness(1.6); }
+  50% { transform: scale(0.95); opacity: 1; filter: brightness(1.2); }
+  75% { transform: scale(1.05); opacity: 1; filter: brightness(1); }
+  100% { transform: scale(1); opacity: 1; filter: brightness(1); }
 }
 
 /* Card draw into hand */
@@ -226,6 +227,47 @@ html, body {
 
 .target-glow {
   animation: target-pulse 1s ease-in-out infinite;
+}
+
+/* ─── Last Played Card display ─────────────────────────────── */
+
+@keyframes lastPlayedSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) translateX(40px) scale(0.8);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(-5px) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) scale(1);
+  }
+}
+
+/* ─── Board card entrance animation (for minions appearing) ── */
+
+@keyframes boardCardEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-30px);
+    filter: brightness(2);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.15) translateY(0);
+    filter: brightness(1.5);
+  }
+  70% {
+    transform: scale(0.95) translateY(0);
+    filter: brightness(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: brightness(1);
+  }
 }
 
 /* ─── Card drag & drop ──────────────────────────────────────── */
@@ -562,6 +604,11 @@ html, body {
     font-size: 42px !important;
     letter-spacing: 6px !important;
   }
+}
+
+/* --- Last played card display responsive --- */
+@media (max-width: 768px) {
+  /* Last played card hides on small screens to save space */
 }
 
 /* --- Combat log collapses on small screens --- */

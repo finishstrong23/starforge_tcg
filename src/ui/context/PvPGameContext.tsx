@@ -713,6 +713,7 @@ export const PvPGameProvider: React.FC<PvPGameProviderProps> = ({
     legendaryCinematic: null,
     dismissLegendaryCinematic: () => {},
     voicelineBubble: null,
+    lastPlayedCard: null,
     pendingAdaptChoice: null,
     resolveAdaptChoice: () => {},
   };

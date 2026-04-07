@@ -114,6 +114,20 @@ interface GameContextValue {
   // Voiceline bubble
   voicelineBubble: { text: string; side: 'player' | 'opponent' } | null;
 
+  // Last played card display
+  lastPlayedCard: {
+    name: string;
+    cost: number;
+    attack?: number;
+    health?: number;
+    cardText?: string;
+    rarity: string;
+    type: string;
+    definitionId: string;
+    isPlayer: boolean;
+    race?: string;
+  } | null;
+
   // Adapt choice
   pendingAdaptChoice: PendingAdaptChoice | null;
   resolveAdaptChoice: (option: AdaptOption) => void;
@@ -272,6 +286,21 @@ export const GameProvider: React.FC<GameProviderProps> = ({
 
   // Adapt choice state
   const [pendingAdaptChoice, setPendingAdaptChoice] = useState<PendingAdaptChoice | null>(null);
+
+  // Last played card state — shows what was just played for a few seconds
+  const [lastPlayedCard, setLastPlayedCard] = useState<{
+    name: string;
+    cost: number;
+    attack?: number;
+    health?: number;
+    cardText?: string;
+    rarity: string;
+    type: string;
+    definitionId: string;
+    isPlayer: boolean;
+    race?: string;
+  } | null>(null);
+  const lastPlayedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Combat log state
   const [combatLog, setCombatLog] = useState<CombatLogEntry[]>([]);
@@ -450,6 +479,21 @@ export const GameProvider: React.FC<GameProviderProps> = ({
         const def = globalCardDatabase.getCard(data.cardDefinitionId);
         const name = def?.name || data.cardDefinitionId;
         addLogEntry(`${who} played ${name}`, 'play', isPlayer, event.turn, data.cardDefinitionId);
+        // Show "Last Played Card" display
+        if (lastPlayedTimerRef.current) clearTimeout(lastPlayedTimerRef.current);
+        setLastPlayedCard({
+          name,
+          cost: def?.cost ?? 0,
+          attack: (def as any)?.attack,
+          health: (def as any)?.health,
+          cardText: def?.cardText,
+          rarity: def?.rarity || 'COMMON',
+          type: def?.type || 'MINION',
+          definitionId: data.cardDefinitionId,
+          isPlayer,
+          race: (def as any)?.race,
+        });
+        lastPlayedTimerRef.current = setTimeout(() => setLastPlayedCard(null), 3500);
         if (def?.rarity === 'LEGENDARY') {
           SoundManager.play('legendaryPlay');
           // Legendary entrance cinematic
@@ -602,8 +646,8 @@ export const GameProvider: React.FC<GameProviderProps> = ({
       setCurrentAnimation(null);
       forceUpdate();
       // Gap before next animation so player can see each one
-      setTimeout(() => processAiAnimationQueue(), 400);
-    }, 800);
+      setTimeout(() => processAiAnimationQueue(), 700);
+    }, 1200);
   }, [forceUpdate]);
 
   // Queue an opponent attack animation — assign to ref for access from event handler
@@ -795,7 +839,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     const runAI = async () => {
       try {
         // Initial delay so player can see it's the AI's turn
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
         if (engineRef.current && aiRef.current) {
           // Override the AI's executeTurn to force UI updates between actions
@@ -838,7 +882,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
             forceUpdateRef.current();
 
             // Wait between actions so player can see each move (Hearthstone-style pacing)
-            await new Promise(resolve => setTimeout(resolve, 1200));
+            await new Promise(resolve => setTimeout(resolve, 2000));
           }
 
           // End turn
@@ -1259,6 +1303,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     legendaryCinematic,
     dismissLegendaryCinematic,
     voicelineBubble,
+    lastPlayedCard,
     pendingAdaptChoice,
     resolveAdaptChoice,
   };

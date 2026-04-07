@@ -73,6 +73,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     activateStarforge,
     canStarforge,
     combatLog,
+    lastPlayedCard,
     currentAnimation,
     onAnimationComplete,
     vfxEvents,
@@ -381,7 +382,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
           </div>
           <div data-testid="opponent-board" style={styles.minionsRow}>
             {opponentBoard.map((card) => (
-              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative', overflow: 'visible', padding: '4px', flexShrink: 1, minWidth: 0 }} onClick={(e) => e.stopPropagation()}>
+              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative', overflow: 'visible', padding: '4px', flexShrink: 1, minWidth: 0, animation: 'boardCardEntrance 0.6s ease-out' }} onClick={(e) => e.stopPropagation()}>
                 <Card
                   card={card}
                   isOnBoard
@@ -449,7 +450,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
             data-testid="player-board"
           >
             {playerBoard.map((card) => (
-              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative', overflow: 'visible', padding: '4px', flexShrink: 1, minWidth: 0 }}>
+              <div key={card.instanceId} data-card-id={card.instanceId} style={{ position: 'relative', overflow: 'visible', padding: '4px', flexShrink: 1, minWidth: 0, animation: 'boardCardEntrance 0.6s ease-out' }}>
                 <Card
                   card={card}
                   isOnBoard
@@ -595,6 +596,45 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
       {/* Keyword Glossary Overlay */}
       {showGlossary && (
         <KeywordGlossary onClose={() => setShowGlossary(false)} />
+      )}
+
+      {/* Last Played Card Display — shows what was just played */}
+      {lastPlayedCard && (
+        <div style={styles.lastPlayedOverlay} key={`lpc-${lastPlayedCard.definitionId}-${Date.now()}`}>
+          <div style={styles.lastPlayedLabel}>
+            {lastPlayedCard.isPlayer ? 'You played' : 'Opponent played'}
+          </div>
+          <div style={{
+            ...styles.lastPlayedCard,
+            borderColor: lastPlayedCard.rarity === 'LEGENDARY' ? '#ff8000'
+              : lastPlayedCard.rarity === 'EPIC' ? '#a335ee'
+              : lastPlayedCard.rarity === 'RARE' ? '#0070dd'
+              : '#667788',
+          }}>
+            <div style={styles.lastPlayedCost}>{lastPlayedCard.cost}</div>
+            <div style={styles.lastPlayedName}>{lastPlayedCard.name}</div>
+            <div style={styles.lastPlayedArt}>
+              <CardArt
+                cardId={lastPlayedCard.definitionId}
+                race={lastPlayedCard.race as Race | undefined}
+                cardType={lastPlayedCard.type as 'MINION' | 'SPELL' | 'STRUCTURE'}
+                cost={lastPlayedCard.cost}
+                width={140}
+                height={80}
+              />
+            </div>
+            {lastPlayedCard.attack !== undefined && lastPlayedCard.health !== undefined && (
+              <div style={styles.lastPlayedStats}>
+                <span style={{ color: '#ffcc00', fontWeight: 'bold' }}>{lastPlayedCard.attack}</span>
+                <span style={{ color: '#888' }}>/</span>
+                <span style={{ color: '#22cc44', fontWeight: 'bold' }}>{lastPlayedCard.health}</span>
+              </div>
+            )}
+            {lastPlayedCard.cardText && (
+              <div style={styles.lastPlayedText}>{lastPlayedCard.cardText}</div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Card Flight Animation Overlay */}
@@ -774,30 +814,30 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '10px 20px',
     background: 'transparent',
     position: 'relative',
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   boardRow: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '14px',
+    gap: '16px',
     flexShrink: 1,
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   minionsRow: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: '8px',
+    gap: '12px',
     width: '100%',
     maxWidth: '900px',
     minHeight: 0,
-    padding: '6px 12px',
-    background: 'rgba(0, 0, 0, 0.2)',
+    padding: '8px 16px',
+    background: 'transparent',
     borderRadius: '12px',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
+    border: 'none',
     flexWrap: 'nowrap' as const,
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   centerDivider: {
     display: 'flex',
@@ -935,6 +975,85 @@ const styles: { [key: string]: React.CSSProperties } = {
     textShadow: '0 1px 3px rgba(0,0,0,0.8)',
     boxShadow: '0 0 8px #ffaa00, 0 0 16px rgba(170, 0, 255, 0.4)',
     animation: 'starforgePulse 1.5s ease-in-out infinite',
+  },
+  lastPlayedOverlay: {
+    position: 'absolute',
+    right: '16px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    zIndex: 500,
+    pointerEvents: 'none',
+    animation: 'lastPlayedSlideIn 0.4s ease-out forwards',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '6px',
+    filter: 'drop-shadow(0 4px 20px rgba(0,0,0,0.7))',
+  },
+  lastPlayedLabel: {
+    fontSize: '12px',
+    fontWeight: 'bold',
+    color: '#aabbcc',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '1.5px',
+    textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+  },
+  lastPlayedCard: {
+    width: '160px',
+    background: 'linear-gradient(135deg, #1a1a30 0%, #252545 50%, #1a1a30 100%)',
+    border: '2px solid #667788',
+    borderRadius: '10px',
+    padding: '10px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '4px',
+    boxShadow: '0 0 20px rgba(100, 150, 255, 0.3), inset 0 0 15px rgba(0,0,0,0.3)',
+  },
+  lastPlayedCost: {
+    position: 'absolute',
+    top: '22px',
+    left: '6px',
+    width: '24px',
+    height: '24px',
+    borderRadius: '50%',
+    background: '#1a5fff',
+    color: '#fff',
+    fontSize: '13px',
+    fontWeight: 'bold',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    boxShadow: '0 0 8px rgba(26, 95, 255, 0.5)',
+    zIndex: 2,
+  },
+  lastPlayedName: {
+    fontSize: '13px',
+    fontWeight: 'bold',
+    color: '#ffffff',
+    textAlign: 'center' as const,
+    lineHeight: '1.2',
+    textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+  },
+  lastPlayedArt: {
+    width: '140px',
+    height: '80px',
+    borderRadius: '6px',
+    overflow: 'hidden',
+  },
+  lastPlayedStats: {
+    display: 'flex',
+    gap: '4px',
+    fontSize: '15px',
+  },
+  lastPlayedText: {
+    fontSize: '10px',
+    color: '#ccccdd',
+    textAlign: 'center' as const,
+    lineHeight: '1.3',
+    maxHeight: '40px',
+    overflow: 'hidden',
+    padding: '0 2px',
   },
   flightOverlay: {
     position: 'absolute',
