@@ -23,7 +23,10 @@
     "test:e2e:report": "npx playwright show-report reports/playwright-html",
     "stress-test": "node stress-test.mjs",
     "stress-test:1000": "node stress-test.mjs 1000",
-    "stress-test:5000": "node stress-test.mjs 5000"
+    "stress-test:5000": "node stress-test.mjs 5000",
+    "list-cards": "node scripts/list-card-names.mjs",
+    "list-cards:check": "node scripts/list-card-names.mjs --check",
+    "list-cards:filenames": "node scripts/list-card-names.mjs --filenames"
   },
   "keywords": [
     "tcg",

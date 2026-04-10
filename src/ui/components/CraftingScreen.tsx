@@ -235,6 +235,7 @@ export const CraftingScreen: React.FC<CraftingScreenProps> = ({ onBack }) => {
                   }}>
                     <CardArt
                       cardId={card.id}
+                      cardName={card.name}
                       race={(card as any).race as Race | undefined}
                       cardType={(card.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
                       cost={card.cost}
@@ -273,6 +274,7 @@ export const CraftingScreen: React.FC<CraftingScreenProps> = ({ onBack }) => {
             <>
               <CardArt
                 cardId={selectedCard.id}
+                cardName={selectedCard.name}
                 race={(selectedCard as any).race as Race | undefined}
                 cardType={(selectedCard.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
                 cost={selectedCard.cost}

@@ -1,11 +1,28 @@
 /**
  * STARFORGE TCG - Card Art with Custom Image Support
  *
- * Loads custom artwork from public/cards/{cardId}.png if available,
- * otherwise falls back to procedural SVG generation.
+ * Loads custom artwork from public/cards/ if available, otherwise falls
+ * back to procedural SVG generation.
  *
- * To add custom art: drop a PNG/JPG/WEBP into public/cards/ named
- * after the card's definition ID (e.g. cogsmiths_gear_golem.png).
+ * ──────────────────────────────────────────────────────────────
+ *  HOW TO ADD CUSTOM CARD ART (simple version)
+ * ──────────────────────────────────────────────────────────────
+ *  Just drop a PNG/JPG/WEBP into public/cards/ named after the
+ *  card. Any of these filename styles work — pick whichever is
+ *  easiest for you:
+ *
+ *    public/cards/Sparktinkerer.png       ← exact card name
+ *    public/cards/sparktinkerer.png       ← lowercase
+ *    public/cards/spark-tinkerer.png      ← hyphenated
+ *    public/cards/spark_tinkerer.png      ← underscored
+ *    public/cards/cog_m1.png              ← card ID (legacy)
+ *
+ *  Spaces, capitalization and punctuation are all ignored when
+ *  matching — "Gear Golem.png", "gear_golem.png", and
+ *  "GearGolem.png" all map to the same card.
+ *
+ *  Supported extensions: .png, .webp, .jpg (checked in that order)
+ * ──────────────────────────────────────────────────────────────
  *
  * Procedural fallback generates rich, multi-layered SVG card illustrations with:
  * - Deep background gradients with noise textures
@@ -22,35 +39,72 @@ import { Race } from '../../types/Race';
 
 // --- Custom image loading system ---
 
-/** Cache of image availability checks to avoid repeated network requests */
+/** Cache of image availability checks to avoid repeated network requests. Keyed by cache key. */
 const imageCache = new Map<string, string | null>();
 
 /** Supported image extensions, checked in order */
 const IMAGE_EXTENSIONS = ['png', 'webp', 'jpg'];
 
 /**
- * Check if a custom card image exists in public/cards/.
- * Returns the URL if found, null otherwise. Results are cached.
+ * Build the list of filename candidates to try for a given card.
+ * We try a bunch of human-friendly name formats so the user doesn't
+ * have to care about slugification rules.
  */
-function probeCardImage(cardId: string): Promise<string | null> {
-  const cached = imageCache.get(cardId);
+function buildCandidateNames(cardId: string, cardName?: string): string[] {
+  const names = new Set<string>();
+
+  if (cardName) {
+    const trimmed = cardName.trim();
+    names.add(trimmed);                                    // "Spark Tinkerer"
+    names.add(trimmed.toLowerCase());                      // "spark tinkerer"
+    names.add(trimmed.replace(/\s+/g, ''));                // "SparkTinkerer"
+    names.add(trimmed.toLowerCase().replace(/\s+/g, ''));  // "sparktinkerer"
+    names.add(trimmed.replace(/\s+/g, '_'));               // "Spark_Tinkerer"
+    names.add(trimmed.toLowerCase().replace(/\s+/g, '_')); // "spark_tinkerer"
+    names.add(trimmed.replace(/\s+/g, '-'));               // "Spark-Tinkerer"
+    names.add(trimmed.toLowerCase().replace(/\s+/g, '-')); // "spark-tinkerer"
+    // Strip anything non-alphanumeric as a last-resort match
+    const stripped = trimmed.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (stripped) names.add(stripped);
+  }
+
+  // Legacy / fallback: the raw card definition ID
+  names.add(cardId);
+
+  return Array.from(names);
+}
+
+/**
+ * Check if a custom card image exists in public/cards/.
+ * Tries multiple filename candidates (human name and card ID) across
+ * the supported extensions. Returns the URL if found, null otherwise.
+ * Results are cached by the combined (cardId, cardName) key.
+ */
+function probeCardImage(cardId: string, cardName?: string): Promise<string | null> {
+  const cacheKey = `${cardId}::${cardName || ''}`;
+  const cached = imageCache.get(cacheKey);
   if (cached !== undefined) return Promise.resolve(cached);
 
-  // Try each extension in order
+  const candidates = buildCandidateNames(cardId, cardName);
+
   return (async () => {
-    for (const ext of IMAGE_EXTENSIONS) {
-      const url = `./cards/${cardId}.${ext}`;
-      try {
-        const resp = await fetch(url, { method: 'HEAD' });
-        if (resp.ok) {
-          imageCache.set(cardId, url);
-          return url;
+    for (const base of candidates) {
+      // URL-encode so names with spaces ("Spark Tinkerer.png") resolve correctly
+      const encoded = encodeURIComponent(base);
+      for (const ext of IMAGE_EXTENSIONS) {
+        const url = `./cards/${encoded}.${ext}`;
+        try {
+          const resp = await fetch(url, { method: 'HEAD' });
+          if (resp.ok) {
+            imageCache.set(cacheKey, url);
+            return url;
+          }
+        } catch {
+          // Network error — skip this candidate
         }
-      } catch {
-        // Network error — skip this extension
       }
     }
-    imageCache.set(cardId, null);
+    imageCache.set(cacheKey, null);
     return null;
   })();
 }
@@ -58,26 +112,27 @@ function probeCardImage(cardId: string): Promise<string | null> {
 /**
  * Hook that returns the custom image URL for a card, or null if none exists.
  */
-function useCardImage(cardId: string): string | null {
-  const cached = imageCache.get(cardId);
+function useCardImage(cardId: string, cardName?: string): string | null {
+  const cacheKey = `${cardId}::${cardName || ''}`;
+  const cached = imageCache.get(cacheKey);
   const [imageUrl, setImageUrl] = useState<string | null>(cached !== undefined ? cached : null);
   const [checked, setChecked] = useState(cached !== undefined);
 
   useEffect(() => {
-    if (imageCache.has(cardId)) {
-      setImageUrl(imageCache.get(cardId)!);
+    if (imageCache.has(cacheKey)) {
+      setImageUrl(imageCache.get(cacheKey)!);
       setChecked(true);
       return;
     }
     let cancelled = false;
-    probeCardImage(cardId).then((url) => {
+    probeCardImage(cardId, cardName).then((url) => {
       if (!cancelled) {
         setImageUrl(url);
         setChecked(true);
       }
     });
     return () => { cancelled = true; };
-  }, [cardId]);
+  }, [cacheKey, cardId, cardName]);
 
   return checked ? imageUrl : null;
 }
@@ -117,6 +172,9 @@ function seededRandom(seed: number, index: number): number {
 
 interface CardArtProps {
   cardId: string;
+  /** Human-readable card name. Enables matching art files by name
+   *  (e.g. public/cards/Sparktinkerer.png) instead of card ID. */
+  cardName?: string;
   race?: Race;
   cardType: 'MINION' | 'SPELL' | 'STRUCTURE';
   cost: number;
@@ -127,19 +185,20 @@ interface CardArtProps {
 
 /**
  * CardArt - Main exported component.
- * Checks for a custom image in public/cards/{cardId}.{png,webp,jpg}.
- * If found, renders the image. Otherwise falls back to procedural SVG.
+ * Checks for a custom image in public/cards/ using the card name or
+ * card ID. If found, renders the image. Otherwise falls back to
+ * procedural SVG.
  */
 export const CardArt: React.FC<CardArtProps> = (props) => {
-  const { cardId, width = 80, height = 50, isForged = false } = props;
-  const imageUrl = useCardImage(cardId);
+  const { cardId, cardName, width = 80, height = 50, isForged = false } = props;
+  const imageUrl = useCardImage(cardId, cardName);
 
   if (imageUrl) {
     return (
       <div style={{ position: 'relative', width, height, borderRadius: '4px', overflow: 'hidden' }}>
         <img
           src={imageUrl}
-          alt={cardId}
+          alt={cardName || cardId}
           width={width}
           height={height}
           style={{

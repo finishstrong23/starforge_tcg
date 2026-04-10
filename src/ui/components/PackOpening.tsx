@@ -230,6 +230,7 @@ export const PackOpening: React.FC<PackOpeningProps> = ({ onBack }) => {
                     <>
                       <CardArt
                         cardId={pc.card.id}
+                        cardName={pc.card.name}
                         race={(pc.card as any).race as Race | undefined}
                         cardType={(pc.card.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
                         cost={pc.card.cost}

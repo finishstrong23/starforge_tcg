@@ -120,6 +120,7 @@ export const MulliganOverlay: React.FC<MulliganOverlayProps> = ({
                 <div style={styles.artArea}>
                   <CardArt
                     cardId={card.definitionId}
+                    cardName={definition?.name}
                     race={(definition as any)?.race as Race | undefined}
                     cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
                     cost={card.currentCost}

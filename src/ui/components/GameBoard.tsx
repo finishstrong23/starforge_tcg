@@ -95,6 +95,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
   // ── Card flight animation state ──
   const [flightCard, setFlightCard] = useState<{
     definitionId: string;
+    name?: string;
     cost: number;
     race?: string;
     cardType: string;
@@ -133,6 +134,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
     const def = globalCardDatabase.getCard(card.definitionId);
     setFlightCard({
       definitionId: card.definitionId,
+      name: def?.name,
       cost: card.currentCost,
       race: (def as any)?.race,
       cardType: def?.type || 'MINION',
@@ -616,6 +618,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
             <div style={styles.lastPlayedArt}>
               <CardArt
                 cardId={lastPlayedCard.definitionId}
+                cardName={lastPlayedCard.name}
                 race={lastPlayedCard.race as Race | undefined}
                 cardType={lastPlayedCard.type as 'MINION' | 'SPELL' | 'STRUCTURE'}
                 cost={lastPlayedCard.cost}
@@ -643,6 +646,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({ onBackToMenu, isCampaign =
           <div style={styles.flightCard}>
             <CardArt
               cardId={flightCard.definitionId}
+              cardName={flightCard.name}
               race={flightCard.race as Race | undefined}
               cardType={flightCard.cardType as 'MINION' | 'SPELL' | 'STRUCTURE'}
               cost={flightCard.cost}

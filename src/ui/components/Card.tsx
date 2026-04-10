@@ -440,6 +440,7 @@ export const Card: React.FC<CardProps> = ({
           ) : (
             <CardArt
               cardId={card.definitionId}
+              cardName={definition?.name}
               race={(definition as any)?.race as Race | undefined}
               cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
               cost={card.currentCost}
@@ -519,6 +520,7 @@ export const Card: React.FC<CardProps> = ({
             <div style={styles.previewArtArea}>
               <CardArt
                 cardId={card.definitionId}
+                cardName={definition?.name}
                 race={(definition as any)?.race as Race | undefined}
                 cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
                 cost={card.currentCost}
@@ -605,6 +607,7 @@ export const Card: React.FC<CardProps> = ({
           <div style={styles.popupArt}>
             <CardArt
               cardId={card.definitionId}
+              cardName={definition?.name}
               race={(definition as any)?.race as Race | undefined}
               cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
               cost={card.currentCost}
