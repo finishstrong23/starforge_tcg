@@ -197,7 +197,8 @@ export const CollectionManager: React.FC<CollectionManagerProps> = ({ onBack }) 
                   race={(card as any).race as Race | undefined}
                   cardType={(card.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
                   cost={card.cost}
-                  width={90} height={55}
+                  width={96} height={134}
+                  displayMode="full"
                 />
               </div>
               <div style={styles.cardCost}>{card.cost}</div>
@@ -225,8 +226,9 @@ export const CollectionManager: React.FC<CollectionManagerProps> = ({ onBack }) 
               race={(selectedCard as any).race as Race | undefined}
               cardType={(selectedCard.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
               cost={selectedCard.cost}
-              width={200} height={120}
+              width={240} height={336}
               isForged={false}
+              displayMode="full"
             />
             <div style={styles.detailName}>{selectedCard.name}</div>
             <div style={{

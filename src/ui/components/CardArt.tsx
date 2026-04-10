@@ -111,8 +111,10 @@ function probeCardImage(cardId: string, cardName?: string): Promise<string | nul
 
 /**
  * Hook that returns the custom image URL for a card, or null if none exists.
+ * Exported so Card.tsx can use it to decide whether to render the procedural
+ * frame or swap in a "full card image" layout.
  */
-function useCardImage(cardId: string, cardName?: string): string | null {
+export function useCardImage(cardId: string, cardName?: string): string | null {
   const cacheKey = `${cardId}::${cardName || ''}`;
   const cached = imageCache.get(cacheKey);
   const [imageUrl, setImageUrl] = useState<string | null>(cached !== undefined ? cached : null);
@@ -181,6 +183,18 @@ interface CardArtProps {
   width?: number;
   height?: number;
   isForged?: boolean;
+  /**
+   * How to display a custom card image:
+   *  - 'cover' (default): center-crop to fill the slot — legacy behavior,
+   *    best for small landscape thumbnails that want to focus on artwork.
+   *  - 'full': letterbox to preserve aspect ratio — show the whole card.
+   *  - 'portrait': cover with object-position focused on the upper art area
+   *    of a standard TCG card layout (title at top, art roughly 15%-55% down).
+   *    Use for Hearthstone-style board minions where we only want the art.
+   *
+   * Ignored for the procedural SVG fallback.
+   */
+  displayMode?: 'cover' | 'full' | 'portrait';
 }
 
 /**
@@ -190,12 +204,35 @@ interface CardArtProps {
  * procedural SVG.
  */
 export const CardArt: React.FC<CardArtProps> = (props) => {
-  const { cardId, cardName, width = 80, height = 50, isForged = false } = props;
+  const {
+    cardId, cardName,
+    width = 80, height = 50,
+    isForged = false,
+    displayMode = 'cover',
+  } = props;
   const imageUrl = useCardImage(cardId, cardName);
 
   if (imageUrl) {
+    // Map displayMode to object-fit / object-position.
+    //   cover    → center-crop to fill slot (legacy default)
+    //   full     → letterbox to preserve full card
+    //   portrait → cover with focus on the art region (top ~22%)
+    const objectFit: React.CSSProperties['objectFit'] =
+      displayMode === 'full' ? 'contain' : 'cover';
+    const objectPosition =
+      displayMode === 'portrait' ? 'center 22%' : 'center center';
+
     return (
-      <div style={{ position: 'relative', width, height, borderRadius: '4px', overflow: 'hidden' }}>
+      <div style={{
+        position: 'relative',
+        width,
+        height,
+        borderRadius: '4px',
+        overflow: 'hidden',
+        // Subtle backdrop so letterboxed images in 'full' mode don't
+        // bleed through to the parent's background.
+        background: displayMode === 'full' ? 'rgba(0,0,0,0.2)' : 'transparent',
+      }}>
         <img
           src={imageUrl}
           alt={cardName || cardId}
@@ -205,7 +242,8 @@ export const CardArt: React.FC<CardArtProps> = (props) => {
             display: 'block',
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit,
+            objectPosition,
             borderRadius: '4px',
           }}
         />

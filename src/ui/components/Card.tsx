@@ -18,7 +18,7 @@ import type { CardInstance } from '../../types/Card';
 import { CombatKeyword, OriginalKeyword, TriggerKeyword } from '../../types/Keywords';
 import { globalCardDatabase } from '../../cards/CardDatabase';
 import { KEYWORD_DESCRIPTIONS } from './KeywordTooltip';
-import { CardArt } from './CardArt';
+import { CardArt, useCardImage } from './CardArt';
 import type { Race } from '../../types/Race';
 import { getCardTier, getCardCosmeticStyles, injectCosmeticStyles, CosmeticTier, TIER_INFO } from '../../progression/CardCosmetics';
 
@@ -198,6 +198,14 @@ export const Card: React.FC<CardProps> = ({
   const definition = globalCardDatabase.getCard(card.definitionId);
   const isMinion = card.currentAttack !== undefined;
 
+  // Custom card image (from public/cards/). When present, we skip the
+  // procedural frame entirely and render the uploaded full-card image.
+  //   - In hand / preview / popup : show the whole image (contain)
+  //   - On the board              : crop to the art area (Hearthstone-style),
+  //                                 with keyword icons displayed below the card
+  const customImageUrl = useCardImage(card.definitionId, definition?.name);
+  const hasCustomImage = !!customImageUrl;
+
   // Tribe from definition
   const tribe = (definition as any)?.tribe as string | undefined;
   const showTribe = tribe && tribe !== 'NONE';
@@ -297,7 +305,7 @@ export const Card: React.FC<CardProps> = ({
   const cardStyles: React.CSSProperties = {
     ...styles.card,
     ...(isInHand ? styles.cardInHand : {}),
-    ...(isOnBoard ? styles.cardOnBoard : {}),
+    ...(isOnBoard ? (hasCustomImage ? styles.cardOnBoardPortrait : styles.cardOnBoard) : {}),
     border: `3px solid ${borderColor}`,
     boxShadow,
     cursor: onClick ? 'pointer' : 'default',
@@ -402,12 +410,24 @@ export const Card: React.FC<CardProps> = ({
           {card.currentCost}
         </div>
 
-        {/* Card name */}
-        <div style={styles.nameArea}>
-          <div data-testid="card-name" style={{ ...styles.cardName, borderBottom: `2px solid ${rarityColor}` }}>
+        {/* Card name — hidden when the uploaded image has its own title bar. */}
+        {!hasCustomImage && (
+          <div style={styles.nameArea}>
+            <div data-testid="card-name" style={{ ...styles.cardName, borderBottom: `2px solid ${rarityColor}` }}>
+              {definition?.name || 'Unknown'}
+            </div>
+          </div>
+        )}
+        {/* Invisible name node so tests can still read the card name when
+            the procedural title bar is hidden. */}
+        {hasCustomImage && (
+          <div
+            data-testid="card-name"
+            style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', opacity: 0 }}
+          >
             {definition?.name || 'Unknown'}
           </div>
-        </div>
+        )}
 
         {/* Cosmetic tier badge */}
         {cosmeticTier !== CosmeticTier.STANDARD && (
@@ -426,36 +446,78 @@ export const Card: React.FC<CardProps> = ({
           </div>
         )}
 
-        {/* Tribe badge */}
-        {showTribe && (
+        {/* Tribe badge — hidden when we're using a full-card image (the
+            image already has its own type/tribe line baked in). */}
+        {showTribe && !hasCustomImage && (
           <div style={{ ...styles.tribeBadge, color: tribeColor }}>
             {tribe!.toLowerCase()}
           </div>
         )}
 
-        {/* Card art area */}
-        <div style={styles.artArea}>
-          {card.isCloaked ? (
-            <div style={styles.cloakedOverlay}>👻</div>
-          ) : (
-            <CardArt
-              cardId={card.definitionId}
-              cardName={definition?.name}
-              race={(definition as any)?.race as Race | undefined}
-              cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
-              cost={card.currentCost}
-              width={isInHand ? 80 : 120}
-              height={isInHand ? 50 : 75}
-              isForged={card.isForged}
-            />
-          )}
-        </div>
-
-        {/* Card text for spells (simplified) */}
-        {!isMinion && isInHand && (
-          <div style={styles.spellText}>
-            {definition?.cardText?.slice(0, 30) || ''}
+        {hasCustomImage ? (
+          // ───────────────────────────────────────────────────────────
+          //  Custom-image mode
+          //  • In hand : show the whole uploaded card (contain).
+          //  • On board: crop to the art area only (Hearthstone-style).
+          //  Dynamic cost/attack/health overlay badges still render in the
+          //  corners so buffs/debuffs remain visible even though the image
+          //  has the base numbers baked in.
+          // ───────────────────────────────────────────────────────────
+          <div style={styles.customImageFill}>
+            {card.isCloaked ? (
+              <div style={styles.cloakedOverlayFill}>👻</div>
+            ) : (
+              <img
+                src={customImageUrl!}
+                alt={definition?.name || card.definitionId}
+                draggable={false}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  // Hand/preview : contain the whole card.
+                  // Board minion : cover with focus on the art area so only
+                  //                the portrait region is visible.
+                  objectFit: isOnBoard ? 'cover' : 'contain',
+                  objectPosition: isOnBoard ? 'center 30%' : 'center center',
+                  borderRadius: '7px',
+                  pointerEvents: 'none',
+                }}
+              />
+            )}
+            {/* Forged shimmer overlay for custom-image mode */}
+            {isForged && !card.isCloaked && (
+              <div style={styles.customImageForgedOverlay} />
+            )}
           </div>
+        ) : (
+          <>
+            {/* Card art area (procedural) */}
+            <div style={styles.artArea}>
+              {card.isCloaked ? (
+                <div style={styles.cloakedOverlay}>👻</div>
+              ) : (
+                <CardArt
+                  cardId={card.definitionId}
+                  cardName={definition?.name}
+                  race={(definition as any)?.race as Race | undefined}
+                  cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
+                  cost={card.currentCost}
+                  width={isInHand ? 80 : 120}
+                  height={isInHand ? 50 : 75}
+                  isForged={card.isForged}
+                />
+              )}
+            </div>
+
+            {/* Card text for spells (simplified) */}
+            {!isMinion && isInHand && (
+              <div style={styles.spellText}>
+                {definition?.cardText?.slice(0, 30) || ''}
+              </div>
+            )}
+          </>
         )}
 
         {/* Attack/Health badges - absolute positioned, Hearthstone-style */}
@@ -490,8 +552,9 @@ export const Card: React.FC<CardProps> = ({
         </div>
       )}
 
-      {/* Keywords row - inside card in hand */}
-      {isInHand && cardKeywords.length > 0 && (
+      {/* Keywords row - inside card in hand (hidden when using a full-card
+          image, since the image already shows the rules text). */}
+      {isInHand && !hasCustomImage && cardKeywords.length > 0 && (
         <div style={styles.keywordRow}>
           {cardKeywords.slice(0, 3).map(kw => keywordIcons[kw] || '').join('')}
         </div>
@@ -511,24 +574,46 @@ export const Card: React.FC<CardProps> = ({
             setShowPreview(false);
           }}
         >
-          <div style={styles.previewCard}>
-            <div style={styles.previewHeader}>
-              <span style={styles.previewCost}>{card.currentCost}</span>
-              <span style={styles.previewName}>{definition?.name || 'Unknown'}</span>
-            </div>
-
-            <div style={styles.previewArtArea}>
-              <CardArt
-                cardId={card.definitionId}
-                cardName={definition?.name}
-                race={(definition as any)?.race as Race | undefined}
-                cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
-                cost={card.currentCost}
-                width={360}
-                height={180}
-                isForged={card.isForged}
+          <div style={hasCustomImage ? styles.previewCardImage : styles.previewCard}>
+            {hasCustomImage ? (
+              // Custom image preview — show the full uploaded card at a
+              // large size. Skip the decorative header/art/text blocks
+              // since they're all already baked into the image.
+              <img
+                src={customImageUrl!}
+                alt={definition?.name || card.definitionId}
+                draggable={false}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  maxHeight: '75vh',
+                  objectFit: 'contain',
+                  borderRadius: '12px',
+                  marginBottom: '12px',
+                  pointerEvents: 'none',
+                }}
               />
-            </div>
+            ) : (
+              <>
+                <div style={styles.previewHeader}>
+                  <span style={styles.previewCost}>{card.currentCost}</span>
+                  <span style={styles.previewName}>{definition?.name || 'Unknown'}</span>
+                </div>
+
+                <div style={styles.previewArtArea}>
+                  <CardArt
+                    cardId={card.definitionId}
+                    cardName={definition?.name}
+                    race={(definition as any)?.race as Race | undefined}
+                    cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
+                    cost={card.currentCost}
+                    width={360}
+                    height={180}
+                    isForged={card.isForged}
+                  />
+                </div>
+              </>
+            )}
 
             {isMinion && (
               <div style={styles.previewStats}>
@@ -541,17 +626,19 @@ export const Card: React.FC<CardProps> = ({
               </div>
             )}
 
-            {showTribe && (
+            {showTribe && !hasCustomImage && (
               <div style={{ textAlign: 'center', fontSize: '16px', color: tribeColor, fontWeight: 'bold', marginBottom: '8px' }}>
                 ⬡ {tribe!.charAt(0) + tribe!.slice(1).toLowerCase()}
               </div>
             )}
 
-            <div style={{ textAlign: 'center', fontSize: '15px', color: rarityColor, marginBottom: '10px' }}>
-              {definition?.rarity}
-            </div>
+            {!hasCustomImage && (
+              <div style={{ textAlign: 'center', fontSize: '15px', color: rarityColor, marginBottom: '10px' }}>
+                {definition?.rarity}
+              </div>
+            )}
 
-            {definition?.cardText && (
+            {definition?.cardText && !hasCustomImage && (
               <div style={styles.previewText}>{definition.cardText}</div>
             )}
 
@@ -599,23 +686,45 @@ export const Card: React.FC<CardProps> = ({
             };
           })()),
         }}>
-          <div style={styles.popupHeader}>
-            <span style={styles.popupCost}>{card.currentCost}</span>
-            <span style={styles.popupName}>{definition?.name || 'Unknown'}</span>
-          </div>
-
-          <div style={styles.popupArt}>
-            <CardArt
-              cardId={card.definitionId}
-              cardName={definition?.name}
-              race={(definition as any)?.race as Race | undefined}
-              cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
-              cost={card.currentCost}
-              width={196}
-              height={100}
-              isForged={card.isForged}
+          {hasCustomImage ? (
+            // Hover popup for cards with a custom image: just show the
+            // uploaded card big. No duplicate header/stats/tribe/rarity
+            // blocks since they're all already in the image.
+            <img
+              src={customImageUrl!}
+              alt={definition?.name || card.definitionId}
+              draggable={false}
+              style={{
+                display: 'block',
+                width: '100%',
+                maxHeight: '52vh',
+                objectFit: 'contain',
+                borderRadius: '8px',
+                marginBottom: '8px',
+                pointerEvents: 'none',
+              }}
             />
-          </div>
+          ) : (
+            <>
+              <div style={styles.popupHeader}>
+                <span style={styles.popupCost}>{card.currentCost}</span>
+                <span style={styles.popupName}>{definition?.name || 'Unknown'}</span>
+              </div>
+
+              <div style={styles.popupArt}>
+                <CardArt
+                  cardId={card.definitionId}
+                  cardName={definition?.name}
+                  race={(definition as any)?.race as Race | undefined}
+                  cardType={(definition?.type || 'MINION') as 'MINION' | 'SPELL' | 'STRUCTURE'}
+                  cost={card.currentCost}
+                  width={196}
+                  height={100}
+                  isForged={card.isForged}
+                />
+              </div>
+            </>
+          )}
 
           {isMinion && (
             <div style={styles.popupStats}>
@@ -629,15 +738,17 @@ export const Card: React.FC<CardProps> = ({
           )}
 
           {/* Tribe in popup */}
-          {showTribe && (
+          {showTribe && !hasCustomImage && (
             <div style={styles.popupTribe}>
               <span style={{ color: tribeColor }}>⬡ {tribe!.charAt(0) + tribe!.slice(1).toLowerCase()}</span>
             </div>
           )}
 
-          <div style={styles.popupRarity}>
-            <span style={{ color: rarityColor }}>{definition?.rarity}</span>
-          </div>
+          {!hasCustomImage && (
+            <div style={styles.popupRarity}>
+              <span style={{ color: rarityColor }}>{definition?.rarity}</span>
+            </div>
+          )}
 
           {isForged && (
             <div style={{
@@ -660,7 +771,7 @@ export const Card: React.FC<CardProps> = ({
             </div>
           )}
 
-          {definition?.cardText && (
+          {definition?.cardText && !hasCustomImage && (
             <div style={styles.popupText}>{definition.cardText}</div>
           )}
 
@@ -705,6 +816,14 @@ const styles: { [key: string]: React.CSSProperties } = {
   cardOnBoard: {
     width: '110px',
     height: '155px',
+  },
+  // Hearthstone-style minion token: a shorter, wider slot that forces the
+  // uploaded card image to crop down to just the portrait/art region.
+  // Used only when a custom image exists for a minion on the board.
+  cardOnBoardPortrait: {
+    width: '118px',
+    height: '96px',
+    borderRadius: '10px',
   },
   barrierOverlay: {
     position: 'absolute',
@@ -767,6 +886,38 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
     position: 'relative',
   },
+  // Fills the entire card slot with the uploaded image. Used when a
+  // custom PNG exists in public/cards/ and we want to bypass the
+  // procedural name area / art slot / spell text entirely.
+  customImageFill: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: '5px',
+    overflow: 'hidden',
+    pointerEvents: 'none',
+  },
+  customImageForgedOverlay: {
+    position: 'absolute',
+    inset: 0,
+    background: 'linear-gradient(135deg, rgba(255,170,0,0.28) 0%, rgba(160,60,255,0.22) 50%, rgba(255,170,0,0.28) 100%)',
+    borderRadius: '5px',
+    pointerEvents: 'none',
+    mixBlendMode: 'screen',
+  },
+  cloakedOverlayFill: {
+    position: 'absolute',
+    inset: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '40px',
+    opacity: 0.6,
+    background: 'rgba(0,0,0,0.6)',
+    borderRadius: '5px',
+  },
   cardArtEmoji: {
     fontSize: '32px',
   },
@@ -784,13 +935,16 @@ const styles: { [key: string]: React.CSSProperties } = {
     right: 0,
   },
   keywordRowBelow: {
-    fontSize: '14px',
+    fontSize: '15px',
     textAlign: 'center',
-    padding: '2px 4px',
-    marginTop: '2px',
-    background: 'rgba(0, 0, 0, 0.6)',
-    borderRadius: '4px',
-    letterSpacing: '2px',
+    padding: '3px 6px',
+    marginTop: '3px',
+    background: 'rgba(0, 0, 0, 0.72)',
+    border: '1px solid rgba(255, 204, 0, 0.35)',
+    borderRadius: '10px',
+    letterSpacing: '3px',
+    lineHeight: '1',
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.6)',
   },
   structureGlow: {
     position: 'absolute',
@@ -885,6 +1039,21 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '24px',
     overflowY: 'auto',
     boxShadow: '0 0 40px rgba(255, 204, 0, 0.3), 0 20px 60px rgba(0, 0, 0, 0.8)',
+  },
+  // Preview container when the card has a custom image. Lighter chrome so
+  // the uploaded artwork is the star of the show.
+  previewCardImage: {
+    width: 'min(520px, 95vw)',
+    maxHeight: '92vh',
+    background: 'transparent',
+    border: 'none',
+    borderRadius: '16px',
+    padding: '16px',
+    overflowY: 'auto',
+    boxShadow: '0 0 40px rgba(255, 204, 0, 0.2), 0 20px 60px rgba(0, 0, 0, 0.8)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   previewHeader: {
     display: 'flex',
