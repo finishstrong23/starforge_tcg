@@ -24,13 +24,7 @@ const STARTER_DECKS = [
   { key: 'COGSMITHS', label: 'Cogsmiths' },
   { key: 'LUMINAR', label: 'Luminar' },
   { key: 'PYROCLAST', label: 'Pyroclast' },
-  { key: 'VOIDBORN', label: 'Voidborn' },
-  { key: 'BIOTITANS', label: 'Biotitans' },
-  { key: 'CRYSTALLINE', label: 'Crystalline' },
   { key: 'PHANTOM_CORSAIRS', label: 'Phantom Corsairs' },
-  { key: 'HIVEMIND', label: 'Hivemind' },
-  { key: 'ASTROMANCERS', label: 'Astromancers' },
-  { key: 'CHRONOBOUND', label: 'Chronobound' },
 ];
 
 // Pull a single field value from a one-line card object literal.
@@ -158,7 +152,7 @@ const out = [];
 out.push('# STARFORGE TCG — Starter Decks (Art Reference)');
 out.push('');
 out.push(
-  'This file contains every card in the 10 faction starter decks, formatted for easy copy/paste handoff to the art team. Source of truth: `src/data/SampleCards.ts`.'
+  `This file contains every card in the ${STARTER_DECKS.length} launch faction starter decks (25 cards each), formatted for easy copy/paste handoff to the art team. Source of truth: \`src/data/SampleCards.ts\`.`
 );
 out.push('');
 
