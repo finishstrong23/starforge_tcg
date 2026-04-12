@@ -23,6 +23,7 @@ const NODE_COLORS: Record<MapNodeType, string> = {
   REST: '#2ecc71',
   SHOP: '#f1c40f',
   TREASURE: '#ffd700',
+  FORGE: '#ff6b35',
 };
 
 // Icons per node type — crossed swords, flame, skull, campfire leaf, money bag, chest
@@ -33,6 +34,7 @@ const NODE_ICONS: Record<MapNodeType, string> = {
   REST: '\uD83C\uDF43',
   SHOP: '\uD83D\uDCB0',
   TREASURE: '\uD83D\uDCE6',
+  FORGE: '\uD83D\uDD28',
 };
 
 const NODE_LABELS: Record<MapNodeType, string> = {
@@ -42,6 +44,7 @@ const NODE_LABELS: Record<MapNodeType, string> = {
   REST: 'Rest Site',
   SHOP: 'Shop',
   TREASURE: 'Treasure',
+  FORGE: 'Forge',
 };
 
 const PULSE_KEYFRAMES = `

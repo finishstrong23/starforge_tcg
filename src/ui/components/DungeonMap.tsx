@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { MapView } from '../../dungeon/components/MapView';
+import MapView from '../../dungeon/components/MapView';
 import type { DungeonRunSave, MapNode } from '../../dungeon/roguelite/types';
 import { findNode, getNextNodes } from '../../dungeon/roguelite/RunManager';
 import { RELICS_BY_ID } from '../../dungeon/roguelite/data/relics';

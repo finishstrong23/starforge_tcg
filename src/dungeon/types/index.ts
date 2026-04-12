@@ -132,7 +132,7 @@ export interface DungeonRelic {
 }
 
 // ─── Map ────────────────────────────────────────────────────
-export type MapNodeType = 'COMBAT' | 'ELITE' | 'BOSS' | 'REST' | 'SHOP' | 'TREASURE';
+export type MapNodeType = 'COMBAT' | 'ELITE' | 'BOSS' | 'REST' | 'SHOP' | 'TREASURE' | 'FORGE';
 
 export interface MapNode {
   id: string;
