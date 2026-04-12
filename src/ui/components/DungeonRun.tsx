@@ -1,141 +1,433 @@
 /**
- * STARFORGE TCG - Dungeon Run Mode
+ * STARFORGE TCG — Roguelite Dungeon Run (Phase Router)
  *
- * Roguelike mode: start with 10 cards, fight 8 bosses, collect
- * card bundles and relics along the way. 1 loss = run over.
+ * Slay-the-Spire-style roguelite mode. Death resets the run.
+ * Over 3 acts (~20 battles), player upgrades cards with stacked
+ * keyword combos until their deck becomes absurdly powerful.
+ *
+ * This component is the top-level router that renders the correct
+ * screen based on the current run phase and manages all transitions.
  */
 
 import React, { useState, useCallback } from 'react';
-import { Race, RaceData } from '../../types/Race';
-import { AIDifficulty } from '../../ai/AIPlayer';
-import { GameProvider, useGame } from '../context/GameContext';
-import { GameBoard } from './GameBoard';
+import type { DungeonRunSave, RewardOffer, MapNodeType } from '../../dungeon/roguelite/types';
 import {
-  createDungeonRun,
-  getCurrentBoss,
-  recordBossFight,
-  chooseCardBundle,
-  chooseRelic,
-  removeCards,
-  skipRemoval,
-  getBundleChoices,
-  getRelicOptions,
-  saveDungeonRun,
-  loadDungeonRun,
-  deleteDungeonRun,
-  saveRunToHistory,
-  loadRunHistory,
-  hasCompletedWithRace,
-} from '../../dungeon/DungeonState';
-import type { DungeonRunSave, DungeonRunRecord } from '../../dungeon/DungeonState';
-import type { DungeonBoss, DungeonRelic as RelicType, CardBundle } from '../../dungeon/DungeonData';
-import { SpaceBackground } from './SpaceBackground';
-import { DungeonBackground, tierToTheme, type DungeonTheme } from './DungeonBackground';
+  createRun,
+  saveRun,
+  loadRun,
+  endRun,
+  abandonRun,
+  advanceToNode,
+  completeCurrentNode,
+  recordBattle,
+  healHp,
+  addCardToDeck,
+  removeCardFromDeck,
+  addRelic,
+  spendGold,
+  earnGold,
+  returnToMap,
+  findNode,
+  calculateGoldReward,
+  transitionAct,
+} from '../../dungeon/roguelite/RunManager';
+import { rehydrateDeck } from '../../dungeon/roguelite/CardSerializer';
+import { getEncounter } from '../../dungeon/roguelite/data/encounters';
+import { getRelicOffers, RELICS_BY_ID } from '../../dungeon/roguelite/data/relics';
+import { getUpgradeOffers } from '../../dungeon/roguelite/CardUpgradeSystem';
+import { globalCardDatabase } from '../../cards/CardDatabase';
+import { AIDifficulty } from '../../ai/AIPlayer';
+import { Race } from '../../types/Race';
+
+import { DungeonHeroSelect } from './DungeonHeroSelect';
+import { DungeonMap } from './DungeonMap';
+import { DungeonBattle } from './DungeonBattle';
+import type { DungeonBattleResult } from './DungeonBattle';
+import { DungeonReward } from './DungeonReward';
+import { DungeonForge } from './DungeonForge';
+import { DungeonShop } from './DungeonShop';
+import { DungeonRest } from './DungeonRest';
+import { DungeonDeckView } from './DungeonDeckView';
+import { DungeonRunSummary } from './DungeonRunSummary';
 
 interface DungeonRunProps {
   onBack: () => void;
 }
 
 export const DungeonRun: React.FC<DungeonRunProps> = ({ onBack }) => {
-  const [save, setSave] = useState<DungeonRunSave | null>(() => loadDungeonRun());
+  const [save, setSave] = useState<DungeonRunSave | null>(() => loadRun());
+  const [showDeck, setShowDeck] = useState(false);
 
-  // ── Faction Selection ──
-  if (!save || !save.isActive) {
-    return <FactionSelect onSelect={(race) => {
-      const run = createDungeonRun(race);
-      saveDungeonRun(run);
-      setSave(run);
-    }} onBack={onBack} />;
+  // ─── Persist helper ──────────────────────────────────────
+  const updateSave = useCallback((updated: DungeonRunSave) => {
+    saveRun(updated);
+    setSave({ ...updated });
+  }, []);
+
+  // ─── No active run → Hero Select ────────────────────────
+  if (!save) {
+    return (
+      <DungeonHeroSelect
+        onSelectHero={(race: Race, heroId: string) => {
+          const run = createRun(race, heroId);
+          updateSave(run);
+        }}
+        onBack={onBack}
+      />
+    );
   }
 
-  const updateSave = (updated: DungeonRunSave) => {
-    saveDungeonRun(updated);
-    setSave(updated);
-  };
+  // ─── Deck overlay (available from MAP, REST, etc.) ──────
+  if (showDeck) {
+    return (
+      <DungeonDeckView
+        save={save}
+        onClose={() => setShowDeck(false)}
+      />
+    );
+  }
 
+  // ─── Phase Router ───────────────────────────────────────
   switch (save.phase) {
-    case 'pre_boss':
+    // ── MAP ──────────────────────────────────────────────
+    case 'MAP':
       return (
-        <PreBossScreen
+        <DungeonMap
           save={save}
-          onFight={() => updateSave({ ...save, phase: 'fighting' })}
+          onSelectNode={(nodeId: string) => {
+            const updated = advanceToNode({ ...save }, nodeId);
+            updateSave(updated);
+          }}
+          onViewDeck={() => setShowDeck(true)}
           onAbandon={() => {
-            saveRunToHistory(save);
-            deleteDungeonRun();
+            endRun(save, 'DEATH');
             setSave(null);
           }}
         />
       );
 
-    case 'fighting': {
-      const boss = getCurrentBoss(save);
-      if (!boss) return null;
+    // ── BATTLE ───────────────────────────────────────────
+    case 'BATTLE': {
+      const node = save.currentNodeId ? findNode(save.map, save.currentNodeId) : null;
+      const nodeType: MapNodeType = node?.type || 'COMBAT';
+      const encounter = getEncounter(save.act, nodeType, save.race);
+
+      const difficultyMap: Record<string, AIDifficulty> = {
+        easy: AIDifficulty.EASY,
+        medium: AIDifficulty.MEDIUM,
+        hard: AIDifficulty.HARD,
+      };
+
+      const playerDeck = rehydrateDeck(save.deck, 'player');
+
       return (
         <DungeonBattle
-          save={save}
-          boss={boss}
-          onBattleEnd={(won, hpRemaining) => {
-            const updated = recordBossFight(save, won, hpRemaining);
-            if (!updated.isActive) {
-              saveRunToHistory(updated);
-              deleteDungeonRun();
+          playerRace={save.race}
+          playerHeroId={save.heroId}
+          playerDeck={playerDeck}
+          opponentRace={encounter.race}
+          difficulty={difficultyMap[encounter.difficulty] || AIDifficulty.MEDIUM}
+          opponentHeroHp={encounter.heroHp}
+          encounterName={encounter.name}
+          onBattleEnd={(result: DungeonBattleResult) => {
+            const updated = { ...save };
+
+            // Record battle
+            recordBattle(updated, {
+              nodeId: save.currentNodeId || '',
+              enemyRace: encounter.race,
+              won: result.won,
+              turns: result.turnCount,
+              hpBefore: save.hp,
+              hpAfter: result.won ? result.playerHealthRemaining : 0,
+            });
+
+            if (!result.won) {
+              // Death
+              updated.phase = 'DEATH';
+              updateSave(updated);
+              return;
             }
+
+            // Update HP from battle result
+            updated.hp = Math.min(save.maxHp, result.playerHealthRemaining);
+
+            // Complete the node
+            completeCurrentNode(updated);
+
+            // Generate rewards
+            const goldReward = calculateGoldReward(save.act, nodeType);
+            earnGold(updated, goldReward);
+
+            // Build reward offer
+            const cardOffers = generateCardOffers(save.race, 3);
+            const upgradeTier = nodeType === 'ELITE' || nodeType === 'BOSS' ? 'RARE' : 'COMMON';
+            const relicOffers = nodeType === 'BOSS'
+              ? getRelicOffers(3, save.relics, save.act >= 2 ? 'RARE' : 'COMMON').map(r => r.id)
+              : [];
+
+            const rewards: RewardOffer = {
+              cardOffers,
+              upgradeOffers: [upgradeTier], // tier indicator for the reward screen
+              relicOffers,
+              goldReward,
+              canRemoveCard: nodeType === 'COMBAT' || nodeType === 'ELITE',
+              sourceNodeType: nodeType,
+            };
+
+            updated.pendingRewards = rewards;
+            updated.phase = 'REWARD';
             updateSave(updated);
           }}
         />
       );
     }
 
-    case 'choose_cards': {
-      const bundles = getBundleChoices(save);
+    // ── REWARD ───────────────────────────────────────────
+    case 'REWARD': {
+      const rewards = save.pendingRewards;
+      if (!rewards) {
+        // No pending rewards, go to map
+        const updated = returnToMap({ ...save });
+        updateSave(updated);
+        return null;
+      }
+
       return (
-        <ChooseCardsScreen
+        <DungeonReward
           save={save}
-          bundles={bundles}
-          onChoose={(bundle) => updateSave(chooseCardBundle(save, bundle))}
+          rewards={rewards}
+          onAddCard={(definitionId: string) => {
+            const updated = { ...save };
+            addCardToDeck(updated, definitionId);
+            updated.pendingRewards = undefined;
+            const next = returnToMap(updated);
+            updateSave(next);
+          }}
+          onUpgradeCard={(runCardId: string, upgradeId: string) => {
+            const updated = { ...save };
+            // Apply upgrade to the serialized card
+            const card = updated.deck.find(c => c.runCardId === runCardId);
+            if (card) {
+              card.upgrades.push({
+                templateId: upgradeId,
+                appliedAtNode: save.currentNodeId || '',
+              });
+            }
+            updated.pendingRewards = undefined;
+            const next = returnToMap(updated);
+            updateSave(next);
+          }}
+          onRemoveCard={(runCardId: string) => {
+            const updated = { ...save };
+            removeCardFromDeck(updated, runCardId);
+            updated.pendingRewards = undefined;
+            const next = returnToMap(updated);
+            updateSave(next);
+          }}
+          onSkip={() => {
+            const updated = { ...save };
+            updated.pendingRewards = undefined;
+            const next = returnToMap(updated);
+            updateSave(next);
+          }}
         />
       );
     }
 
-    case 'choose_relic': {
-      const relics = getRelicOptions(save);
+    // ── SHOP ─────────────────────────────────────────────
+    case 'SHOP':
       return (
-        <ChooseRelicScreen
+        <DungeonShop
           save={save}
-          relics={relics}
-          onChoose={(relic) => updateSave(chooseRelic(save, relic))}
+          onBuyCard={(definitionId: string, cost: number) => {
+            const updated = { ...save };
+            if (spendGold(updated, cost)) {
+              addCardToDeck(updated, definitionId);
+              updateSave(updated);
+            }
+          }}
+          onBuyRelic={(relicId: string, cost: number) => {
+            const updated = { ...save };
+            if (spendGold(updated, cost)) {
+              addRelic(updated, relicId);
+              updateSave(updated);
+            }
+          }}
+          onRemoveCard={(runCardId: string, cost: number) => {
+            const updated = { ...save };
+            if (spendGold(updated, cost)) {
+              removeCardFromDeck(updated, runCardId);
+              updateSave(updated);
+            }
+          }}
+          onLeave={() => {
+            const updated = { ...save };
+            completeCurrentNode(updated);
+            const next = returnToMap(updated);
+            updateSave(next);
+          }}
         />
+      );
+
+    // ── REST ─────────────────────────────────────────────
+    case 'REST':
+      return (
+        <DungeonRest
+          save={save}
+          onHeal={() => {
+            const updated = { ...save };
+            const healAmount = Math.floor(save.maxHp * 0.3);
+            healHp(updated, healAmount);
+            completeCurrentNode(updated);
+            const next = returnToMap(updated);
+            updateSave(next);
+          }}
+          onUpgradeCard={(runCardId: string, upgradeId: string) => {
+            const updated = { ...save };
+            const card = updated.deck.find(c => c.runCardId === runCardId);
+            if (card) {
+              card.upgrades.push({
+                templateId: upgradeId,
+                appliedAtNode: save.currentNodeId || '',
+              });
+            }
+            completeCurrentNode(updated);
+            const next = returnToMap(updated);
+            updateSave(next);
+          }}
+        />
+      );
+
+    // ── FORGE ────────────────────────────────────────────
+    case 'FORGE':
+      return (
+        <DungeonForge
+          save={save}
+          onUpgradeCard={(runCardId: string, upgradeId: string) => {
+            const updated = { ...save };
+            const card = updated.deck.find(c => c.runCardId === runCardId);
+            if (card) {
+              card.upgrades.push({
+                templateId: upgradeId,
+                appliedAtNode: save.currentNodeId || '',
+              });
+            }
+            completeCurrentNode(updated);
+            const next = returnToMap(updated);
+            updateSave(next);
+          }}
+          onSkip={() => {
+            const updated = { ...save };
+            completeCurrentNode(updated);
+            const next = returnToMap(updated);
+            updateSave(next);
+          }}
+        />
+      );
+
+    // ── TREASURE ─────────────────────────────────────────
+    case 'TREASURE': {
+      // Auto-grant a relic + show upgrade choice
+      // For simplicity, show as a reward screen with relic + upgrade
+      const treasureRelics = getRelicOffers(1, save.relics, save.act >= 2 ? 'RARE' : 'COMMON');
+
+      return (
+        <div style={styles.treasureContainer}>
+          <h1 style={styles.treasureTitle}>Treasure Found!</h1>
+          <p style={styles.treasureSubtitle}>A hidden cache of ancient power</p>
+
+          {treasureRelics.length > 0 && (
+            <div style={styles.treasureRelic}>
+              <div style={styles.treasureRelicIcon}>{treasureRelics[0].icon}</div>
+              <div style={styles.treasureRelicName}>{treasureRelics[0].name}</div>
+              <div style={styles.treasureRelicDesc}>{treasureRelics[0].description}</div>
+            </div>
+          )}
+
+          <div style={styles.treasureGold}>+20 Gold</div>
+
+          <button
+            style={styles.treasureBtn}
+            onClick={() => {
+              const updated = { ...save };
+              // Grant relic
+              if (treasureRelics.length > 0) {
+                addRelic(updated, treasureRelics[0].id);
+              }
+              // Grant gold
+              earnGold(updated, 20);
+              completeCurrentNode(updated);
+              const next = returnToMap(updated);
+              updateSave(next);
+            }}
+          >
+            Collect & Continue
+          </button>
+        </div>
       );
     }
 
-    case 'remove_cards':
-      return (
-        <RemoveCardsScreen
-          save={save}
-          onRemove={(ids) => updateSave(removeCards(save, ids))}
-          onSkip={() => updateSave(skipRemoval(save))}
-        />
-      );
+    // ── ACT TRANSITION ───────────────────────────────────
+    case 'ACT_TRANSITION': {
+      const nextAct = save.act;
+      const actNames: Record<number, string> = {
+        1: 'The Abandoned Outpost',
+        2: 'The Corrupted Depths',
+        3: 'The Starforge Core',
+      };
 
-    case 'run_over':
       return (
-        <RunResultScreen
+        <div style={styles.transitionContainer}>
+          <div style={styles.transitionIcon}>
+            {nextAct === 2 ? '\u2694\uFE0F' : nextAct === 3 ? '\uD83D\uDD25' : '\u2728'}
+          </div>
+          <h1 style={styles.transitionTitle}>Act {nextAct}</h1>
+          <h2 style={styles.transitionName}>{actNames[nextAct] || 'Unknown Sector'}</h2>
+          <p style={styles.transitionDesc}>
+            {nextAct === 2
+              ? 'The enemies grow stronger. Elite encounters lurk ahead.'
+              : nextAct === 3
+              ? 'The final act. Only the most powerful decks will survive.'
+              : 'Your journey begins.'}
+          </p>
+          <div style={styles.transitionStats}>
+            HP: {save.hp}/{save.maxHp} | Deck: {save.deck.length} | Relics: {save.relics.length}
+          </div>
+          <button
+            style={styles.transitionBtn}
+            onClick={() => {
+              const updated = { ...save, phase: 'MAP' as const };
+              updateSave(updated);
+            }}
+          >
+            Enter Act {nextAct}
+          </button>
+        </div>
+      );
+    }
+
+    // ── VICTORY ──────────────────────────────────────────
+    case 'VICTORY':
+      return (
+        <DungeonRunSummary
           save={save}
-          won={false}
+          result="VICTORY"
           onContinue={() => {
-            deleteDungeonRun();
+            endRun(save, 'VICTORY');
             setSave(null);
           }}
         />
       );
 
-    case 'run_victory':
+    // ── DEATH ────────────────────────────────────────────
+    case 'DEATH':
       return (
-        <RunResultScreen
+        <DungeonRunSummary
           save={save}
-          won={true}
+          result="DEATH"
           onContinue={() => {
-            deleteDungeonRun();
+            endRun(save, 'DEATH');
             setSave(null);
           }}
         />
@@ -146,906 +438,128 @@ export const DungeonRun: React.FC<DungeonRunProps> = ({ onBack }) => {
   }
 };
 
-// ─── FACTION SELECT ─────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────
 
-const FactionSelect: React.FC<{
-  onSelect: (race: Race) => void;
-  onBack: () => void;
-}> = ({ onSelect, onBack }) => {
-  const [selected, setSelected] = useState<Race>(Race.PYROCLAST);
-  const history = loadRunHistory();
+/**
+ * Generate card offers for post-battle rewards.
+ * Picks random collectible cards from the player's race.
+ */
+function generateCardOffers(race: Race, count: number): string[] {
+  const raceCards = globalCardDatabase.getCardsForRace(race)
+    .filter(c => c.collectible && c.cost <= 6);
+  const shuffled = [...raceCards].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count).map(c => c.id);
+}
 
-  const races = [
-    Race.PYROCLAST, Race.LUMINAR, Race.HIVEMIND, Race.COGSMITHS, Race.VOIDBORN,
-    Race.BIOTITANS, Race.CRYSTALLINE, Race.PHANTOM_CORSAIRS, Race.ASTROMANCERS, Race.CHRONOBOUND,
-  ];
+// ─── Inline Styles for Treasure & Transition ─────────────
 
-  return (
-    <div style={s.container}>
-      <DungeonBackground theme="select" />
-      <div style={s.header}>
-        <button onClick={onBack} style={s.backBtn}>Back</button>
-        <h1 style={s.title}>Dungeon Run</h1>
-        <p style={s.subtitle}>Choose your faction. Start with 10 cards. Defeat 8 bosses.</p>
-      </div>
-
-      <div style={s.factionGrid}>
-        {races.map((race) => {
-          const info = RaceData[race];
-          const completed = hasCompletedWithRace(race);
-          const isSel = selected === race;
-          return (
-            <button
-              key={race}
-              onClick={() => setSelected(race)}
-              style={{
-                ...s.factionCard,
-                borderColor: isSel ? '#ffd700' : 'rgba(255,255,255,0.15)',
-                background: isSel
-                  ? 'linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,215,0,0.05) 100%)'
-                  : 'rgba(255,255,255,0.05)',
-              }}
-            >
-              <div style={s.factionName}>{info.name}</div>
-              <div style={s.factionPlanet}>{info.planet}</div>
-              {completed && <div style={s.completedBadge}>Cleared</div>}
-            </button>
-          );
-        })}
-      </div>
-
-      <div style={s.selectedInfo}>
-        <h3 style={{ color: '#ffd700', margin: '0 0 4px' }}>{RaceData[selected].name}</h3>
-        <p style={{ color: '#aaa', margin: 0, fontSize: 14 }}>{RaceData[selected].playstyle}</p>
-      </div>
-
-      <button onClick={() => onSelect(selected)} style={s.startBtn}>
-        Begin Run
-      </button>
-
-      {history.length > 0 && (
-        <div style={s.historySection}>
-          <h3 style={{ color: '#888', fontSize: 14, margin: '16px 0 8px' }}>Recent Runs</h3>
-          <div style={s.historyList}>
-            {history.slice(0, 5).map((r, i) => (
-              <div key={i} style={s.historyItem}>
-                <span style={{ color: r.won ? '#4ade80' : '#f87171' }}>
-                  {r.won ? 'Victory' : `${r.bossesDefeated}/8`}
-                </span>
-                <span style={{ color: '#888', marginLeft: 8 }}>{RaceData[r.race]?.name}</span>
-                <span style={{ color: '#666', marginLeft: 'auto', fontSize: 12 }}>
-                  {r.relics.length} relics
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ─── PRE-BOSS SCREEN ────────────────────────────────────────────────────────
-
-const PreBossScreen: React.FC<{
-  save: DungeonRunSave;
-  onFight: () => void;
-  onAbandon: () => void;
-}> = ({ save, onFight, onAbandon }) => {
-  const boss = getCurrentBoss(save);
-  if (!boss) return null;
-  const theme = tierToTheme(boss.tier);
-  const actNames: Record<number, string> = { 1: 'The Abandoned Outpost', 2: 'The Corrupted Depths', 3: 'The Starforge Core' };
-  const actName = actNames[boss.tier] || 'Unknown Sector';
-  const tierColors: Record<number, string> = { 1: '#60a5fa', 2: '#c084fc', 3: '#f97316' };
-
-  return (
-    <div style={s.container}>
-      <DungeonBackground theme={theme} />
-      <div style={s.runHeader}>
-        <div style={s.runInfo}>
-          <span style={s.runStat}>HP: <span style={{ color: save.currentHP > 10 ? '#4ade80' : '#f87171' }}>{save.currentHP}</span>/{save.maxHP}</span>
-          <span style={s.runStat}>Boss {save.currentBossIndex + 1}/8</span>
-          <span style={s.runStat}>Deck: {save.deck.length} cards</span>
-          <span style={s.runStat}>Relics: {save.relics.length}</span>
-        </div>
-      </div>
-
-      {save.relics.length > 0 && (
-        <div style={s.relicBar}>
-          {save.relics.map((r) => (
-            <div key={r.id} style={s.relicIcon} title={`${r.name}: ${r.description}`}>
-              {r.icon}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Act banner */}
-      <div style={{
-        ...s.actBanner,
-        borderColor: tierColors[boss.tier] || '#888',
-        background: `linear-gradient(90deg, transparent 0%, ${tierColors[boss.tier]}15 50%, transparent 100%)`,
-      }}>
-        <div style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 2 }}>
-          Act {boss.tier}
-        </div>
-        <div style={{ fontSize: 16, color: tierColors[boss.tier], fontWeight: 'bold' }}>
-          {actName}
-        </div>
-      </div>
-
-      <div style={{
-        ...s.bossCard,
-        borderColor: `${tierColors[boss.tier]}60`,
-        boxShadow: `0 0 30px ${tierColors[boss.tier]}15`,
-      }}>
-        <div style={s.bossIcon}>{boss.icon}</div>
-        <h2 style={s.bossName}>{boss.name}</h2>
-        <div style={s.bossTitle}>{boss.title}</div>
-        <div style={{ ...s.bossTier, color: tierColors[boss.tier] }}>
-          {boss.tier === 3 ? 'FINAL BOSS' : `Tier ${boss.tier} Boss`}
-        </div>
-        <div style={s.bossHP}>HP: {boss.startingHealth}</div>
-        <div style={s.bossHeroPower}>
-          <strong>{boss.heroPowerName}:</strong> {boss.heroPowerDescription}
-        </div>
-        {boss.specialRule && (
-          <div style={s.bossSpecial}>Special: {boss.specialRule}</div>
-        )}
-        <div style={s.bossQuote}>{boss.introQuote}</div>
-      </div>
-
-      <div style={s.actionRow}>
-        <button onClick={onFight} style={s.fightBtn}>Fight!</button>
-        <button onClick={onAbandon} style={s.abandonBtn}>Abandon Run</button>
-      </div>
-    </div>
-  );
-};
-
-// ─── DUNGEON BATTLE ─────────────────────────────────────────────────────────
-
-const DungeonBattleInner: React.FC<{
-  onBattleEnd: (won: boolean, hpRemaining: number) => void;
-}> = ({ onBattleEnd }) => {
-  const { gameState, playerState, isGameOver, turnNumber } = useGame();
-  const resultSentRef = React.useRef(false);
-
-  const handleGameEnd = useCallback(() => {
-    if (resultSentRef.current) return;
-    if (!isGameOver || !gameState || !playerState) return;
-    resultSentRef.current = true;
-
-    const won = gameState.winnerId === 'player';
-    onBattleEnd(won, Math.max(0, playerState.hero.currentHealth));
-  }, [isGameOver, gameState, playerState, onBattleEnd]);
-
-  return <GameBoard onBackToMenu={handleGameEnd} isCampaign={true} />;
-};
-
-const DungeonBattle: React.FC<{
-  save: DungeonRunSave;
-  boss: DungeonBoss;
-  onBattleEnd: (won: boolean, hpRemaining: number) => void;
-}> = ({ save, boss, onBattleEnd }) => {
-  // Map boss tier to AI difficulty
-  const diffMap: Record<number, AIDifficulty> = {
-    1: AIDifficulty.EASY,
-    2: AIDifficulty.MEDIUM,
-    3: AIDifficulty.HARD,
-  };
-
-  return (
-    <GameProvider
-      playerRace={save.race}
-      aiDifficulty={diffMap[boss.tier] || AIDifficulty.MEDIUM}
-      opponentRace={boss.race}
-      customDeckCardIds={save.deck}
-    >
-      <DungeonBattleInner onBattleEnd={onBattleEnd} />
-    </GameProvider>
-  );
-};
-
-// ─── CHOOSE CARDS SCREEN ────────────────────────────────────────────────────
-
-const ChooseCardsScreen: React.FC<{
-  save: DungeonRunSave;
-  bundles: CardBundle[];
-  onChoose: (bundle: CardBundle) => void;
-}> = ({ save, bundles, onChoose }) => {
-  const boss = getCurrentBoss(save);
-  const theme: DungeonTheme = boss ? tierToTheme(boss.tier) : 'outpost';
-
-  return (
-    <div style={s.container}>
-      <DungeonBackground theme={theme} />
-      <RunStatus save={save} />
-      <h2 style={s.choiceTitle}>Victory! Choose Your Reward</h2>
-      <p style={s.choiceSubtitle}>Add 3 cards to your deck ({save.deck.length} cards currently)</p>
-
-      <div style={s.bundleGrid}>
-        {bundles.map((bundle) => (
-          <button
-            key={bundle.id}
-            onClick={() => onChoose(bundle)}
-            style={s.bundleCard}
-          >
-            <h3 style={s.bundleName}>{bundle.name}</h3>
-            <p style={s.bundleDesc}>{bundle.description}</p>
-            <div style={s.bundleCards}>
-              {bundle.cardIds.map((id, i) => (
-                <div key={i} style={s.bundleCardItem}>{id.replace(/_/g, ' ')}</div>
-              ))}
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-// ─── CHOOSE RELIC SCREEN ────────────────────────────────────────────────────
-
-const ChooseRelicScreen: React.FC<{
-  save: DungeonRunSave;
-  relics: RelicType[];
-  onChoose: (relic: RelicType) => void;
-}> = ({ save, relics, onChoose }) => {
-  const boss = getCurrentBoss(save);
-  const relicTheme: DungeonTheme = boss ? tierToTheme(boss.tier) : 'outpost';
-
-  return (
-    <div style={s.container}>
-      <DungeonBackground theme={relicTheme} />
-      <RunStatus save={save} />
-      <h2 style={s.choiceTitle}>Ancient Relic Found</h2>
-      <p style={s.choiceSubtitle}>Permanent passive bonus for the rest of this run</p>
-
-      <div style={s.relicGrid}>
-        {relics.map((relic) => {
-          const tierColor = relic.tier === 'legendary' ? '#ffd700'
-            : relic.tier === 'rare' ? '#60a5fa' : '#888';
-          return (
-            <button
-              key={relic.id}
-              onClick={() => onChoose(relic)}
-              style={{
-                ...s.relicCard,
-                borderColor: tierColor,
-                boxShadow: relic.tier === 'legendary' ? `0 0 20px ${tierColor}30` : 'none',
-              }}
-            >
-              <div style={s.relicBigIcon}>{relic.icon}</div>
-              <h3 style={s.relicName}>{relic.name}</h3>
-              <div style={{ ...s.relicTier, color: tierColor }}>{relic.tier}</div>
-              <p style={s.relicDesc}>{relic.description}</p>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-// ─── REMOVE CARDS SCREEN ────────────────────────────────────────────────────
-
-const RemoveCardsScreen: React.FC<{
-  save: DungeonRunSave;
-  onRemove: (ids: string[]) => void;
-  onSkip: () => void;
-}> = ({ save, onRemove, onSkip }) => {
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const maxRemove = 2;
-
-  const toggle = (id: string) => {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else if (next.size < maxRemove) {
-        next.add(id);
-      }
-      return next;
-    });
-  };
-
-  // Deduplicate for display (show count)
-  const cardCounts = new Map<string, number>();
-  for (const id of save.deck) {
-    cardCounts.set(id, (cardCounts.get(id) || 0) + 1);
-  }
-
-  const removeTheme: DungeonTheme = 'depths';
-  return (
-    <div style={s.container}>
-      <DungeonBackground theme={removeTheme} />
-      <RunStatus save={save} />
-      <h2 style={s.choiceTitle}>Purge Your Deck</h2>
-      <p style={s.choiceSubtitle}>
-        Remove up to {maxRemove} cards from your deck to streamline it
-        ({selected.size}/{maxRemove} selected)
-      </p>
-
-      <div style={s.removeGrid}>
-        {Array.from(cardCounts.entries()).map(([id, count]) => {
-          const isSel = selected.has(id);
-          return (
-            <button
-              key={id}
-              onClick={() => toggle(id)}
-              style={{
-                ...s.removeCard,
-                borderColor: isSel ? '#f87171' : 'rgba(255,255,255,0.15)',
-                background: isSel ? 'rgba(248,113,113,0.15)' : 'rgba(255,255,255,0.05)',
-              }}
-            >
-              <span>{id.replace(/_/g, ' ')}</span>
-              {count > 1 && <span style={{ color: '#888', fontSize: 12 }}>x{count}</span>}
-            </button>
-          );
-        })}
-      </div>
-
-      <div style={s.actionRow}>
-        {selected.size > 0 && (
-          <button
-            onClick={() => onRemove(Array.from(selected))}
-            style={s.removeBtn}
-          >
-            Remove {selected.size} Card{selected.size > 1 ? 's' : ''}
-          </button>
-        )}
-        <button onClick={onSkip} style={s.skipBtn}>Skip</button>
-      </div>
-    </div>
-  );
-};
-
-// ─── RUN RESULT SCREEN ──────────────────────────────────────────────────────
-
-const RunResultScreen: React.FC<{
-  save: DungeonRunSave;
-  won: boolean;
-  onContinue: () => void;
-}> = ({ save, won }) => {
-  // onContinue triggers deletion + reset to faction select
-  return (
-    <div style={s.container}>
-      <DungeonBackground theme={won ? 'victory' : 'defeat'} />
-      <div style={s.resultScreen}>
-        <div style={s.resultIcon}>{won ? '🏆' : '💀'}</div>
-        <h1 style={{ ...s.resultTitle, color: won ? '#ffd700' : '#f87171' }}>
-          {won ? 'DUNGEON CLEARED!' : 'RUN OVER'}
-        </h1>
-        <p style={s.resultSubtitle}>
-          {won
-            ? `You defeated all 8 bosses as ${RaceData[save.race].name}!`
-            : `Defeated by boss ${save.currentBossIndex + 1} of 8.`}
-        </p>
-
-        <div style={s.resultStats}>
-          <div style={s.resultStat}>
-            <span style={s.statLabel}>Bosses Defeated</span>
-            <span style={s.statValue}>{save.bossesDefeated}/8</span>
-          </div>
-          <div style={s.resultStat}>
-            <span style={s.statLabel}>Final Deck Size</span>
-            <span style={s.statValue}>{save.deck.length}</span>
-          </div>
-          <div style={s.resultStat}>
-            <span style={s.statLabel}>Relics Collected</span>
-            <span style={s.statValue}>{save.relics.length}</span>
-          </div>
-        </div>
-
-        {save.relics.length > 0 && (
-          <div style={s.resultRelics}>
-            {save.relics.map(r => (
-              <div key={r.id} style={s.resultRelic}>
-                <span>{r.icon}</span>
-                <span style={{ marginLeft: 6 }}>{r.name}</span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <button onClick={() => {
-          deleteDungeonRun();
-          window.location.reload();
-        }} style={s.startBtn}>
-          {won ? 'Play Again' : 'Try Again'}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// ─── RUN STATUS BAR ─────────────────────────────────────────────────────────
-
-const RunStatus: React.FC<{ save: DungeonRunSave }> = ({ save }) => (
-  <div style={s.runHeader}>
-    <div style={s.runInfo}>
-      <span style={s.runStat}>
-        HP: <span style={{ color: save.currentHP > 10 ? '#4ade80' : '#f87171' }}>
-          {save.currentHP}
-        </span>/{save.maxHP}
-      </span>
-      <span style={s.runStat}>Boss {save.currentBossIndex + 1}/8</span>
-      <span style={s.runStat}>Deck: {save.deck.length}</span>
-    </div>
-    {save.relics.length > 0 && (
-      <div style={s.relicBar}>
-        {save.relics.map(r => (
-          <div key={r.id} style={s.relicIcon} title={`${r.name}: ${r.description}`}>
-            {r.icon}
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-);
-
-// ─── STYLES ─────────────────────────────────────────────────────────────────
-
-const s: Record<string, React.CSSProperties> = {
-  container: {
-    width: '100%',
-    height: '100%',
-    background: '#040410',
-    color: '#fff',
+const styles: Record<string, React.CSSProperties> = {
+  // Treasure
+  treasureContainer: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    overflow: 'auto',
-    padding: 20,
-    position: 'relative',
-  },
-  header: {
-    textAlign: 'center',
-    marginBottom: 20,
-    position: 'relative',
-    zIndex: 2,
-  },
-  title: {
-    fontSize: 32,
-    color: '#ffd700',
-    margin: '0 0 4px',
-    textShadow: '0 2px 10px rgba(255,215,0,0.3)',
-  },
-  subtitle: {
-    color: '#aaa',
-    fontSize: 14,
-    margin: 0,
-  },
-  backBtn: {
-    background: 'rgba(255,255,255,0.1)',
-    border: '1px solid rgba(255,255,255,0.2)',
-    color: '#ccc',
-    padding: '6px 16px',
-    borderRadius: 6,
-    cursor: 'pointer',
-    fontSize: 13,
-    marginBottom: 8,
-  },
-  factionGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-    gap: 10,
-    width: '100%',
-    maxWidth: 700,
-    marginBottom: 16,
-    position: 'relative',
-    zIndex: 2,
-  },
-  factionCard: {
-    padding: '12px 8px',
-    borderRadius: 8,
-    border: '2px solid rgba(255,255,255,0.15)',
-    cursor: 'pointer',
-    textAlign: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    padding: '20px',
+    background: 'linear-gradient(135deg, #1a1a0a 0%, #2a2a1a 50%, #1a1a2e 100%)',
     color: '#fff',
-    transition: 'all 0.2s',
-    position: 'relative',
   },
-  factionName: {
-    fontSize: 14,
-    fontWeight: 'bold',
+  treasureTitle: {
+    fontSize: '2rem',
+    color: '#ffd700',
+    margin: '10px 0',
   },
-  factionPlanet: {
-    fontSize: 11,
-    color: '#888',
-    marginTop: 2,
+  treasureSubtitle: {
+    color: '#aab',
+    marginBottom: '24px',
   },
-  completedBadge: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    background: '#4ade80',
-    color: '#000',
-    fontSize: 9,
-    padding: '1px 5px',
-    borderRadius: 3,
-    fontWeight: 'bold',
-  },
-  selectedInfo: {
+  treasureRelic: {
+    background: 'rgba(255,215,0,0.1)',
+    border: '2px solid rgba(255,215,0,0.4)',
+    borderRadius: '12px',
+    padding: '24px',
     textAlign: 'center',
-    marginBottom: 16,
-    position: 'relative',
-    zIndex: 2,
+    marginBottom: '16px',
+    maxWidth: '300px',
   },
-  startBtn: {
+  treasureRelicIcon: {
+    fontSize: '3rem',
+    marginBottom: '8px',
+  },
+  treasureRelicName: {
+    fontSize: '1.2rem',
+    fontWeight: 'bold',
+    color: '#ffd700',
+    marginBottom: '4px',
+  },
+  treasureRelicDesc: {
+    color: '#ccc',
+    fontSize: '0.9rem',
+  },
+  treasureGold: {
+    fontSize: '1.2rem',
+    color: '#ffd700',
+    marginBottom: '20px',
+  },
+  treasureBtn: {
+    padding: '12px 30px',
     background: 'linear-gradient(135deg, #ffd700 0%, #ff8c00 100%)',
+    border: 'none',
+    borderRadius: '8px',
     color: '#000',
-    border: 'none',
-    padding: '12px 40px',
-    borderRadius: 8,
-    fontSize: 16,
+    fontSize: '1rem',
     fontWeight: 'bold',
     cursor: 'pointer',
-    position: 'relative',
-    zIndex: 2,
   },
-  historySection: {
-    width: '100%',
-    maxWidth: 500,
-    marginTop: 8,
-    position: 'relative',
-    zIndex: 2,
-  },
-  historyList: {
+
+  // Act Transition
+  transitionContainer: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 4,
-  },
-  historyItem: {
-    display: 'flex',
     alignItems: 'center',
-    padding: '4px 8px',
-    background: 'rgba(255,255,255,0.03)',
-    borderRadius: 4,
-    fontSize: 13,
-  },
-
-  // Run header
-  runHeader: {
-    width: '100%',
-    maxWidth: 700,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-    marginBottom: 16,
-    position: 'relative',
-    zIndex: 2,
-  },
-  runInfo: {
-    display: 'flex',
-    gap: 16,
     justifyContent: 'center',
-    flexWrap: 'wrap',
-  },
-  runStat: {
-    fontSize: 14,
-    color: '#ccc',
-    background: 'rgba(255,255,255,0.05)',
-    padding: '4px 12px',
-    borderRadius: 4,
-  },
-  relicBar: {
-    display: 'flex',
-    gap: 6,
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-  },
-  relicIcon: {
-    fontSize: 20,
-    cursor: 'help',
-    background: 'rgba(255,215,0,0.1)',
-    borderRadius: 4,
-    padding: '2px 6px',
-  },
-
-  // Act banner
-  actBanner: {
-    textAlign: 'center',
-    padding: '10px 24px',
-    borderTop: '1px solid',
-    borderBottom: '1px solid',
-    borderColor: '#888',
-    marginBottom: 16,
-    position: 'relative',
-    zIndex: 2,
-    width: '100%',
-    maxWidth: 400,
-  },
-
-  // Boss card
-  bossCard: {
-    background: 'rgba(255,255,255,0.05)',
-    border: '2px solid rgba(255,215,0,0.3)',
-    borderRadius: 12,
-    padding: 24,
-    textAlign: 'center',
-    maxWidth: 400,
-    width: '100%',
-    marginBottom: 20,
-    position: 'relative',
-    zIndex: 2,
-  },
-  bossIcon: {
-    fontSize: 48,
-    marginBottom: 8,
-  },
-  bossName: {
-    fontSize: 24,
-    color: '#ffd700',
-    margin: '0 0 2px',
-  },
-  bossTitle: {
-    fontSize: 14,
-    color: '#aaa',
-    fontStyle: 'italic',
-    marginBottom: 8,
-  },
-  bossTier: {
-    fontSize: 12,
-    color: '#888',
-    marginBottom: 4,
-  },
-  bossHP: {
-    fontSize: 16,
-    color: '#f87171',
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  bossHeroPower: {
-    fontSize: 13,
-    color: '#60a5fa',
-    marginBottom: 6,
-  },
-  bossSpecial: {
-    fontSize: 12,
-    color: '#fbbf24',
-    fontStyle: 'italic',
-    marginBottom: 8,
-  },
-  bossQuote: {
-    fontSize: 13,
-    color: '#888',
-    fontStyle: 'italic',
-  },
-
-  // Actions
-  actionRow: {
-    display: 'flex',
-    gap: 12,
-    justifyContent: 'center',
-    position: 'relative',
-    zIndex: 2,
-  },
-  fightBtn: {
-    background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)',
+    minHeight: '100vh',
+    padding: '20px',
+    background: 'linear-gradient(135deg, #0a0a2e 0%, #1a1a3e 50%, #0a0a2e 100%)',
     color: '#fff',
-    border: 'none',
-    padding: '12px 40px',
-    borderRadius: 8,
-    fontSize: 16,
-    fontWeight: 'bold',
-    cursor: 'pointer',
   },
-  abandonBtn: {
-    background: 'rgba(255,255,255,0.1)',
-    color: '#888',
-    border: '1px solid rgba(255,255,255,0.15)',
-    padding: '12px 20px',
-    borderRadius: 8,
-    fontSize: 14,
-    cursor: 'pointer',
+  transitionIcon: {
+    fontSize: '4rem',
+    marginBottom: '12px',
   },
-
-  // Choose cards / relics
-  choiceTitle: {
-    fontSize: 24,
+  transitionTitle: {
+    fontSize: '2.5rem',
     color: '#ffd700',
     margin: '0 0 4px',
+  },
+  transitionName: {
+    fontSize: '1.3rem',
+    color: '#7df',
+    margin: '0 0 16px',
+    fontWeight: 'normal',
+  },
+  transitionDesc: {
+    color: '#aab',
+    fontSize: '1rem',
     textAlign: 'center',
-    position: 'relative',
-    zIndex: 2,
+    maxWidth: '400px',
+    marginBottom: '20px',
+    lineHeight: '1.4',
   },
-  choiceSubtitle: {
-    color: '#aaa',
-    fontSize: 14,
-    margin: '0 0 20px',
-    textAlign: 'center',
-    position: 'relative',
-    zIndex: 2,
-  },
-  bundleGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: 12,
-    width: '100%',
-    maxWidth: 700,
-    position: 'relative',
-    zIndex: 2,
-  },
-  bundleCard: {
-    background: 'rgba(255,255,255,0.05)',
-    border: '2px solid rgba(96,165,250,0.3)',
-    borderRadius: 10,
-    padding: 16,
-    cursor: 'pointer',
-    textAlign: 'center',
-    color: '#fff',
-    transition: 'all 0.2s',
-  },
-  bundleName: {
-    fontSize: 16,
-    color: '#60a5fa',
-    margin: '0 0 4px',
-  },
-  bundleDesc: {
-    fontSize: 12,
-    color: '#aaa',
-    margin: '0 0 10px',
-  },
-  bundleCards: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 3,
-  },
-  bundleCardItem: {
-    fontSize: 11,
-    color: '#ccc',
-    background: 'rgba(255,255,255,0.05)',
-    borderRadius: 3,
-    padding: '2px 6px',
-    textTransform: 'capitalize',
-  },
-
-  // Relics
-  relicGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 12,
-    width: '100%',
-    maxWidth: 600,
-    position: 'relative',
-    zIndex: 2,
-  },
-  relicCard: {
-    background: 'rgba(255,255,255,0.05)',
-    border: '2px solid #888',
-    borderRadius: 10,
-    padding: 16,
-    cursor: 'pointer',
-    textAlign: 'center',
-    color: '#fff',
-    transition: 'all 0.2s',
-  },
-  relicBigIcon: {
-    fontSize: 36,
-    marginBottom: 6,
-  },
-  relicName: {
-    fontSize: 15,
-    color: '#ffd700',
-    margin: '0 0 2px',
-  },
-  relicTier: {
-    fontSize: 11,
+  transitionStats: {
     color: '#888',
-    textTransform: 'uppercase',
-    marginBottom: 6,
+    fontSize: '0.9rem',
+    marginBottom: '24px',
   },
-  relicDesc: {
-    fontSize: 12,
-    color: '#ccc',
-    margin: 0,
-  },
-
-  // Remove cards
-  removeGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-    gap: 6,
-    width: '100%',
-    maxWidth: 700,
-    marginBottom: 16,
-    position: 'relative',
-    zIndex: 2,
-  },
-  removeCard: {
-    padding: '8px 12px',
-    borderRadius: 6,
-    border: '1px solid rgba(255,255,255,0.15)',
-    cursor: 'pointer',
-    color: '#fff',
-    fontSize: 13,
-    textTransform: 'capitalize',
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    background: 'rgba(255,255,255,0.05)',
-  },
-  removeBtn: {
-    background: 'linear-gradient(135deg, #f87171 0%, #b91c1c 100%)',
-    color: '#fff',
+  transitionBtn: {
+    padding: '12px 40px',
+    background: 'linear-gradient(135deg, #ffd700 0%, #ff8c00 100%)',
     border: 'none',
-    padding: '10px 24px',
-    borderRadius: 8,
-    fontSize: 14,
+    borderRadius: '8px',
+    color: '#000',
+    fontSize: '1rem',
     fontWeight: 'bold',
     cursor: 'pointer',
-  },
-  skipBtn: {
-    background: 'rgba(255,255,255,0.1)',
-    color: '#ccc',
-    border: '1px solid rgba(255,255,255,0.2)',
-    padding: '10px 24px',
-    borderRadius: 8,
-    fontSize: 14,
-    cursor: 'pointer',
-  },
-
-  // Result screen
-  resultScreen: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    textAlign: 'center',
-    position: 'relative',
-    zIndex: 2,
-  },
-  resultIcon: {
-    fontSize: 64,
-    marginBottom: 12,
-  },
-  resultTitle: {
-    fontSize: 36,
-    margin: '0 0 8px',
-    textShadow: '0 2px 15px rgba(255,215,0,0.3)',
-  },
-  resultSubtitle: {
-    fontSize: 16,
-    color: '#aaa',
-    margin: '0 0 24px',
-  },
-  resultStats: {
-    display: 'flex',
-    gap: 24,
-    marginBottom: 20,
-  },
-  resultStat: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#888',
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ffd700',
-  },
-  resultRelics: {
-    display: 'flex',
-    gap: 8,
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    marginBottom: 20,
-  },
-  resultRelic: {
-    background: 'rgba(255,215,0,0.1)',
-    border: '1px solid rgba(255,215,0,0.3)',
-    borderRadius: 6,
-    padding: '4px 10px',
-    fontSize: 13,
-    color: '#ffd700',
   },
 };
