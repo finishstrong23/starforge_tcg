@@ -123,12 +123,24 @@ export function saveRun(save: DungeonRunSave): void {
 
 /**
  * Load the active run from localStorage.
+ * Sanitizes transient phases (BATTLE) that can't be resumed after reload.
  */
 export function loadRun(): DungeonRunSave | null {
   try {
     const data = loadSaveData();
     if (!data.active || data.active.version !== 1) return null;
-    return data.active;
+
+    const run = data.active;
+
+    // A battle in progress can't be resumed after page reload — send
+    // the player back to the map so they can re-enter the node (or pick
+    // a different one). Their HP/gold/deck state is preserved.
+    if (run.phase === 'BATTLE') {
+      run.phase = 'MAP';
+      run.pendingRewards = undefined;
+    }
+
+    return run;
   } catch {
     return null;
   }
