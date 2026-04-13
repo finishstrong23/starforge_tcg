@@ -38,6 +38,7 @@ import { getCardVoiceline, VoiceEvent, getInteractionLine } from '../../lore/Car
 import { loadFactionWars, recordWinContribution, saveFactionWars } from '../../events/FactionWars';
 import { AdaptOption } from '../../types/Keywords';
 import type { PendingAdaptChoice } from '../../engine/EffectResolver';
+import { rehydrateDeck } from '../../dungeon/roguelite/CardSerializer';
 
 type TargetingMode = 'none' | 'attack' | 'spell' | 'heropower';
 
@@ -153,6 +154,8 @@ interface GameProviderProps {
   customDeckCardIds?: string[];
   /** Pre-built CardInstance[] deck (for roguelite dungeon run with upgrades) */
   customDeckInstances?: CardInstance[];
+  /** Serialized run deck — rehydrated inside GameProvider after DB init */
+  customSerializedDeck?: import('../../dungeon/roguelite/types').SerializedRunCard[];
   /** Player hero ID override (used with customDeckInstances) */
   playerHeroId?: string;
   /** Override opponent hero HP (for roguelite scaling) */
@@ -281,6 +284,7 @@ export const GameProvider: React.FC<GameProviderProps> = ({
   opponentRace: forcedOpponentRace,
   customDeckCardIds,
   customDeckInstances,
+  customSerializedDeck,
   playerHeroId,
   opponentHeroHp,
 }) => {
@@ -704,18 +708,24 @@ export const GameProvider: React.FC<GameProviderProps> = ({
     try {
       // Clear previous database and reinitialize
       globalCardDatabase.clear();
-      if (customDeckCardIds || customDeckInstances) {
+      if (customDeckCardIds || customDeckInstances || customSerializedDeck) {
         initializeFullDatabase();
       } else {
         initializeSampleDatabase();
       }
 
       // Create player deck:
-      // 1. Pre-built instances (roguelite with upgrades) — use directly
-      // 2. Custom card IDs (deckbuilder) — build from IDs
-      // 3. Default — auto-generate sample deck
+      // 1. Serialized roguelite deck — rehydrate here (after DB init) so patched defs get registered
+      // 2. Pre-built instances (roguelite with upgrades) — use directly
+      // 3. Custom card IDs (deckbuilder) — build from IDs
+      // 4. Default — auto-generate sample deck
       let playerDeck: { cards: CardInstance[]; heroId: string };
-      if (customDeckInstances && playerHeroId) {
+      if (customSerializedDeck && playerHeroId) {
+        playerDeck = {
+          cards: rehydrateDeck(customSerializedDeck, 'player'),
+          heroId: playerHeroId,
+        };
+      } else if (customDeckInstances && playerHeroId) {
         playerDeck = {
           cards: customDeckInstances,
           heroId: playerHeroId,

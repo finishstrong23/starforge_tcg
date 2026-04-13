@@ -13,7 +13,7 @@ import { GameBoard } from './GameBoard';
 import { GameProvider, useGame } from '../context/GameContext';
 import { Race } from '../../types/Race';
 import type { AIDifficulty } from '../../ai/AIPlayer';
-import type { CardInstance } from '../../types/Card';
+import type { SerializedRunCard } from '../../dungeon/roguelite/types';
 
 export interface DungeonBattleResult {
   won: boolean;
@@ -26,8 +26,8 @@ interface DungeonBattleProps {
   playerRace: Race;
   /** Player's hero ID (from HeroDefinitions) */
   playerHeroId: string;
-  /** Pre-built deck with upgrades applied */
-  playerDeck: CardInstance[];
+  /** Serialized run deck — rehydrated inside GameProvider */
+  playerDeck: SerializedRunCard[];
   /** Opponent race (for AI deck) */
   opponentRace: Race;
   /** AI difficulty level */
@@ -87,7 +87,7 @@ export const DungeonBattle: React.FC<DungeonBattleProps> = ({
       playerRace={playerRace}
       aiDifficulty={difficulty}
       opponentRace={opponentRace}
-      customDeckInstances={playerDeck}
+      customSerializedDeck={playerDeck}
       playerHeroId={playerHeroId}
       opponentHeroHp={opponentHeroHp}
     >

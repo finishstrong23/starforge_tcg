@@ -29,9 +29,7 @@ import {
   returnToMap,
   findNode,
   calculateGoldReward,
-  transitionAct,
 } from '../../dungeon/roguelite/RunManager';
-import { rehydrateDeck } from '../../dungeon/roguelite/CardSerializer';
 import { getEncounter } from '../../dungeon/roguelite/data/encounters';
 import { getRelicOffers, RELICS_BY_ID } from '../../dungeon/roguelite/data/relics';
 import { getUpgradeOffers } from '../../dungeon/roguelite/CardUpgradeSystem';
@@ -118,13 +116,11 @@ export const DungeonRun: React.FC<DungeonRunProps> = ({ onBack }) => {
         hard: AIDifficulty.HARD,
       };
 
-      const playerDeck = rehydrateDeck(save.deck, 'player');
-
       return (
         <DungeonBattle
           playerRace={save.race}
           playerHeroId={save.heroId}
-          playerDeck={playerDeck}
+          playerDeck={save.deck}
           opponentRace={encounter.race}
           difficulty={difficultyMap[encounter.difficulty] || AIDifficulty.MEDIUM}
           opponentHeroHp={encounter.heroHp}
