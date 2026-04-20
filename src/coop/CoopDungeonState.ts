@@ -6,7 +6,7 @@
  */
 
 import { Race } from '../types/Race';
-import type { DungeonBoss, DungeonRelic, CardBundle } from '../dungeon/DungeonData';
+import type { DungeonBoss, DungeonRelic, CardBundle } from './DungeonSourceData';
 import type { CoopMap, MapNode, CoopEvent, CoopEventEffect, ShopItem } from './CoopDungeonData';
 import {
   generateCoopMap,

@@ -33,7 +33,7 @@ import { LeaderboardScreen } from './components/LeaderboardScreen';
 import { MetaDashboard } from './components/MetaDashboard';
 import { SpectateScreen } from './components/SpectateScreen';
 import { ScreenTransition } from './components/ScreenTransition';
-import { DungeonRun } from './components/DungeonRun';
+import { DungeonRoot } from '../dungeon';
 import { CoopDungeon } from './components/CoopDungeon';
 import { PuzzleMode } from './components/PuzzleMode';
 import { recordGameResult } from '../stats/GameStats';
@@ -538,7 +538,7 @@ export const App: React.FC = () => {
       {/* Dungeon Run */}
       {screen === 'dungeon-run' && (
         <ScreenTransition screenKey="dungeon-run">
-          <DungeonRun onBack={() => setScreen('menu')} />
+          <DungeonRoot onBack={() => setScreen('menu')} />
         </ScreenTransition>
       )}
 

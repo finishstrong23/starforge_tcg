@@ -33,8 +33,8 @@ import {
 import type { CoopRunState, CoopPhase } from '../../coop/CoopDungeonState';
 import type { MapNode, CoopEvent, ShopItem } from '../../coop/CoopDungeonData';
 import { getTeamSynergy, COOP_RELICS } from '../../coop/CoopDungeonData';
-import { getCardBundleChoices, getRelicChoices } from '../../dungeon/DungeonData';
-import type { DungeonBoss, DungeonRelic, CardBundle } from '../../dungeon/DungeonData';
+import { getCardBundleChoices, getRelicChoices } from '../../coop/DungeonSourceData';
+import type { DungeonBoss, DungeonRelic, CardBundle } from '../../coop/DungeonSourceData';
 
 interface CoopDungeonProps {
   onBack: () => void;
