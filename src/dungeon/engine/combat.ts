@@ -1,4 +1,4 @@
-import type { CardInstance, CombatState, EnemyDefinition, RelicDefinition, StatusEffect, StatusEffectType } from '../types';
+import type { CardInstance, CombatPhase, CombatState, EnemyDefinition, RelicDefinition, StatusEffect, StatusEffectType } from '../types';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -305,7 +305,7 @@ export function attackWithMinion(state: CombatState, attackerId: string, targetI
     const counterDmg = calcDamage(target.attack ?? 0, target.statusEffects, attacker.statusEffects);
 
     // Apply damage to enemy minion
-    const targetResult = applyShieldedDamage(target.currentShield ?? 0, target.currentHealth ?? target.health ?? 1, dmg);
+    const targetResult = applyShieldedDamage(0, target.currentHealth ?? target.health ?? 1, dmg);
     // Apply counter damage to attacker
     const attackerResult = applyShieldedDamage(0, attacker.currentHealth ?? attacker.health ?? 1, counterDmg);
 
@@ -370,7 +370,7 @@ function processDeaths(state: CombatState): CombatState {
 // ─── endPlayerTurn ───────────────────────────────────────────────────────────
 
 export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): CombatState {
-  let s = { ...state, phase: 'enemy_turn' as const };
+  let s: CombatState = { ...state, phase: 'enemy_turn' as CombatPhase };
   void relics; // relic effects applied by relicEffects.ts
 
   // Discard hand
