@@ -490,12 +490,258 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   },
 ];
 
+// ─── Luminar (40 cards) ──────────────────────────────────────────────────────
+
+const LUMINAR_CARDS: CardDefinition[] = [
+  {
+    id: 'L-001', name: 'Light Jab', faction: 'Luminar', type: 'Attack', cost: 1,
+    keywords: [], rarity: 'Common',
+    cardText: 'Deal 6 damage.',
+    upgradeText: 'Deal 9 damage.',
+  },
+  {
+    id: 'L-002', name: 'Glow Ward', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: [], rarity: 'Common',
+    cardText: 'Gain 5 Block.',
+    upgradeText: 'Gain 7 Block. Gain 1 Lumen on a Channel card in hand.',
+  },
+  {
+    id: 'L-003', name: 'Meditate', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: [], rarity: 'Common',
+    cardText: 'Draw 2 cards. Gain 1 Lumen on each Channel card in hand.',
+    upgradeText: 'Draw 2 cards. Gain 2 Lumens on each Channel card in hand.',
+  },
+  {
+    id: 'L-004', name: 'Prism Strike', faction: 'Luminar', type: 'Attack', cost: 1,
+    keywords: ['ILLUMINATE'], rarity: 'Common',
+    cardText: 'Channel. Deal 6 damage. Release: +2 damage per Lumen.',
+    upgradeText: 'Channel. Deal 8 damage. Release: +3 damage per Lumen.',
+  },
+  {
+    id: 'L-005', name: 'Radiance', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: ['ILLUMINATE'], rarity: 'Common',
+    cardText: 'Gain 2 Lumens on the leftmost Channel card in hand.',
+    upgradeText: 'Gain 2 Lumens on every Channel card in hand.',
+  },
+  {
+    id: 'L-006', name: 'Halo Ward', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: ['BARRIER'], rarity: 'Common',
+    cardText: 'Channel. Gain 6 Block. Release: +2 Block per Lumen.',
+    upgradeText: 'Channel. Gain 8 Block. Release: +3 Block per Lumen.',
+  },
+  {
+    id: 'L-007', name: 'Beam', faction: 'Luminar', type: 'Attack', cost: 1,
+    keywords: [], rarity: 'Common',
+    cardText: 'Deal 4 damage to all enemies.',
+    upgradeText: 'Deal 5 damage to all enemies.',
+  },
+  {
+    id: 'L-008', name: 'Chant', faction: 'Luminar', type: 'Skill', cost: 0,
+    keywords: [], rarity: 'Common',
+    cardText: 'The next Channel card you play this turn is treated as having +2 Lumens.',
+    upgradeText: 'The next Channel card you play this turn is treated as having +3 Lumens.',
+  },
+  {
+    id: 'L-009', name: 'Sunrise', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: ['ILLUMINATE'], rarity: 'Common',
+    cardText: 'Gain 1 Lumen on a Channel card in hand. Draw 1 card.',
+    upgradeText: 'Gain 2 Lumens on a Channel card in hand. Draw 1 card.',
+  },
+  {
+    id: 'L-010', name: 'Hymn', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: ['DRAIN'], rarity: 'Common',
+    cardText: 'Heal 3 HP. Gain 1 Lumen on a Channel card in hand.',
+    upgradeText: 'Heal 5 HP. Gain 1 Lumen on every Channel card in hand.',
+  },
+  {
+    id: 'L-011', name: 'Gleam', faction: 'Luminar', type: 'Attack', cost: 1,
+    keywords: ['ILLUMINATE'], rarity: 'Common',
+    cardText: 'Channel. Deal 8 damage. Release: +4 damage per Lumen.',
+    upgradeText: 'Channel. Deal 10 damage. Release: +5 damage per Lumen.',
+  },
+  {
+    id: 'L-012', name: 'Steady Light', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: ['ILLUMINATE'], rarity: 'Common',
+    cardText: 'Channel. Gain 4 Block. Retain.',
+    upgradeText: 'Channel. Gain 5 Block. Retain. Gain 1 Lumen when retained.',
+  },
+  {
+    id: 'L-013', name: 'Harmonize', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: [], rarity: 'Common',
+    cardText: 'Transfer Lumens freely between Channel cards in hand.',
+    upgradeText: 'Transfer Lumens freely between Channel cards. Each transfer adds +1 Lumen.',
+  },
+  {
+    id: 'L-014', name: 'Searing Ray', faction: 'Luminar', type: 'Attack', cost: 2,
+    keywords: [], rarity: 'Common',
+    cardText: 'Deal 12 damage. +2 damage for each Channel card in hand.',
+    upgradeText: 'Deal 14 damage. +3 damage for each Channel card in hand.',
+  },
+  {
+    id: 'L-015', name: 'Ward of Dawn', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: ['GUARDIAN'], rarity: 'Common',
+    cardText: 'Gain 8 Block.',
+    upgradeText: 'Gain 10 Block. Draw 1 card if at full HP.',
+  },
+  {
+    id: 'L-016', name: 'Inner Peace', faction: 'Luminar', type: 'Skill', cost: 0,
+    keywords: [], rarity: 'Common',
+    cardText: 'End turn. Draw 2 cards next turn. Gain 1 Lumen on every Channel card in hand.',
+    upgradeText: 'End turn. Draw 3 cards next turn. Gain 2 Lumens on every Channel card in hand.',
+  },
+  {
+    id: 'L-017', name: 'Sunbeam', faction: 'Luminar', type: 'Attack', cost: 2,
+    keywords: ['ILLUMINATE'], rarity: 'Uncommon',
+    cardText: 'Channel. Deal 10 damage. Release: +3 damage per Lumen.',
+    upgradeText: 'Channel. Deal 12 damage. Release: +4 damage per Lumen.',
+  },
+  {
+    id: 'L-018', name: 'Aurora', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: ['ILLUMINATE'], rarity: 'Uncommon',
+    cardText: 'Channel. Apply Vulnerable 2 to all enemies. Release: +1 Vulnerable per Lumen.',
+    upgradeText: 'Channel. Apply Vulnerable 2 and Weak 1 to all. Release: +1 each per Lumen.',
+  },
+  {
+    id: 'L-019', name: 'Mantra', faction: 'Luminar', type: 'Power', cost: 1,
+    keywords: ['ILLUMINATE'], rarity: 'Uncommon',
+    cardText: 'The first card you play each turn gains Channel and 1 Lumen.',
+    upgradeText: 'The first card you play each turn gains Channel and 2 Lumens.',
+  },
+  {
+    id: 'L-020', name: 'Focus', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: ['ILLUMINATE'], rarity: 'Uncommon',
+    cardText: 'Gain 3 Lumens distributed freely across Channel cards in hand.',
+    upgradeText: 'Gain 5 Lumens distributed freely across Channel cards in hand.',
+  },
+  {
+    id: 'L-021', name: 'Solar Bolt', faction: 'Luminar', type: 'Attack', cost: 1,
+    keywords: [], rarity: 'Uncommon',
+    cardText: 'Deal 14 damage. Exhaust.',
+    upgradeText: 'Deal 18 damage. Exhaust.',
+  },
+  {
+    id: 'L-022', name: 'Halo', faction: 'Luminar', type: 'Power', cost: 2,
+    keywords: ['BARRIER'], rarity: 'Uncommon',
+    cardText: 'At end of turn, gain Block equal to total Lumens across all Channel cards in hand.',
+    upgradeText: 'At end of turn, gain double Block from total Lumens in hand.',
+  },
+  {
+    id: 'L-023', name: 'Blinding Flash', faction: 'Luminar', type: 'Skill', cost: 2,
+    keywords: [], rarity: 'Uncommon',
+    cardText: 'Apply Weak 2 and Vulnerable 2 to all enemies. Consume 1 Lumen from each Channel card.',
+    upgradeText: 'Apply Weak 3 and Vulnerable 3 to all enemies. No Lumen cost.',
+  },
+  {
+    id: 'L-024', name: 'Sacred Geometry', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: [], rarity: 'Uncommon',
+    cardText: 'The next Release effect this turn triggers twice.',
+    upgradeText: 'The next Release effect this turn triggers three times.',
+  },
+  {
+    id: 'L-025', name: 'Astral Step', faction: 'Luminar', type: 'Skill', cost: 0,
+    keywords: [], rarity: 'Uncommon',
+    cardText: 'Discard your hand, draw 3 cards. Drawn Channel cards gain 1 Lumen.',
+    upgradeText: 'Discard your hand, draw 4 cards. Drawn Channel cards gain 2 Lumens.',
+  },
+  {
+    id: 'L-026', name: 'Starfall', faction: 'Luminar', type: 'Attack', cost: 2,
+    keywords: ['ILLUMINATE', 'BLITZ'], rarity: 'Uncommon',
+    cardText: 'Channel. Deal 5 damage 3 times. Release: +2 damage per hit per Lumen.',
+    upgradeText: 'Channel. Deal 6 damage 3 times. Release: +3 damage per hit per Lumen.',
+  },
+  {
+    id: 'L-027', name: 'Enduring Light', faction: 'Luminar', type: 'Power', cost: 2,
+    keywords: ['ILLUMINATE'], rarity: 'Uncommon',
+    cardText: 'Channel cards automatically Retain.',
+    upgradeText: 'Channel cards automatically Retain. +1 Lumen each time they retain.',
+  },
+  {
+    id: 'L-028', name: 'Focused Beam', faction: 'Luminar', type: 'Attack', cost: 2,
+    keywords: ['ILLUMINATE'], rarity: 'Uncommon',
+    cardText: 'Channel. Deal 20 damage. Release: Apply Weak 1 per Lumen.',
+    upgradeText: 'Channel. Deal 25 damage. Release: Apply Weak 1 per Lumen.',
+  },
+  {
+    id: 'L-029', name: 'Moonlit Guard', faction: 'Luminar', type: 'Skill', cost: 2,
+    keywords: ['GUARDIAN', 'ILLUMINATE'], rarity: 'Uncommon',
+    cardText: 'Gain 16 Block. Gain 1 Lumen on every Channel card in hand.',
+    upgradeText: 'Gain 20 Block. Gain 2 Lumens on every Channel card in hand.',
+  },
+  {
+    id: 'L-030', name: 'Wisdom', faction: 'Luminar', type: 'Skill', cost: 1,
+    keywords: [], rarity: 'Uncommon',
+    cardText: 'Draw cards equal to total Lumens on Channel cards in hand.',
+    upgradeText: 'Draw cards equal to total Lumens + 1 on Channel cards in hand.',
+  },
+  {
+    id: 'L-031', name: 'Supernova', faction: 'Luminar', type: 'Attack', cost: 3,
+    keywords: ['ILLUMINATE'], rarity: 'Rare',
+    cardText: 'Channel. Deal 20 damage to all enemies. Release: +10 damage per Lumen.',
+    upgradeText: 'Channel. Deal 25 damage to all enemies. Release: +12 damage per Lumen.',
+  },
+  {
+    id: 'L-032', name: 'Everlight', faction: 'Luminar', type: 'Power', cost: 2,
+    keywords: ['ILLUMINATE'], rarity: 'Rare',
+    cardText: 'At turn start, gain 1 Lumen on every Channel card in hand.',
+    upgradeText: 'At turn start, gain 2 Lumens on every Channel card in hand.',
+  },
+  {
+    id: 'L-033', name: 'Transcendence', faction: 'Luminar', type: 'Skill', cost: 2,
+    keywords: [], rarity: 'Rare',
+    cardText: 'Choose a Channel card in your draw pile. Play it immediately, ignoring cost.',
+    upgradeText: 'Choose 2 Channel cards in your draw pile. Play them immediately, ignoring cost.',
+  },
+  {
+    id: 'L-034', name: 'Gravitas', faction: 'Luminar', type: 'Power', cost: 3,
+    keywords: [], rarity: 'Rare',
+    cardText: 'All Release effects are doubled.',
+    upgradeText: 'All Release effects are tripled.',
+  },
+  {
+    id: 'L-035', name: 'Stellar Body', faction: 'Luminar', type: 'Power', cost: 2,
+    keywords: ['BARRIER'], rarity: 'Rare',
+    cardText: 'The first attack that would damage you each turn is reduced to 0.',
+    upgradeText: 'The first attack that would damage you each turn is reduced to 0. Gain 2 Lumens when this triggers.',
+  },
+  {
+    id: 'L-036', name: 'Illumination', faction: 'Luminar', type: 'Skill', cost: 2,
+    keywords: ['ILLUMINATE'], rarity: 'Rare',
+    cardText: 'Reveal all enemy intents for the rest of combat. Apply Vulnerable 3 to all.',
+    upgradeText: 'Reveal all enemy intents. Apply Vulnerable 4 to all. Vulnerable does not decay this combat.',
+  },
+  {
+    id: 'L-037', name: "Sun's Blessing", faction: 'Luminar', type: 'Power', cost: 3,
+    keywords: ['ILLUMINATE'], rarity: 'Rare',
+    cardText: 'Max Lumens per Channel card increased by 3 (cap 8).',
+    upgradeText: 'Max Lumens per Channel card increased by 5 (cap 10). Cards gain 1 Lumen when they retain.',
+  },
+  {
+    id: 'L-038', name: 'Divine Intervention', faction: 'Luminar', type: 'Skill', cost: 2,
+    keywords: ['BARRIER'], rarity: 'Rare',
+    cardText: 'When you would die this combat, survive at 1 HP and gain 5 Lumens distributed. Exhaust.',
+    upgradeText: 'When you would die this combat, survive at 10 HP and gain 5 Lumens distributed.',
+  },
+  {
+    id: 'L-039', name: 'Godlight', faction: 'Luminar', type: 'Attack', cost: 3,
+    keywords: ['ILLUMINATE', 'DRAIN'], rarity: 'Rare',
+    cardText: 'Channel. Deal 15 damage. Release: +8 damage per Lumen. Heal for half damage dealt.',
+    upgradeText: 'Channel. Deal 15 damage. Release: +8 damage per Lumen. Heal for full damage dealt.',
+  },
+  {
+    id: 'L-040', name: 'Apex', faction: 'Luminar', type: 'Skill', cost: 3,
+    keywords: ['ILLUMINATE'], rarity: 'Rare',
+    cardText: 'Trigger Release on every Channel card in hand simultaneously. They are not discarded.',
+    upgradeText: 'Trigger Release on every Channel card in hand twice. They are not discarded.',
+  },
+];
+
 // ─── Pool & helpers ───────────────────────────────────────────────────────────
 
 export const CARD_POOL: CardDefinition[] = [
   ...COGSMITHS_CARDS,
   ...PYROCLAST_CARDS,
-  // Luminar, WarpRiders added in subsequent phases
+  ...LUMINAR_CARDS,
+  // WarpRiders added in next phase
 ];
 
 export const getCardsByFaction = (faction: Faction): CardDefinition[] =>
