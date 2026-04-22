@@ -47,7 +47,7 @@ export const STARTER_PLANETS: [Race, Race] = [Race.PYROCLAST, Race.LUMINAR];
  */
 export const CAMPAIGN_ORDER: Race[] = [
   Race.COGSMITHS,        // Wave 1: Mechs teach board trading
-  Race.PHANTOM_CORSAIRS, // Wave 2: Evasion teaches targeting
+  Race.WARP_RIDERS, // Wave 2: Evasion teaches targeting
   Race.PYROCLAST,        // Included for non-Pyroclast starters
   Race.LUMINAR,          // Included for non-Luminar starters
 ];
@@ -121,17 +121,17 @@ export const PLANET_ENCOUNTERS: Record<Race, PlanetEncounter> = {
     loreUnlock: 'PRIMEVA CODEX: Primeva\'s rapid evolution is not natural — it\'s driven by microscopic STARFORGE fragments embedded in the planet\'s crust. Every living thing on Primeva is slowly being forged into something greater. The Biotitans learned to accelerate this process.',
     difficulty: AIDifficulty.MEDIUM,
   },
-  [Race.PHANTOM_CORSAIRS]: {
-    race: Race.PHANTOM_CORSAIRS,
+  [Race.WARP_RIDERS]: {
+    race: Race.WARP_RIDERS,
     planet: 'Netherstorm',
     title: 'The Pirate Nebula',
     color: '#8844cc',
     icon: '👻',
-    introBriefing: 'Netherstorm isn\'t a planet — it\'s a permanent storm of dark energy where the Phantom Corsairs make their hideout. Their ships phase between dimensions, striking from angles that shouldn\'t exist. You can\'t target what you can\'t see.',
+    introBriefing: 'Netherstorm isn\'t a planet — it\'s a permanent storm of dark energy where the Warp Riders make their hideout. Their ships phase between dimensions, striking from angles that shouldn\'t exist. You can\'t target what you can\'t see.',
     enemyTaunt: '"We don\'t fight fair, love. We fight from the shadows, and we take what we want. Including your best cards."',
     victoryText: 'Captain Shadowvane raises a phantom glass in salute. "Fair enough, you earned it." The Corsairs pledge their spectral fleet to your cause — pirates always follow the winning side.',
     defeatText: 'Their PHASE minions slipped past your defenses like ghosts. They stole your best cards and used them against you. But phase breaks when they attack — that\'s your moment to strike back.',
-    loreUnlock: 'NETHERSTORM CODEX: The Phantom Corsairs discovered that the space between dimensions is navigable. Their PHASE technology lets them exist in two realities simultaneously. Captain Shadowvane was the first to survive the crossing — everyone before her went mad.',
+    loreUnlock: 'NETHERSTORM CODEX: The Warp Riders discovered that the space between dimensions is navigable. Their PHASE technology lets them exist in two realities simultaneously. Captain Shadowvane was the first to survive the crossing — everyone before her went mad.',
     difficulty: AIDifficulty.MEDIUM,
   },
   [Race.CRYSTALLINE]: {
@@ -229,7 +229,7 @@ export const STARTER_DESCRIPTIONS: Record<Race, { pitch: string; strength: strin
   [Race.VOIDBORN]: { pitch: '', strength: '', fantasy: '' },
   [Race.BIOTITANS]: { pitch: '', strength: '', fantasy: '' },
   [Race.CRYSTALLINE]: { pitch: '', strength: '', fantasy: '' },
-  [Race.PHANTOM_CORSAIRS]: { pitch: '', strength: '', fantasy: '' },
+  [Race.WARP_RIDERS]: { pitch: '', strength: '', fantasy: '' },
   [Race.HIVEMIND]: { pitch: '', strength: '', fantasy: '' },
   [Race.ASTROMANCERS]: { pitch: '', strength: '', fantasy: '' },
   [Race.CHRONOBOUND]: { pitch: '', strength: '', fantasy: '' },

@@ -201,7 +201,7 @@ export const PUZZLES: PuzzleDefinition[] = [
     hint: 'Play the minion with BLITZ, then attack with everything.',
     playerHP: 10,
     playerCrystals: 4,
-    playerRace: Race.PHANTOM_CORSAIRS,
+    playerRace: Race.WARP_RIDERS,
     playerBoard: [
       { name: 'Shadow Blade', attack: 3, health: 2, keywords: [], canAttack: true },
     ],
@@ -260,7 +260,7 @@ export const PUZZLES: PuzzleDefinition[] = [
     hint: 'Attack with your minion. CLOAK breaks but that\'s fine — it\'s lethal.',
     playerHP: 3,
     playerCrystals: 0,
-    playerRace: Race.PHANTOM_CORSAIRS,
+    playerRace: Race.WARP_RIDERS,
     playerBoard: [
       { name: 'Shadow Assassin', attack: 6, health: 1, keywords: ['CLOAK'], canAttack: true },
     ],
@@ -617,7 +617,7 @@ export const PUZZLES: PuzzleDefinition[] = [
     hint: 'Ignore the PHASE minions and go for lethal directly.',
     playerHP: 8,
     playerCrystals: 3,
-    playerRace: Race.PHANTOM_CORSAIRS,
+    playerRace: Race.WARP_RIDERS,
     playerBoard: [
       { name: 'Ghost Ship', attack: 5, health: 3, keywords: ['CLOAK'], canAttack: true },
       { name: 'Corsair', attack: 3, health: 2, keywords: [], canAttack: true },

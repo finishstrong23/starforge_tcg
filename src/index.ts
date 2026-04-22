@@ -70,7 +70,7 @@ export function initializeFullDatabase(): CardDatabase {
   // Register balanced starter deck cards (they may have unique IDs not in the main pool)
   const allRaces = [
     Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN, Race.BIOTITANS,
-    Race.CRYSTALLINE, Race.PHANTOM_CORSAIRS, Race.HIVEMIND, Race.ASTROMANCERS,
+    Race.CRYSTALLINE, Race.WARP_RIDERS, Race.HIVEMIND, Race.ASTROMANCERS,
     Race.CHRONOBOUND,
   ];
   for (const race of allRaces) {

@@ -7624,7 +7624,7 @@
   {
     "id": "phc_m1",
     "name": "Deckhand Specter",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7643,7 +7643,7 @@
   {
     "id": "phc_m2",
     "name": "Phantom Parrot",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7662,7 +7662,7 @@
   {
     "id": "phc_s1",
     "name": "Ghostly Cutlass",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -7679,7 +7679,7 @@
   {
     "id": "phc_s2",
     "name": "Plunder",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -7696,7 +7696,7 @@
   {
     "id": "phc_m3",
     "name": "Stowaway",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7716,7 +7716,7 @@
   {
     "id": "phc_m4",
     "name": "Smuggler's Shade",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7735,7 +7735,7 @@
   {
     "id": "phc_m5",
     "name": "Ghost Gunner",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7755,7 +7755,7 @@
   {
     "id": "phc_m6",
     "name": "Pickpocket",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7772,7 +7772,7 @@
   {
     "id": "phc_s3",
     "name": "Smoke Bomb",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -7789,7 +7789,7 @@
   {
     "id": "phc_s4",
     "name": "Cheap Shot",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -7806,7 +7806,7 @@
   {
     "id": "phc_m7",
     "name": "Phantom Blade",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7826,7 +7826,7 @@
   {
     "id": "phc_m8",
     "name": "Cargo Raider",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7845,7 +7845,7 @@
   {
     "id": "phc_m9",
     "name": "Spectral Rigging",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7864,7 +7864,7 @@
   {
     "id": "phc_s5",
     "name": "Hijack",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -7881,7 +7881,7 @@
   {
     "id": "phc_s6",
     "name": "Ghostwalk",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -7898,7 +7898,7 @@
   {
     "id": "phc_m10",
     "name": "Swindler",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7917,7 +7917,7 @@
   {
     "id": "phc_m11",
     "name": "Corsair Quartermaster",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7934,7 +7934,7 @@
   {
     "id": "phc_m12",
     "name": "Wraithship Gunner",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -7954,7 +7954,7 @@
   {
     "id": "phc_s7",
     "name": "Ransack",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -7971,7 +7971,7 @@
   {
     "id": "phc_s8",
     "name": "Spectral Ambush",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -7988,7 +7988,7 @@
   {
     "id": "phc_m13",
     "name": "Phantom Duelist",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -8008,7 +8008,7 @@
   {
     "id": "phc_m14",
     "name": "Ghost Fleet Raider",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -8027,7 +8027,7 @@
   {
     "id": "phc_s9",
     "name": "Identity Theft",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -8044,7 +8044,7 @@
   {
     "id": "phc_s10",
     "name": "Boarding Party",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -8061,7 +8061,7 @@
   {
     "id": "phc_m15",
     "name": "Phantom Dreadnought",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -8081,7 +8081,7 @@
   {
     "id": "phc_s11",
     "name": "Grand Heist",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -8098,7 +8098,7 @@
   {
     "id": "phc_m16",
     "name": "Ghost Galleon",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -8118,7 +8118,7 @@
   {
     "id": "phc_s12",
     "name": "Mutiny",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Common",
@@ -8135,7 +8135,7 @@
   {
     "id": "phc_st1",
     "name": "Smuggler's Cache",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Structure",
     "tribe": null,
     "rarity": "Common",
@@ -8152,7 +8152,7 @@
   {
     "id": "phc_m17",
     "name": "Pocket Thief",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Common",
@@ -8171,7 +8171,7 @@
   {
     "id": "phc_m18",
     "name": "First Mate Phantom",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Rare",
@@ -8190,7 +8190,7 @@
   {
     "id": "phc_s13",
     "name": "Ghostly Sabotage",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Rare",
@@ -8207,7 +8207,7 @@
   {
     "id": "phc_m19",
     "name": "Spectral Assassin",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Rare",
@@ -8227,7 +8227,7 @@
   {
     "id": "phc_st2",
     "name": "Contraband Market",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Structure",
     "tribe": null,
     "rarity": "Rare",
@@ -8244,7 +8244,7 @@
   {
     "id": "phc_s14",
     "name": "Phantom Swap",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Rare",
@@ -8261,7 +8261,7 @@
   {
     "id": "phc_s15",
     "name": "Corsair Ambush",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Rare",
@@ -8278,7 +8278,7 @@
   {
     "id": "phc_m20",
     "name": "Ethereal Smuggler",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Rare",
@@ -8298,7 +8298,7 @@
   {
     "id": "phc_s16",
     "name": "Haunt",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Rare",
@@ -8315,7 +8315,7 @@
   {
     "id": "phc_s17",
     "name": "Wraithship Bombardment",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Rare",
@@ -8332,7 +8332,7 @@
   {
     "id": "phc_m21",
     "name": "Fence",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Rare",
@@ -8351,7 +8351,7 @@
   {
     "id": "phc_st3",
     "name": "Void Anchor",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Structure",
     "tribe": null,
     "rarity": "Rare",
@@ -8368,7 +8368,7 @@
   {
     "id": "phc_m22",
     "name": "Ghostly Crew",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Rare",
@@ -8387,7 +8387,7 @@
   {
     "id": "phc_s18",
     "name": "Plunderstorm",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Rare",
@@ -8404,7 +8404,7 @@
   {
     "id": "phc_m23",
     "name": "Phase Stalker",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Rare",
@@ -8423,7 +8423,7 @@
   {
     "id": "phc_st4",
     "name": "Netherstorm Portal",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Structure",
     "tribe": null,
     "rarity": "Rare",
@@ -8440,7 +8440,7 @@
   {
     "id": "phc_s19",
     "name": "Treasure Map",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Rare",
@@ -8457,7 +8457,7 @@
   {
     "id": "phc_s20",
     "name": "Ghostfire Cannon",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Rare",
@@ -8474,7 +8474,7 @@
   {
     "id": "phc_m24",
     "name": "Spectral Boarders",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Rare",
@@ -8494,7 +8494,7 @@
   {
     "id": "phc_s21",
     "name": "Dead Man's Hand",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Rare",
@@ -8511,7 +8511,7 @@
   {
     "id": "phc_m25",
     "name": "Loot Hoarder",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Rare",
@@ -8528,7 +8528,7 @@
   {
     "id": "phc_m26",
     "name": "SPECTRAL FLAGSHIP",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Epic",
@@ -8547,7 +8547,7 @@
   {
     "id": "phc_s22",
     "name": "THE GREAT TRAIN ROBBERY",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Epic",
@@ -8564,7 +8564,7 @@
   {
     "id": "phc_m27",
     "name": "GHOST IN THE MACHINE",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Epic",
@@ -8584,7 +8584,7 @@
   {
     "id": "phc_s23",
     "name": "PHANTOM ARMADA",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Epic",
@@ -8601,7 +8601,7 @@
   {
     "id": "phc_s24",
     "name": "DIMENSIONAL HEIST",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Epic",
@@ -8618,7 +8618,7 @@
   {
     "id": "phc_m28",
     "name": "CAPTAIN SHADOWVANE",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Legendary",
@@ -8638,7 +8638,7 @@
   {
     "id": "phc_m29",
     "name": "THE NETHERSTORM",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": null,
     "rarity": "Legendary",
@@ -8657,7 +8657,7 @@
   {
     "id": "phc_m30",
     "name": "PHANTOM ADMIRAL WRAITH",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Legendary",
@@ -8677,7 +8677,7 @@
   {
     "id": "phc_m31",
     "name": "JACK 'DEAD HAND' MORROW",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Minion",
     "tribe": "Pirate",
     "rarity": "Legendary",
@@ -8698,7 +8698,7 @@
   {
     "id": "phc_s25",
     "name": "THE GHOST TIDE",
-    "faction": "PhantomCorsairs",
+    "faction": "WarpRiders",
     "type": "Spell",
     "tribe": null,
     "rarity": "Legendary",

@@ -129,7 +129,7 @@ const AI_NAMES: Record<Race, string[]> = {
   [Race.VOIDBORN]: ['Nullseer Xal', 'Voidwalker Nyx'],
   [Race.BIOTITANS]: ['Apex Growler', 'Primarch Thorne'],
   [Race.CRYSTALLINE]: ['Prismsage Opal', 'Fracture Mage'],
-  [Race.PHANTOM_CORSAIRS]: ['Captain Shade', 'Dread Pirate Rex'],
+  [Race.WARP_RIDERS]: ['Captain Shade', 'Dread Pirate Rex'],
   [Race.HIVEMIND]: ['Swarm Queen Zara', 'Hiveboss Chitik'],
   [Race.ASTROMANCERS]: ['Stargazer Lyra', 'Cosmos Weaver'],
   [Race.CHRONOBOUND]: ['Timekeeper Epoch', 'Chronarch Vex'],
@@ -172,7 +172,7 @@ function createDefaultState(): TournamentState {
 function getAvailableRaces(exclude: Race): Race[] {
   const allPlayable = [
     Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN,
-    Race.BIOTITANS, Race.PHANTOM_CORSAIRS, Race.CRYSTALLINE,
+    Race.BIOTITANS, Race.WARP_RIDERS, Race.CRYSTALLINE,
     Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND,
   ];
   return allPlayable.filter(r => r !== exclude);

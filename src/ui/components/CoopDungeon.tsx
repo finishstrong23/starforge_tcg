@@ -40,7 +40,7 @@ interface CoopDungeonProps {
   onBack: () => void;
 }
 
-const LAUNCH_RACES = [Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS];
+const LAUNCH_RACES = [Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.WARP_RIDERS];
 
 export const CoopDungeon: React.FC<CoopDungeonProps> = ({ onBack }) => {
   const [runState, setRunState] = useState<CoopRunState | null>(null);

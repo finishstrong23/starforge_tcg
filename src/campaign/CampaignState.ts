@@ -247,7 +247,7 @@ function getRacePrefix(race: Race): string | null {
     [Race.VOIDBORN]: 'void',
     [Race.BIOTITANS]: 'bio',
     [Race.CRYSTALLINE]: 'crys',
-    [Race.PHANTOM_CORSAIRS]: 'pc',
+    [Race.WARP_RIDERS]: 'pc',
     [Race.HIVEMIND]: 'hive',
     [Race.ASTROMANCERS]: 'astro',
     [Race.CHRONOBOUND]: 'chrono',

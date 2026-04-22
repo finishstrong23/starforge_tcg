@@ -160,7 +160,7 @@ Every card in `card-schema.json` must have these fields:
 - `cost` must be 0-10 (inclusive)
 - `attack` must be non-negative for Minions/Weapons, null for Spells
 - `health` must be >= 1 for Minions, null for Spells/Weapons
-- `faction` must be one of: Astromancers, Biotitans, Chronobound, Cogsmiths, Crystalline, Hivemind, Luminar, Neutral, Phantom Corsairs, Pyroclast, Voidborn
+- `faction` must be one of: Astromancers, Biotitans, Chronobound, Cogsmiths, Crystalline, Hivemind, Luminar, Neutral, Warp Riders, Pyroclast, Voidborn
 - `rarity` must be one of: Common, Rare, Epic, Legendary
 - `type` must be one of: Minion, Spell, Weapon
 - `keywords` entries must all exist in the Keywords Reference
@@ -287,6 +287,6 @@ For full faction mechanics, read `faction-rules.md`. Summary:
 | Hivemind | Adjacent minion buffs & swarm | Position-aware buffs, board ordering |
 | Luminar | Shields & divine protection | Shield stacking, damage prevention order |
 | Neutral | Universal utility cards | Cross-faction interaction correctness |
-| Phantom Corsairs | Stealth & evasion | Target filtering, stealth break timing |
+| Warp Riders | Stealth & evasion | Target filtering, stealth break timing |
 | Pyroclast | Direct damage & burn effects | Damage routing, overkill handling |
 | Voidborn | Sacrifice & life drain | Self-damage triggers, drain math |

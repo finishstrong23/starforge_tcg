@@ -56,7 +56,7 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
 
 
   const availableRaces = [
-    Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS,
+    Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.WARP_RIDERS,
   ];
 
   const difficulties = [

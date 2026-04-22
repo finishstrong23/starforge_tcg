@@ -84,7 +84,7 @@ export const TEAM_SYNERGIES: TeamSynergy[] = [
     value: 2,
   },
   {
-    races: [Race.VOIDBORN, Race.PHANTOM_CORSAIRS],
+    races: [Race.VOIDBORN, Race.WARP_RIDERS],
     name: 'Shadow Raid',
     description: 'Cards stolen by your team cost (1) less',
     bonusType: 'cost_reduction',
@@ -133,7 +133,7 @@ export const TEAM_SYNERGIES: TeamSynergy[] = [
     value: 1,
   },
   {
-    races: [Race.COGSMITHS, Race.PHANTOM_CORSAIRS],
+    races: [Race.COGSMITHS, Race.WARP_RIDERS],
     name: 'Pirate Engineering',
     description: 'Stolen cards your team plays generate a spare part',
     bonusType: 'stat_buff',
@@ -203,7 +203,7 @@ export const AI_TEAMMATES: { name: string; race: Race; personality: string }[] =
   { name: 'Shadow Weaver', race: Race.VOIDBORN, personality: 'control' },
   { name: 'Apex Predator', race: Race.BIOTITANS, personality: 'midrange' },
   { name: 'Crystal Sage', race: Race.CRYSTALLINE, personality: 'combo' },
-  { name: 'Captain Mirage', race: Race.PHANTOM_CORSAIRS, personality: 'tempo' },
+  { name: 'Captain Mirage', race: Race.WARP_RIDERS, personality: 'tempo' },
   { name: 'Hive Queen Zyx', race: Race.HIVEMIND, personality: 'aggressive' },
   { name: 'Star Oracle', race: Race.ASTROMANCERS, personality: 'control' },
   { name: 'Warden Epoch', race: Race.CHRONOBOUND, personality: 'combo' },

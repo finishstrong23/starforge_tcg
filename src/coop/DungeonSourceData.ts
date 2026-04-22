@@ -122,7 +122,7 @@ export const DUNGEON_BOSSES: DungeonBoss[] = [
     id: 'boss_shadow_rat',
     name: 'Shadow Rat',
     title: 'The Pickpocket',
-    race: Race.PHANTOM_CORSAIRS,
+    race: Race.WARP_RIDERS,
     tier: 1,
     heroPowerName: 'Filch',
     heroPowerDescription: 'Add a random card to your hand.',
@@ -261,7 +261,7 @@ export const DUNGEON_BOSSES: DungeonBoss[] = [
     id: 'boss_phantom_admiral',
     name: 'Phantom Admiral',
     title: 'The Ghost Fleet',
-    race: Race.PHANTOM_CORSAIRS,
+    race: Race.WARP_RIDERS,
     tier: 2,
     heroPowerName: 'Phase Shift',
     heroPowerDescription: 'Give a friendly minion CLOAK.',
@@ -723,7 +723,7 @@ export function getDungeonStarterDeck(race: Race): string[] {
       'cry_sd_m2', 'cry_sd_m2',   // Geode Apprentice (2)
       'cry_sd_s4', 'cry_sd_s4',   // Refraction Bolt (2)
     ],
-    [Race.PHANTOM_CORSAIRS]: [
+    [Race.WARP_RIDERS]: [
       'phc_sd_m1', 'phc_sd_m1',   // Deckhand Specter (1)
       'phc_sd_m2', 'phc_sd_m2',   // Phantom Parrot (1)
       'phc_sd_s1', 'phc_sd_s1',   // Plunder (1)

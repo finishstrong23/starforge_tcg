@@ -19,7 +19,7 @@ interface BalanceTesterProps {
 }
 
 const RACES = [
-  Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS,
+  Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.WARP_RIDERS,
 ];
 
 const RACE_COLORS: Record<string, string> = {
@@ -29,7 +29,7 @@ const RACE_COLORS: Record<string, string> = {
   [Race.VOIDBORN]:         '#7c3aed',
   [Race.BIOTITANS]:        '#22c55e',
   [Race.CRYSTALLINE]:      '#a855f7',
-  [Race.PHANTOM_CORSAIRS]: '#6366f1',
+  [Race.WARP_RIDERS]: '#6366f1',
   [Race.HIVEMIND]:         '#84cc16',
   [Race.ASTROMANCERS]:     '#06b6d4',
   [Race.CHRONOBOUND]:      '#f97316',

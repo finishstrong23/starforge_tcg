@@ -22,7 +22,7 @@ const STAT_ADJUSTMENTS = {
   VOIDBORN:          30,  // 35.4% → needs buff (CLOAK is weak keyword)
   BIOTITANS:        -12,  // 62.3% → slightly high
   CRYSTALLINE:        0,  // 53.6% → fine
-  PHANTOM_CORSAIRS:  15,  // 41.7% → needs buff
+  WARP_RIDERS:  15,  // 41.7% → needs buff
   HIVEMIND:           5,  // 46.8% → slight buff
   ASTROMANCERS:       0,  // 56.4% → fine
   CHRONOBOUND:       30,  // 29.8% → needs significant buff

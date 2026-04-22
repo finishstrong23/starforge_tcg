@@ -26,7 +26,7 @@ import {
   COGSMITHS_CARDS,
   LUMINAR_CARDS,
   PYROCLAST_CARDS,
-  PHANTOM_CORSAIRS_CARDS,
+  WARP_RIDERS_CARDS,
   NEUTRAL_CARDS,
 } from './SampleCards';
 import { getExpansionCardsByRace, ALL_EXPANSION_CARDS } from './ExpansionCards';
@@ -83,7 +83,7 @@ function getCardsForRace(race: Race): CardDefinition[] {
     case Race.COGSMITHS: base = COGSMITHS_CARDS; break;
     case Race.LUMINAR: base = LUMINAR_CARDS; break;
     case Race.PYROCLAST: base = PYROCLAST_CARDS; break;
-    case Race.PHANTOM_CORSAIRS: base = PHANTOM_CORSAIRS_CARDS; break;
+    case Race.WARP_RIDERS: base = WARP_RIDERS_CARDS; break;
     case Race.NEUTRAL: base = NEUTRAL_CARDS; break;
     default: return [];
   }
@@ -326,7 +326,7 @@ export function buildCardLookup(): Map<string, CardDefinition> {
   // All base faction cards
   const allRaces = [
     Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN, Race.BIOTITANS,
-    Race.CRYSTALLINE, Race.PHANTOM_CORSAIRS, Race.HIVEMIND, Race.ASTROMANCERS,
+    Race.CRYSTALLINE, Race.WARP_RIDERS, Race.HIVEMIND, Race.ASTROMANCERS,
     Race.CHRONOBOUND, Race.NEUTRAL,
   ];
 

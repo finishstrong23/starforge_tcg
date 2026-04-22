@@ -11,7 +11,7 @@ async function main() {
   });
   const allRaces = [
     Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN, Race.BIOTITANS,
-    Race.CRYSTALLINE, Race.PHANTOM_CORSAIRS, Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND,
+    Race.CRYSTALLINE, Race.WARP_RIDERS, Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND,
   ];
 
   console.log('Running balance test: 100 games per matchup (45 matchups = 4,500 games)...');

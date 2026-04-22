@@ -18,7 +18,7 @@ const RACE_COLORS: Record<string, { primary: string; glow: string }> = {
   VOIDBORN:         { primary: '#8844ff', glow: '#9955ff' },
   BIOTITANS:        { primary: '#44cc44', glow: '#55dd55' },
   CRYSTALLINE:      { primary: '#44ccff', glow: '#55ddff' },
-  PHANTOM_CORSAIRS: { primary: '#8888bb', glow: '#9999cc' },
+  WARP_RIDERS: { primary: '#8888bb', glow: '#9999cc' },
   HIVEMIND:         { primary: '#aacc00', glow: '#bbdd22' },
   ASTROMANCERS:     { primary: '#4466ff', glow: '#5577ff' },
   CHRONOBOUND:      { primary: '#cc8844', glow: '#dd9955' },

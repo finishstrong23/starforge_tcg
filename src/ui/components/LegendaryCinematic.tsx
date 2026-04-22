@@ -64,7 +64,7 @@ const FACTION_THEMES: Record<Race, {
     entranceStyle: 'shatter',
     bgGlow: 'radial-gradient(circle, rgba(245,158,11,0.4), transparent 70%)',
   },
-  [Race.PHANTOM_CORSAIRS]: {
+  [Race.WARP_RIDERS]: {
     primaryColor: '#06b6d4',
     secondaryColor: '#22d3ee',
     particleEmoji: '\uD83D\uDC7B',

@@ -191,8 +191,8 @@ export const ALL_PETS: PetDefinition[] = [
     emoji: '\uD83E\uDD9C',
     description: 'A ghostly spectral parrot from the Netherstorm.',
     rarity: PetRarity.RARE,
-    faction: Race.PHANTOM_CORSAIRS,
-    unlockCondition: 'Default Phantom Corsairs pet',
+    faction: Race.WARP_RIDERS,
+    unlockCondition: 'Default Warp Riders pet',
     animations: {
       idle: ['preening', 'lookout', 'pecking at loot'],
       happy: ['squawks', 'flips'],

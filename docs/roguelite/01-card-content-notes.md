@@ -178,8 +178,9 @@ blocking — just log items for the phase that wires up resolution:
 - [ ] `src/roguelite/data/rifts.ts` — 5 Rift types from the Warp Riders
   Flux State Reference sheet, already typed in `faction_mechanics.ts` but
   not instantiated yet.
-- [ ] Global rename Phantom Corsairs → Warp Riders across
-  `src/types/Race.ts` and consumers. User-flagged as separate task.
+- [x] Global rename Phantom Corsairs → Warp Riders across
+  `src/types/Race.ts` and consumers. Done in a follow-up commit after
+  this doc was written.
 - [ ] Productionize the one-shot generator script under `scripts/` so the
   card data can be re-generated when the spreadsheets change.
 

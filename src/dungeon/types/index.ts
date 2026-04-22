@@ -1,5 +1,5 @@
 // ─── CARD TYPES ────────────────────────────────────────────────────────────
-export type Faction = 'Cogsmiths' | 'Pyroclast' | 'Luminar' | 'PhantomCorsairs';
+export type Faction = 'Cogsmiths' | 'Pyroclast' | 'Luminar' | 'WarpRiders';
 export type CardType = 'Minion' | 'Spell' | 'Structure';
 export type Rarity = 'Common' | 'Rare' | 'Epic' | 'Legendary';
 export type Keyword =

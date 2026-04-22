@@ -24,7 +24,7 @@ const STARTER_DECKS = [
   { key: 'COGSMITHS', label: 'Cogsmiths' },
   { key: 'LUMINAR', label: 'Luminar' },
   { key: 'PYROCLAST', label: 'Pyroclast' },
-  { key: 'PHANTOM_CORSAIRS', label: 'Phantom Corsairs' },
+  { key: 'WARP_RIDERS', label: 'Warp Riders' },
 ];
 
 // Pull a single field value from a one-line card object literal.

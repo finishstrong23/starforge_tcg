@@ -240,10 +240,10 @@ export const HERO_CRYSTALLINE: HeroDefinition = {
  * PHANTOM CORSAIRS - Captain Shadowvane
  * Hero Power: "Ghost Shot" - Deal 2 damage. Draw a card.
  */
-export const HERO_PHANTOM_CORSAIRS: HeroDefinition = {
+export const HERO_WARP_RIDERS: HeroDefinition = {
   id: 'hero_corsairs_shadowvane',
   name: 'Captain Shadowvane',
-  race: Race.PHANTOM_CORSAIRS,
+  race: Race.WARP_RIDERS,
   maxHealth: 30,
   heroPower: createHeroPower(
     'hp_ghost_shot',
@@ -369,7 +369,7 @@ export const LAUNCH_HEROES: HeroDefinition[] = [
   HERO_PYROCLAST,
   HERO_COGSMITHS,
   HERO_LUMINAR,
-  HERO_PHANTOM_CORSAIRS,
+  HERO_WARP_RIDERS,
 ];
 
 /**
@@ -382,7 +382,7 @@ export const ALL_HEROES: HeroDefinition[] = [
   HERO_VOIDBORN,
   HERO_BIOTITANS,
   HERO_CRYSTALLINE,
-  HERO_PHANTOM_CORSAIRS,
+  HERO_WARP_RIDERS,
   HERO_HIVEMIND,
   HERO_ASTROMANCERS,
   HERO_CHRONOBOUND,

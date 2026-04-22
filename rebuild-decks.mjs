@@ -45,7 +45,7 @@ const RACE_COMBAT_WEIGHTS = {
     BARRIER: 5, GUARDIAN: 5, DRAIN: 3, DOUBLE_STRIKE: 3,
     SWIFT: 2, CLOAK: 1, BLITZ: 1, LETHAL: 1
   },
-  PHANTOM_CORSAIRS: {
+  WARP_RIDERS: {
     SWIFT: 5, CLOAK: 4, BLITZ: 3, DRAIN: 4,
     LETHAL: 2, DOUBLE_STRIKE: 1, BARRIER: 1, GUARDIAN: 1
   },
@@ -114,7 +114,7 @@ const WIN_RATE_BALANCE_BIAS = {
   LUMINAR:          -40,  // 61.1% → moderate nerf
   BIOTITANS:        -35,  // 60.2% → moderate nerf
   CRYSTALLINE:      -15,  // 53.7% → slight nerf
-  PHANTOM_CORSAIRS:  20,  // 45.3% → slight buff
+  WARP_RIDERS:  20,  // 45.3% → slight buff
   HIVEMIND:          40,  // 39.7% → moderate buff
   VOIDBORN:          40,  // 39.6% → moderate buff
   ASTROMANCERS:      80,  // 29.6% → strong buff
@@ -315,7 +315,7 @@ function main() {
   console.log('Step 2: Parsing card pools...');
 
   const races = ['COGSMITHS', 'LUMINAR', 'PYROCLAST', 'VOIDBORN', 'BIOTITANS',
-                 'CRYSTALLINE', 'PHANTOM_CORSAIRS', 'HIVEMIND', 'ASTROMANCERS', 'CHRONOBOUND'];
+                 'CRYSTALLINE', 'WARP_RIDERS', 'HIVEMIND', 'ASTROMANCERS', 'CHRONOBOUND'];
 
   const racePools = {};
   for (const race of races) {

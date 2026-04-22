@@ -998,7 +998,7 @@ const CRYSTALLINE = [
 console.log('  CRYSTALLINE: 30 cards defined');
 
 // ============================================================================
-// PHANTOM_CORSAIRS — Ghost Pirates (SWIFT/CLOAK/BLITZ/DRAIN/LETHAL)
+// WARP_RIDERS — Ghost Pirates (SWIFT/CLOAK/BLITZ/DRAIN/LETHAL)
 // Theme: Speed, stealth, hit-and-run piracy
 // Starforge: PHANTOM ADMIRAL (line 15617)
 // ============================================================================
@@ -1007,7 +1007,7 @@ const PC_STARFORGE = `  {
     name: 'PHANTOM ADMIRAL',
     cost: 7,
     type: CardType.MINION,
-    race: Race.PHANTOM_CORSAIRS,
+    race: Race.WARP_RIDERS,
     rarity: CardRarity.EPIC,
     attack: 6,
     health: 8,
@@ -1040,119 +1040,119 @@ const PC_STARFORGE = `  {
     set: 'CORE',
   }`;
 
-const PHANTOM_CORSAIRS = [
+const WARP_RIDERS = [
   // --- SPELLS (5) ---
-  spell('pc_s1', 'Cutlass Strike', 1, 'PHANTOM_CORSAIRS', 'COMMON', [],
+  spell('pc_s1', 'Cutlass Strike', 1, 'WARP_RIDERS', 'COMMON', [],
     [E('DAMAGE', PLAY, CHOSEN, dmg(3))],
     'Quick. Clean. Deadly.', 'Deal 3 damage'),
-  spell('pc_s2', 'Plunder', 2, 'PHANTOM_CORSAIRS', 'COMMON', [],
+  spell('pc_s2', 'Plunder', 2, 'WARP_RIDERS', 'COMMON', [],
     [E('DRAW', PLAY, NONE, draw(2))],
     'Take everything. Leave nothing.', 'Draw 2 cards'),
-  spell('pc_s3', 'Ghostly Broadside', 3, 'PHANTOM_CORSAIRS', 'RARE', [],
+  spell('pc_s3', 'Ghostly Broadside', 3, 'WARP_RIDERS', 'RARE', [],
     [E('DAMAGE', PLAY, ALL_EM, dmg(2))],
     'You can\'t dodge ghost cannonballs.', 'Deal 2 damage to all enemy minions'),
-  spell('pc_s4', 'Boarding Action', 4, 'PHANTOM_CORSAIRS', 'COMMON', [],
+  spell('pc_s4', 'Boarding Action', 4, 'WARP_RIDERS', 'COMMON', [],
     [E('DAMAGE', PLAY, CHOSEN, dmg(4)), E('SUMMON', PLAY, NONE, summon(1))],
     'BOARD THEM! BOARD EVERYTHING!', 'Deal 4 damage. Summon a 2/2 Phantom Pirate'),
-  spell('pc_s5', 'Cannon Barrage', 5, 'PHANTOM_CORSAIRS', 'RARE', [],
+  spell('pc_s5', 'Cannon Barrage', 5, 'WARP_RIDERS', 'RARE', [],
     [E('DAMAGE', PLAY, ALL_E, dmg(3))],
     'FIRE! FIRE EVERYTHING!', 'Deal 3 damage to all enemies'),
   // --- STRUCTURES (3) ---
-  structure('pc_st1', 'Smuggler\'s Cache', 2, 'PHANTOM_CORSAIRS', 'COMMON', ['T:DEPLOY'],
+  structure('pc_st1', 'Smuggler\'s Cache', 2, 'WARP_RIDERS', 'COMMON', ['T:DEPLOY'],
     [E('DRAW', PLAY, NONE, draw(1))],
     'Hidden. Valuable. Probably stolen.', 'Start of turn: Draw a card'),
-  structure('pc_st2', 'Ghost Cannon', 3, 'PHANTOM_CORSAIRS', 'COMMON', ['T:DEPLOY'],
+  structure('pc_st2', 'Ghost Cannon', 3, 'WARP_RIDERS', 'COMMON', ['T:DEPLOY'],
     [E('DAMAGE', PLAY, RAND_E, dmg(2))],
     'Fires ghost bullets. Still hurts.', 'Start of turn: Deal 2 damage to a random enemy'),
-  structure('pc_st3', 'Pirate Hideout', 4, 'PHANTOM_CORSAIRS', 'RARE', ['T:DEPLOY'],
+  structure('pc_st3', 'Pirate Hideout', 4, 'WARP_RIDERS', 'RARE', ['T:DEPLOY'],
     [E('SUMMON', PLAY, NONE, summon(1))],
     'Arr! Everyone needs a base of operations.', 'Start of turn: Summon a 1/1 Phantom Pirate'),
   // --- MINIONS (21 + 1 starforge = 22) ---
   // 1-cost (4)
-  minion('pc_m1', 'Deckhand Shade', 1, 'PHANTOM_CORSAIRS', 'COMMON', 2, 1, 'PIRATE',
+  minion('pc_m1', 'Deckhand Shade', 1, 'WARP_RIDERS', 'COMMON', 2, 1, 'PIRATE',
     ['CLOAK'],
     [], 'Invisible deckhand. Still does chores.', 'CLOAK'),
-  minion('pc_m2', 'Cutthroat Imp', 1, 'PHANTOM_CORSAIRS', 'COMMON', 1, 2, 'PIRATE',
+  minion('pc_m2', 'Cutthroat Imp', 1, 'WARP_RIDERS', 'COMMON', 1, 2, 'PIRATE',
     ['SWIFT', 'LETHAL'],
     [], 'Small knife. Big ambition.', 'SWIFT. LETHAL'),
-  minion('pc_m3', 'Ghost Parrot', 1, 'PHANTOM_CORSAIRS', 'COMMON', 2, 2, 'PIRATE',
+  minion('pc_m3', 'Ghost Parrot', 1, 'WARP_RIDERS', 'COMMON', 2, 2, 'PIRATE',
     ['SWIFT'],
     [], 'Polly wants a SOUL.', 'SWIFT'),
-  minion('pc_m4', 'Smuggler Scout', 1, 'PHANTOM_CORSAIRS', 'COMMON', 1, 3, 'PIRATE',
+  minion('pc_m4', 'Smuggler Scout', 1, 'WARP_RIDERS', 'COMMON', 1, 3, 'PIRATE',
     ['CLOAK', 'T:DEPLOY'],
     [E('DRAW', PLAY, NONE, draw(1))],
     'Sees everything. Tells nobody.', 'CLOAK. Draw a card'),
   // 2-cost (4)
-  minion('pc_m5', 'Phantom Cutlass', 2, 'PHANTOM_CORSAIRS', 'COMMON', 3, 2, 'PIRATE',
+  minion('pc_m5', 'Phantom Cutlass', 2, 'WARP_RIDERS', 'COMMON', 3, 2, 'PIRATE',
     ['SWIFT', 'BLITZ'],
     [], 'A sword that swings itself. Terrifying.', 'SWIFT. BLITZ'),
-  minion('pc_m6', 'Spectral Swashbuckler', 2, 'PHANTOM_CORSAIRS', 'COMMON', 2, 3, 'PIRATE',
+  minion('pc_m6', 'Spectral Swashbuckler', 2, 'WARP_RIDERS', 'COMMON', 2, 3, 'PIRATE',
     ['CLOAK', 'DRAIN'],
     [], 'Buckles swashes. Swashes buckles. Both ghostily.', 'CLOAK. DRAIN'),
-  minion('pc_m7', 'Corsair Raider', 2, 'PHANTOM_CORSAIRS', 'COMMON', 3, 3, 'PIRATE',
+  minion('pc_m7', 'Corsair Raider', 2, 'WARP_RIDERS', 'COMMON', 3, 3, 'PIRATE',
     ['SWIFT'],
     [], 'Raids. Pillages. Takes breaks for grog.', 'SWIFT'),
-  minion('pc_m8', 'Ghostly Rigger', 2, 'PHANTOM_CORSAIRS', 'COMMON', 2, 4, 'PIRATE',
+  minion('pc_m8', 'Ghostly Rigger', 2, 'WARP_RIDERS', 'COMMON', 2, 4, 'PIRATE',
     ['DRAIN', 'T:DEPLOY'],
     [E('DAMAGE', PLAY, RAND_E, dmg(1))],
     'Rigs the ship. Rigs the fight.', 'DRAIN. Deal 1 damage to a random enemy'),
   // 3-cost (4)
-  minion('pc_m9', 'Phantom Dagger', 3, 'PHANTOM_CORSAIRS', 'RARE', 3, 3, 'PIRATE',
+  minion('pc_m9', 'Phantom Dagger', 3, 'WARP_RIDERS', 'RARE', 3, 3, 'PIRATE',
     ['CLOAK', 'LETHAL', 'SWIFT'],
     [], 'Three keywords of pure pirate perfection.', 'CLOAK. LETHAL. SWIFT'),
-  minion('pc_m10', 'Spectral Gunner', 3, 'PHANTOM_CORSAIRS', 'COMMON', 3, 4, 'PIRATE',
+  minion('pc_m10', 'Spectral Gunner', 3, 'WARP_RIDERS', 'COMMON', 3, 4, 'PIRATE',
     ['SWIFT', 'T:DEPLOY'],
     [E('DAMAGE', PLAY, RAND_E, dmg(2))],
     'Shoots first. Doesn\'t ask questions. Is a ghost.', 'SWIFT. Deal 2 damage to a random enemy'),
-  minion('pc_m11', 'Ghost Navigator', 3, 'PHANTOM_CORSAIRS', 'COMMON', 2, 5, 'PIRATE',
+  minion('pc_m11', 'Ghost Navigator', 3, 'WARP_RIDERS', 'COMMON', 2, 5, 'PIRATE',
     ['CLOAK', 'DRAIN'],
     [], 'Navigates the void. Drains the living.', 'CLOAK. DRAIN'),
-  minion('pc_m12', 'Corsair Duelist', 3, 'PHANTOM_CORSAIRS', 'COMMON', 4, 3, 'PIRATE',
+  minion('pc_m12', 'Corsair Duelist', 3, 'WARP_RIDERS', 'COMMON', 4, 3, 'PIRATE',
     ['BLITZ', 'DRAIN'],
     [], 'Challenges you. Beats you. Heals from it.', 'BLITZ. DRAIN'),
   // 4-cost (3)
-  minion('pc_m13', 'Phantom Boarder', 4, 'PHANTOM_CORSAIRS', 'COMMON', 4, 5, 'PIRATE',
+  minion('pc_m13', 'Phantom Boarder', 4, 'WARP_RIDERS', 'COMMON', 4, 5, 'PIRATE',
     ['SWIFT', 'CLOAK', 'T:DEPLOY'],
     [E('DAMAGE', PLAY, RAND_E, dmg(2))],
     'Boards your ship. Boards your SOUL.', 'SWIFT. CLOAK. Deal 2 damage to a random enemy'),
-  minion('pc_m14', 'Spectral Cannoneer', 4, 'PHANTOM_CORSAIRS', 'RARE', 5, 4, 'PIRATE',
+  minion('pc_m14', 'Spectral Cannoneer', 4, 'WARP_RIDERS', 'RARE', 5, 4, 'PIRATE',
     ['BLITZ', 'DRAIN', 'T:DEPLOY'],
     [E('DAMAGE', PLAY, RAND_E, dmg(2))],
     'Ghost cannons. Real damage.', 'BLITZ. DRAIN. Deal 2 damage to a random enemy'),
-  minion('pc_m15', 'Ghost Captain', 4, 'PHANTOM_CORSAIRS', 'COMMON', 4, 5, 'PIRATE',
+  minion('pc_m15', 'Ghost Captain', 4, 'WARP_RIDERS', 'COMMON', 4, 5, 'PIRATE',
     ['SWIFT', 'DRAIN', 'LETHAL'],
     [], 'Captains the ghost ship. And your nightmares.', 'SWIFT. DRAIN. LETHAL'),
   // 5-cost (2)
-  minion('pc_m16', 'Phantom Duelist', 5, 'PHANTOM_CORSAIRS', 'COMMON', 5, 6, 'PIRATE',
+  minion('pc_m16', 'Phantom Duelist', 5, 'WARP_RIDERS', 'COMMON', 5, 6, 'PIRATE',
     ['SWIFT', 'CLOAK', 'DRAIN'],
     [], 'Fights you. You can\'t fight back. Space pirate honor.', 'SWIFT. CLOAK. DRAIN'),
-  minion('pc_m17', 'Dread Pirate', 5, 'PHANTOM_CORSAIRS', 'RARE', 6, 5, 'PIRATE',
+  minion('pc_m17', 'Dread Pirate', 5, 'WARP_RIDERS', 'RARE', 6, 5, 'PIRATE',
     ['BLITZ', 'DRAIN', 'T:DEPLOY'],
     [E('DAMAGE', PLAY, RAND_E, dmg(3))],
     'The name strikes fear. The sword strikes harder.', 'BLITZ. DRAIN. Deal 3 damage to a random enemy'),
   // 6-cost (2)
-  minion('pc_m18', 'Ghost Galleon', 6, 'PHANTOM_CORSAIRS', 'COMMON', 6, 7, 'PIRATE',
+  minion('pc_m18', 'Ghost Galleon', 6, 'WARP_RIDERS', 'COMMON', 6, 7, 'PIRATE',
     ['SWIFT', 'CLOAK', 'DRAIN', 'T:DEPLOY'],
     [E('SUMMON', PLAY, NONE, summon(2))],
     'A ship that sails itself. Through WALLS.', 'SWIFT. CLOAK. DRAIN. Summon two 1/1 Phantom Pirates'),
-  minion('pc_m19', 'Corsair Flagship', 6, 'PHANTOM_CORSAIRS', 'RARE', 5, 8, 'PIRATE',
+  minion('pc_m19', 'Corsair Flagship', 6, 'WARP_RIDERS', 'RARE', 5, 8, 'PIRATE',
     ['SWIFT', 'DRAIN', 'BLITZ', 'T:DEPLOY'],
     [E('DAMAGE', PLAY, ALL_EM, dmg(2))],
     'The pride of the ghost fleet.', 'SWIFT. DRAIN. BLITZ. Deal 2 damage to all enemy minions'),
   // 7-cost = STARFORGE (inserted separately)
   // 8-cost (1)
-  minion('pc_m20', 'Kraken of the Damned', 8, 'PHANTOM_CORSAIRS', 'EPIC', 8, 8, 'PIRATE',
+  minion('pc_m20', 'Kraken of the Damned', 8, 'WARP_RIDERS', 'EPIC', 8, 8, 'PIRATE',
     ['SWIFT', 'CLOAK', 'DRAIN', 'LETHAL', 'T:DEPLOY'],
     [E('DAMAGE', PLAY, ALL_EM, dmg(3))],
     'Release the kraken. The GHOST kraken.', 'SWIFT. CLOAK. DRAIN. LETHAL. Deal 3 damage to all enemy minions'),
   // 9-cost (1)
-  minion('pc_m21', 'Dreadnought Specter', 9, 'PHANTOM_CORSAIRS', 'EPIC', 8, 10, 'PIRATE',
+  minion('pc_m21', 'Dreadnought Specter', 9, 'WARP_RIDERS', 'EPIC', 8, 10, 'PIRATE',
     ['SWIFT', 'DRAIN', 'BLITZ', 'CLOAK', 'T:DEPLOY'],
     [E('DAMAGE', PLAY, RAND_E, dmg(5))],
     'The final ship. The last voyage. YOUR last voyage.', 'SWIFT. DRAIN. BLITZ. CLOAK. Deal 5 damage to a random enemy'),
 ];
 
-console.log('  PHANTOM_CORSAIRS: 30 cards defined');
+console.log('  WARP_RIDERS: 30 cards defined');
 
 // ============================================================================
 // HIVEMIND — Swarm & Last Words Bombs (LETHAL/DRAIN/SWIFT/BARRIER/BLITZ/DS + LAST_WORDS)
@@ -1721,7 +1721,7 @@ const decks = {
   VOIDBORN: buildDeck('VOIDBORN', VOIDBORN, [VOIDBORN_STARFORGE]),
   BIOTITANS: buildDeck('BIOTITANS', BIOTITANS, [BIOTITANS_STARFORGE]),
   CRYSTALLINE: buildDeck('CRYSTALLINE', CRYSTALLINE, [CRYSTALLINE_STARFORGE]),
-  PHANTOM_CORSAIRS: buildDeck('PHANTOM_CORSAIRS', PHANTOM_CORSAIRS, [PC_STARFORGE]),
+  WARP_RIDERS: buildDeck('WARP_RIDERS', WARP_RIDERS, [PC_STARFORGE]),
   HIVEMIND: buildDeck('HIVEMIND', HIVEMIND, [HIVEMIND_STARFORGE_1, HIVEMIND_STARFORGE_2]),
   ASTROMANCERS: buildDeck('ASTROMANCERS', ASTROMANCERS, [ASTRO_STARFORGE]),
   CHRONOBOUND: buildDeck('CHRONOBOUND', CHRONOBOUND, [CHRONO_STARFORGE_1, CHRONO_STARFORGE_2]),
@@ -1740,7 +1740,7 @@ let src = readFileSync(FILE, 'utf8');
 
 const deckOrder = [
   'COGSMITHS', 'LUMINAR', 'PYROCLAST', 'VOIDBORN', 'BIOTITANS',
-  'CRYSTALLINE', 'PHANTOM_CORSAIRS', 'HIVEMIND', 'ASTROMANCERS', 'CHRONOBOUND'
+  'CRYSTALLINE', 'WARP_RIDERS', 'HIVEMIND', 'ASTROMANCERS', 'CHRONOBOUND'
 ];
 
 for (let i = 0; i < deckOrder.length; i++) {

@@ -27,7 +27,7 @@ const RACE_SHEETS = {
   'Voidborn': 'VOIDBORN',
   'Biotitans': 'BIOTITANS',
   'Crystalline': 'CRYSTALLINE',
-  'Phantom Corsairs': 'PHANTOM_CORSAIRS',
+  'Warp Riders': 'WARP_RIDERS',
   'Hivemind': 'HIVEMIND',
   'Astromancers': 'ASTROMANCERS',
   'Chronobound': 'CHRONOBOUND',
@@ -40,7 +40,7 @@ const RACE_PREFIXES = {
   'VOIDBORN': 'void',
   'BIOTITANS': 'bio',
   'CRYSTALLINE': 'crys',
-  'PHANTOM_CORSAIRS': 'pc',
+  'WARP_RIDERS': 'pc',
   'HIVEMIND': 'hive',
   'ASTROMANCERS': 'astro',
   'CHRONOBOUND': 'chrono',
@@ -173,8 +173,8 @@ const RACE_COMBAT_WEIGHTS = {
     BARRIER: 5, GUARDIAN: 5, DRAIN: 3, DOUBLE_STRIKE: 3,
     SWIFT: 2, CLOAK: 1, BLITZ: 1, LETHAL: 1
   },
-  // Phantom Corsairs: "Speed Raiders" — SWIFT + CLOAK + DRAIN evasion (49-53%)
-  PHANTOM_CORSAIRS: {
+  // Warp Riders: "Speed Raiders" — SWIFT + CLOAK + DRAIN evasion (49-53%)
+  WARP_RIDERS: {
     SWIFT: 5, CLOAK: 4, BLITZ: 3, DRAIN: 4,
     LETHAL: 2, DOUBLE_STRIKE: 1, BARRIER: 1, GUARDIAN: 1
   },
@@ -1252,7 +1252,7 @@ function computeDeckPower(deck) {
 }
 
 // Win-rate bias: Based on Round 9 results (spread 58.1%, 6 races in 40-60%).
-// Round 9: Pyroclast fixed (74→59), Phantom Corsairs fixed (34→51).
+// Round 9: Pyroclast fixed (74→59), Warp Riders fixed (34→51).
 // Problems: Biotitans 77.5% (GUARDIAN/LETHAL overflow), Chronobound 19.4% (top-heavy curve),
 // Luminar 36.5% (needs buff), Crystalline 63.8% (still high).
 // Structural fixes: Biotitans weights diversified (GUARDIAN 2→1, LETHAL 3→1),
@@ -1265,7 +1265,7 @@ const WIN_RATE_BALANCE_BIAS = {
   LUMINAR:           0,
   VOIDBORN:          0,
   BIOTITANS:         0,
-  PHANTOM_CORSAIRS:  0,
+  WARP_RIDERS:  0,
   CRYSTALLINE:       0,
   HIVEMIND:          0,
   ASTROMANCERS:      0,
