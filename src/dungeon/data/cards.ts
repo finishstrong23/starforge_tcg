@@ -735,13 +735,258 @@ const LUMINAR_CARDS: CardDefinition[] = [
   },
 ];
 
+// ─── Warp Riders (40 cards) ──────────────────────────────────────────────────
+
+const WARPRIDERS_CARDS: CardDefinition[] = [
+  {
+    id: 'W-001', name: 'Glitch Strike', faction: 'WarpRiders', type: 'Attack', cost: 1,
+    keywords: ['PHASE'], rarity: 'Common',
+    cardText: 'Flux. A: Deal 4 damage. B: Deal 8 damage. C: Deal 6 damage and draw 1 card.',
+    upgradeText: 'Flux. A: Deal 5. B: Deal 10. C: Deal 7 and draw 1.',
+  },
+  {
+    id: 'W-002', name: 'Warp Step', faction: 'WarpRiders', type: 'Skill', cost: 1,
+    keywords: ['PHASE'], rarity: 'Common',
+    cardText: 'Flux. A: Gain 5 Block. B: Gain 3 Block and 1 Energy next turn. C: Gain 7 Block.',
+    upgradeText: 'Flux. A: Gain 7 Block. B: Gain 5 Block and 1 Energy next turn. C: Gain 9 Block.',
+  },
+  {
+    id: 'W-003', name: 'Twist', faction: 'WarpRiders', type: 'Skill', cost: 0,
+    keywords: [], rarity: 'Common',
+    cardText: 'Reroll the state of all Flux cards in your hand.',
+    upgradeText: 'Reroll all Flux cards in hand. The next Flux card you play this turn locks to a state of your choice.',
+  },
+  {
+    id: 'W-004', name: 'Unstable Bolt', faction: 'WarpRiders', type: 'Attack', cost: 1,
+    keywords: [], rarity: 'Common',
+    cardText: 'Deal 3 to 10 damage (random).',
+    upgradeText: 'Deal 5 to 12 damage (random).',
+  },
+  {
+    id: 'W-005', name: 'Pocket Dim', faction: 'WarpRiders', type: 'Skill', cost: 1,
+    keywords: ['CLOAK'], rarity: 'Common',
+    cardText: 'Remove a card from combat. It returns to your hand at the start of next turn.',
+    upgradeText: 'Remove 2 cards from combat. They return to hand next turn.',
+  },
+  {
+    id: 'W-006', name: 'Phase Slash', faction: 'WarpRiders', type: 'Attack', cost: 1,
+    keywords: ['PHASE'], rarity: 'Common',
+    cardText: 'Deal 6 damage. Shuffle this card into your draw pile.',
+    upgradeText: 'Deal 8 damage. Shuffle this card into your draw pile.',
+  },
+  {
+    id: 'W-007', name: 'Echo', faction: 'WarpRiders', type: 'Skill', cost: 1,
+    keywords: [], rarity: 'Common',
+    cardText: 'Add a copy of the last card played this combat to your hand.',
+    upgradeText: 'Add a copy of each of the last 2 cards played this combat to your hand.',
+  },
+  {
+    id: 'W-008', name: 'Spatial Strike', faction: 'WarpRiders', type: 'Attack', cost: 1,
+    keywords: ['PHASE', 'BLITZ'], rarity: 'Common',
+    cardText: 'Flux. A: Deal 8 damage. B: Deal 3 damage twice. C: Deal 5 damage and draw 1 card.',
+    upgradeText: 'Flux. A: Deal 10. B: Deal 4 twice. C: Deal 6 and draw 1.',
+  },
+  {
+    id: 'W-009', name: 'Reality Crack', faction: 'WarpRiders', type: 'Skill', cost: 1,
+    keywords: [], rarity: 'Common',
+    cardText: 'Deal 4 damage to all enemies. Open a random Rift for 2 turns.',
+    upgradeText: 'Deal 5 damage to all enemies. Open 2 random Rifts for 2 turns.',
+  },
+  {
+    id: 'W-010', name: 'Void Whisper', faction: 'WarpRiders', type: 'Skill', cost: 0,
+    keywords: [], rarity: 'Common',
+    cardText: 'Choose one: gain 1 Energy OR draw 2 cards.',
+    upgradeText: 'Gain 1 Energy and draw 1 card.',
+  },
+  {
+    id: 'W-011', name: 'Anomaly', faction: 'WarpRiders', type: 'Attack', cost: 1,
+    keywords: [], rarity: 'Common',
+    cardText: 'Deal 4 to 12 damage (random).',
+    upgradeText: 'Deal 6 to 14 damage (random).',
+  },
+  {
+    id: 'W-012', name: 'Stutter Step', faction: 'WarpRiders', type: 'Skill', cost: 1,
+    keywords: [], rarity: 'Common',
+    cardText: 'Gain 6 Block. Reroll all Flux cards in hand.',
+    upgradeText: 'Gain 8 Block. Reroll all Flux cards in hand.',
+  },
+  {
+    id: 'W-013', name: 'Warped Blade', faction: 'WarpRiders', type: 'Attack', cost: 1,
+    keywords: ['PHASE'], rarity: 'Common',
+    cardText: 'Flux. A: Deal 5 damage. B: Deal 7 damage. C: Deal 6 damage and apply Weak 1.',
+    upgradeText: 'Flux. A: Deal 7. B: Deal 9. C: Deal 8 and apply Weak 1.',
+  },
+  {
+    id: 'W-014', name: 'Fold Space', faction: 'WarpRiders', type: 'Skill', cost: 1,
+    keywords: [], rarity: 'Common',
+    cardText: 'Return a random card from your discard pile to your hand.',
+    upgradeText: 'Return 2 random cards from your discard pile to your hand.',
+  },
+  {
+    id: 'W-015', name: 'Quantum Guard', faction: 'WarpRiders', type: 'Skill', cost: 1,
+    keywords: ['PHASE'], rarity: 'Common',
+    cardText: 'Flux. A: Gain 5 Block. B: Gain 8 Block. C: Gain 3 Block and 3 Block next turn.',
+    upgradeText: 'Flux. A: Gain 7. B: Gain 10. C: Gain 4 and 4 next turn.',
+  },
+  {
+    id: 'W-016', name: 'Dimensional Rift', faction: 'WarpRiders', type: 'Skill', cost: 2,
+    keywords: ['CLOAK'], rarity: 'Common',
+    cardText: 'Open a Cost Rift for 2 turns: 1 random card in your hand costs 0 each turn.',
+    upgradeText: 'Open a Cost Rift for 3 turns: 2 random cards in your hand cost 0 each turn.',
+  },
+  {
+    id: 'W-017', name: 'Probability Wave', faction: 'WarpRiders', type: 'Skill', cost: 1,
+    keywords: [], rarity: 'Uncommon',
+    cardText: 'All Flux cards in your hand display their highest-value state this turn.',
+    upgradeText: 'All Flux cards in your hand lock to their highest-value state for this turn.',
+  },
+  {
+    id: 'W-018', name: 'Event Horizon', faction: 'WarpRiders', type: 'Power', cost: 2,
+    keywords: ['PHASE'], rarity: 'Uncommon',
+    cardText: 'Flux cards in your hand no longer shift at turn start.',
+    upgradeText: 'Flux cards in your hand no longer shift. Gain 2 Block at turn start.',
+  },
+  {
+    id: 'W-019', name: 'Chaos Bolt', faction: 'WarpRiders', type: 'Attack', cost: 1,
+    keywords: [], rarity: 'Uncommon',
+    cardText: 'Deal 6 to 20 damage (random).',
+    upgradeText: 'Deal 8 to 24 damage (random).',
+  },
+  {
+    id: 'W-020', name: 'Rift Walker', faction: 'WarpRiders', type: 'Skill', cost: 2,
+    keywords: ['CLOAK'], rarity: 'Uncommon',
+    cardText: 'Open 3 random Rifts for 2 turns each.',
+    upgradeText: 'Open 3 random Rifts for 3 turns each.',
+  },
+  {
+    id: 'W-021', name: 'Paradox Strike', faction: 'WarpRiders', type: 'Attack', cost: 2,
+    keywords: [], rarity: 'Uncommon',
+    cardText: 'Deal 14 damage. 50% chance to take 6 self damage.',
+    upgradeText: 'Deal 18 damage. 50% chance to take 4 self damage.',
+  },
+  {
+    id: 'W-022', name: 'Time Skip', faction: 'WarpRiders', type: 'Skill', cost: 2,
+    keywords: ['CLOAK'], rarity: 'Uncommon',
+    cardText: 'Skip the next turn of one enemy. Exhaust.',
+    upgradeText: 'Skip the next turn of up to 2 enemies. Exhaust.',
+  },
+  {
+    id: 'W-023', name: 'Tesseract', faction: 'WarpRiders', type: 'Skill', cost: 2,
+    keywords: ['PHASE'], rarity: 'Uncommon',
+    cardText: 'Choose a Flux card in your hand. Lock it to the state of your choice for the rest of combat.',
+    upgradeText: 'Choose 2 Flux cards in your hand. Lock each to a state of your choice for the rest of combat.',
+  },
+  {
+    id: 'W-024', name: 'Dimensional Shield', faction: 'WarpRiders', type: 'Skill', cost: 2,
+    keywords: ['PHASE', 'BARRIER'], rarity: 'Uncommon',
+    cardText: 'Flux. A: Gain 20 Block. B: Gain 10 Block and Retain. C: Gain 15 Block and 1 Energy next turn.',
+    upgradeText: 'Flux. A: Gain 24. B: Gain 12 and Retain. C: Gain 18 and 1 Energy next turn.',
+  },
+  {
+    id: 'W-025', name: 'Warp Strike', faction: 'WarpRiders', type: 'Attack', cost: 2,
+    keywords: ['PHASE', 'BLITZ'], rarity: 'Uncommon',
+    cardText: 'Flux. A: Deal 18 damage. B: Deal 10 damage and apply Vulnerable 2. C: Deal 12 damage twice.',
+    upgradeText: 'Flux. A: Deal 22. B: Deal 12 and Vulnerable 3. C: Deal 14 twice.',
+  },
+  {
+    id: 'W-026', name: 'Probability Reset', faction: 'WarpRiders', type: 'Skill', cost: 1,
+    keywords: [], rarity: 'Uncommon',
+    cardText: 'Reroll all Flux cards in your hand and draw pile. Draw 2 cards.',
+    upgradeText: 'Reroll all Flux cards in hand, draw, and discard. Draw 2 cards.',
+  },
+  {
+    id: 'W-027', name: 'Entropy', faction: 'WarpRiders', type: 'Power', cost: 2,
+    keywords: [], rarity: 'Uncommon',
+    cardText: "Enemies' telegraphed damage values are randomized each turn within their range.",
+    upgradeText: "Enemies' damage is randomized and reduced by 1 per hit.",
+  },
+  {
+    id: 'W-028', name: 'Collapsing Star', faction: 'WarpRiders', type: 'Attack', cost: 2,
+    keywords: [], rarity: 'Uncommon',
+    cardText: 'Deal 8 to 20 damage to all enemies (random). Take 3 self damage.',
+    upgradeText: 'Deal 10 to 24 damage to all enemies. Take 3 self damage.',
+  },
+  {
+    id: 'W-029', name: 'Singularity', faction: 'WarpRiders', type: 'Power', cost: 2,
+    keywords: ['PHASE'], rarity: 'Uncommon',
+    cardText: 'Flux. A: Draw 1 extra card each turn. B: Gain 1 extra Energy each turn. C: Gain 4 Block each turn.',
+    upgradeText: 'Flux. A: Draw 2 extra. B: Gain 2 Energy. C: Gain 6 Block each turn.',
+  },
+  {
+    id: 'W-030', name: 'Mirror Self', faction: 'WarpRiders', type: 'Skill', cost: 2,
+    keywords: [], rarity: 'Uncommon',
+    cardText: 'Add a copy of 2 cards from your hand to your hand. They cost 0 this turn.',
+    upgradeText: 'Add a copy of 3 cards from your hand to your hand. They cost 0 this turn.',
+  },
+  {
+    id: 'W-031', name: 'The Archer', faction: 'WarpRiders', type: 'Attack', cost: 2,
+    keywords: ['SWIFT'], rarity: 'Rare',
+    cardText: 'Deal 20 damage to one target. Ignore all evasion and positional effects. Your next Flux card locks to its current state.',
+    upgradeText: 'Deal 24 damage to one target. Ignore all evasion and positional effects. Your next 2 Flux cards lock to their current states.',
+  },
+  {
+    id: 'W-032', name: 'Cosmic Choir', faction: 'WarpRiders', type: 'Power', cost: 3,
+    keywords: ['PHASE'], rarity: 'Rare',
+    cardText: 'Whenever a Flux card in your hand shifts state, deal 3 damage to a random enemy and gain 1 Block.',
+    upgradeText: 'Whenever a Flux card in your hand shifts state, deal 5 damage to a random enemy and gain 2 Block.',
+  },
+  {
+    id: 'W-033', name: 'The Burning Face of the World', faction: 'WarpRiders', type: 'Attack', cost: 3,
+    keywords: [], rarity: 'Rare',
+    cardText: 'Deal 40 damage to all enemies. Apply Vulnerable 2 to all. Open 3 random Rifts for 2 turns. Exhaust.',
+    upgradeText: 'Deal 55 damage to all enemies. Apply Vulnerable 3 to all. Open 4 random Rifts for 2 turns. Exhaust.',
+  },
+  {
+    id: 'W-034', name: 'Mistress of the Mysteries', faction: 'WarpRiders', type: 'Power', cost: 2,
+    keywords: ['CLOAK'], rarity: 'Rare',
+    cardText: 'At start of each turn, reveal the top card of your draw pile. Once per turn, you may play that card from the top of your draw pile for 1 less Energy (min 0).',
+    upgradeText: 'At start of each turn, reveal the top 2 cards. Once per turn, play either for 1 less Energy (min 0).',
+  },
+  {
+    id: 'W-035', name: 'Omniverse Slash', faction: 'WarpRiders', type: 'Attack', cost: 3,
+    keywords: ['BLITZ'], rarity: 'Rare',
+    cardText: 'Deal 8 damage to target 5 times. Each hit independently has a 50% chance to deal double damage.',
+    upgradeText: 'Deal 10 damage to target 5 times. Each hit has a 50% chance to deal double damage.',
+  },
+  {
+    id: 'W-036', name: 'Rift Master', faction: 'WarpRiders', type: 'Power', cost: 3,
+    keywords: ['CLOAK'], rarity: 'Rare',
+    cardText: 'All Rifts you open last twice as long and their effects are doubled.',
+    upgradeText: 'All Rifts you open last three times as long and their effects are tripled.',
+  },
+  {
+    id: 'W-037', name: 'Schrödinger', faction: 'WarpRiders', type: 'Skill', cost: 2,
+    keywords: ['PHASE'], rarity: 'Rare',
+    cardText: 'This turn: all damage dealt and taken is multiplied by 0 or 2 (50/50 roll). Exhaust.',
+    upgradeText: 'This turn: all damage dealt and taken is multiplied by 0 or 2 (33/66 in your favor). Exhaust.',
+  },
+  {
+    id: 'W-038', name: 'Chrono Break', faction: 'WarpRiders', type: 'Skill', cost: 3,
+    keywords: ['PHASE'], rarity: 'Rare',
+    cardText: 'Replay every card play from your previous turn in the same order. Exhaust.',
+    upgradeText: 'Replay every card play from your previous 2 turns in order. Exhaust.',
+  },
+  {
+    id: 'W-039', name: 'Reality Anchor', faction: 'WarpRiders', type: 'Power', cost: 2,
+    keywords: ['PHASE'], rarity: 'Rare',
+    cardText: 'At start of each turn, lock one Flux card in your hand to a state of your choice.',
+    upgradeText: 'At start of each turn, lock 2 Flux cards in your hand to states of your choice.',
+  },
+  {
+    id: 'W-040', name: 'Genesis Bolt', faction: 'WarpRiders', type: 'Attack', cost: 3,
+    keywords: ['BLITZ'], rarity: 'Rare',
+    cardText: 'Deal 25 damage to all enemies. Apply Weak 2, Vulnerable 2, and 4 Burn to all enemies. Open a Genesis Rift for 1 turn (all cards cost -1 Energy).',
+    upgradeText: 'Deal 30 damage to all enemies. Apply Weak 3, Vulnerable 3, and 5 Burn. Open 2 Genesis Rifts.',
+  },
+];
+
 // ─── Pool & helpers ───────────────────────────────────────────────────────────
 
 export const CARD_POOL: CardDefinition[] = [
   ...COGSMITHS_CARDS,
   ...PYROCLAST_CARDS,
   ...LUMINAR_CARDS,
-  // WarpRiders added in next phase
+  ...WARPRIDERS_CARDS,
 ];
 
 export const getCardsByFaction = (faction: Faction): CardDefinition[] =>
