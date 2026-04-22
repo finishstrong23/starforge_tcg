@@ -17,3 +17,22 @@ export {
   ALL_ROGUELITE_CARDS,
   CARD_BY_ID,
 } from './cards';
+export {
+  SplitMix64,
+  createNewRun,
+  materializeStarterDeck,
+  saveCheckpoint,
+  resumeLatestRun,
+  endRun,
+} from './engine';
+export type { CreateRunOptions } from './engine';
+export {
+  IndexedDBAdapter,
+  InMemoryAdapter,
+  RunStore,
+  MetaStore,
+  createPersistence,
+  RUNS_DB_NAME,
+  META_DB_NAME,
+} from './persistence';
+export type { StorageAdapter, RoguelitePersistence } from './persistence';
