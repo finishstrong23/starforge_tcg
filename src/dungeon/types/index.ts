@@ -1,7 +1,7 @@
 // ─── CARD TYPES ────────────────────────────────────────────────────────────
 export type Faction = 'Cogsmiths' | 'Pyroclast' | 'Luminar' | 'WarpRiders';
-export type CardType = 'Minion' | 'Spell' | 'Structure';
-export type Rarity = 'Common' | 'Rare' | 'Epic' | 'Legendary';
+export type CardType = 'Minion' | 'Spell' | 'Structure' | 'Attack' | 'Skill' | 'Power' | 'Augment';
+export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary';
 export type Keyword =
   | 'LAST_WORDS'
   | 'IMMOLATE'
