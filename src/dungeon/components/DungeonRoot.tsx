@@ -77,7 +77,7 @@ const s = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-  },
+  } as React.CSSProperties,
   headerRow: {
     width: '100%',
     maxWidth: '1200px',
@@ -86,7 +86,7 @@ const s = {
     alignItems: 'flex-start',
     marginBottom: '2rem',
   },
-  titleBlock: { display: 'flex', flexDirection: 'column', gap: '0.35rem' },
+  titleBlock: { display: 'flex', flexDirection: 'column', gap: '0.35rem' } as React.CSSProperties,
   title: {
     fontSize: '2.2rem',
     letterSpacing: '0.18em',
@@ -178,7 +178,7 @@ const s = {
     gridTemplateColumns: '1fr 1fr',
     gap: '1.5rem',
   },
-  detailCol: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
+  detailCol: { display: 'flex', flexDirection: 'column', gap: '0.75rem' } as React.CSSProperties,
   detailHeader: (accent: string): React.CSSProperties => ({
     fontSize: '0.7rem',
     letterSpacing: '0.25em',
@@ -192,7 +192,7 @@ const s = {
     opacity: 0.85,
     margin: 0,
   },
-  deckList: { display: 'flex', flexDirection: 'column', gap: '0.35rem' },
+  deckList: { display: 'flex', flexDirection: 'column', gap: '0.35rem' } as React.CSSProperties,
   deckRow: {
     display: 'flex',
     alignItems: 'baseline',
@@ -239,7 +239,7 @@ const s = {
     letterSpacing: '0.1em',
     maxWidth: '460px',
     textAlign: 'right',
-  },
+  } as React.CSSProperties,
 };
 
 // ─── Detail panel for the selected faction ──────────────────────────────────

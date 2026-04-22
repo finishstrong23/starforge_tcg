@@ -1,39 +1,37 @@
-// Map state types. Phase 2 defines the shape needed for persistence to
-// round-trip; Phase 3 (map generator) populates this with real data
-// derived from the map-generation-algorithm.md spec. Keep fields loose
-// enough that the Phase 3 port of map_generator_reference.py can fill
-// them without further shape changes.
+// Map state types. Finalised by Phase 3 (map generator) to match the
+// output shape of map-generation-algorithm.md. Row/node structure mirrors
+// the MapGraph → Row → Node types from the spec.
 
 export type NodeType =
-  | 'combat'       // standard monster fight
-  | 'elite'        // hard fight, better rewards
-  | 'rest'         // heal or upgrade
-  | 'shop'         // buy cards, relics, potions
-  | 'anomaly'      // design-doc term for event/choice rooms
-  | 'boss'         // act boss
-  | 'entry'        // row-0 entry point (always combat per design)
-  | 'treasure';    // mid-act chest (if the map spec adds it)
+  | 'combat'    // standard monster fight
+  | 'elite'     // hard fight, better rewards
+  | 'rest'      // heal or upgrade
+  | 'shop'      // buy cards, relics, potions
+  | 'anomaly'   // event / choice room
+  | 'boss'      // act boss
+  | 'entry';    // row-1 entry marker
 
 export interface MapNode {
-  id: string;                   // unique within a RunState across all acts
-  actNumber: 1 | 2 | 3;
-  row: number;                  // 0..11 for 12 steps per act
-  col: number;                  // column within row (variable)
+  id: string;               // stable within a map, e.g. "r7n2"
+  row: number;              // 1..15 (1-indexed, matches spec)
+  x: number;                // 0.0..1.0 horizontal position
   type: NodeType;
+  outgoingEdges: string[];  // IDs of nodes in the next row this connects to
   visited: boolean;
-  connections: string[];        // ids of next-row nodes this connects to
-  // Optional metadata filled in by Phase 3 (enemy template, anomaly id,
-  // shop seed, etc.). Kept as a loose record so Phase 2 doesn't have to
-  // know the map spec yet.
   meta?: Record<string, unknown>;
+}
+
+export interface MapRow {
+  index: number;    // 1..15 (matches node.row)
+  nodes: MapNode[];
 }
 
 export interface ActMap {
   actNumber: 1 | 2 | 3;
-  // Deterministic seed string used to generate this map. Derived from
-  // RunState.seed; preserved so the generator can be re-run and the
-  // exact same map is reproduced.
+  // Hex representation of the numeric seed used to generate this map.
+  // Stored so the graph can be regenerated identically on load without
+  // persisting the full edge list (per implementation note #5 in the spec).
   actSeed: string;
-  nodes: MapNode[];
+  rows: MapRow[];
   completed: boolean;
 }

@@ -24,6 +24,11 @@ export {
   saveCheckpoint,
   resumeLatestRun,
   endRun,
+  generateActMap,
+  getAvailableNodes,
+  visitNode,
+  buildNodeIndex,
+  MAP_CONFIG,
 } from './engine';
 export type { CreateRunOptions } from './engine';
 export {

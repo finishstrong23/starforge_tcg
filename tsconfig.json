@@ -25,6 +25,8 @@
     "noImplicitOverride": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
+    "types": ["node", "jest"],
+    "ignoreDeprecations": "6.0",
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],

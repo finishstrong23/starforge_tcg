@@ -7,3 +7,10 @@ export {
   endRun,
 } from './run';
 export type { CreateRunOptions } from './run';
+export {
+  generateActMap,
+  getAvailableNodes,
+  visitNode,
+  buildNodeIndex,
+  MAP_CONFIG,
+} from './mapgen';

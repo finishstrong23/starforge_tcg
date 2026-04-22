@@ -17,7 +17,7 @@ export {
 } from './faction_mechanics';
 export type { StarterDeck, StarterDeckCard } from './starter_deck';
 export type { StatusEffect, StatusEffectId } from './status_effect';
-export type { NodeType, MapNode, ActMap } from './map_state';
+export type { NodeType, MapNode, MapRow, ActMap } from './map_state';
 export type {
   CombatPhase,
   CombatState,
