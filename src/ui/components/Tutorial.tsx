@@ -88,7 +88,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     title: 'The 4 Galactic Factions',
-    text: 'Each faction has a unique playstyle and Hero Power:\n• Pyroclast — aggressive burn damage, Last Words suicide minions\n• Cogsmiths — Mech synergy, Salvage card advantage\n• Luminar — healing, Guardian walls, Illuminate combos\n• Phantom Corsairs — Cloak stealth, Phase evasion, card theft',
+    text: 'Each faction has a unique playstyle and Hero Power:\n• Pyroclast — aggressive burn damage, Last Words suicide minions\n• Cogsmiths — Mech synergy, Salvage card advantage\n• Luminar — healing, Guardian walls, Illuminate combos\n• Warp Riders — Cloak stealth, Phase evasion, card theft',
     highlight: 'none',
     tip: 'Try all 4 factions to find your playstyle! Each one feels completely different.',
   },

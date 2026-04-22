@@ -46,7 +46,7 @@
     },
     {
       "rank": 7,
-      "faction": "PhantomCorsairs",
+      "faction": "WarpRiders",
       "win_rate": 33.87,
       "wins": 3048,
       "games": 9000
@@ -104,9 +104,9 @@
       "Luminar": 956,
       "draws": 0
     },
-    "Astromancers_vs_PhantomCorsairs": {
+    "Astromancers_vs_WarpRiders": {
       "Astromancers": 426,
-      "PhantomCorsairs": 574,
+      "WarpRiders": 574,
       "draws": 0
     },
     "Astromancers_vs_Pyroclast": {
@@ -144,9 +144,9 @@
       "Luminar": 318,
       "draws": 0
     },
-    "Biotitans_vs_PhantomCorsairs": {
+    "Biotitans_vs_WarpRiders": {
       "Biotitans": 824,
-      "PhantomCorsairs": 176,
+      "WarpRiders": 176,
       "draws": 0
     },
     "Biotitans_vs_Pyroclast": {
@@ -179,9 +179,9 @@
       "Luminar": 838,
       "draws": 0
     },
-    "Chronobound_vs_PhantomCorsairs": {
+    "Chronobound_vs_WarpRiders": {
       "Chronobound": 550,
-      "PhantomCorsairs": 450,
+      "WarpRiders": 450,
       "draws": 0
     },
     "Chronobound_vs_Pyroclast": {
@@ -209,9 +209,9 @@
       "Luminar": 300,
       "draws": 0
     },
-    "Cogsmiths_vs_PhantomCorsairs": {
+    "Cogsmiths_vs_WarpRiders": {
       "Cogsmiths": 841,
-      "PhantomCorsairs": 159,
+      "WarpRiders": 159,
       "draws": 0
     },
     "Cogsmiths_vs_Pyroclast": {
@@ -234,9 +234,9 @@
       "Luminar": 920,
       "draws": 0
     },
-    "Crystalline_vs_PhantomCorsairs": {
+    "Crystalline_vs_WarpRiders": {
       "Crystalline": 388,
-      "PhantomCorsairs": 612,
+      "WarpRiders": 612,
       "draws": 0
     },
     "Crystalline_vs_Pyroclast": {
@@ -254,9 +254,9 @@
       "Luminar": 392,
       "draws": 0
     },
-    "Hivemind_vs_PhantomCorsairs": {
+    "Hivemind_vs_WarpRiders": {
       "Hivemind": 915,
-      "PhantomCorsairs": 85,
+      "WarpRiders": 85,
       "draws": 0
     },
     "Hivemind_vs_Pyroclast": {
@@ -269,9 +269,9 @@
       "Voidborn": 24,
       "draws": 0
     },
-    "Luminar_vs_PhantomCorsairs": {
+    "Luminar_vs_WarpRiders": {
       "Luminar": 827,
-      "PhantomCorsairs": 173,
+      "WarpRiders": 173,
       "draws": 0
     },
     "Luminar_vs_Pyroclast": {
@@ -284,13 +284,13 @@
       "Voidborn": 108,
       "draws": 0
     },
-    "PhantomCorsairs_vs_Pyroclast": {
-      "PhantomCorsairs": 151,
+    "WarpRiders_vs_Pyroclast": {
+      "WarpRiders": 151,
       "Pyroclast": 849,
       "draws": 0
     },
-    "PhantomCorsairs_vs_Voidborn": {
-      "PhantomCorsairs": 668,
+    "WarpRiders_vs_Voidborn": {
+      "WarpRiders": 668,
       "Voidborn": 332,
       "draws": 0
     },

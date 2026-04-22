@@ -41,7 +41,7 @@ function generateSimulatedLeaderboard(profile: PvPProfile): LeaderboardEntry[] {
   ];
 
   const races = [
-    Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS,
+    Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.WARP_RIDERS,
   ];
 
   // Generate AI entries clustered around the player's rating

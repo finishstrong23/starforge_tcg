@@ -674,7 +674,7 @@ export class AIPlayer {
     }
 
     // PHANTOM CORSAIRS: Values CLOAK, PHASE, card theft, tempo
-    if (cardRace === Race.PHANTOM_CORSAIRS || player.race === Race.PHANTOM_CORSAIRS) {
+    if (cardRace === Race.WARP_RIDERS || player.race === Race.WARP_RIDERS) {
       if (hasKeyword(card, CombatKeyword.CLOAK as Keyword)) score += 2;
       if (hasKeyword(card, OriginalKeyword.PHASE as Keyword)) score += 3; // Untargetable = very sticky
       if (cardText.includes('steal') || cardText.includes('copy')) score += 3;

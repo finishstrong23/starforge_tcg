@@ -18,7 +18,7 @@ interface MetaDashboardProps {
 }
 
 const PLAYABLE_RACES = [
-  Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS,
+  Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.WARP_RIDERS,
 ];
 
 type DashboardTab = 'matchups' | 'races' | 'trends' | 'analysis';
@@ -77,7 +77,7 @@ const MatchupMatrix: React.FC<{ stats: GlobalStats }> = ({ stats }) => {
     [Race.PYROCLAST]: 'PYR',
     [Race.VOIDBORN]: 'VOI',
     [Race.BIOTITANS]: 'BIO',
-    [Race.PHANTOM_CORSAIRS]: 'COR',
+    [Race.WARP_RIDERS]: 'COR',
     [Race.CRYSTALLINE]: 'CRY',
     [Race.HIVEMIND]: 'HIV',
     [Race.ASTROMANCERS]: 'AST',

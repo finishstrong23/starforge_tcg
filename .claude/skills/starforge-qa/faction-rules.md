@@ -9,7 +9,7 @@
 6. Hivemind
 7. Luminar
 8. Neutral
-9. Phantom Corsairs
+9. Warp Riders
 10. Pyroclast
 11. Voidborn
 
@@ -197,7 +197,7 @@
 
 ---
 
-## 9. Phantom Corsairs
+## 9. Warp Riders
 
 **Identity:** Spectral pirates who strike from the shadows.
 

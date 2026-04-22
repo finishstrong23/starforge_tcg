@@ -7,7 +7,7 @@
  * CHRONOBOUND 67.8% → nerf harder (remove more LETHAL stacking)
  * HIVEMIND 63.4% → slight nerf
  * PYROCLAST 57.6% → slight nerf
- * PHANTOM_CORSAIRS 47.1% → ok
+ * WARP_RIDERS 47.1% → ok
  * CRYSTALLINE 46.1% → slight buff
  * COGSMITHS 41.4% → needs buff
  * VOIDBORN 40.9% → needs buff  

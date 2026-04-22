@@ -14,7 +14,7 @@
  * HIVEMIND 71.8% — lots of tokens + LETHAL + DRAIN
  * PYROCLAST 56.7% — aggressive BLITZ+DS ok
  * CRYSTALLINE 46.2% — ok-ish, too defensive
- * PHANTOM_CORSAIRS 45.9% — ok-ish, CLOAK not as impactful
+ * WARP_RIDERS 45.9% — ok-ish, CLOAK not as impactful
  * VOIDBORN 40.6% — CLOAK + DRAIN but not enough offense
  * COGSMITHS 36.5% — too defensive
  * BIOTITANS 32.4% — too defensive

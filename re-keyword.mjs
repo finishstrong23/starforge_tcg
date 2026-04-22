@@ -61,8 +61,8 @@ const RACE_COMBAT_WEIGHTS = {
     BARRIER: 5, GUARDIAN: 5, DRAIN: 3, DOUBLE_STRIKE: 3,
     SWIFT: 2, CLOAK: 1, BLITZ: 1, LETHAL: 1
   },
-  // Phantom Corsairs: "Ghost Raiders" — SWIFT + CLOAK evasion (41.7% → more DRAIN)
-  PHANTOM_CORSAIRS: {
+  // Warp Riders: "Ghost Raiders" — SWIFT + CLOAK evasion (41.7% → more DRAIN)
+  WARP_RIDERS: {
     SWIFT: 5, CLOAK: 4, BLITZ: 3, DRAIN: 4,
     LETHAL: 2, DOUBLE_STRIKE: 1, BARRIER: 1, GUARDIAN: 1
   },
@@ -293,7 +293,7 @@ function rebuildStarterDecks() {
 
   // Parse all card pools and starter deck sections
   const races = ['COGSMITHS', 'LUMINAR', 'PYROCLAST', 'VOIDBORN', 'BIOTITANS',
-                 'CRYSTALLINE', 'PHANTOM_CORSAIRS', 'HIVEMIND', 'ASTROMANCERS', 'CHRONOBOUND'];
+                 'CRYSTALLINE', 'WARP_RIDERS', 'HIVEMIND', 'ASTROMANCERS', 'CHRONOBOUND'];
 
   // For each race, extract their card pool
   for (const race of races) {

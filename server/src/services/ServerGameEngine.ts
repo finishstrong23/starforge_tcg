@@ -131,7 +131,7 @@ function ensureDatabase(): void {
 
   const allRaces = [
     Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN, Race.BIOTITANS,
-    Race.CRYSTALLINE, Race.PHANTOM_CORSAIRS, Race.HIVEMIND, Race.ASTROMANCERS,
+    Race.CRYSTALLINE, Race.WARP_RIDERS, Race.HIVEMIND, Race.ASTROMANCERS,
     Race.CHRONOBOUND,
   ];
   for (const race of allRaces) {
@@ -155,14 +155,14 @@ const RACE_MAP: Record<string, Race> = {
   voidborn: Race.VOIDBORN,
   biotitans: Race.BIOTITANS,
   crystalline: Race.CRYSTALLINE,
-  'phantom_corsairs': Race.PHANTOM_CORSAIRS,
+  'warp_riders': Race.WARP_RIDERS,
   hivemind: Race.HIVEMIND,
   astromancers: Race.ASTROMANCERS,
   chronobound: Race.CHRONOBOUND,
   celestari: Race.LUMINAR,
   mechara: Race.COGSMITHS,
   verdani: Race.BIOTITANS,
-  nethari: Race.PHANTOM_CORSAIRS,
+  nethari: Race.WARP_RIDERS,
   draconid: Race.PYROCLAST,
   crystari: Race.CRYSTALLINE,
   aetherian: Race.ASTROMANCERS,

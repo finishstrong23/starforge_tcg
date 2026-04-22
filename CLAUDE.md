@@ -213,7 +213,7 @@ Data processing and balance tools (run with `node`):
 ## Game Architecture
 
 ### Core Concepts
-- **10 Races**: Cogsmiths, Luminar, Pyroclast, Voidborn, Biotitans, Crystalline, Phantom Corsairs, Hivemind, Astromancers, Chronobound (+ Neutral)
+- **10 Races**: Cogsmiths, Luminar, Pyroclast, Voidborn, Biotitans, Crystalline, Warp Riders, Hivemind, Astromancers, Chronobound (+ Neutral)
 - **21 Keywords**: 8 combat (Guardian, Barrier, Swift, Blitz, etc.), 2 trigger (Deploy, Last Words), 11 original (Salvage, Upgrade, Illuminate, Immolate, STARFORGE, etc.)
 - **STARFORGE**: Unique mechanic — cards transform/upgrade mid-game
 - **Crystal System**: Mana/resource system (crystals per turn)

@@ -25,7 +25,7 @@ const { Race } = await import('./dist/types/Race.js');
 
 const allRaces = [
   Race.COGSMITHS, Race.LUMINAR, Race.PYROCLAST, Race.VOIDBORN,
-  Race.BIOTITANS, Race.PHANTOM_CORSAIRS, Race.CRYSTALLINE,
+  Race.BIOTITANS, Race.WARP_RIDERS, Race.CRYSTALLINE,
   Race.HIVEMIND, Race.ASTROMANCERS, Race.CHRONOBOUND
 ];
 

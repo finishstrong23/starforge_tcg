@@ -65,7 +65,7 @@ export const StatsScreen: React.FC<StatsScreenProps> = ({ onBack }) => {
   };
 
   const allRaces = [
-    Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.PHANTOM_CORSAIRS,
+    Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.WARP_RIDERS,
   ];
 
   return (

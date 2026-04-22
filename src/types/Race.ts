@@ -21,7 +21,7 @@ export enum Race {
   /** Energy crystals, spell synergy, mana manipulation */
   CRYSTALLINE = 'CRYSTALLINE',
   /** Space pirates, card theft, evasion */
-  PHANTOM_CORSAIRS = 'PHANTOM_CORSAIRS',
+  WARP_RIDERS = 'WARP_RIDERS',
   /** Insectoid swarm, token generation */
   HIVEMIND = 'HIVEMIND',
   /** Cosmic magic, card draw, deck manipulation */
@@ -96,9 +96,9 @@ export const RaceData: Record<Race, RaceInfo> = {
     playstyle: 'Spell-heavy combo deck',
     winCondition: 'Chain spells for massive damage/value',
   },
-  [Race.PHANTOM_CORSAIRS]: {
-    race: Race.PHANTOM_CORSAIRS,
-    name: 'Phantom Corsairs',
+  [Race.WARP_RIDERS]: {
+    race: Race.WARP_RIDERS,
+    name: 'Warp Riders',
     planet: 'Netherstorm',
     theme: 'Space pirates, card theft, evasion',
     playstyle: 'Tempo-based aggro with card theft',
@@ -156,7 +156,7 @@ export const LaunchFactions: Race[] = [
   Race.PYROCLAST,
   Race.COGSMITHS,
   Race.LUMINAR,
-  Race.PHANTOM_CORSAIRS,
+  Race.WARP_RIDERS,
 ];
 
 /**

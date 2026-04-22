@@ -43,7 +43,7 @@ const MinionTribe = {
 const Race = {
   COGSMITHS: 'Cogsmiths', LUMINAR: 'Luminar', PYROCLAST: 'Pyroclast',
   VOIDBORN: 'Voidborn', BIOTITANS: 'Biotitans', CRYSTALLINE: 'Crystalline',
-  PHANTOM_CORSAIRS: 'Phantom Corsairs', HIVEMIND: 'Hivemind',
+  WARP_RIDERS: 'Warp Riders', HIVEMIND: 'Hivemind',
   ASTROMANCERS: 'Astromancers', CHRONOBOUND: 'Chronobound', NEUTRAL: 'Neutral',
 };
 const Keywords = {

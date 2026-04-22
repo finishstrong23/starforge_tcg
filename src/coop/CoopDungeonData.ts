@@ -6,9 +6,9 @@
  */
 
 import { Race } from '../types/Race';
-import { DUNGEON_BOSSES, type DungeonBoss, type DungeonRelic, type CardBundle } from '../dungeon/DungeonData';
+import { DUNGEON_BOSSES, type DungeonBoss, type DungeonRelic, type CardBundle } from './DungeonSourceData';
 import { TEAM_SYNERGIES, type TeamSynergy } from '../tagteam/TagTeamData';
-import { getDungeonStarterDeck, getCardBundleChoices } from '../dungeon/DungeonData';
+import { getDungeonStarterDeck, getCardBundleChoices } from './DungeonSourceData';
 
 // ─── MAP TYPES ──────────────────────────────────────────────────────────────
 

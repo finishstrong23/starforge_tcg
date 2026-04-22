@@ -94,7 +94,7 @@ export async function getFactionStats(seasonId?: string): Promise<FactionStats[]
   } catch {
     // Return mock data if DB not available
     const races = ['pyroclast', 'voidborn', 'cogsmiths', 'luminar', 'biotitans',
-                   'crystalline', 'phantom_corsairs', 'hivemind', 'astromancers', 'chronobound'];
+                   'crystalline', 'warp_riders', 'hivemind', 'astromancers', 'chronobound'];
     return races.map(race => ({
       race,
       gamesPlayed: Math.floor(Math.random() * 5000) + 1000,
@@ -242,7 +242,7 @@ export function getRefundableCards(): { cardId: string; cardName: string; until:
  */
 export async function getMatchupMatrix(): Promise<Record<string, Record<string, number>>> {
   const races = ['pyroclast', 'voidborn', 'cogsmiths', 'luminar', 'biotitans',
-                 'crystalline', 'phantom_corsairs', 'hivemind', 'astromancers', 'chronobound'];
+                 'crystalline', 'warp_riders', 'hivemind', 'astromancers', 'chronobound'];
   const matrix: Record<string, Record<string, number>> = {};
 
   for (const race of races) {

@@ -16,7 +16,7 @@ const repoRoot = path.resolve(__dirname, '..');
 
 const FILE = path.join(repoRoot, 'src/data/SampleCards.ts');
 const TARGET = 25;
-const DECKS_TO_TRIM = ['COGSMITHS', 'LUMINAR', 'PYROCLAST', 'PHANTOM_CORSAIRS'];
+const DECKS_TO_TRIM = ['COGSMITHS', 'LUMINAR', 'PYROCLAST', 'WARP_RIDERS'];
 
 let src = fs.readFileSync(FILE, 'utf8');
 

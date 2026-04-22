@@ -91,7 +91,7 @@ export const FACTION_AUDIO_EFFECTS: Record<Race, AudioEffect> = {
   [Race.VOIDBORN]: 'echo',
   [Race.BIOTITANS]: 'pitch_low',
   [Race.CRYSTALLINE]: 'reverb',
-  [Race.PHANTOM_CORSAIRS]: 'echo',
+  [Race.WARP_RIDERS]: 'echo',
   [Race.HIVEMIND]: 'swarm',
   [Race.ASTROMANCERS]: 'ethereal',
   [Race.CHRONOBOUND]: 'alien',
@@ -237,7 +237,7 @@ export const LEGENDARY_VOICELINES: CardVoicelines[] = [
   {
     cardId: 'phan_legendary_1',
     cardName: 'Captain Vex Nightstorm',
-    race: Race.PHANTOM_CORSAIRS,
+    race: Race.WARP_RIDERS,
     play: [
       { text: 'Your treasure is mine, friend.', audioEffect: 'echo' },
       { text: 'The Netherstorm delivers!', audioEffect: 'echo' },
@@ -429,7 +429,7 @@ export const HERO_VOICELINES: HeroVoicelines[] = [
     defeat: [{ text: 'The crystal... goes dark...' }],
   },
   {
-    race: Race.PHANTOM_CORSAIRS,
+    race: Race.WARP_RIDERS,
     heroName: 'Admiral Shade',
     emotes: {
       [HeroEmote.GREETINGS]: [{ text: 'Ahoy! Your loot looks heavy. Let me help.' }],

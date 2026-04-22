@@ -803,7 +803,7 @@ This file contains every card in the 4 launch faction starter decks (25 cards ea
 ---
 
 
-## Phantom Corsairs Starter Deck (25 cards)
+## Warp Riders Starter Deck (25 cards)
 
 ### Deckhand Specter
 **Cost:** 1 · **Type:** MINION · **ATK/HP:** 1/1 · **Tribe:** PIRATE · **Rarity:** COMMON

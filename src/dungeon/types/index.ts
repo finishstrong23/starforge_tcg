@@ -1,251 +1,196 @@
-/**
- * STARFORGE TCG — Dungeon Run Mode Types
- * Slay the Spire-style roguelite type definitions
- */
+// ─── CARD TYPES ────────────────────────────────────────────────────────────
+export type Faction = 'Cogsmiths' | 'Pyroclast' | 'Luminar' | 'WarpRiders';
+export type CardType = 'Minion' | 'Spell' | 'Structure';
+export type Rarity = 'Common' | 'Rare' | 'Epic' | 'Legendary';
+export type Keyword =
+  | 'LAST_WORDS'
+  | 'IMMOLATE'
+  | 'ILLUMINATE'
+  | 'DRAIN'
+  | 'GUARDIAN'
+  | 'BARRIER'
+  | 'CLOAK'
+  | 'PHASE'
+  | 'SWIFT'
+  | 'BLITZ'
+  | 'DEPLOY'
+  | 'UPGRADE';
 
-// ─── Factions ───────────────────────────────────────────────
-export type DungeonFaction = 'Cogsmiths' | 'Pyroclast' | 'Luminar' | 'PhantomCorsairs';
-
-export const ALL_FACTIONS: DungeonFaction[] = ['Cogsmiths', 'Pyroclast', 'Luminar', 'PhantomCorsairs'];
-
-export const FACTION_COLORS: Record<DungeonFaction, { primary: string; secondary: string; bg: string }> = {
-  Cogsmiths: { primary: '#d4760a', secondary: '#8b5e34', bg: '#2a1f14' },
-  Pyroclast: { primary: '#e63946', secondary: '#ff6b35', bg: '#2a1414' },
-  Luminar: { primary: '#ffd700', secondary: '#fffacd', bg: '#2a2714' },
-  PhantomCorsairs: { primary: '#7b2d8e', secondary: '#00cec9', bg: '#1a142a' },
-};
-
-// ─── Cards ──────────────────────────────────────────────────
-export interface DungeonCardDefinition {
+export interface CardDefinition {
   id: string;
   name: string;
-  faction: DungeonFaction;
-  type: 'Minion' | 'Spell' | 'Structure';
+  faction: Faction;
+  type: CardType;
   cost: number;
   attack?: number;
   health?: number;
-  keywords: string[];
+  keywords: Keyword[];
   cardText: string;
-  rarity: 'Common' | 'Rare' | 'Epic' | 'Legendary';
-  tribe?: string;
+  rarity: Rarity;
+  upgradeText?: string;           // What changes on upgrade
+  upgraded?: boolean;
 }
 
-export interface RunCard extends DungeonCardDefinition {
-  instanceId: string;
+export interface CardInstance extends CardDefinition {
+  instanceId: string;             // unique per copy in deck
   upgraded: boolean;
-  upgradedCost?: number;
-  upgradedText?: string;
-  upgradedKeywords?: string[];
+  currentHealth?: number;         // for minions in play
+  hasAttacked?: boolean;
+  statusEffects: StatusEffect[];
 }
 
-// ─── Enemies ────────────────────────────────────────────────
-export type IntentType = 'ATTACK' | 'DEFEND' | 'BUFF' | 'DEBUFF' | 'SPECIAL';
+// ─── STATUS EFFECTS ─────────────────────────────────────────────────────────
+export type StatusEffectType =
+  | 'poison'
+  | 'burn'
+  | 'shield'
+  | 'strength'
+  | 'weak'
+  | 'vulnerable'
+  | 'barrier'
+  | 'stealth'
+  | 'phase';
+
+export interface StatusEffect {
+  type: StatusEffectType;
+  stacks: number;
+  duration?: number;              // turns remaining, undefined = permanent
+}
+
+// ─── ENEMY TYPES ────────────────────────────────────────────────────────────
+export type IntentType = 'attack' | 'defend' | 'buff' | 'debuff' | 'summon' | 'special';
 
 export interface EnemyIntent {
   type: IntentType;
-  value?: number;
+  value?: number;                 // damage or shield amount
   description: string;
 }
 
-export interface AIPattern {
-  name: string;
-  getIntent: (turn: number, enemy: DungeonEnemy) => EnemyIntent;
-}
-
-export interface DungeonEnemy {
+export interface EnemyDefinition {
   id: string;
   name: string;
+  lore: string;                   // one-line flavor text
   maxHealth: number;
-  currentHealth: number;
-  block: number;
-  intent: EnemyIntent;
-  statusEffects: StatusEffect[];
-  actTier: 1 | 2 | 3;
+  attack: number;
+  art: string;                    // emoji or color code for placeholder art
+  acts: (1 | 2 | 3)[];            // which acts this enemy appears in
   isElite: boolean;
   isBoss: boolean;
-  aiPattern: AIPattern;
+  intents: EnemyIntent[];         // rotation of intents
+  onDeath?: string;               // special effect description
 }
 
-// ─── Status Effects ─────────────────────────────────────────
-export type StatusType =
-  | 'STRENGTH'
-  | 'DEXTERITY'
-  | 'VULNERABLE'
-  | 'WEAK'
-  | 'BURN'
-  | 'ILLUMINATE_STACKS'
-  | 'IMMOLATE_STACKS'
-  | 'BARRIER'
-  | 'DRAIN'
-  | 'PHASE'
-  | 'GUARDIAN'
-  | 'CLOAK'
-  | 'SWIFT'
-  | 'BLITZ'
-  | 'DOUBLE_STRIKE'
-  | 'ENRAGE'
-  | 'REGEN';
-
-export interface StatusEffect {
-  type: StatusType;
-  stacks: number;
-  duration?: number;
-}
-
-// ─── Board Minions ──────────────────────────────────────────
-export interface BoardMinion {
-  instanceId: string;
-  card: RunCard;
-  currentAttack: number;
+export interface EnemyInstance extends EnemyDefinition {
   currentHealth: number;
-  maxHealth: number;
-  hasAttacked: boolean;
+  currentShield: number;
   statusEffects: StatusEffect[];
-  summonedThisTurn: boolean;
+  intentIndex: number;            // current position in intent rotation
+  minionsInPlay: CardInstance[];
 }
 
-// ─── Relics ─────────────────────────────────────────────────
+// ─── RELIC TYPES ────────────────────────────────────────────────────────────
 export type RelicTrigger =
-  | 'ON_COMBAT_START'
-  | 'ON_CARD_PLAYED'
-  | 'ON_KILL'
-  | 'ON_HERO_HEAL'
-  | 'ON_TURN_START'
-  | 'ON_MINION_DEATH'
-  | 'ON_HERO_DEATH'
-  | 'PASSIVE';
+  | 'run_start'
+  | 'combat_start'
+  | 'combat_end'
+  | 'on_kill'
+  | 'on_card_play'
+  | 'on_heal'
+  | 'on_damage_taken'
+  | 'on_rest'
+  | 'on_shop'
+  | 'turn_start'
+  | 'turn_end'
+  | 'on_death'
+  | 'passive';
 
-export interface RelicEffect {
-  type: string;
-  value: number;
-  condition?: string;
-}
-
-export interface DungeonRelic {
+export interface RelicDefinition {
   id: string;
   name: string;
   description: string;
-  flavorText: string;
+  flavor: string;                 // lore text
   trigger: RelicTrigger;
-  effect: RelicEffect;
-  isBossRelic?: boolean;
+  rarity: 'Common' | 'Uncommon' | 'Rare' | 'Boss';
+  art: string;                    // emoji placeholder
 }
 
-// ─── Map ────────────────────────────────────────────────────
-export type MapNodeType = 'COMBAT' | 'ELITE' | 'BOSS' | 'REST' | 'SHOP' | 'TREASURE' | 'FORGE';
+// ─── MAP TYPES ───────────────────────────────────────────────────────────────
+export type NodeType = 'combat' | 'elite' | 'boss' | 'rest' | 'shop' | 'treasure';
 
 export interface MapNode {
   id: string;
-  type: MapNodeType;
-  act: number;
   row: number;
   col: number;
-  connections: string[];
+  type: NodeType;
+  visited: boolean;
+  connections: string[];          // ids of next-row nodes this connects to
+}
+
+export interface ActMap {
+  actNumber: 1 | 2 | 3;
+  nodes: MapNode[];
+  currentNodeId: string | null;
   completed: boolean;
-  accessible: boolean;
 }
 
-// ─── Run State ──────────────────────────────────────────────
-export type RunPhase =
-  | 'DRAFT'
-  | 'MAP'
-  | 'COMBAT'
-  | 'SHOP'
-  | 'REST'
-  | 'REWARD'
-  | 'VICTORY'
-  | 'DEATH'
-  | 'ACT_TRANSITION';
-
+// ─── COMBAT STATE ────────────────────────────────────────────────────────────
 export type CombatPhase =
-  | 'COMBAT_START'
-  | 'PLAYER_TURN_START'
-  | 'PLAYER_ACTING'
-  | 'PLAYER_TURN_END'
-  | 'ENEMY_TURN_START'
-  | 'ENEMY_TURN_END'
-  | 'COMBAT_VICTORY'
-  | 'RUN_DEATH';
+  | 'draw'
+  | 'player_turn'
+  | 'enemy_turn'
+  | 'combat_end_win'
+  | 'combat_end_loss';
 
-export interface RewardState {
-  cardOptions: DungeonCardDefinition[];
-  relicOptions: DungeonRelic[];
-  gold: number;
-  picked: boolean;
+export interface CombatState {
+  phase: CombatPhase;
+  turn: number;
+  playerHealth: number;
+  playerMaxHealth: number;
+  playerEnergy: number;
+  playerMaxEnergy: number;
+  playerShield: number;
+  playerStatusEffects: StatusEffect[];
+  playerBoard: CardInstance[];    // minions in play
+  hand: CardInstance[];
+  drawPile: CardInstance[];
+  discardPile: CardInstance[];
+  enemy: EnemyInstance;
+  enemyBoard: CardInstance[];     // enemy minions in play
+  lastAction: string;             // description of last thing that happened
+  combatLog: string[];
 }
 
-export interface RunStats {
-  turnsPlayed: number;
-  damageDealt: number;
-  damageTaken: number;
-  cardsCollected: number;
-  relicsCollected: number;
-  enemiesKilled: number;
-  floorReached: number;
-}
+// ─── RUN STATE ───────────────────────────────────────────────────────────────
+export type RunPhase =
+  | 'draft'
+  | 'map'
+  | 'combat'
+  | 'elite_combat'
+  | 'boss_combat'
+  | 'rest'
+  | 'shop'
+  | 'reward'
+  | 'run_end_win'
+  | 'run_end_loss';
 
 export interface RunState {
   phase: RunPhase;
-  act: 1 | 2 | 3;
-  deck: RunCard[];
-  hand: RunCard[];
-  drawPile: RunCard[];
-  discardPile: RunCard[];
-  exhaustPile: RunCard[];
+  currentAct: 1 | 2 | 3;
+  actMaps: ActMap[];
+  deck: CardInstance[];
+  hand: CardInstance[];
+  relics: RelicDefinition[];
+  gold: number;
+  maxHealth: number;
+  currentHealth: number;
   energy: number;
   maxEnergy: number;
-  heroHealth: number;
-  maxHeroHealth: number;
-  heroBlock: number;
-  heroStatusEffects: StatusEffect[];
-  board: BoardMinion[];
-  currentEnemy: DungeonEnemy | null;
-  currentEnemyGroup: DungeonEnemy[];
-  map: MapNode[][];
-  currentNodeId: string;
-  relics: DungeonRelic[];
-  gold: number;
-  turn: number;
-  combatPhase: CombatPhase;
-  runSeed: string;
-  combatLog: string[];
-  stats: RunStats;
-  reward: RewardState | null;
-
-  // Draft state
-  draftRound: number;
-  draftFaction: DungeonFaction | null;
-  draftOptions: DungeonCardDefinition[];
-  draftRelicOptions: DungeonRelic[];
-
-  // Relic tracking
-  cardsPlayedThisTurn: number;
-  hasHealedThisTurn: boolean;
-  hasHealedThisCombat: boolean;
-  phoenixFeatherUsed: boolean;
-
-  // Combat selection
-  selectedMinionId: string | null;
-  selectedCardId: string | null;
-
-  // Floating combat text
-  floatingTexts: FloatingText[];
-}
-
-export interface FloatingText {
-  id: string;
-  text: string;
-  x: number;
-  y: number;
-  color: string;
-  createdAt: number;
-}
-
-// ─── Shop ───────────────────────────────────────────────────
-export interface ShopItem {
-  type: 'card' | 'relic' | 'removeCard' | 'upgradeCard';
-  card?: DungeonCardDefinition;
-  relic?: DungeonRelic;
-  cost: number;
-  sold: boolean;
+  combatState: CombatState | null;
+  runStats: {
+    totalCombats: number;
+    elitesDefeated: number;
+    bossesDefeated: number;
+    cardsPlayed: number;
+    totalDamageDealt: number;
+  };
 }

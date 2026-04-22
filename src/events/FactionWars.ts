@@ -82,7 +82,7 @@ export const GALACTIC_MAP: GalacticTerritory[] = [
     planetName: 'Nullheim',
     baseScore: 0,
     dominanceLevel: 1,
-    adjacentTerritories: [Race.PYROCLAST, Race.PHANTOM_CORSAIRS, Race.ASTROMANCERS],
+    adjacentTerritories: [Race.PYROCLAST, Race.WARP_RIDERS, Race.ASTROMANCERS],
   },
   {
     race: Race.BIOTITANS,
@@ -99,7 +99,7 @@ export const GALACTIC_MAP: GalacticTerritory[] = [
     adjacentTerritories: [Race.COGSMITHS, Race.BIOTITANS, Race.ASTROMANCERS],
   },
   {
-    race: Race.PHANTOM_CORSAIRS,
+    race: Race.WARP_RIDERS,
     planetName: 'Netherstorm',
     baseScore: 0,
     dominanceLevel: 1,
@@ -110,7 +110,7 @@ export const GALACTIC_MAP: GalacticTerritory[] = [
     planetName: 'Xenoptera',
     baseScore: 0,
     dominanceLevel: 1,
-    adjacentTerritories: [Race.PYROCLAST, Race.BIOTITANS, Race.PHANTOM_CORSAIRS],
+    adjacentTerritories: [Race.PYROCLAST, Race.BIOTITANS, Race.WARP_RIDERS],
   },
   {
     race: Race.ASTROMANCERS,
@@ -124,7 +124,7 @@ export const GALACTIC_MAP: GalacticTerritory[] = [
     planetName: 'Temporia',
     baseScore: 0,
     dominanceLevel: 1,
-    adjacentTerritories: [Race.COGSMITHS, Race.PHANTOM_CORSAIRS, Race.ASTROMANCERS],
+    adjacentTerritories: [Race.COGSMITHS, Race.WARP_RIDERS, Race.ASTROMANCERS],
   },
 ];
 
@@ -138,7 +138,7 @@ export const FACTION_COLORS: Record<Race, { primary: string; glow: string }> = {
   [Race.VOIDBORN]: { primary: '#7c3aed', glow: 'rgba(124,58,237,0.4)' },
   [Race.BIOTITANS]: { primary: '#22c55e', glow: 'rgba(34,197,94,0.4)' },
   [Race.CRYSTALLINE]: { primary: '#818cf8', glow: 'rgba(129,140,248,0.4)' },
-  [Race.PHANTOM_CORSAIRS]: { primary: '#06b6d4', glow: 'rgba(6,182,212,0.4)' },
+  [Race.WARP_RIDERS]: { primary: '#06b6d4', glow: 'rgba(6,182,212,0.4)' },
   [Race.HIVEMIND]: { primary: '#84cc16', glow: 'rgba(132,204,22,0.4)' },
   [Race.ASTROMANCERS]: { primary: '#a78bfa', glow: 'rgba(167,139,250,0.4)' },
   [Race.CHRONOBOUND]: { primary: '#22d3ee', glow: 'rgba(34,211,238,0.4)' },

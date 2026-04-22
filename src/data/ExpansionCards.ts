@@ -214,16 +214,16 @@ export const CRYSTALLINE_EXPANSION: CardDefinition[] = [
 // ============================================================================
 // PHANTOM CORSAIRS EXPANSION (10 cards)
 // ============================================================================
-export const PHANTOM_CORSAIRS_EXPANSION: CardDefinition[] = [
-  { id: 'pc_ex1', name: 'Stowaway', cost: 1, type: CardType.MINION, race: Race.PHANTOM_CORSAIRS, rarity: CardRarity.RARE, attack: 2, health: 1, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.CLOAK }], effects: [{ id: 'e0', type: EffectType.DRAW, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { count: 1 } as DrawEffectData, isMandatory: true }], flavorText: 'Snuck aboard.', cardText: 'CLOAK. DEPLOY: Draw a card', collectible: true, set: 'EXPANSION' },
-  { id: 'pc_ex2', name: 'Walk the Plank', cost: 3, type: CardType.SPELL, race: Race.PHANTOM_CORSAIRS, rarity: CardRarity.RARE, keywords: [], effects: [{ id: 'e0', type: EffectType.DESTROY, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.CHOSEN, data: { value: 1 } as GenericEffectData, isMandatory: true }], flavorText: 'Off you go!', cardText: 'Destroy an enemy minion with 3 or less Attack', collectible: true, set: 'EXPANSION' },
-  { id: 'pc_ex3', name: 'Ghost Ship Raider', cost: 3, type: CardType.MINION, race: Race.PHANTOM_CORSAIRS, rarity: CardRarity.RARE, attack: 3, health: 3, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.CLOAK }, { keyword: OriginalKeyword.PHASE }], effects: [], flavorText: 'Phases through defenses.', cardText: 'CLOAK. PHASE (Can\'t be targeted by spells)', collectible: true, set: 'EXPANSION' },
-  { id: 'pc_ex4', name: 'Plunderer\'s Map', cost: 2, type: CardType.SPELL, race: Race.PHANTOM_CORSAIRS, rarity: CardRarity.RARE, keywords: [], effects: [{ id: 'e0', type: EffectType.DRAW, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { count: 2 } as DrawEffectData, isMandatory: true }], flavorText: 'X marks the spot.', cardText: 'Draw 2 cards', collectible: true, set: 'EXPANSION' },
-  { id: 'pc_ex5', name: 'Blade Dancer', cost: 4, type: CardType.MINION, race: Race.PHANTOM_CORSAIRS, rarity: CardRarity.RARE, attack: 4, health: 3, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.DOUBLE_STRIKE }], effects: [], flavorText: 'Two strikes, one dance.', cardText: 'DOUBLE STRIKE', collectible: true, set: 'EXPANSION' },
-  { id: 'pc_ex6', name: 'Phantom Admiral', cost: 5, type: CardType.MINION, race: Race.PHANTOM_CORSAIRS, rarity: CardRarity.EPIC, attack: 4, health: 5, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.CLOAK }, { keyword: TriggerKeyword.DEPLOY }], effects: [{ id: 'e0', type: EffectType.BUFF, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.ALL_FRIENDLY_MINIONS, data: { attack: 1, health: 1 } as BuffEffectData, isMandatory: true }], flavorText: 'Commands from the shadows.', cardText: 'CLOAK. DEPLOY: Give all friendly minions +1/+1', collectible: true, set: 'EXPANSION' },
-  { id: 'pc_ex7', name: 'Dimensional Anchor', cost: 5, type: CardType.SPELL, race: Race.PHANTOM_CORSAIRS, rarity: CardRarity.EPIC, keywords: [], effects: [{ id: 'e0', type: EffectType.RETURN_TO_HAND, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.ALL_ENEMY_MINIONS, data: { value: 1 } as GenericEffectData, isMandatory: true }], flavorText: 'Anchor them elsewhere.', cardText: 'Return all enemy minions to their hand', collectible: true, set: 'EXPANSION' },
-  { id: 'pc_ex8', name: 'Corsair Flagship', cost: 7, type: CardType.MINION, race: Race.PHANTOM_CORSAIRS, rarity: CardRarity.EPIC, attack: 6, health: 7, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.CLOAK }, { keyword: TriggerKeyword.DEPLOY }], effects: [{ id: 'e0', type: EffectType.SUMMON, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { cardId: 'token_pirate', count: 3 } as SummonEffectData, isMandatory: true }], flavorText: 'The flagship arrives.', cardText: 'CLOAK. DEPLOY: Summon three 2/1 Ghost Pirates', collectible: true, set: 'EXPANSION' },
-  { id: 'pc_ex9', name: 'Netherstorm Pirate King', cost: 8, type: CardType.MINION, race: Race.PHANTOM_CORSAIRS, rarity: CardRarity.LEGENDARY, attack: 7, health: 7, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.CLOAK }, { keyword: CombatKeyword.DOUBLE_STRIKE }], effects: [], flavorText: 'King of the void pirates.', cardText: 'CLOAK. DOUBLE STRIKE', collectible: true, set: 'EXPANSION',
+export const WARP_RIDERS_EXPANSION: CardDefinition[] = [
+  { id: 'pc_ex1', name: 'Stowaway', cost: 1, type: CardType.MINION, race: Race.WARP_RIDERS, rarity: CardRarity.RARE, attack: 2, health: 1, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.CLOAK }], effects: [{ id: 'e0', type: EffectType.DRAW, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { count: 1 } as DrawEffectData, isMandatory: true }], flavorText: 'Snuck aboard.', cardText: 'CLOAK. DEPLOY: Draw a card', collectible: true, set: 'EXPANSION' },
+  { id: 'pc_ex2', name: 'Walk the Plank', cost: 3, type: CardType.SPELL, race: Race.WARP_RIDERS, rarity: CardRarity.RARE, keywords: [], effects: [{ id: 'e0', type: EffectType.DESTROY, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.CHOSEN, data: { value: 1 } as GenericEffectData, isMandatory: true }], flavorText: 'Off you go!', cardText: 'Destroy an enemy minion with 3 or less Attack', collectible: true, set: 'EXPANSION' },
+  { id: 'pc_ex3', name: 'Ghost Ship Raider', cost: 3, type: CardType.MINION, race: Race.WARP_RIDERS, rarity: CardRarity.RARE, attack: 3, health: 3, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.CLOAK }, { keyword: OriginalKeyword.PHASE }], effects: [], flavorText: 'Phases through defenses.', cardText: 'CLOAK. PHASE (Can\'t be targeted by spells)', collectible: true, set: 'EXPANSION' },
+  { id: 'pc_ex4', name: 'Plunderer\'s Map', cost: 2, type: CardType.SPELL, race: Race.WARP_RIDERS, rarity: CardRarity.RARE, keywords: [], effects: [{ id: 'e0', type: EffectType.DRAW, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { count: 2 } as DrawEffectData, isMandatory: true }], flavorText: 'X marks the spot.', cardText: 'Draw 2 cards', collectible: true, set: 'EXPANSION' },
+  { id: 'pc_ex5', name: 'Blade Dancer', cost: 4, type: CardType.MINION, race: Race.WARP_RIDERS, rarity: CardRarity.RARE, attack: 4, health: 3, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.DOUBLE_STRIKE }], effects: [], flavorText: 'Two strikes, one dance.', cardText: 'DOUBLE STRIKE', collectible: true, set: 'EXPANSION' },
+  { id: 'pc_ex6', name: 'Phantom Admiral', cost: 5, type: CardType.MINION, race: Race.WARP_RIDERS, rarity: CardRarity.EPIC, attack: 4, health: 5, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.CLOAK }, { keyword: TriggerKeyword.DEPLOY }], effects: [{ id: 'e0', type: EffectType.BUFF, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.ALL_FRIENDLY_MINIONS, data: { attack: 1, health: 1 } as BuffEffectData, isMandatory: true }], flavorText: 'Commands from the shadows.', cardText: 'CLOAK. DEPLOY: Give all friendly minions +1/+1', collectible: true, set: 'EXPANSION' },
+  { id: 'pc_ex7', name: 'Dimensional Anchor', cost: 5, type: CardType.SPELL, race: Race.WARP_RIDERS, rarity: CardRarity.EPIC, keywords: [], effects: [{ id: 'e0', type: EffectType.RETURN_TO_HAND, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.ALL_ENEMY_MINIONS, data: { value: 1 } as GenericEffectData, isMandatory: true }], flavorText: 'Anchor them elsewhere.', cardText: 'Return all enemy minions to their hand', collectible: true, set: 'EXPANSION' },
+  { id: 'pc_ex8', name: 'Corsair Flagship', cost: 7, type: CardType.MINION, race: Race.WARP_RIDERS, rarity: CardRarity.EPIC, attack: 6, health: 7, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.CLOAK }, { keyword: TriggerKeyword.DEPLOY }], effects: [{ id: 'e0', type: EffectType.SUMMON, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { cardId: 'token_pirate', count: 3 } as SummonEffectData, isMandatory: true }], flavorText: 'The flagship arrives.', cardText: 'CLOAK. DEPLOY: Summon three 2/1 Ghost Pirates', collectible: true, set: 'EXPANSION' },
+  { id: 'pc_ex9', name: 'Netherstorm Pirate King', cost: 8, type: CardType.MINION, race: Race.WARP_RIDERS, rarity: CardRarity.LEGENDARY, attack: 7, health: 7, tribe: MinionTribe.PIRATE, keywords: [{ keyword: CombatKeyword.CLOAK }, { keyword: CombatKeyword.DOUBLE_STRIKE }], effects: [], flavorText: 'King of the void pirates.', cardText: 'CLOAK. DOUBLE STRIKE', collectible: true, set: 'EXPANSION',
     starforge: {
       type: StarforgeType.PROGRESSIVE,
       conditions: [{ type: StarforgeConditionType.ATTACK_COUNT, targetValue: 6, persistsAcrossZones: true, persistsIfSilenced: true }],
@@ -232,7 +232,7 @@ export const PHANTOM_CORSAIRS_EXPANSION: CardDefinition[] = [
       transformationText: 'STARFORGE — After attacking 6 times: Transform into THE NETHERSTORM EMPEROR — 14/14. The unseen blade strikes twice.',
     },
   },
-  { id: 'pc_ex10', name: 'The Phantom Fleet', cost: 10, type: CardType.SPELL, race: Race.PHANTOM_CORSAIRS, rarity: CardRarity.LEGENDARY, keywords: [], effects: [{ id: 'e0', type: EffectType.SUMMON, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { cardId: 'token_pirate_elite', count: 5 } as SummonEffectData, isMandatory: true }], flavorText: 'The entire fleet materializes.', cardText: 'Summon five 3/3 Ghost Pirates with SWIFT', collectible: true, set: 'EXPANSION' },
+  { id: 'pc_ex10', name: 'The Phantom Fleet', cost: 10, type: CardType.SPELL, race: Race.WARP_RIDERS, rarity: CardRarity.LEGENDARY, keywords: [], effects: [{ id: 'e0', type: EffectType.SUMMON, trigger: EffectTrigger.ON_PLAY, targetType: TargetType.NONE, data: { cardId: 'token_pirate_elite', count: 5 } as SummonEffectData, isMandatory: true }], flavorText: 'The entire fleet materializes.', cardText: 'Summon five 3/3 Ghost Pirates with SWIFT', collectible: true, set: 'EXPANSION' },
 ];
 
 // ============================================================================
@@ -371,12 +371,12 @@ export const NEUTRAL_EXPANSION: CardDefinition[] = [
 // ============================================================================
 // Combined expansion exports
 // ============================================================================
-// Launch factions: Pyroclast, Cogsmiths, Luminar, Phantom Corsairs
+// Launch factions: Pyroclast, Cogsmiths, Luminar, Warp Riders
 export const ALL_EXPANSION_CARDS: CardDefinition[] = [
   ...COGSMITHS_EXPANSION,
   ...LUMINAR_EXPANSION,
   ...PYROCLAST_EXPANSION,
-  ...PHANTOM_CORSAIRS_EXPANSION,
+  ...WARP_RIDERS_EXPANSION,
   ...NEUTRAL_EXPANSION,
 ];
 
@@ -386,7 +386,7 @@ export function getExpansionCardsByRace(race: Race): CardDefinition[] {
     case Race.COGSMITHS: return COGSMITHS_EXPANSION;
     case Race.LUMINAR: return LUMINAR_EXPANSION;
     case Race.PYROCLAST: return PYROCLAST_EXPANSION;
-    case Race.PHANTOM_CORSAIRS: return PHANTOM_CORSAIRS_EXPANSION;
+    case Race.WARP_RIDERS: return WARP_RIDERS_EXPANSION;
     case Race.NEUTRAL: return NEUTRAL_EXPANSION;
     default: return [];
   }
