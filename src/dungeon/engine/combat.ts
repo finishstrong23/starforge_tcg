@@ -390,11 +390,11 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
     s = log(s, `☠ Poison deals ${poisonDmg} damage`);
   }
 
-  // Reset minions / shield / energy
+  // Reset minions and energy. Shield is cleared at the START of the player's next turn
+  // (inside executeEnemyTurn, before drawing), so it can still absorb the enemy's attack.
   s = {
     ...s,
     playerBoard: s.playerBoard.map((m) => ({ ...m, hasAttacked: false })),
-    playerShield: 0,
     playerEnergy: s.playerMaxEnergy,
   };
 
@@ -477,7 +477,8 @@ export function executeEnemyTurn(state: CombatState): CombatState {
 
   s = checkCombatEnd(s);
   if (s.phase === 'enemy_turn') {
-    s = { ...s, phase: 'player_turn' };
+    // Clear the player's remaining block at the start of their new turn, then draw.
+    s = { ...s, phase: 'player_turn', playerShield: 0 };
     s = drawCards(s, 5);
   }
 
