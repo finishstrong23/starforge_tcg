@@ -23,15 +23,24 @@ function hashSeed(seed: string): number {
   return h >>> 0;
 }
 
-// ─── Generation constants ─────────────────────────────────────────────────────
+// ─── Topology constants ───────────────────────────────────────────────────────
+// The map is a 9-row grid. Row 0 = three start nodes (one per column), one
+// per path. Rows 1–6 are the procedural middle; same-column edges for most
+// rows with a narrow convergence window at rows 2→3 and 3→4 where paths can
+// briefly cross. Rows 5→6→7 force you back into a single column, funneling
+// each path into its own rest stop. All three rest stops converge on the
+// single boss.
 
 const COLS = 3;
-const MID_ROWS = [1, 2, 3, 4, 5, 6];  // procedural middle rows
+const MID_ROWS = [1, 2, 3, 4, 5, 6];
 const REST_ROW = 7;
 const BOSS_ROW = 8;
 const TOTAL_ROWS = 9;
 
-/** Per-act distributions for the 18 middle slots (rows 1-6 × 3 cols). */
+/** Rows whose outgoing edges may diverge by ±1 column (the convergence band). */
+const CONVERGENCE_SOURCE_ROWS = new Set([2, 3]);
+
+/** Per-act distributions for the 18 middle slots (rows 1–6 × 3 cols). */
 const ACT_DISTRIBUTIONS: Record<1 | 2 | 3, Record<Exclude<NodeType, 'boss'>, number>> = {
   1: { combat: 10, elite: 2, rest: 2, shop: 2, treasure: 2 },
   2: { combat: 9,  elite: 3, rest: 2, shop: 2, treasure: 2 },
@@ -63,18 +72,19 @@ export function generateActMap(actNumber: 1 | 2 | 3, seed: string): ActMap {
   const rng = mulberry32(hashSeed(`${seed}-act${actNumber}`));
   const nodes: MapNode[] = [];
 
-  // Row 0: single combat start node in the middle column
-  const startId = nodeId(0, 1);
-  nodes.push({
-    id: startId,
-    row: 0,
-    col: 1,
-    type: 'combat',
-    visited: false,
-    connections: [],
-  });
+  // Row 0: THREE combat start nodes — the player chooses a path.
+  for (let col = 0; col < COLS; col++) {
+    nodes.push({
+      id: nodeId(0, col),
+      row: 0,
+      col,
+      type: 'combat',
+      visited: false,
+      connections: [],
+    });
+  }
 
-  // Rows 1-6: procedural distribution
+  // Rows 1–6: procedural distribution (18 slots)
   const dist = ACT_DISTRIBUTIONS[actNumber];
   const typePool: Exclude<NodeType, 'boss'>[] = [];
   (Object.keys(dist) as Exclude<NodeType, 'boss'>[]).forEach((t) => {
@@ -97,7 +107,7 @@ export function generateActMap(actNumber: 1 | 2 | 3, seed: string): ActMap {
     }
   }
 
-  // Row 7: rest row (3 rests, one per column — a breather before boss)
+  // Row 7: one rest per column — every path gets a breather before the boss.
   for (let col = 0; col < COLS; col++) {
     nodes.push({
       id: nodeId(REST_ROW, col),
@@ -109,7 +119,7 @@ export function generateActMap(actNumber: 1 | 2 | 3, seed: string): ActMap {
     });
   }
 
-  // Row 8: boss (single centered node)
+  // Row 8: single centered boss.
   const bossId = nodeId(BOSS_ROW, 1);
   nodes.push({
     id: bossId,
@@ -120,29 +130,46 @@ export function generateActMap(actNumber: 1 | 2 | 3, seed: string): ActMap {
     connections: [],
   });
 
-  // ─── Wire forward connections (no dead ends, no crossing edges) ────────────
-  // Edges may only go to col-1, col, or col+1 in the next row. We first build
-  // a set of "arriving" columns per row so every node gets at least one
-  // incoming edge; then we ensure every source has at least one outgoing edge.
-
+  // ── Wire edges ────────────────────────────────────────────────────────────
   for (let r = 0; r < TOTAL_ROWS - 1; r++) {
     const sources = nodes.filter((n) => n.row === r);
-    const targetsRow = r + 1;
-    const targets = nodes.filter((n) => n.row === targetsRow);
+    const targets = nodes.filter((n) => n.row === r + 1);
 
-    // Pass 1: every source picks 1-2 outgoing edges to adjacent-column targets
+    // Row 7 → 8: every rest stop funnels into the single boss.
+    if (r === REST_ROW) {
+      const boss = targets[0];
+      if (boss) {
+        for (const src of sources) src.connections.push(boss.id);
+      }
+      continue;
+    }
+
+    const allowCross = CONVERGENCE_SOURCE_ROWS.has(r);
+
+    if (!allowCross) {
+      // Lane-locked: each source connects only to its same-column target.
+      // This creates the three distinct paths at the start and again at the end.
+      for (const src of sources) {
+        const tgt = targets.find((t) => t.col === src.col);
+        if (tgt) src.connections.push(tgt.id);
+      }
+      continue;
+    }
+
+    // Convergence band: ±1 column edges, 1–2 per source, for a narrow mixing
+    // window. Paths touch here but still need to re-commit before row 5.
     for (const src of sources) {
       const candidates = targets.filter((t) => Math.abs(t.col - src.col) <= 1);
       if (candidates.length === 0) continue;
 
-      const count = 1 + (rng() < 0.45 ? 1 : 0);
+      const count = 1 + (rng() < 0.5 ? 1 : 0);
       const picked = shuffle(candidates, rng).slice(0, Math.min(count, candidates.length));
       for (const t of picked) {
         if (!src.connections.includes(t.id)) src.connections.push(t.id);
       }
     }
 
-    // Pass 2: guarantee every target in next row has at least one incoming edge
+    // Make sure every target in the convergence has at least one incoming edge.
     for (const tgt of targets) {
       const hasIncoming = sources.some((s) => s.connections.includes(tgt.id));
       if (hasIncoming) continue;
@@ -154,20 +181,21 @@ export function generateActMap(actNumber: 1 | 2 | 3, seed: string): ActMap {
     }
   }
 
-  // Prevent two edges from "crossing" (source A → col+1 while source A+1 → col)
-  // is permitted in STS — leaving it in for variety.
-
   return {
     actNumber,
     nodes,
-    currentNodeId: startId,
+    currentNodeId: null, // player picks one of the three row-0 starts
     completed: false,
   };
 }
 
 // ─── Traversal helpers ────────────────────────────────────────────────────────
 
-export function getAvailableNodes(map: ActMap, currentNodeId: string): MapNode[] {
+export function getAvailableNodes(map: ActMap, currentNodeId: string | null): MapNode[] {
+  // Before entering the map, the three row-0 start nodes are the available picks.
+  if (!currentNodeId) {
+    return map.nodes.filter((n) => n.row === 0);
+  }
   const current = map.nodes.find((n) => n.id === currentNodeId);
   if (!current) return [];
   return current.connections
