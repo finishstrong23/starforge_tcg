@@ -25,20 +25,17 @@ function hashSeed(seed: string): number {
 
 // ─── Topology constants ───────────────────────────────────────────────────────
 // The map is a 9-row grid. Row 0 = three start nodes (one per column), one
-// per path. Rows 1–6 are the procedural middle; same-column edges for most
-// rows with a narrow convergence window at rows 2→3 and 3→4 where paths can
-// briefly cross. Rows 5→6→7 force you back into a single column, funneling
-// each path into its own rest stop. All three rest stops converge on the
-// single boss.
+// per path. Rows 1–6 are the procedural middle. The convergence band (1–2
+// consecutive rows somewhere in rows 1–5) allows ±1 column crossing; all
+// other rows are lane-locked. The band position is seeded-random each run so
+// every map has a distinct shape. Rows 5→6→7 always funnel back to separate
+// rest stops before the single boss.
 
 const COLS = 3;
 const MID_ROWS = [1, 2, 3, 4, 5, 6];
 const REST_ROW = 7;
 const BOSS_ROW = 8;
 const TOTAL_ROWS = 9;
-
-/** Rows whose outgoing edges may diverge by ±1 column (the convergence band). */
-const CONVERGENCE_SOURCE_ROWS = new Set([2, 3]);
 
 /** Per-act distributions for the 18 middle slots (rows 1–6 × 3 cols). */
 const ACT_DISTRIBUTIONS: Record<1 | 2 | 3, Record<Exclude<NodeType, 'boss'>, number>> = {
@@ -130,6 +127,21 @@ export function generateActMap(actNumber: 1 | 2 | 3, seed: string): ActMap {
     connections: [],
   });
 
+  // ── Randomised convergence band ──────────────────────────────────────────
+  // Pick a window of 1–2 consecutive rows (anywhere in rows 1–5) where paths
+  // may cross ±1 column. Everything outside that window stays lane-locked.
+  // Rows 5 and 6 are always lane-locked so paths re-separate before the rests.
+  const convStart = 1 + Math.floor(rng() * 4); // 1, 2, 3, or 4
+  const convWindowSize = rng() < 0.62 ? 2 : 1;
+  const convEnd = Math.min(convStart + convWindowSize - 1, 4); // never past row 4
+  const convergenceRows = new Set<number>();
+  for (let r = convStart; r <= convEnd; r++) convergenceRows.add(r);
+
+  // Probability of a lane-locked node also sprouting an optional ±1 branch.
+  // Kept low so the three-path feel dominates. Disabled for rows adjacent to
+  // the convergence band (would blur the visual separation too much).
+  const BRANCH_PROB = 0.22;
+
   // ── Wire edges ────────────────────────────────────────────────────────────
   for (let r = 0; r < TOTAL_ROWS - 1; r++) {
     const sources = nodes.filter((n) => n.row === r);
@@ -144,20 +156,34 @@ export function generateActMap(actNumber: 1 | 2 | 3, seed: string): ActMap {
       continue;
     }
 
-    const allowCross = CONVERGENCE_SOURCE_ROWS.has(r);
+    const allowCross = convergenceRows.has(r);
 
     if (!allowCross) {
-      // Lane-locked: each source connects only to its same-column target.
-      // This creates the three distinct paths at the start and again at the end.
+      // Lane-locked: guaranteed same-column edge plus an occasional branch.
       for (const src of sources) {
         const tgt = targets.find((t) => t.col === src.col);
         if (tgt) src.connections.push(tgt.id);
+
+        // Optional branch: only in rows far enough from the convergence band.
+        const distFromConv = Math.min(
+          Math.abs(r - convStart + 1),
+          Math.abs(r - convEnd),
+        );
+        if (distFromConv >= 2 && rng() < BRANCH_PROB) {
+          const adj = targets.filter((t) => Math.abs(t.col - src.col) === 1);
+          if (adj.length > 0) {
+            const branch = adj[Math.floor(rng() * adj.length)];
+            if (branch && !src.connections.includes(branch.id)) {
+              src.connections.push(branch.id);
+            }
+          }
+        }
       }
       continue;
     }
 
     // Convergence band: ±1 column edges, 1–2 per source, for a narrow mixing
-    // window. Paths touch here but still need to re-commit before row 5.
+    // window. Paths touch here but re-commit to their lane after convEnd.
     for (const src of sources) {
       const candidates = targets.filter((t) => Math.abs(t.col - src.col) <= 1);
       if (candidates.length === 0) continue;
@@ -169,7 +195,7 @@ export function generateActMap(actNumber: 1 | 2 | 3, seed: string): ActMap {
       }
     }
 
-    // Make sure every target in the convergence has at least one incoming edge.
+    // Guarantee every convergence-band target has at least one incoming edge.
     for (const tgt of targets) {
       const hasIncoming = sources.some((s) => s.connections.includes(tgt.id));
       if (hasIncoming) continue;
