@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { CardInstance, CombatState } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { playCard, attackWithMinion, endPlayerTurn, executeEnemyTurn } from '../engine/combat';
@@ -8,6 +8,20 @@ import { CardComponent } from './CardComponent';
 
 const ENEMY_TURN_DELAY_MS = 1200;
 const ENEMY_ACTION_LINGER_MS = 900;
+const FLOAT_DURATION_MS = 1300;
+
+// ─── Floating combat numbers ──────────────────────────────────────────────────
+
+interface FloatNum {
+  id: number;
+  text: string;
+  color: string;
+  shadow: string;
+  top: string;
+  left: string;
+}
+
+let _floatId = 0;
 
 // ─── HUD sub-component ────────────────────────────────────────────────────────
 
@@ -171,9 +185,10 @@ interface HUDProps {
   cs: CombatState;
   onEndTurn: () => void;
   isEnemyTurn: boolean;
+  shakeKey: number;
 }
 
-const HUDBar: React.FC<HUDProps> = ({ cs, onEndTurn, isEnemyTurn }) => {
+const HUDBar: React.FC<HUDProps> = ({ cs, onEndTurn, isEnemyTurn, shakeKey }) => {
   const hpPct = Math.max(0, (cs.playerHealth / cs.playerMaxHealth) * 100);
   const hpColor = hpPct > 60 ? '#22cc44' : hpPct > 30 ? '#ffcc00' : '#ff4444';
 
@@ -191,14 +206,25 @@ const HUDBar: React.FC<HUDProps> = ({ cs, onEndTurn, isEnemyTurn }) => {
       }}
     >
       {/* HP block */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 80 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 90 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: '#aaa' }}>
           <span>HP</span>
           <span style={{ color: hpColor, fontWeight: 700 }}>
             {cs.playerHealth}/{cs.playerMaxHealth}
           </span>
         </div>
-        <div style={{ width: '100%', height: 5, background: '#1a1a2e', borderRadius: 3, overflow: 'hidden' }}>
+        {/* HP bar shakes when player takes damage */}
+        <div
+          key={`shake-${shakeKey}`}
+          style={{
+            width: '100%',
+            height: 6,
+            background: '#1a1a2e',
+            borderRadius: 3,
+            overflow: 'hidden',
+            animation: shakeKey > 0 ? 'dungeonShake 320ms ease-out' : undefined,
+          }}
+        >
           <div style={{ width: `${hpPct}%`, height: '100%', background: hpColor, borderRadius: 3, transition: 'width 300ms' }} />
         </div>
         {cs.playerShield > 0 && (
@@ -244,14 +270,108 @@ const HUDBar: React.FC<HUDProps> = ({ cs, onEndTurn, isEnemyTurn }) => {
 
 // ─── CombatView ───────────────────────────────────────────────────────────────
 
+// Spread float numbers horizontally so multi-hit stacks are readable
+const X_SLOTS = [38, 48, 56, 44, 52, 42, 58] as const;
+let _xSlot = 0;
+const nextX = () => `${X_SLOTS[_xSlot++ % X_SLOTS.length]}%`;
+
 export const CombatView: React.FC = () => {
   const { runState, setCombatState } = useDungeonRun();
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [selectedMinionId, setSelectedMinionId] = useState<string | null>(null);
   const [enemyActing, setEnemyActing] = useState(false);
 
+  // ── Floating numbers + flash state ─────────────────────────────────────────
+  const [floatNums, setFloatNums] = useState<FloatNum[]>([]);
+  const [enemyFlashKey, setEnemyFlashKey] = useState(0);
+  const [playerFlashKey, setPlayerFlashKey] = useState(0);
+  const [playerHealKey, setPlayerHealKey] = useState(0);
+  const [playerShakeKey, setPlayerShakeKey] = useState(0);
+
+  const prevPlayerHP    = useRef<number | null>(null);
+  const prevEnemyHP     = useRef<number | null>(null);
+  const prevPlayerShield = useRef<number | null>(null);
+  const prevEnemyShield  = useRef<number | null>(null);
+
   const cs = runState?.combatState;
   const relics = runState?.relics ?? [];
+
+  // Spawn a floating number and auto-remove after animation
+  const spawnFloat = useCallback((
+    text: string,
+    color: string,
+    shadow: string,
+    top: string,
+  ) => {
+    const id = ++_floatId;
+    const left = nextX();
+    setFloatNums((prev) => [...prev, { id, text, color, shadow, top, left }]);
+    window.setTimeout(() => {
+      setFloatNums((prev) => prev.filter((f) => f.id !== id));
+    }, FLOAT_DURATION_MS);
+  }, []);
+
+  // Watch HP/shield changes, spawn floats + trigger flashes
+  useEffect(() => {
+    if (!cs) return;
+
+    const enemyHP     = cs.enemy.currentHealth;
+    const enemyShield = cs.enemy.currentShield;
+    const playerHP    = cs.playerHealth;
+    const playerShield = cs.playerShield;
+
+    // Enemy takes damage
+    if (prevEnemyHP.current !== null && enemyHP < prevEnemyHP.current) {
+      const rawDmg = prevEnemyHP.current - enemyHP;
+      // If shield also dropped, show both numbers
+      if (prevEnemyShield.current !== null && prevEnemyShield.current > enemyShield) {
+        const blocked = prevEnemyShield.current - enemyShield;
+        spawnFloat(`🛡 ${blocked}`, '#3b8fff', '#001a4488', '16%');
+      }
+      spawnFloat(`-${rawDmg}`, '#ff4455', '#ff000044', '22%');
+      setEnemyFlashKey((k) => k + 1);
+    }
+    // Enemy gains shield
+    if (prevEnemyShield.current !== null && enemyShield > prevEnemyShield.current) {
+      spawnFloat(`+🛡 ${enemyShield - prevEnemyShield.current}`, '#3b8fff', '#001a8888', '18%');
+    }
+
+    // Player takes damage
+    if (prevPlayerHP.current !== null && playerHP < prevPlayerHP.current) {
+      const rawDmg = prevPlayerHP.current - playerHP;
+      if (prevPlayerShield.current !== null && prevPlayerShield.current > playerShield) {
+        const blocked = prevPlayerShield.current - playerShield;
+        spawnFloat(`🛡 ${blocked}`, '#3b8fff', '#001a4488', '72%');
+      }
+      spawnFloat(`-${rawDmg}`, '#ff4455', '#ff000044', '78%');
+      setPlayerFlashKey((k) => k + 1);
+      setPlayerShakeKey((k) => k + 1);
+    }
+    // Player heals
+    if (prevPlayerHP.current !== null && playerHP > prevPlayerHP.current) {
+      spawnFloat(`+${playerHP - prevPlayerHP.current}`, '#22dd66', '#00aa4444', '74%');
+      setPlayerHealKey((k) => k + 1);
+    }
+    // Player gains shield
+    if (prevPlayerShield.current !== null && playerShield > prevPlayerShield.current) {
+      spawnFloat(`+🛡 ${playerShield - prevPlayerShield.current}`, '#3b8fff', '#001a8888', '76%');
+    }
+
+    prevPlayerHP.current    = playerHP;
+    prevEnemyHP.current     = enemyHP;
+    prevPlayerShield.current = playerShield;
+    prevEnemyShield.current  = enemyShield;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cs?.playerHealth, cs?.enemy.currentHealth, cs?.playerShield, cs?.enemy.currentShield]);
+
+  // Initialise refs on first render so first-turn changes don't misfire
+  useEffect(() => {
+    if (!cs || prevPlayerHP.current !== null) return;
+    prevPlayerHP.current     = cs.playerHealth;
+    prevEnemyHP.current      = cs.enemy.currentHealth;
+    prevPlayerShield.current  = cs.playerShield;
+    prevEnemyShield.current   = cs.enemy.currentShield;
+  }, [cs]);
 
   // Attack cards need to click an enemy target. Everything else plays immediately.
   const needsTarget = (card: CardInstance): boolean => card.type === 'Attack';
@@ -262,7 +382,6 @@ export const CombatView: React.FC = () => {
     const card = cs.hand.find((c) => c.instanceId === instanceId);
     if (!card) return;
 
-    // Non-targeted cards play on a single click.
     if (!needsTarget(card)) {
       const next = playCard(cs, instanceId, 'enemy');
       setSelectedCardId(null);
@@ -271,7 +390,6 @@ export const CombatView: React.FC = () => {
       return;
     }
 
-    // Attack cards: toggle selection, wait for target click.
     if (selectedCardId === instanceId) {
       setSelectedCardId(null);
       return;
@@ -337,7 +455,7 @@ export const CombatView: React.FC = () => {
     setCombatState(next);
   }, [cs, relics, setCombatState]);
 
-  // Drive the enemy turn with a delay so the player can see the intent resolve.
+  // Drive enemy turn with staged delay
   useEffect(() => {
     if (!cs) return;
     if (cs.phase !== 'enemy_turn') {
@@ -345,10 +463,8 @@ export const CombatView: React.FC = () => {
       return;
     }
     let resolveId: number | null = null;
-    // Stage 1: linger on the pulsing intent.
     const showIntentId = window.setTimeout(() => {
       setEnemyActing(true);
-      // Stage 2: execute, then linger on the result briefly.
       resolveId = window.setTimeout(() => {
         const next = executeEnemyTurn(cs);
         setCombatState(next);
@@ -365,7 +481,6 @@ export const CombatView: React.FC = () => {
   const isEnemyTurn = cs.phase === 'enemy_turn';
   const isCombatOver = cs.phase === 'combat_end_win' || cs.phase === 'combat_end_loss';
 
-  // Which enemy minions are targetable
   const enemyGuardians = cs.enemyBoard.filter((m) => m.keywords.includes('GUARDIAN'));
   const targetableEnemyMinionIds = new Set<string>(
     enemyGuardians.length > 0
@@ -374,7 +489,6 @@ export const CombatView: React.FC = () => {
       ? cs.enemyBoard.map((m) => m.instanceId)
       : [],
   );
-
   const canTargetEnemy =
     (selectedCardId !== null || selectedMinionId !== null) && enemyGuardians.length === 0;
 
@@ -383,8 +497,7 @@ export const CombatView: React.FC = () => {
       display: 'flex',
       flexDirection: 'column',
       minHeight: '100vh',
-      background:
-        'radial-gradient(ellipse at 50% 0%, #1a1830 0%, #0a0a18 45%, #050510 100%)',
+      background: 'radial-gradient(ellipse at 50% 0%, #1a1830 0%, #0a0a18 45%, #050510 100%)',
       color: '#f0f0f8',
       overflow: 'hidden',
       userSelect: 'none',
@@ -397,8 +510,9 @@ export const CombatView: React.FC = () => {
       padding: '32px 16px 18px',
       flexShrink: 0,
       borderBottom: '1px solid #1a1a2e',
-      background:
-        'linear-gradient(180deg, rgba(70,20,40,0.14) 0%, rgba(10,10,22,0) 100%)',
+      background: 'linear-gradient(180deg, rgba(70,20,40,0.14) 0%, rgba(10,10,22,0) 100%)',
+      position: 'relative',
+      overflow: 'hidden',
     },
     boardSection: {
       flex: 1,
@@ -414,8 +528,7 @@ export const CombatView: React.FC = () => {
       width: '82%',
       alignSelf: 'center',
       height: 1,
-      background:
-        'linear-gradient(90deg, transparent, #c89b3c55 20%, #c89b3c 50%, #c89b3c55 80%, transparent)',
+      background: 'linear-gradient(90deg, transparent, #c89b3c55 20%, #c89b3c 50%, #c89b3c55 80%, transparent)',
       margin: '10px 0',
       flexShrink: 0,
       boxShadow: '0 0 6px #c89b3c22',
@@ -426,8 +539,7 @@ export const CombatView: React.FC = () => {
       padding: '8px 0 6px',
       maxHeight: 220,
       overflowY: 'auto',
-      background:
-        'linear-gradient(0deg, rgba(40,40,80,0.18) 0%, rgba(10,10,22,0) 100%)',
+      background: 'linear-gradient(0deg, rgba(40,40,80,0.18) 0%, rgba(10,10,22,0) 100%)',
     },
     overlay: {
       position: 'absolute',
@@ -460,10 +572,9 @@ export const CombatView: React.FC = () => {
       letterSpacing: '0.25em',
       textTransform: 'uppercase',
       borderRadius: 4,
-      boxShadow: isEnemyTurn
-        ? '0 0 14px #ff446644'
-        : '0 0 10px #3b8fff33',
+      boxShadow: isEnemyTurn ? '0 0 14px #ff446644' : '0 0 10px #3b8fff33',
       animation: isEnemyTurn ? 'dungeonTurnPulse 900ms ease-in-out infinite' : undefined,
+      whiteSpace: 'nowrap',
     },
   };
 
@@ -482,7 +593,52 @@ export const CombatView: React.FC = () => {
           0%   { opacity: 0; transform: translateX(-10px); }
           100% { opacity: 1; transform: translateX(0); }
         }
+        @keyframes dungeonFloatUp {
+          0%   { opacity: 1;   transform: translateY(0)     scale(1);    }
+          15%  { opacity: 1;   transform: translateY(-10px) scale(1.18); }
+          100% { opacity: 0;   transform: translateY(-64px) scale(0.88); }
+        }
+        @keyframes dungeonDmgFlash {
+          0%   { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        @keyframes dungeonHealFlash {
+          0%   { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        @keyframes dungeonShake {
+          0%   { transform: translateX(0); }
+          20%  { transform: translateX(-4px); }
+          40%  { transform: translateX(4px); }
+          60%  { transform: translateX(-3px); }
+          80%  { transform: translateX(2px); }
+          100% { transform: translateX(0); }
+        }
       `}</style>
+
+      {/* ── Floating combat numbers (absolute over root) ─── */}
+      {floatNums.map((f) => (
+        <div
+          key={f.id}
+          style={{
+            position: 'absolute',
+            top: f.top,
+            left: f.left,
+            transform: 'translateX(-50%)',
+            zIndex: 20,
+            pointerEvents: 'none',
+            fontSize: 26,
+            fontWeight: 900,
+            color: f.color,
+            textShadow: `0 0 12px ${f.shadow}, 0 2px 4px rgba(0,0,0,0.8)`,
+            letterSpacing: '-0.02em',
+            animation: `dungeonFloatUp ${FLOAT_DURATION_MS}ms cubic-bezier(0.22,1,0.36,1) forwards`,
+            fontFamily: 'monospace',
+          }}
+        >
+          {f.text}
+        </div>
+      ))}
 
       <div style={s.turnBanner}>
         {isEnemyTurn ? '⚠ Enemy Turn' : `Your Turn · ${cs.turn}`}
@@ -505,8 +661,23 @@ export const CombatView: React.FC = () => {
         </div>
       )}
 
-      {/* Enemy section */}
+      {/* ── Enemy section ── */}
       <div style={s.enemySection}>
+        {/* Red flash on enemy damage */}
+        {enemyFlashKey > 0 && (
+          <div
+            key={`ef-${enemyFlashKey}`}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(255,40,60,0.30)',
+              pointerEvents: 'none',
+              zIndex: 3,
+              animation: 'dungeonDmgFlash 500ms ease-out forwards',
+            }}
+          />
+        )}
+        {/* Player-heal (enemy section shows nothing for heal; kept for parity) */}
         <EnemyComponent
           enemy={cs.enemy}
           isTargeted={canTargetEnemy}
@@ -516,7 +687,7 @@ export const CombatView: React.FC = () => {
         />
       </div>
 
-      {/* Board section */}
+      {/* ── Board section ── */}
       <div style={s.boardSection}>
         <BoardRow
           cards={cs.enemyBoard}
@@ -525,9 +696,7 @@ export const CombatView: React.FC = () => {
           targetableIds={targetableEnemyMinionIds}
           onCardClick={handleEnemyMinionClick}
         />
-
         <div style={s.boardDivider} />
-
         <BoardRow
           cards={cs.playerBoard}
           label="Your Minions"
@@ -536,22 +705,56 @@ export const CombatView: React.FC = () => {
         />
       </div>
 
-      {/* Combat log */}
+      {/* ── Combat log ── */}
       <CombatLog log={cs.combatLog} />
 
-      {/* Hand */}
-      <div style={s.handSection}>
-        <HandComponent
-          hand={cs.hand}
-          energy={cs.playerEnergy}
-          selectedId={selectedCardId}
-          onCardSelect={handleCardSelect}
-          disabled={isEnemyTurn || isCombatOver}
-        />
+      {/* ── Hand ── */}
+      {/* Player damage flash behind hand */}
+      <div style={{ position: 'relative', flexShrink: 0 }}>
+        {playerFlashKey > 0 && (
+          <div
+            key={`pf-${playerFlashKey}`}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(255,40,60,0.22)',
+              pointerEvents: 'none',
+              zIndex: 3,
+              animation: 'dungeonDmgFlash 500ms ease-out forwards',
+            }}
+          />
+        )}
+        {playerHealKey > 0 && (
+          <div
+            key={`ph-${playerHealKey}`}
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(40,220,100,0.18)',
+              pointerEvents: 'none',
+              zIndex: 3,
+              animation: 'dungeonHealFlash 600ms ease-out forwards',
+            }}
+          />
+        )}
+        <div style={s.handSection}>
+          <HandComponent
+            hand={cs.hand}
+            energy={cs.playerEnergy}
+            selectedId={selectedCardId}
+            onCardSelect={handleCardSelect}
+            disabled={isEnemyTurn || isCombatOver}
+          />
+        </div>
       </div>
 
-      {/* HUD */}
-      <HUDBar cs={cs} onEndTurn={handleEndTurn} isEnemyTurn={isEnemyTurn || isCombatOver} />
+      {/* ── HUD ── */}
+      <HUDBar
+        cs={cs}
+        onEndTurn={handleEndTurn}
+        isEnemyTurn={isEnemyTurn || isCombatOver}
+        shakeKey={playerShakeKey}
+      />
     </div>
   );
 };
