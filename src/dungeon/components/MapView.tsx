@@ -164,7 +164,7 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
 
   if (!map) return null;
 
-  const availableNodes = getAvailableNodes(map, map.currentNodeId ?? '');
+  const availableNodes = getAvailableNodes(map, map.currentNodeId);
   const availableIds = new Set(availableNodes.map((n) => n.id));
   const nodeById = new Map(map.nodes.map((n) => [n.id, n]));
 
