@@ -113,33 +113,57 @@ const BoardRow: React.FC<{
 
 // ─── Combat log ───────────────────────────────────────────────────────────────
 
-const CombatLog: React.FC<{ log: string[] }> = ({ log }) => (
-  <div
-    style={{
-      width: '100%',
-      padding: '4px 10px',
-      background: '#06060e',
-      borderTop: '1px solid #1a1a2e',
-      borderBottom: '1px solid #1a1a2e',
-      maxHeight: 56,
-      overflowY: 'auto',
-    }}
-  >
-    {log.slice(-4).map((entry, i) => (
+const CombatLog: React.FC<{ log: string[] }> = ({ log }) => {
+  const visible = log.slice(-7);
+  return (
+    <div
+      style={{
+        width: '100%',
+        padding: '8px 16px 10px',
+        background: 'linear-gradient(180deg, #06060e 0%, #09091a 100%)',
+        borderTop: '1px solid #1a1a2e',
+        borderBottom: '1px solid #1a1a2e',
+        maxHeight: 140,
+        overflowY: 'auto',
+        boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.6)',
+        flexShrink: 0,
+      }}
+    >
       <div
-        key={i}
         style={{
-          fontSize: 9,
-          color: i === log.length - 1 ? '#ddd' : '#777',
-          lineHeight: 1.5,
-          letterSpacing: '0.03em',
+          fontSize: 8,
+          letterSpacing: '0.25em',
+          color: '#c89b3c',
+          opacity: 0.55,
+          textTransform: 'uppercase',
+          marginBottom: 6,
         }}
       >
-        {entry}
+        ▸ Combat Log
       </div>
-    ))}
-  </div>
-);
+      {visible.map((entry, i) => {
+        const isLatest = i === visible.length - 1;
+        return (
+          <div
+            key={`${log.length - visible.length + i}-${entry}`}
+            style={{
+              fontSize: 11,
+              color: isLatest ? '#e8e8ff' : '#666',
+              lineHeight: 1.5,
+              letterSpacing: '0.03em',
+              fontWeight: isLatest ? 600 : 400,
+              padding: '1px 0',
+              animation: isLatest ? 'dungeonLogSlide 300ms ease-out' : undefined,
+            }}
+          >
+            <span style={{ color: '#c89b3c88', marginRight: 6 }}>›</span>
+            {entry}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
 // ─── HUD bar ─────────────────────────────────────────────────────────────────
 
@@ -453,6 +477,10 @@ export const CombatView: React.FC = () => {
         @keyframes dungeonIntentPulse {
           0%, 100% { box-shadow: 0 0 0 0 currentColor, 0 0 6px 0 rgba(255,255,255,0.02); transform: scale(1); }
           50%      { box-shadow: 0 0 0 3px currentColor, 0 0 22px 2px currentColor; transform: scale(1.03); }
+        }
+        @keyframes dungeonLogSlide {
+          0%   { opacity: 0; transform: translateX(-10px); }
+          100% { opacity: 1; transform: translateX(0); }
         }
       `}</style>
 
