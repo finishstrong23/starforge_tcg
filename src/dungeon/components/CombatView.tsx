@@ -1,10 +1,13 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import type { CardInstance, CombatState } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
-import { playCard, attackWithMinion, endPlayerTurn } from '../engine/combat';
+import { playCard, attackWithMinion, endPlayerTurn, executeEnemyTurn } from '../engine/combat';
 import { EnemyComponent } from './EnemyComponent';
 import { HandComponent } from './HandComponent';
 import { CardComponent } from './CardComponent';
+
+const ENEMY_TURN_DELAY_MS = 1200;
+const ENEMY_ACTION_LINGER_MS = 900;
 
 // ─── HUD sub-component ────────────────────────────────────────────────────────
 
@@ -221,24 +224,42 @@ export const CombatView: React.FC = () => {
   const { runState, setCombatState } = useDungeonRun();
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [selectedMinionId, setSelectedMinionId] = useState<string | null>(null);
+  const [enemyActing, setEnemyActing] = useState(false);
 
   const cs = runState?.combatState;
   const relics = runState?.relics ?? [];
 
+  // Attack cards need to click an enemy target. Everything else plays immediately.
+  const needsTarget = (card: CardInstance): boolean => card.type === 'Attack';
+
   const handleCardSelect = useCallback((instanceId: string) => {
     if (!cs) return;
+    if (cs.phase !== 'player_turn') return;
+    const card = cs.hand.find((c) => c.instanceId === instanceId);
+    if (!card) return;
+
+    // Non-targeted cards play on a single click.
+    if (!needsTarget(card)) {
+      const next = playCard(cs, instanceId, 'enemy');
+      setSelectedCardId(null);
+      setSelectedMinionId(null);
+      setCombatState(next);
+      return;
+    }
+
+    // Attack cards: toggle selection, wait for target click.
     if (selectedCardId === instanceId) {
       setSelectedCardId(null);
       return;
     }
     setSelectedCardId(instanceId);
     setSelectedMinionId(null);
-  }, [cs, selectedCardId]);
+  }, [cs, selectedCardId, setCombatState]);
 
   const handleEnemyClick = useCallback(() => {
     if (!cs) return;
+    if (cs.phase !== 'player_turn') return;
 
-    // Play selected hand card targeting the enemy
     if (selectedCardId) {
       const next = playCard(cs, selectedCardId, 'enemy');
       setSelectedCardId(null);
@@ -246,9 +267,7 @@ export const CombatView: React.FC = () => {
       return;
     }
 
-    // Attack with selected player minion
     if (selectedMinionId) {
-      // If enemy board has a GUARDIAN, must target it first
       const guardians = cs.enemyBoard.filter((m) => m.keywords.includes('GUARDIAN'));
       const targetId = guardians.length > 0 ? guardians[0].instanceId : 'enemy';
       const next = attackWithMinion(cs, selectedMinionId, targetId);
@@ -259,6 +278,7 @@ export const CombatView: React.FC = () => {
 
   const handleEnemyMinionClick = useCallback((minionId: string) => {
     if (!cs) return;
+    if (cs.phase !== 'player_turn') return;
 
     if (selectedCardId) {
       const next = playCard(cs, selectedCardId, minionId);
@@ -276,6 +296,7 @@ export const CombatView: React.FC = () => {
 
   const handlePlayerMinionClick = useCallback((minionId: string) => {
     if (!cs) return;
+    if (cs.phase !== 'player_turn') return;
     const minion = cs.playerBoard.find((m) => m.instanceId === minionId);
     if (!minion) return;
     if (minion.hasAttacked) return;
@@ -285,11 +306,35 @@ export const CombatView: React.FC = () => {
 
   const handleEndTurn = useCallback(() => {
     if (!cs) return;
+    if (cs.phase !== 'player_turn') return;
     setSelectedCardId(null);
     setSelectedMinionId(null);
     const next = endPlayerTurn(cs, relics);
     setCombatState(next);
   }, [cs, relics, setCombatState]);
+
+  // Drive the enemy turn with a delay so the player can see the intent resolve.
+  useEffect(() => {
+    if (!cs) return;
+    if (cs.phase !== 'enemy_turn') {
+      setEnemyActing(false);
+      return;
+    }
+    let resolveId: number | null = null;
+    // Stage 1: linger on the pulsing intent.
+    const showIntentId = window.setTimeout(() => {
+      setEnemyActing(true);
+      // Stage 2: execute, then linger on the result briefly.
+      resolveId = window.setTimeout(() => {
+        const next = executeEnemyTurn(cs);
+        setCombatState(next);
+      }, ENEMY_ACTION_LINGER_MS);
+    }, ENEMY_TURN_DELAY_MS);
+    return () => {
+      window.clearTimeout(showIntentId);
+      if (resolveId !== null) window.clearTimeout(resolveId);
+    };
+  }, [cs, setCombatState]);
 
   if (!cs) return null;
 
@@ -313,40 +358,52 @@ export const CombatView: React.FC = () => {
     root: {
       display: 'flex',
       flexDirection: 'column',
-      height: '100%',
-      background: 'radial-gradient(ellipse at top, #0d0d20 0%, #080810 100%)',
+      minHeight: '100vh',
+      background:
+        'radial-gradient(ellipse at 50% 0%, #1a1830 0%, #0a0a18 45%, #050510 100%)',
       color: '#f0f0f8',
       overflow: 'hidden',
       userSelect: 'none',
+      position: 'relative',
     },
     enemySection: {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'flex-start',
-      padding: '10px 8px 4px',
+      padding: '32px 16px 18px',
       flexShrink: 0,
+      borderBottom: '1px solid #1a1a2e',
+      background:
+        'linear-gradient(180deg, rgba(70,20,40,0.14) 0%, rgba(10,10,22,0) 100%)',
     },
     boardSection: {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'center',
+      justifyContent: 'space-between',
       overflow: 'hidden',
+      minHeight: 160,
+      padding: '12px 0',
+      gap: 8,
     },
     boardDivider: {
-      width: '90%',
+      width: '82%',
       alignSelf: 'center',
       height: 1,
-      background: 'linear-gradient(90deg, transparent, #3a3a5a, transparent)',
-      margin: '4px 0',
+      background:
+        'linear-gradient(90deg, transparent, #c89b3c55 20%, #c89b3c 50%, #c89b3c55 80%, transparent)',
+      margin: '10px 0',
       flexShrink: 0,
+      boxShadow: '0 0 6px #c89b3c22',
     },
     handSection: {
       flexShrink: 0,
       borderTop: '1px solid #1a1a2e',
-      padding: '4px 0',
-      maxHeight: 200,
+      padding: '8px 0 6px',
+      maxHeight: 220,
       overflowY: 'auto',
+      background:
+        'linear-gradient(0deg, rgba(40,40,80,0.18) 0%, rgba(10,10,22,0) 100%)',
     },
     overlay: {
       position: 'absolute',
@@ -362,10 +419,47 @@ export const CombatView: React.FC = () => {
       fontWeight: 700,
       letterSpacing: '0.15em',
     },
+    turnBanner: {
+      position: 'absolute',
+      top: 8,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 5,
+      padding: '5px 16px',
+      background: isEnemyTurn
+        ? 'linear-gradient(180deg, #3a0e14 0%, #200608 100%)'
+        : 'linear-gradient(180deg, #0e1a3a 0%, #060820 100%)',
+      border: isEnemyTurn ? '1px solid #ff4466' : '1px solid #3b8fff',
+      color: isEnemyTurn ? '#ff8899' : '#8ab5ff',
+      fontSize: 10,
+      fontWeight: 700,
+      letterSpacing: '0.25em',
+      textTransform: 'uppercase',
+      borderRadius: 4,
+      boxShadow: isEnemyTurn
+        ? '0 0 14px #ff446644'
+        : '0 0 10px #3b8fff33',
+      animation: isEnemyTurn ? 'dungeonTurnPulse 900ms ease-in-out infinite' : undefined,
+    },
   };
 
   return (
     <div style={s.root}>
+      <style>{`
+        @keyframes dungeonTurnPulse {
+          0%, 100% { filter: brightness(1); }
+          50%      { filter: brightness(1.35); }
+        }
+        @keyframes dungeonIntentPulse {
+          0%, 100% { box-shadow: 0 0 0 0 currentColor, 0 0 6px 0 rgba(255,255,255,0.02); transform: scale(1); }
+          50%      { box-shadow: 0 0 0 3px currentColor, 0 0 22px 2px currentColor; transform: scale(1.03); }
+        }
+      `}</style>
+
+      <div style={s.turnBanner}>
+        {isEnemyTurn ? '⚠ Enemy Turn' : `Your Turn · ${cs.turn}`}
+      </div>
+
       {/* Combat-end overlay */}
       {isCombatOver && (
         <div style={s.overlay}>
@@ -388,6 +482,8 @@ export const CombatView: React.FC = () => {
         <EnemyComponent
           enemy={cs.enemy}
           isTargeted={canTargetEnemy}
+          intentPulsing={isEnemyTurn}
+          intentResolving={enemyActing}
           onClick={canTargetEnemy ? handleEnemyClick : undefined}
         />
       </div>
