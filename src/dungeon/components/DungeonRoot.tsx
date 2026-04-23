@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { DungeonRunProvider } from '../context/DungeonRunContext';
+import { DungeonRunProvider, useDungeonRun } from '../context/DungeonRunContext';
+import type { Faction } from '../types';
 import {
   STARTER_DECKS,
   CARD_BY_ID,
@@ -7,13 +8,19 @@ import {
   type StarterDeck,
   type Card,
 } from '../../roguelite';
+import { DraftView } from './DraftView';
+import { MapView } from './MapView';
+import { CombatView } from './CombatView';
+import { RewardView } from './RewardView';
+import { RestSiteView } from './RestSiteView';
+import { ShopView } from './ShopView';
+import { RelicBar } from './RelicBar';
+import { DeckViewer } from './DeckViewer';
 
 interface DungeonRootProps {
   onBack: () => void;
 }
 
-// Faction presentation (name, mechanic summary, accent color, glyph).
-// Lives in the UI layer because it's display metadata, not game data.
 const FACTIONS: Array<{
   id: FactionId;
   glyph: string;
@@ -65,7 +72,60 @@ const FACTIONS: Array<{
   },
 ];
 
-const s = {
+// ─── Style helpers (functions extracted so they aren't inside Record<string, CSSProperties>) ──
+
+const selCardStyle = (accent: string, selected: boolean): React.CSSProperties => ({
+  background: selected
+    ? `linear-gradient(135deg, ${accent}22, #141428 70%)`
+    : 'linear-gradient(135deg, #12121e, #0b0b14)',
+  border: selected ? `1px solid ${accent}` : '1px solid #222236',
+  borderRadius: '6px',
+  padding: '1.25rem 1.25rem 1.1rem',
+  cursor: 'pointer',
+  transition: 'border-color 120ms ease, transform 120ms ease',
+  transform: selected ? 'translateY(-2px)' : 'none',
+  boxShadow: selected ? `0 0 0 1px ${accent}33, 0 14px 40px -20px ${accent}88` : 'none',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.6rem',
+});
+
+const cardGlyphStyle = (accent: string): React.CSSProperties => ({
+  fontSize: '1.6rem',
+  color: accent,
+  width: '2rem',
+  textAlign: 'center',
+});
+
+const cardMechanicLabelStyle = (accent: string): React.CSSProperties => ({
+  fontSize: '0.7rem',
+  letterSpacing: '0.18em',
+  color: accent,
+  textTransform: 'uppercase',
+  marginTop: '0.25rem',
+});
+
+const detailHeaderStyle = (accent: string): React.CSSProperties => ({
+  fontSize: '0.7rem',
+  letterSpacing: '0.25em',
+  color: accent,
+  textTransform: 'uppercase',
+});
+
+const beginBtnStyle = (accent: string, disabled: boolean): React.CSSProperties => ({
+  padding: '0.85rem 2.2rem',
+  background: disabled ? 'transparent' : `linear-gradient(180deg, ${accent}, ${accent}cc)`,
+  color: disabled ? '#6a6a80' : '#0a0a16',
+  border: disabled ? '1px solid #2a2a40' : `1px solid ${accent}`,
+  cursor: disabled ? 'not-allowed' : 'pointer',
+  letterSpacing: '0.18em',
+  fontSize: '0.9rem',
+  fontWeight: 700,
+  borderRadius: '3px',
+  textTransform: 'uppercase',
+});
+
+const s: Record<string, React.CSSProperties> = {
   root: {
     width: '100%',
     minHeight: '100vh',
@@ -77,7 +137,7 @@ const s = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-  } as React.CSSProperties,
+  },
   headerRow: {
     width: '100%',
     maxWidth: '1200px',
@@ -86,7 +146,7 @@ const s = {
     alignItems: 'flex-start',
     marginBottom: '2rem',
   },
-  titleBlock: { display: 'flex', flexDirection: 'column', gap: '0.35rem' } as React.CSSProperties,
+  titleBlock: { display: 'flex', flexDirection: 'column', gap: '0.35rem' },
   title: {
     fontSize: '2.2rem',
     letterSpacing: '0.18em',
@@ -127,37 +187,9 @@ const s = {
     gap: '1rem',
     marginBottom: '2rem',
   },
-  card: (accent: string, selected: boolean): React.CSSProperties => ({
-    background: selected
-      ? `linear-gradient(135deg, ${accent}22, #141428 70%)`
-      : 'linear-gradient(135deg, #12121e, #0b0b14)',
-    border: selected ? `1px solid ${accent}` : '1px solid #222236',
-    borderRadius: '6px',
-    padding: '1.25rem 1.25rem 1.1rem',
-    cursor: 'pointer',
-    transition: 'border-color 120ms ease, transform 120ms ease',
-    transform: selected ? 'translateY(-2px)' : 'none',
-    boxShadow: selected ? `0 0 0 1px ${accent}33, 0 14px 40px -20px ${accent}88` : 'none',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.6rem',
-  }),
   cardHeader: { display: 'flex', alignItems: 'center', gap: '0.7rem' },
-  cardGlyph: (accent: string): React.CSSProperties => ({
-    fontSize: '1.6rem',
-    color: accent,
-    width: '2rem',
-    textAlign: 'center',
-  }),
   cardName: { fontSize: '1.1rem', fontWeight: 600, letterSpacing: '0.05em' },
   cardTag: { fontSize: '0.8rem', opacity: 0.65 },
-  cardMechanicLabel: (accent: string): React.CSSProperties => ({
-    fontSize: '0.7rem',
-    letterSpacing: '0.18em',
-    color: accent,
-    textTransform: 'uppercase',
-    marginTop: '0.25rem',
-  }),
   cardMechanicBody: { fontSize: '0.82rem', opacity: 0.82, lineHeight: 1.4 },
   cardFooter: {
     marginTop: '0.4rem',
@@ -178,13 +210,7 @@ const s = {
     gridTemplateColumns: '1fr 1fr',
     gap: '1.5rem',
   },
-  detailCol: { display: 'flex', flexDirection: 'column', gap: '0.75rem' } as React.CSSProperties,
-  detailHeader: (accent: string): React.CSSProperties => ({
-    fontSize: '0.7rem',
-    letterSpacing: '0.25em',
-    color: accent,
-    textTransform: 'uppercase',
-  }),
+  detailCol: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
   characterName: { fontSize: '1.4rem', fontWeight: 600, margin: 0 },
   mechanicProse: {
     fontSize: '0.92rem',
@@ -192,7 +218,7 @@ const s = {
     opacity: 0.85,
     margin: 0,
   },
-  deckList: { display: 'flex', flexDirection: 'column', gap: '0.35rem' } as React.CSSProperties,
+  deckList: { display: 'flex', flexDirection: 'column', gap: '0.35rem' },
   deckRow: {
     display: 'flex',
     alignItems: 'baseline',
@@ -218,31 +244,92 @@ const s = {
     maxWidth: '1200px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     marginTop: '1.5rem',
   },
-  beginBtn: (accent: string, disabled: boolean): React.CSSProperties => ({
-    padding: '0.85rem 2.2rem',
-    background: disabled ? 'transparent' : `linear-gradient(180deg, ${accent}, ${accent}cc)`,
-    color: disabled ? '#6a6a80' : '#0a0a16',
-    border: disabled ? '1px solid #2a2a40' : `1px solid ${accent}`,
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    letterSpacing: '0.18em',
-    fontSize: '0.9rem',
-    fontWeight: 700,
-    borderRadius: '3px',
+  // Run overlay elements
+  runWrap: {
+    position: 'relative',
+    width: '100%',
+    minHeight: '100vh',
+    fontFamily: 'var(--font-family, system-ui, sans-serif)',
+  },
+  deckBtn: {
+    position: 'fixed',
+    bottom: 72,
+    right: 12,
+    zIndex: 120,
+    padding: '6px 14px',
+    background: '#0e0e1e',
+    border: '1px solid #2a2a3a',
+    color: '#aaa',
+    borderRadius: 4,
+    fontSize: 10,
+    cursor: 'pointer',
+    letterSpacing: '0.12em',
     textTransform: 'uppercase',
-  }),
-  phaseNote: {
-    fontSize: '0.72rem',
-    opacity: 0.5,
+  },
+  abandonBtn: {
+    position: 'fixed',
+    top: 12,
+    left: 12,
+    zIndex: 120,
+    padding: '5px 12px',
+    background: 'transparent',
+    border: '1px solid #3a1a1a',
+    color: '#aa5555',
+    borderRadius: 4,
+    fontSize: 9,
+    cursor: 'pointer',
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+  },
+  // Run end screen
+  endRoot: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 24,
+    minHeight: '100vh',
+    background: 'radial-gradient(ellipse at top, #10101e, #060610)',
+    color: '#f0f0f8',
+    padding: '2rem 1rem',
+    fontFamily: 'var(--font-family, system-ui, sans-serif)',
+  },
+  endTitle: {
+    fontSize: '2.5rem',
+    fontWeight: 700,
+    letterSpacing: '0.25em',
+    textTransform: 'uppercase',
+    margin: 0,
+    textAlign: 'center',
+  },
+  endStats: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    alignItems: 'center',
+    opacity: 0.75,
+    fontSize: 13,
     letterSpacing: '0.1em',
-    maxWidth: '460px',
-    textAlign: 'right',
-  } as React.CSSProperties,
+  },
+  endBtn: {
+    padding: '10px 28px',
+    background: 'linear-gradient(180deg, #3b8fff, #1a5fcc)',
+    color: '#fff',
+    border: '1px solid #3b8fff',
+    borderRadius: 4,
+    fontWeight: 700,
+    fontSize: 11,
+    letterSpacing: '0.15em',
+    cursor: 'pointer',
+    textTransform: 'uppercase',
+    marginTop: 8,
+  },
 };
 
-// ─── Detail panel for the selected faction ──────────────────────────────────
+// ─── Faction select sub-components ──────────────────────────────────────────
 
 const DeckRow: React.FC<{ count: number; card: Card }> = ({ count, card }) => (
   <div>
@@ -272,7 +359,7 @@ const FactionDetail: React.FC<{
   return (
     <div style={s.detailPanel}>
       <div style={s.detailCol}>
-        <div style={s.detailHeader(faction.accent)}>Character</div>
+        <div style={detailHeaderStyle(faction.accent)}>Character</div>
         <h2 style={s.characterName}>{deck.characterName}</h2>
         <p style={s.mechanicProse}>
           <strong style={{ color: faction.accent, letterSpacing: '0.1em' }}>
@@ -286,7 +373,7 @@ const FactionDetail: React.FC<{
         </div>
       </div>
       <div style={s.detailCol}>
-        <div style={s.detailHeader(faction.accent)}>Starter Deck · 10 cards</div>
+        <div style={detailHeaderStyle(faction.accent)}>Starter Deck · 10 cards</div>
         <div style={s.deckList}>
           {rows.map((r) => (
             <DeckRow key={r.card.id} count={r.count} card={r.card} />
@@ -297,15 +384,49 @@ const FactionDetail: React.FC<{
   );
 };
 
-// ─── Root ───────────────────────────────────────────────────────────────────
+// ─── Run-end screen ──────────────────────────────────────────────────────────
 
-export const DungeonRoot: React.FC<DungeonRootProps> = ({ onBack }) => {
-  const [selectedId, setSelectedId] = useState<FactionId>('Pyroclast');
-  const selected = FACTIONS.find((f) => f.id === selectedId)!;
-  const selectedDeck = STARTER_DECKS[selectedId];
+const RunEndScreen: React.FC<{ won: boolean; onBack: () => void }> = ({ won, onBack }) => {
+  const { runState } = useDungeonRun();
+  const stats = runState?.runStats;
+  const act = runState?.currentAct ?? 1;
 
   return (
-    <DungeonRunProvider>
+    <div style={s.endRoot}>
+      <h1 style={{ ...s.endTitle, color: won ? '#22cc66' : '#cc3333' }}>
+        {won ? '👑 Victory!' : '💀 Defeated'}
+      </h1>
+      <div style={{ ...s.endTitle, fontSize: '1rem', opacity: 0.5, letterSpacing: '0.2em' }}>
+        {won ? 'The dungeon falls before you.' : `Fell in Act ${act}.`}
+      </div>
+      <div style={s.endStats}>
+        <div>Combats won: {stats?.totalCombats ?? 0}</div>
+        <div>Elites defeated: {stats?.elitesDefeated ?? 0}</div>
+        <div>Bosses defeated: {stats?.bossesDefeated ?? 0}</div>
+        <div>Gold remaining: {runState?.gold ?? 0}g</div>
+        <div>Relics collected: {runState?.relics.length ?? 0}</div>
+        <div>Deck size: {runState?.deck.length ?? 0} cards</div>
+      </div>
+      <button type="button" style={s.endBtn} onClick={onBack}>
+        Main Menu
+      </button>
+    </div>
+  );
+};
+
+// ─── Inner component (reads context, routes by phase) ────────────────────────
+
+const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+  const { runState, startNewRun, endRun } = useDungeonRun();
+  const [selectedId, setSelectedId] = useState<FactionId>('Pyroclast');
+  const [deckOpen, setDeckOpen] = useState(false);
+
+  // ── Faction selection (pre-run) ──
+  if (!runState) {
+    const selected = FACTIONS.find((f) => f.id === selectedId)!;
+    const selectedDeck = STARTER_DECKS[selectedId];
+
+    return (
       <div style={s.root}>
         <div style={s.headerRow}>
           <div style={s.titleBlock}>
@@ -332,16 +453,16 @@ export const DungeonRoot: React.FC<DungeonRootProps> = ({ onBack }) => {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') setSelectedId(f.id);
                 }}
-                style={s.card(f.accent, isSelected)}
+                style={selCardStyle(f.accent, isSelected)}
               >
                 <div style={s.cardHeader}>
-                  <div style={s.cardGlyph(f.accent)}>{f.glyph}</div>
+                  <div style={cardGlyphStyle(f.accent)}>{f.glyph}</div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={s.cardName}>{f.id === 'WarpRiders' ? 'Warp Riders' : f.id}</span>
                     <span style={s.cardTag}>{f.tagline}</span>
                   </div>
                 </div>
-                <div style={s.cardMechanicLabel(f.accent)}>{f.mechanic}</div>
+                <div style={cardMechanicLabelStyle(f.accent)}>{f.mechanic}</div>
                 <div style={s.cardMechanicBody}>{f.mechanicSummary}</div>
                 <div style={s.cardFooter}>{deck.characterName}</div>
               </div>
@@ -352,20 +473,72 @@ export const DungeonRoot: React.FC<DungeonRootProps> = ({ onBack }) => {
         <FactionDetail faction={selected} deck={selectedDeck} />
 
         <div style={s.startRow}>
-          <p style={s.phaseNote}>
-            Card content complete (324 cards). Combat engine + 36-node map
-            land in the next build phase.
-          </p>
           <button
             type="button"
-            disabled
-            style={s.beginBtn(selected.accent, true)}
-            title="Combat engine arriving in the next phase"
+            style={beginBtnStyle(selected.accent, false)}
+            onClick={() => startNewRun(selectedId as Faction)}
           >
             Begin Run
           </button>
         </div>
       </div>
-    </DungeonRunProvider>
+    );
+  }
+
+  // ── Phase routing ──
+  const phase = runState.phase;
+
+  if (phase === 'run_end_win' || phase === 'run_end_loss') {
+    return <RunEndScreen won={phase === 'run_end_win'} onBack={onBack} />;
+  }
+
+  let mainView: React.ReactNode;
+  switch (phase) {
+    case 'draft':      mainView = <DraftView />; break;
+    case 'map':        mainView = <MapView />; break;
+    case 'combat':
+    case 'elite_combat':
+    case 'boss_combat': mainView = <CombatView />; break;
+    case 'reward':     mainView = <RewardView />; break;
+    case 'rest':       mainView = <RestSiteView />; break;
+    case 'shop':       mainView = <ShopView />; break;
+    default:           mainView = <MapView />;
+  }
+
+  return (
+    <div style={s.runWrap}>
+      {mainView}
+
+      {/* Persistent run overlays */}
+      <RelicBar />
+
+      <button
+        type="button"
+        style={s.deckBtn}
+        onClick={() => setDeckOpen((o) => !o)}
+      >
+        View Deck ({runState.deck.length})
+      </button>
+
+      <button
+        type="button"
+        style={s.abandonBtn}
+        onClick={() => {
+          if (window.confirm('Abandon this run?')) endRun(false);
+        }}
+      >
+        ✕ Abandon
+      </button>
+
+      {deckOpen && <DeckViewer onClose={() => setDeckOpen(false)} />}
+    </div>
   );
 };
+
+// ─── Public root (provides context) ─────────────────────────────────────────
+
+export const DungeonRoot: React.FC<DungeonRootProps> = ({ onBack }) => (
+  <DungeonRunProvider>
+    <DungeonRootInner onBack={onBack} />
+  </DungeonRunProvider>
+);
