@@ -41,6 +41,8 @@ export interface DungeonRunContextValue {
   setCombatState: (state: CombatState | null) => void;
   advanceAct: () => void;
   endRun: (won: boolean) => void;
+  /** Return to the map from a non-combat node (rest/shop/reward/treasure). */
+  returnToMap: () => void;
 }
 
 // ─── Reducer ───────────────────────────────────────────────────────────────────
@@ -69,7 +71,8 @@ type Action =
   | { type: 'UPGRADE_CARD'; instanceId: string }
   | { type: 'SET_COMBAT'; state: CombatState | null }
   | { type: 'ADVANCE_ACT' }
-  | { type: 'END_RUN'; won: boolean };
+  | { type: 'END_RUN'; won: boolean }
+  | { type: 'RETURN_TO_MAP' };
 
 const INITIAL: ContextState = {
   run: null,
@@ -355,6 +358,11 @@ function reducer(state: ContextState, action: Action): ContextState {
       };
     }
 
+    case 'RETURN_TO_MAP': {
+      if (!state.run) return state;
+      return { ...state, run: { ...state.run, phase: 'map' } };
+    }
+
     default:
       return state;
   }
@@ -427,6 +435,10 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     dispatch({ type: 'END_RUN', won });
   }, []);
 
+  const returnToMap = useCallback(() => {
+    dispatch({ type: 'RETURN_TO_MAP' });
+  }, []);
+
   const value = useMemo<DungeonRunContextValue>(
     () => ({
       runState: s.run,
@@ -449,13 +461,14 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setCombatState,
       advanceAct,
       endRun,
+      returnToMap,
     }),
     [
       s,
       startNewRun, pickDraftCard, completeDraft, travelToNode,
       addRelic, addGold, spendGold, healPlayer, damagePlayer,
       addCardToDeck, removeCardFromDeck, upgradeCard, setCombatState,
-      advanceAct, endRun,
+      advanceAct, endRun, returnToMap,
     ],
   );
 

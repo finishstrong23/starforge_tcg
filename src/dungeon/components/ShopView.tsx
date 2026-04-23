@@ -1,3 +1,351 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useDungeonRun } from '../context/DungeonRunContext';
+import { CardComponent } from './CardComponent';
+import { CARD_POOL } from '../data/cards';
+import { RELIC_POOL } from '../data/relics';
+import { createCardInstance } from '../engine/draft';
+import type { CardDefinition, RelicDefinition } from '../types';
 
-export const ShopView: React.FC = () => null;
+const CARD_PRICE: Record<string, number> = {
+  Common: 50, Uncommon: 75, Rare: 100, Epic: 140, Legendary: 175,
+};
+
+const REMOVAL_COST = 75;
+
+function pickRandom<T>(arr: T[]): T | undefined {
+  return arr.length ? arr[Math.floor(Math.random() * arr.length)] : undefined;
+}
+
+function randomCards(count: number): CardDefinition[] {
+  const used = new Set<string>();
+  const out: CardDefinition[] = [];
+  let tries = 0;
+  while (out.length < count && tries++ < 200) {
+    const c = pickRandom(CARD_POOL);
+    if (c && !used.has(c.id)) { used.add(c.id); out.push(c); }
+  }
+  return out;
+}
+
+function randomRelics(count: number): RelicDefinition[] {
+  const pool = RELIC_POOL.filter((r) => r.rarity === 'Common' || r.rarity === 'Uncommon' || r.rarity === 'Rare');
+  const used = new Set<string>();
+  const out: RelicDefinition[] = [];
+  let tries = 0;
+  while (out.length < count && tries++ < 100) {
+    const r = pickRandom(pool);
+    if (r && !used.has(r.id)) { used.add(r.id); out.push(r); }
+  }
+  return out;
+}
+
+function relicPrice(relic: RelicDefinition): number {
+  return relic.rarity === 'Boss' ? 200 : relic.rarity === 'Rare' ? 150 : relic.rarity === 'Uncommon' ? 120 : 100;
+}
+
+export const ShopView: React.FC = () => {
+  const { runState, addCardToDeck, addRelic, removeCardFromDeck, spendGold, returnToMap } = useDungeonRun();
+  const [shopCards] = useState<CardDefinition[]>(() => randomCards(4));
+  const [shopRelics] = useState<RelicDefinition[]>(() => randomRelics(2));
+  const [boughtCardIds, setBoughtCardIds] = useState<Set<string>>(new Set());
+  const [boughtRelicIds, setBoughtRelicIds] = useState<Set<string>>(new Set());
+  const [removingCard, setRemovingCard] = useState(false);
+
+  const gold = runState?.gold ?? 0;
+  const deck = runState?.deck ?? [];
+
+  const itemWrapperStyle = (bought: boolean, affordable: boolean): React.CSSProperties => ({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 5,
+    cursor: bought || !affordable ? 'default' : 'pointer',
+    opacity: bought ? 0.35 : 1,
+  });
+
+  const priceBadgeStyle = (affordable: boolean, bought: boolean): React.CSSProperties => ({
+    fontSize: 10,
+    fontWeight: 700,
+    padding: '2px 8px',
+    background: bought ? '#1a1a1a' : affordable ? '#2a2010' : '#1a1a1a',
+    border: bought ? '1px solid #333' : affordable ? '1px solid #c89b3c66' : '1px solid #333',
+    borderRadius: 3,
+    color: bought ? '#555' : affordable ? '#f0d060' : '#555',
+    letterSpacing: '0.1em',
+  });
+
+  const relicBoxStyle = (bought: boolean, affordable: boolean): React.CSSProperties => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    padding: '10px 14px',
+    background: bought ? '#0a0a0a' : affordable ? '#1a1408' : '#0d0d0d',
+    border: bought ? '1px solid #1a1a1a' : affordable ? '1px solid #c89b3c55' : '1px solid #1a1a2e',
+    borderRadius: 7,
+    cursor: bought || !affordable ? 'default' : 'pointer',
+    opacity: bought ? 0.35 : 1,
+    flex: 1,
+    minWidth: 180,
+  });
+
+  const relicPriceStyle = (affordable: boolean): React.CSSProperties => ({
+    fontSize: 10,
+    color: affordable ? '#f0d060' : '#555',
+    fontWeight: 700,
+    flexShrink: 0,
+  });
+
+  const serviceBtnStyle = (affordable: boolean): React.CSSProperties => ({
+    padding: '6px 14px',
+    background: affordable ? '#1a1408' : 'transparent',
+    border: affordable ? '1px solid #c89b3c66' : '1px solid #2a2a3a',
+    color: affordable ? '#f0d060' : '#555',
+    borderRadius: 4,
+    fontSize: 10,
+    cursor: affordable ? 'pointer' : 'default',
+    fontWeight: 700,
+    letterSpacing: '0.08em',
+  });
+
+  const buyCard = (def: CardDefinition) => {
+    const price = CARD_PRICE[def.rarity] ?? 75;
+    if (gold < price || boughtCardIds.has(def.id)) return;
+    addCardToDeck(createCardInstance(def));
+    spendGold(price);
+    setBoughtCardIds((prev) => new Set([...prev, def.id]));
+  };
+
+  const buyRelic = (relic: RelicDefinition) => {
+    const price = relicPrice(relic);
+    if (gold < price || boughtRelicIds.has(relic.id)) return;
+    addRelic(relic);
+    spendGold(price);
+    setBoughtRelicIds((prev) => new Set([...prev, relic.id]));
+  };
+
+  const removeCard = (instanceId: string) => {
+    if (gold < REMOVAL_COST) return;
+    removeCardFromDeck(instanceId);
+    spendGold(REMOVAL_COST);
+    setRemovingCard(false);
+  };
+
+  const s: Record<string, React.CSSProperties> = {
+    root: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 20,
+      padding: '1.5rem 1rem 2rem',
+      minHeight: '100%',
+      background: 'radial-gradient(ellipse at 50% 20%, #1a140a 0%, #060610 100%)',
+      color: '#f0f0f8',
+      overflowY: 'auto',
+    },
+    header: {
+      width: '100%',
+      maxWidth: 500,
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    title: {
+      fontSize: '1.3rem',
+      fontWeight: 700,
+      letterSpacing: '0.15em',
+      textTransform: 'uppercase',
+      margin: 0,
+    },
+    goldBadge: {
+      fontSize: 14,
+      fontWeight: 700,
+      color: '#f0d060',
+      background: '#2a2010',
+      border: '1px solid #c89b3c66',
+      borderRadius: 4,
+      padding: '4px 10px',
+      letterSpacing: '0.08em',
+    },
+    sectionLabel: {
+      width: '100%',
+      maxWidth: 500,
+      fontSize: '0.65rem',
+      letterSpacing: '0.25em',
+      opacity: 0.35,
+      textTransform: 'uppercase',
+    },
+    cardRow: {
+      display: 'flex',
+      gap: 12,
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      width: '100%',
+      maxWidth: 500,
+    },
+    relicRow: {
+      display: 'flex',
+      gap: 12,
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      width: '100%',
+      maxWidth: 500,
+    },
+    relicArt: { fontSize: 24 },
+    relicInfo: { flex: 1, display: 'flex', flexDirection: 'column', gap: 2 },
+    relicName: { fontSize: 11, fontWeight: 700 },
+    relicDesc: { fontSize: 9, opacity: 0.6, lineHeight: 1.4 },
+    serviceBox: {
+      width: '100%',
+      maxWidth: 500,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '12px 16px',
+      background: '#0e0e1e',
+      border: '1px solid #2a2a3a',
+      borderRadius: 7,
+    },
+    serviceInfo: { display: 'flex', flexDirection: 'column', gap: 3 },
+    serviceTitle: { fontSize: 13, fontWeight: 700 },
+    serviceDesc: { fontSize: 10, opacity: 0.55 },
+    leaveBtn: {
+      padding: '9px 26px',
+      background: 'transparent',
+      border: '1px solid #3a3a5a',
+      color: '#aaa',
+      borderRadius: 4,
+      fontSize: 10,
+      cursor: 'pointer',
+      letterSpacing: '0.15em',
+      textTransform: 'uppercase',
+      marginTop: 4,
+    },
+    deckGrid: {
+      display: 'flex',
+      gap: 8,
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      width: '100%',
+      maxWidth: 500,
+    },
+    cancelBtn: {
+      background: 'transparent',
+      border: '1px solid #2a2a3a',
+      color: '#666',
+      padding: '5px 14px',
+      borderRadius: 4,
+      fontSize: 10,
+      cursor: 'pointer',
+    },
+  };
+
+  const priceBadgeFn = (price: number, bought: boolean): React.CSSProperties =>
+    priceBadgeStyle(gold >= price, bought);
+
+  return (
+    <div style={s.root}>
+      <div style={s.header}>
+        <h2 style={s.title}>🛒 Shop</h2>
+        <div style={s.goldBadge}>💰 {gold}g</div>
+      </div>
+
+      {/* Cards */}
+      <div style={s.sectionLabel}>Cards for sale</div>
+      <div style={s.cardRow}>
+        {shopCards.map((def) => {
+          const price = CARD_PRICE[def.rarity] ?? 75;
+          const bought = boughtCardIds.has(def.id);
+          const affordable = gold >= price;
+          return (
+            <div
+              key={def.id}
+              style={itemWrapperStyle(bought, affordable)}
+              onClick={!bought && affordable ? () => buyCard(def) : undefined}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !bought && affordable) buyCard(def); }}
+            >
+              <CardComponent card={createCardInstance(def)} unaffordable={!affordable || bought} />
+              <div style={priceBadgeFn(price, bought)}>
+                {bought ? 'Sold' : `${price}g`}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Relics */}
+      <div style={s.sectionLabel}>Relics for sale</div>
+      <div style={s.relicRow}>
+        {shopRelics.map((relic) => {
+          const price = relicPrice(relic);
+          const bought = boughtRelicIds.has(relic.id);
+          const affordable = gold >= price;
+          return (
+            <div
+              key={relic.id}
+              style={relicBoxStyle(bought, affordable)}
+              onClick={!bought && affordable ? () => buyRelic(relic) : undefined}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !bought && affordable) buyRelic(relic); }}
+            >
+              <span style={s.relicArt}>{relic.art}</span>
+              <div style={s.relicInfo}>
+                <div style={s.relicName}>{relic.name}</div>
+                <div style={s.relicDesc}>{relic.description}</div>
+              </div>
+              <div style={relicPriceStyle(affordable && !bought)}>
+                {bought ? '✓' : `${price}g`}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Card removal */}
+      <div style={s.sectionLabel}>Services</div>
+      <div style={s.serviceBox}>
+        <div style={s.serviceInfo}>
+          <div style={s.serviceTitle}>🗑 Card Removal</div>
+          <div style={s.serviceDesc}>Permanently remove a card from your deck</div>
+        </div>
+        <button
+          type="button"
+          style={serviceBtnStyle(gold >= REMOVAL_COST)}
+          onClick={() => gold >= REMOVAL_COST && setRemovingCard(true)}
+        >
+          {REMOVAL_COST}g
+        </button>
+      </div>
+
+      {/* Deck picker for removal */}
+      {removingCard && (
+        <>
+          <div style={s.sectionLabel}>Choose a card to remove</div>
+          <div style={s.deckGrid}>
+            {deck.map((card) => (
+              <div
+                key={card.instanceId}
+                role="button"
+                tabIndex={0}
+                onClick={() => removeCard(card.instanceId)}
+                onKeyDown={(e) => { if (e.key === 'Enter') removeCard(card.instanceId); }}
+                style={{ cursor: 'pointer' }}
+              >
+                <CardComponent card={card} targetable compact />
+              </div>
+            ))}
+          </div>
+          <button type="button" style={s.cancelBtn} onClick={() => setRemovingCard(false)}>
+            Cancel
+          </button>
+        </>
+      )}
+
+      <button type="button" style={s.leaveBtn} onClick={returnToMap}>
+        Leave Shop
+      </button>
+    </div>
+  );
+};
