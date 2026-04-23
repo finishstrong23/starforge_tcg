@@ -32,11 +32,19 @@ const STATUS_DISPLAY: Record<string, { emoji: string; color: string }> = {
 export interface EnemyComponentProps {
   enemy: EnemyInstance;
   isTargeted?: boolean;
+  /** Pulse the intent box (enemy turn telegraphing). */
+  intentPulsing?: boolean;
+  /** Enemy is mid-action — flash brighter. */
+  intentResolving?: boolean;
   onClick?: () => void;
 }
 
 export const EnemyComponent: React.FC<EnemyComponentProps> = ({
-  enemy, isTargeted = false, onClick,
+  enemy,
+  isTargeted = false,
+  intentPulsing = false,
+  intentResolving = false,
+  onClick,
 }) => {
   const intent = enemy.intents[enemy.intentIndex % enemy.intents.length];
   const hpPct = Math.max(0, (enemy.currentHealth / enemy.maxHealth) * 100);
@@ -57,25 +65,32 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: 6,
-      padding: '10px 12px',
+      gap: 8,
+      padding: '14px 18px',
       cursor: onClick ? 'pointer' : 'default',
-      borderRadius: 8,
+      borderRadius: 10,
       border: isTargeted ? '2px solid #ff3366' : '2px solid transparent',
       boxShadow: isTargeted ? '0 0 16px #ff336666' : 'none',
       transition: 'box-shadow 120ms, border-color 120ms',
-      minWidth: 140,
+      minWidth: 200,
+      maxWidth: 320,
     },
     name: {
-      fontSize: 13,
+      fontSize: 15,
       fontWeight: 700,
-      letterSpacing: '0.06em',
+      letterSpacing: '0.08em',
       color: '#eee',
+      textTransform: 'uppercase',
     },
     art: {
-      fontSize: 52,
+      fontSize: 72,
       lineHeight: 1,
-      filter: isTargeted ? 'drop-shadow(0 0 8px #ff3366)' : undefined,
+      filter: isTargeted
+        ? 'drop-shadow(0 0 12px #ff3366)'
+        : intentResolving
+        ? `drop-shadow(0 0 14px ${intentColor})`
+        : undefined,
+      transition: 'filter 200ms',
     },
     hpRow: {
       width: '100%',
@@ -91,10 +106,11 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
     },
     hpBar: {
       width: '100%',
-      height: 7,
+      height: 8,
       background: '#1a1a2e',
       borderRadius: 4,
       overflow: 'hidden',
+      border: '1px solid #2a2a3a',
     },
     hpFill: {
       height: '100%',
@@ -116,25 +132,48 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
       gap: 4,
       flexWrap: 'wrap',
       justifyContent: 'center',
-    } as React.CSSProperties,
+    },
     intentBox: {
       width: '100%',
-      padding: '5px 8px',
-      background: `${intentColor}18`,
-      border: `1px solid ${intentColor}55`,
-      borderRadius: 5,
+      padding: '8px 12px',
+      background: intentResolving ? `${intentColor}44` : `${intentColor}22`,
+      border: `2px solid ${intentColor}${intentPulsing ? 'cc' : '88'}`,
+      borderRadius: 6,
       display: 'flex',
       alignItems: 'center',
-      gap: 5,
+      gap: 8,
+      color: intentColor,
+      animation: intentPulsing
+        ? 'dungeonIntentPulse 850ms ease-in-out infinite'
+        : undefined,
+      boxShadow: intentPulsing ? `0 0 12px ${intentColor}66` : 'none',
+      transition: 'background 160ms, box-shadow 160ms',
     },
     intentEmoji: {
-      fontSize: 14,
+      fontSize: 22,
+      lineHeight: 1,
+      flexShrink: 0,
+      filter: `drop-shadow(0 0 4px ${intentColor}aa)`,
+    },
+    intentBlock: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 1,
+      flex: 1,
+    },
+    intentLabel: {
+      fontSize: 8,
+      letterSpacing: '0.25em',
+      opacity: 0.7,
+      textTransform: 'uppercase',
+      color: intentColor,
     },
     intentText: {
-      fontSize: 9,
-      color: intentColor,
-      letterSpacing: '0.04em',
+      fontSize: 11,
+      color: '#fff',
+      letterSpacing: '0.05em',
       lineHeight: 1.3,
+      fontWeight: 600,
     },
   };
 
@@ -174,10 +213,16 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
         </div>
       )}
 
-      {/* Intent */}
+      {/* Intent — enlarged and telegraphed */}
       <div style={s.intentBox}>
         <span style={s.intentEmoji}>{INTENT_EMOJI[intent.type]}</span>
-        <span style={s.intentText}>{intent.description}</span>
+        <div style={s.intentBlock}>
+          <span style={s.intentLabel}>
+            {intentResolving ? 'Acting…' : intentPulsing ? 'Incoming' : 'Next Turn'}
+            {intent.value !== undefined && ` · ${intent.value}`}
+          </span>
+          <span style={s.intentText}>{intent.description}</span>
+        </div>
       </div>
     </div>
   );

@@ -390,26 +390,21 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
     s = log(s, `☠ Poison deals ${poisonDmg} damage`);
   }
 
-  // Reset minions
+  // Reset minions / shield / energy
   s = {
     ...s,
     playerBoard: s.playerBoard.map((m) => ({ ...m, hasAttacked: false })),
-    playerShield: 0, // shield resets each turn
+    playerShield: 0,
     playerEnergy: s.playerMaxEnergy,
   };
 
-  s = checkCombatEnd(s);
-  if (s.phase === 'enemy_turn') {
-    s = executeEnemyTurn(s);
-  }
-
-  return s;
+  return checkCombatEnd(s);
 }
 
 // ─── Enemy turn ──────────────────────────────────────────────────────────────
 
-function executeEnemyTurn(state: CombatState): CombatState {
-  let s = { ...state };
+export function executeEnemyTurn(state: CombatState): CombatState {
+  let s: CombatState = { ...state };
   const { enemy } = s;
   const intent = enemy.intents[enemy.intentIndex % enemy.intents.length];
 
