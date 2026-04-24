@@ -205,9 +205,14 @@ const HUDBar: React.FC<HUDProps> = ({ cs, onEndTurn, isEnemyTurn, shakeKey }) =>
         flexShrink: 0,
       }}
     >
-      {/* HP block */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 90 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: '#aaa' }}>
+      {/* Status effects (left) */}
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start', minWidth: 0 }}>
+        <StatusBadges effects={cs.playerStatusEffects} />
+      </div>
+
+      {/* HP block (center) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 140, alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: '#aaa', width: '100%' }}>
           <span>HP</span>
           <span style={{ color: hpColor, fontWeight: 700 }}>
             {cs.playerHealth}/{cs.playerMaxHealth}
@@ -228,42 +233,40 @@ const HUDBar: React.FC<HUDProps> = ({ cs, onEndTurn, isEnemyTurn, shakeKey }) =>
           <div style={{ width: `${hpPct}%`, height: '100%', background: hpColor, borderRadius: 3, transition: 'width 300ms' }} />
         </div>
         {cs.playerShield > 0 && (
-          <div style={{ fontSize: 9, color: '#3b8fff', fontWeight: 600 }}>🛡 {cs.playerShield}</div>
+          <div style={{ fontSize: 10, color: '#3b8fff', fontWeight: 700, textShadow: '0 0 6px #3b8fff66' }}>
+            🛡 {cs.playerShield}
+          </div>
         )}
       </div>
 
-      {/* Status effects */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-        <StatusBadges effects={cs.playerStatusEffects} />
-      </div>
+      {/* Energy + End turn (right) */}
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+          <div style={{ fontSize: 8, opacity: 0.4, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Energy</div>
+          <EnergyPips current={cs.playerEnergy} max={cs.playerMaxEnergy} />
+        </div>
 
-      {/* Energy */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-        <div style={{ fontSize: 8, opacity: 0.4, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Energy</div>
-        <EnergyPips current={cs.playerEnergy} max={cs.playerMaxEnergy} />
+        <button
+          type="button"
+          onClick={onEndTurn}
+          disabled={isEnemyTurn}
+          style={{
+            padding: '7px 14px',
+            background: isEnemyTurn ? 'transparent' : 'linear-gradient(180deg, #ffcc00, #cc9900)',
+            color: isEnemyTurn ? '#555' : '#0a0a12',
+            border: isEnemyTurn ? '1px solid #2a2a3a' : '1px solid #ffcc00',
+            borderRadius: 4,
+            fontWeight: 700,
+            fontSize: 10,
+            letterSpacing: '0.12em',
+            cursor: isEnemyTurn ? 'default' : 'pointer',
+            textTransform: 'uppercase',
+            flexShrink: 0,
+          }}
+        >
+          {isEnemyTurn ? 'Enemy Turn' : 'End Turn'}
+        </button>
       </div>
-
-      {/* End turn */}
-      <button
-        type="button"
-        onClick={onEndTurn}
-        disabled={isEnemyTurn}
-        style={{
-          padding: '7px 14px',
-          background: isEnemyTurn ? 'transparent' : 'linear-gradient(180deg, #ffcc00, #cc9900)',
-          color: isEnemyTurn ? '#555' : '#0a0a12',
-          border: isEnemyTurn ? '1px solid #2a2a3a' : '1px solid #ffcc00',
-          borderRadius: 4,
-          fontWeight: 700,
-          fontSize: 10,
-          letterSpacing: '0.12em',
-          cursor: isEnemyTurn ? 'default' : 'pointer',
-          textTransform: 'uppercase',
-          flexShrink: 0,
-        }}
-      >
-        {isEnemyTurn ? 'Enemy Turn' : 'End Turn'}
-      </button>
     </div>
   );
 };
