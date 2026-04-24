@@ -134,12 +134,11 @@ const CombatLog: React.FC<{ log: string[] }> = ({ log }) => {
       style={{
         width: '100%',
         padding: '8px 16px 10px',
-        background: 'linear-gradient(180deg, #06060e 0%, #09091a 100%)',
-        borderTop: '1px solid #1a1a2e',
-        borderBottom: '1px solid #1a1a2e',
-        maxHeight: 140,
+        background: 'linear-gradient(180deg, #07070f 0%, #0a0a1a 100%)',
+        border: '1px solid #1a1a2e',
+        maxHeight: 130,
         overflowY: 'auto',
-        boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.6)',
+        boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)',
         flexShrink: 0,
       }}
     >
@@ -521,20 +520,10 @@ export const CombatView: React.FC = () => {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-between',
+      justifyContent: 'center',
       overflow: 'hidden',
-      minHeight: 160,
-      padding: '12px 0',
-      gap: 8,
-    },
-    boardDivider: {
-      width: '82%',
-      alignSelf: 'center',
-      height: 1,
-      background: 'linear-gradient(90deg, transparent, #c89b3c55 20%, #c89b3c 50%, #c89b3c55 80%, transparent)',
-      margin: '10px 0',
-      flexShrink: 0,
-      boxShadow: '0 0 6px #c89b3c22',
+      padding: '8px 0',
+      gap: 0,
     },
     handSection: {
       flexShrink: 0,
@@ -699,7 +688,10 @@ export const CombatView: React.FC = () => {
           targetableIds={targetableEnemyMinionIds}
           onCardClick={handleEnemyMinionClick}
         />
-        <div style={s.boardDivider} />
+
+        {/* Combat log sits in the center of the battlefield */}
+        <CombatLog log={cs.combatLog} />
+
         <BoardRow
           cards={cs.playerBoard}
           label="Your Minions"
@@ -707,9 +699,6 @@ export const CombatView: React.FC = () => {
           onCardClick={handlePlayerMinionClick}
         />
       </div>
-
-      {/* ── Combat log ── */}
-      <CombatLog log={cs.combatLog} />
 
       {/* ── Hand ── */}
       {/* Player damage flash behind hand */}
