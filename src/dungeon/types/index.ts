@@ -149,6 +149,8 @@ export interface CombatState {
   playerEnergy: number;
   playerMaxEnergy: number;
   playerShield: number;
+  playerHeat: number;             // Pyroclast faction resource
+  playerFaction: string;          // e.g. 'Pyroclast' | 'Cogsmiths' etc.
   playerStatusEffects: StatusEffect[];
   playerBoard: CardInstance[];    // minions in play
   hand: CardInstance[];

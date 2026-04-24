@@ -201,6 +201,7 @@ function reducer(state: ContextState, action: Action): ContextState {
             state.run.maxHealth,
             state.run.relics,
             enemy,
+            state.draftFaction ?? 'Cogsmiths',
           );
           combatState = applyRelicsToCombat('combat_start', state.run.relics, combatState, {
             combatIndex: state.run.runStats.totalCombats,
