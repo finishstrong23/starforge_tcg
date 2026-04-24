@@ -37,6 +37,7 @@ export interface CardInstance extends CardDefinition {
   currentHealth?: number;         // for minions in play
   hasAttacked?: boolean;
   statusEffects: StatusEffect[];
+  fluxState?: 'A' | 'B' | 'C';    // WarpRiders Flux cards: which mode is active
 }
 
 // ─── STATUS EFFECTS ─────────────────────────────────────────────────────────

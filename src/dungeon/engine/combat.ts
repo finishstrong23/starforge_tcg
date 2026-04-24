@@ -10,6 +10,37 @@ function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n));
 }
 
+// ─── Flux helpers ───────────────────────────────────────────────────────────
+
+const FLUX_STATES: Array<'A' | 'B' | 'C'> = ['A', 'B', 'C'];
+
+function isFluxCard(card: CardInstance): boolean {
+  return /^\s*flux\./i.test(card.cardText);
+}
+
+function randomFluxState(): 'A' | 'B' | 'C' {
+  return FLUX_STATES[Math.floor(Math.random() * 3)];
+}
+
+function shiftFlux(s: 'A' | 'B' | 'C'): 'A' | 'B' | 'C' {
+  return s === 'A' ? 'B' : s === 'B' ? 'C' : 'A';
+}
+
+/** Pull just the active state's body out of "Flux. A: ... B: ... C: ..." text. */
+export function activeFluxText(card: CardInstance): string {
+  if (!isFluxCard(card) || !card.fluxState) return card.cardText;
+  const text = card.upgraded ? (card.upgradeText ?? card.cardText) : card.cardText;
+  const re = new RegExp(`${card.fluxState}:\\s*([^A-C]*?)(?=\\s*[A-C]:|$)`, 'i');
+  const m = text.match(re);
+  return m ? m[1].trim() : text;
+}
+
+function ensureFluxState<T extends CardInstance>(card: T): T {
+  if (!isFluxCard(card)) return card;
+  if (card.fluxState) return card;
+  return { ...card, fluxState: randomFluxState() };
+}
+
 function log(state: CombatState, msg: string): CombatState {
   const log = [...state.combatLog, msg].slice(-8);
   return { ...state, combatLog: log, lastAction: msg };
@@ -124,7 +155,7 @@ export function drawCards(state: CombatState, count: number): CombatState {
       s = { ...s, drawPile: shuffleDeck(s.discardPile), discardPile: [] };
     }
     const [card, ...rest] = s.drawPile;
-    s = { ...s, drawPile: rest, hand: [...s.hand, card] };
+    s = { ...s, drawPile: rest, hand: [...s.hand, ensureFluxState(card)] };
     drawn++;
   }
   return { ...s, phase: 'player_turn' };
@@ -190,10 +221,24 @@ export function playCard(state: CombatState, cardInstanceId: string, targetId?: 
 
 function applySpellEffect(state: CombatState, card: CardInstance, _targetId?: string): CombatState {
   let s = { ...state };
-  const text = card.cardText.toLowerCase();
+  // Flux cards resolve only the body for the active state.
+  const rawText = isFluxCard(card) && card.fluxState ? activeFluxText(card) : card.cardText;
+  const text = rawText.toLowerCase();
 
-  // Extract damage amount from card text
-  const dmgMatch = text.match(/deal (\d+) damage/);
+  // Random-range damage (e.g. Anomaly: "Deal 4 to 12 damage")
+  const rangeDmgMatch = text.match(/deal (\d+) to (\d+) damage/);
+  if (rangeDmgMatch) {
+    const lo = parseInt(rangeDmgMatch[1]);
+    const hi = parseInt(rangeDmgMatch[2]);
+    const roll = lo + Math.floor(Math.random() * (hi - lo + 1));
+    const dmg = calcDamage(roll, s.playerStatusEffects, s.enemy.statusEffects);
+    const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
+    s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
+    s = log(s, `🎲 ${card.name} rolls ${roll} → ${dmg} damage`);
+  }
+
+  // Extract damage amount from card text (skip if range pattern already fired)
+  const dmgMatch = !rangeDmgMatch ? text.match(/deal (\d+) damage/) : null;
   if (dmgMatch) {
     const dmg = calcDamage(parseInt(dmgMatch[1]), s.playerStatusEffects, s.enemy.statusEffects);
     const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
@@ -443,10 +488,16 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
 
   // Reset minions and energy. Shield is cleared at the START of the player's next turn
   // (inside executeEnemyTurn, before drawing), so it can still absorb the enemy's attack.
+  // Also shift Flux state on every Flux card still in the player's draw pile / discard
+  // so the next turn's draws feel "shifted" (cards in hand are discarded above).
+  const rotateFlux = <T extends CardInstance>(c: T): T =>
+    isFluxCard(c) && c.fluxState ? { ...c, fluxState: shiftFlux(c.fluxState) } : c;
   s = {
     ...s,
     playerBoard: s.playerBoard.map((m) => ({ ...m, hasAttacked: false })),
     playerEnergy: s.playerMaxEnergy,
+    drawPile: s.drawPile.map(rotateFlux),
+    discardPile: s.discardPile.map(rotateFlux),
   };
 
   return checkCombatEnd(s);

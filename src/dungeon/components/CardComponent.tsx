@@ -231,6 +231,18 @@ export const CardComponent: React.FC<CardComponentProps> = ({
     WarpRiders: '✦',
   };
 
+  // Flux: extract just the active body so the player sees their actual outcome inline
+  const isFlux = /^\s*flux\./i.test(card.cardText);
+  const fluxBody = isFlux && card.fluxState
+    ? (() => {
+        const t = card.upgraded ? (card.upgradeText ?? card.cardText) : card.cardText;
+        const re = new RegExp(`${card.fluxState}:\\s*([^A-C]*?)(?=\\s*[A-C]:|$)`, 'i');
+        const m = t.match(re);
+        return m ? m[1].trim() : t;
+      })()
+    : null;
+  const fluxColor = card.fluxState === 'A' ? '#4adfff' : card.fluxState === 'B' ? '#ff7acc' : '#ffd24a';
+
   const renderStatuses = (effects: StatusEffect[]) =>
     effects.map((e) => (
       <span key={e.type} title={`${e.type} ×${e.stacks}`}>
@@ -245,6 +257,31 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       {/* Type / rarity */}
       <div style={styles.typeTag}>{card.rarity[0]}</div>
 
+      {/* Flux state badge — shows the WarpRiders A/B/C step */}
+      {isFlux && card.fluxState && (
+        <div
+          title={`Flux state ${card.fluxState} — shifts at end of turn`}
+          style={{
+            position: 'absolute',
+            top: compact ? 2 : 4,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            padding: compact ? '0 4px' : '1px 6px',
+            fontSize: compact ? 8 : 10,
+            fontWeight: 900,
+            letterSpacing: '0.1em',
+            color: fluxColor,
+            background: '#0a0a14',
+            border: `1px solid ${fluxColor}`,
+            borderRadius: 3,
+            boxShadow: `0 0 6px ${fluxColor}66`,
+            lineHeight: 1.2,
+          }}
+        >
+          ✦{card.fluxState}
+        </div>
+      )}
+
       <div style={styles.body}>
         <div style={styles.name}>{card.name}</div>
 
@@ -253,7 +290,16 @@ export const CardComponent: React.FC<CardComponentProps> = ({
         </div>
 
         {!compact && (
-          <div style={styles.text}>{card.upgraded ? (card.upgradeText ?? card.cardText) : card.cardText}</div>
+          <div style={styles.text}>
+            {isFlux && card.fluxState ? (
+              <>
+                <span style={{ color: fluxColor, fontWeight: 700 }}>[{card.fluxState}]</span>{' '}
+                {fluxBody}
+              </>
+            ) : (
+              card.upgraded ? (card.upgradeText ?? card.cardText) : card.cardText
+            )}
+          </div>
         )}
 
         {!compact && card.keywords.length > 0 && (
