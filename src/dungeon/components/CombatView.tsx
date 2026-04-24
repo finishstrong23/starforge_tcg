@@ -685,6 +685,17 @@ export const CombatView: React.FC = () => {
           80%  { transform: translateX(2px); }
           100% { transform: translateX(0); }
         }
+        @keyframes dungeonVignette {
+          0%   { opacity: 0; }
+          15%  { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        @keyframes dungeonEnemyLunge {
+          0%   { transform: translateY(0); }
+          40%  { transform: translateY(38px) scale(1.05); }
+          70%  { transform: translateY(8px) scale(1.02); }
+          100% { transform: translateY(0) scale(1); }
+        }
       `}</style>
 
       {/* ── Floating combat numbers (absolute over root) ─── */}
@@ -748,14 +759,23 @@ export const CombatView: React.FC = () => {
             }}
           />
         )}
-        {/* Player-heal (enemy section shows nothing for heal; kept for parity) */}
-        <EnemyComponent
-          enemy={cs.enemy}
-          isTargeted={canTargetEnemy}
-          intentPulsing={isEnemyTurn}
-          intentResolving={enemyActing}
-          onClick={canTargetEnemy ? handleEnemyClick : undefined}
-        />
+        {/* Enemy "lunge" — re-keyed on every player damage event so the enemy
+            visibly dives toward the player instead of just flashing the screen */}
+        <div
+          key={`lunge-${playerFlashKey}`}
+          style={{
+            animation: playerFlashKey > 0 ? 'dungeonEnemyLunge 520ms cubic-bezier(0.5,0,0.4,1)' : undefined,
+            transformOrigin: 'center bottom',
+          }}
+        >
+          <EnemyComponent
+            enemy={cs.enemy}
+            isTargeted={canTargetEnemy}
+            intentPulsing={isEnemyTurn}
+            intentResolving={enemyActing}
+            onClick={canTargetEnemy ? handleEnemyClick : undefined}
+          />
+        </div>
       </div>
 
       {/* ── Board section ── */}
@@ -779,44 +799,47 @@ export const CombatView: React.FC = () => {
         />
       </div>
 
-      {/* ── Hand ── */}
-      {/* Player damage flash behind hand */}
-      <div style={{ position: 'relative', flexShrink: 0 }}>
-        {playerFlashKey > 0 && (
-          <div
-            key={`pf-${playerFlashKey}`}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'rgba(255,40,60,0.22)',
-              pointerEvents: 'none',
-              zIndex: 3,
-              animation: 'dungeonDmgFlash 500ms ease-out forwards',
-            }}
-          />
-        )}
-        {playerHealKey > 0 && (
-          <div
-            key={`ph-${playerHealKey}`}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'rgba(40,220,100,0.18)',
-              pointerEvents: 'none',
-              zIndex: 3,
-              animation: 'dungeonHealFlash 600ms ease-out forwards',
-            }}
-          />
-        )}
-        <div style={s.handSection}>
-          <HandComponent
-            hand={cs.hand}
-            energy={cs.playerEnergy}
-            selectedId={selectedCardId}
-            onCardSelect={handleCardSelect}
-            disabled={isEnemyTurn || isCombatOver}
-          />
-        </div>
+      {/* Full-screen red vignette on player damage (sits at screen edges) */}
+      {playerFlashKey > 0 && (
+        <div
+          key={`pf-${playerFlashKey}`}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            zIndex: 15,
+            background:
+              'radial-gradient(ellipse at center, rgba(255,40,60,0) 35%, rgba(255,30,50,0.55) 100%)',
+            animation: 'dungeonVignette 700ms ease-out forwards',
+          }}
+        />
+      )}
+      {playerHealKey > 0 && (
+        <div
+          key={`ph-${playerHealKey}`}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            pointerEvents: 'none',
+            zIndex: 15,
+            background:
+              'radial-gradient(ellipse at center, rgba(40,220,100,0) 40%, rgba(40,220,100,0.4) 100%)',
+            animation: 'dungeonVignette 700ms ease-out forwards',
+          }}
+        />
+      )}
+
+      {/* ── Hand (always visible — held during enemy turn) ── */}
+      <div style={s.handSection}>
+        <HandComponent
+          hand={cs.hand}
+          energy={cs.playerEnergy}
+          selectedId={selectedCardId}
+          onCardSelect={handleCardSelect}
+          disabled={isEnemyTurn || isCombatOver}
+          drawCount={cs.drawPile.length}
+          discardCount={cs.discardPile.length}
+        />
       </div>
 
       {/* ── HUD ── */}

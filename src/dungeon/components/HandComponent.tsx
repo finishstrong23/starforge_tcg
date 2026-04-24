@@ -8,7 +8,36 @@ export interface HandComponentProps {
   selectedId: string | null;
   onCardSelect: (instanceId: string) => void;
   disabled?: boolean;
+  drawCount?: number;
+  discardCount?: number;
 }
+
+const PileBadge: React.FC<{ label: string; count: number; color: string; emoji: string }> = ({
+  label, count, color, emoji,
+}) => (
+  <div
+    title={`${label}: ${count}`}
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 44,
+      padding: '4px 6px',
+      background: '#0c0c1a',
+      border: `1px solid ${color}55`,
+      borderRadius: 5,
+      gap: 1,
+      flexShrink: 0,
+    }}
+  >
+    <div style={{ fontSize: 14, lineHeight: 1, color }}>{emoji}</div>
+    <div style={{ fontSize: 13, fontWeight: 800, color: '#eee', lineHeight: 1 }}>{count}</div>
+    <div style={{ fontSize: 7, letterSpacing: '0.15em', opacity: 0.55, textTransform: 'uppercase' }}>
+      {label}
+    </div>
+  </div>
+);
 
 export const HandComponent: React.FC<HandComponentProps> = ({
   hand,
@@ -16,14 +45,17 @@ export const HandComponent: React.FC<HandComponentProps> = ({
   selectedId,
   onCardSelect,
   disabled = false,
+  drawCount,
+  discardCount,
 }) => {
+  const showPiles = drawCount !== undefined || discardCount !== undefined;
+
   const s: Record<string, React.CSSProperties> = {
     wrapper: {
       display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: 6,
-      padding: '4px 6px 0',
+      alignItems: 'flex-end',
+      gap: 8,
+      padding: '4px 8px 0',
       width: '100%',
     },
     label: {
@@ -31,8 +63,16 @@ export const HandComponent: React.FC<HandComponentProps> = ({
       letterSpacing: '0.2em',
       opacity: 0.35,
       textTransform: 'uppercase',
-      alignSelf: 'flex-start',
       paddingLeft: 4,
+      marginBottom: 4,
+    },
+    handCol: {
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: 4,
+      minWidth: 0,
     },
     row: {
       display: 'flex',
@@ -41,35 +81,52 @@ export const HandComponent: React.FC<HandComponentProps> = ({
       justifyContent: 'center',
       width: '100%',
     },
+    pilesCol: {
+      display: 'flex',
+      gap: 6,
+      alignItems: 'flex-end',
+      flexShrink: 0,
+    },
   };
-
-  if (hand.length === 0) {
-    return (
-      <div style={s.wrapper}>
-        <div style={{ ...s.label, alignSelf: 'center', paddingTop: 8 }}>No cards in hand</div>
-      </div>
-    );
-  }
 
   return (
     <div style={s.wrapper}>
-      <div style={s.label}>Hand ({hand.length})</div>
-      <div style={s.row}>
-        {hand.map((card) => {
-          const affordable = card.cost <= energy;
-          const isSelected = card.instanceId === selectedId;
-          return (
-            <CardComponent
-              key={card.instanceId}
-              card={card}
-              selectable={!disabled && affordable}
-              selected={isSelected}
-              unaffordable={!affordable}
-              onClick={!disabled && affordable ? () => onCardSelect(card.instanceId) : undefined}
-            />
-          );
-        })}
+      {/* Draw pile (left) */}
+      {showPiles && (
+        <PileBadge label="Draw" count={drawCount ?? 0} color="#3b8fff" emoji="🂠" />
+      )}
+
+      {/* Hand (center) */}
+      <div style={s.handCol}>
+        <div style={s.label}>Hand ({hand.length})</div>
+        {hand.length === 0 ? (
+          <div style={{ ...s.label, alignSelf: 'center', opacity: 0.4, paddingTop: 4 }}>
+            No cards in hand
+          </div>
+        ) : (
+          <div style={s.row}>
+            {hand.map((card) => {
+              const affordable = card.cost <= energy;
+              const isSelected = card.instanceId === selectedId;
+              return (
+                <CardComponent
+                  key={card.instanceId}
+                  card={card}
+                  selectable={!disabled && affordable}
+                  selected={isSelected}
+                  unaffordable={!affordable}
+                  onClick={!disabled && affordable ? () => onCardSelect(card.instanceId) : undefined}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {/* Discard pile (right) */}
+      {showPiles && (
+        <PileBadge label="Discard" count={discardCount ?? 0} color="#c89b3c" emoji="🃏" />
+      )}
     </div>
   );
 };
