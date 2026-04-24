@@ -71,6 +71,7 @@ export function initCombat(
   playerMaxHealth: number,
   _relics: RelicDefinition[],
   enemy: EnemyDefinition,
+  faction: string = 'Cogsmiths',
 ): CombatState {
   const shuffled = shuffleDeck([...deck]);
   const state: CombatState = {
@@ -81,6 +82,8 @@ export function initCombat(
     playerEnergy: 3,
     playerMaxEnergy: 3,
     playerShield: 0,
+    playerHeat: 0,
+    playerFaction: faction,
     playerStatusEffects: [],
     playerBoard: [],
     hand: [],
@@ -259,6 +262,54 @@ function applySpellEffect(state: CombatState, card: CardInstance, _targetId?: st
   if (strMatch) {
     s = { ...s, playerStatusEffects: addEffect(s.playerStatusEffects, 'strength', parseInt(strMatch[1])) };
     s = log(s, `💪 Gained ${strMatch[1]} Strength`);
+  }
+
+  // Gain Heat
+  const heatGainMatch = text.match(/gain (\d+) heat/);
+  if (heatGainMatch) {
+    const gained = parseInt(heatGainMatch[1]);
+    s = { ...s, playerHeat: s.playerHeat + gained };
+    s = log(s, `🔥 Gained ${gained} Heat (total: ${s.playerHeat})`);
+  }
+
+  // Heat-scaled damage: "deal N damage + M per heat spent (up to X heat)"
+  const heatSpendMatch = text.match(/deal (\d+) damage \+ (\d+) per heat spent \(up to (\d+) heat\)/);
+  if (heatSpendMatch) {
+    const base = parseInt(heatSpendMatch[1]);
+    const perHeat = parseInt(heatSpendMatch[2]);
+    const maxHeat = parseInt(heatSpendMatch[3]);
+    const heatSpent = Math.min(s.playerHeat, maxHeat);
+    const dmg = calcDamage(base + perHeat * heatSpent, s.playerStatusEffects, s.enemy.statusEffects);
+    const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
+    s = { ...s, playerHeat: s.playerHeat - heatSpent, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
+    s = log(s, `💥 ${card.name} deals ${dmg} (spent ${heatSpent} Heat)`);
+  }
+
+  // Consume all heat: "deal N damage. consume all heat"
+  const consumeMatch = text.match(/consume all heat/);
+  if (consumeMatch && !heatSpendMatch) {
+    const heatBonus = s.playerHeat;
+    // If there's already a dmgMatch damage applied above, add heat as bonus
+    if (heatBonus > 0) {
+      const bonusDmg = calcDamage(heatBonus, s.playerStatusEffects, s.enemy.statusEffects);
+      const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, bonusDmg);
+      s = { ...s, playerHeat: 0, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
+      s = log(s, `🔥 Consumed ${heatBonus} Heat for ${bonusDmg} bonus damage`);
+    } else {
+      s = { ...s, playerHeat: 0 };
+    }
+  }
+
+  // Conditional: "if heat >= N, ..."
+  const heatCondMatch = text.match(/if heat >= (\d+)/);
+  if (heatCondMatch && s.playerHeat >= parseInt(heatCondMatch[1])) {
+    // Apply burn as conditional bonus (cards like "If Heat >= 3, apply Ignite 2" — treat Ignite as Burn)
+    const condBurnMatch = text.match(/if heat >= \d+,\s*apply (?:ignite|burn) (\d+)/);
+    if (condBurnMatch) {
+      const stacks = parseInt(condBurnMatch[1]);
+      s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'burn', stacks) } };
+      s = log(s, `🔥 Heat condition met — applied ${stacks} Burn`);
+    }
   }
 
   // IMMOLATE: deal damage to all enemies on death — handled in death processing

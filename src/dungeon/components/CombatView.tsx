@@ -127,8 +127,25 @@ const BoardRow: React.FC<{
 
 // ─── Combat log ───────────────────────────────────────────────────────────────
 
-const CombatLog: React.FC<{ log: string[] }> = ({ log }) => {
+const CombatLog: React.FC<{ log: string[]; cardPool: CardInstance[] }> = ({ log, cardPool }) => {
   const visible = log.slice(-7);
+
+  const cardByName = new Map<string, CardInstance>();
+  for (const c of cardPool) {
+    if (c.name) cardByName.set(c.name, c);
+  }
+  // Sort longest first to avoid partial matches
+  const names = [...cardByName.keys()].sort((a, b) => b.length - a.length);
+
+  function splitLogEntry(text: string): Array<{ text: string; card?: CardInstance }> {
+    if (names.length === 0) return [{ text }];
+    const pattern = new RegExp(`(${names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'g');
+    const parts = text.split(pattern);
+    return parts.map(p => ({ text: p, card: cardByName.get(p) }));
+  }
+
+  const [tooltip, setTooltip] = useState<{ card: CardInstance; x: number; y: number } | null>(null);
+
   return (
     <div
       style={{
@@ -140,6 +157,7 @@ const CombatLog: React.FC<{ log: string[] }> = ({ log }) => {
         overflowY: 'auto',
         boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.4)',
         flexShrink: 0,
+        position: 'relative',
       }}
     >
       <div
@@ -156,6 +174,7 @@ const CombatLog: React.FC<{ log: string[] }> = ({ log }) => {
       </div>
       {visible.map((entry, i) => {
         const isLatest = i === visible.length - 1;
+        const parts = splitLogEntry(entry);
         return (
           <div
             key={`${log.length - visible.length + i}-${entry}`}
@@ -170,10 +189,60 @@ const CombatLog: React.FC<{ log: string[] }> = ({ log }) => {
             }}
           >
             <span style={{ color: '#c89b3c88', marginRight: 6 }}>›</span>
-            {entry}
+            {parts.map((part, pi) =>
+              part.card ? (
+                <span
+                  key={pi}
+                  style={{ color: '#ffcc88', textDecoration: 'underline dotted', cursor: 'help' }}
+                  onMouseEnter={(e) => {
+                    const rect = (e.target as HTMLElement).getBoundingClientRect();
+                    setTooltip({ card: part.card!, x: rect.left, y: rect.top });
+                  }}
+                  onMouseLeave={() => setTooltip(null)}
+                >
+                  {part.text}
+                </span>
+              ) : (
+                <span key={pi}>{part.text}</span>
+              )
+            )}
           </div>
         );
       })}
+
+      {/* Tooltip portal-like overlay */}
+      {tooltip && (
+        <div style={{
+          position: 'fixed',
+          left: tooltip.x,
+          top: tooltip.y - 8,
+          transform: 'translateY(-100%)',
+          zIndex: 999,
+          background: '#0d0d1e',
+          border: '1px solid #3a3a5a',
+          borderRadius: 6,
+          padding: '8px 12px',
+          minWidth: 180,
+          maxWidth: 240,
+          pointerEvents: 'none',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.8)',
+        }}>
+          <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 4, color: '#eee' }}>
+            {tooltip.card.name}
+            <span style={{ fontWeight: 400, fontSize: 10, opacity: 0.6, marginLeft: 8 }}>
+              {tooltip.card.cost}⚡ · {tooltip.card.type}
+            </span>
+          </div>
+          {(tooltip.card.attack !== undefined || tooltip.card.health !== undefined) && (
+            <div style={{ fontSize: 10, color: '#aaa', marginBottom: 4 }}>
+              ⚔ {tooltip.card.attack ?? 0} / ❤ {tooltip.card.health ?? 0}
+            </div>
+          )}
+          <div style={{ fontSize: 10, color: '#ccc', lineHeight: 1.5 }}>
+            {tooltip.card.cardText}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -237,6 +306,16 @@ const HUDBar: React.FC<HUDProps> = ({ cs, onEndTurn, isEnemyTurn, shakeKey }) =>
           </div>
         )}
       </div>
+
+      {/* Heat (Pyroclast) */}
+      {cs.playerFaction === 'Pyroclast' && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          <div style={{ fontSize: 8, opacity: 0.5, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Heat</div>
+          <div style={{ fontSize: 18, fontWeight: 900, color: '#ff6622', textShadow: '0 0 10px #ff662299', lineHeight: 1 }}>
+            🔥 {cs.playerHeat}
+          </div>
+        </div>
+      )}
 
       {/* Energy + End turn (right) */}
       <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
@@ -690,7 +769,7 @@ export const CombatView: React.FC = () => {
         />
 
         {/* Combat log sits in the center of the battlefield */}
-        <CombatLog log={cs.combatLog} />
+        <CombatLog log={cs.combatLog} cardPool={[...cs.hand, ...cs.drawPile, ...cs.discardPile, ...cs.playerBoard]} />
 
         <BoardRow
           cards={cs.playerBoard}
