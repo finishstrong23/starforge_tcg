@@ -498,7 +498,7 @@ export const CombatView: React.FC = () => {
     root: {
       display: 'flex',
       flexDirection: 'column',
-      minHeight: '100vh',
+      height: '100vh',
       background: 'radial-gradient(ellipse at 50% 0%, #1a1830 0%, #0a0a18 45%, #050510 100%)',
       color: '#f0f0f8',
       overflow: 'hidden',
