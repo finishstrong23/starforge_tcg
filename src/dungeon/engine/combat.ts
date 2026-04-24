@@ -469,8 +469,9 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
   let s: CombatState = { ...state, phase: 'enemy_turn' as CombatPhase };
   void relics; // relic effects applied by relicEffects.ts
 
-  // Discard hand
-  s = { ...s, discardPile: [...s.discardPile, ...s.hand], hand: [] };
+  // NOTE: Hand is intentionally NOT discarded here. It stays visible during
+  // the enemy turn so the player can plan; it's discarded right before the
+  // new draw at the start of the next player turn (see executeEnemyTurn).
 
   // Tick player status effects
   const burnDmg = getStack(s.playerStatusEffects, 'burn');
@@ -579,8 +580,14 @@ export function executeEnemyTurn(state: CombatState): CombatState {
 
   s = checkCombatEnd(s);
   if (s.phase === 'enemy_turn') {
-    // Clear the player's remaining block at the start of their new turn, then draw.
-    s = { ...s, phase: 'player_turn', playerShield: 0 };
+    // Start of new player turn: clear shield, discard the held hand, then draw 5.
+    s = {
+      ...s,
+      phase: 'player_turn',
+      playerShield: 0,
+      discardPile: [...s.discardPile, ...s.hand],
+      hand: [],
+    };
     s = drawCards(s, 5);
   }
 
