@@ -73,12 +73,13 @@ const RIFT_META: Record<string, { emoji: string; color: string; label: string; t
 interface StatusStripProps {
   effects: CombatState['playerStatusEffects'];
   rifts?: CombatState['playerRifts'];
+  powers?: CombatState['playerPowers'];
   side: 'enemy' | 'player';
   label?: string;
 }
 
-const StatusStrip: React.FC<StatusStripProps> = ({ effects, rifts = [], side, label }) => {
-  const empty = effects.length === 0 && rifts.length === 0;
+const StatusStrip: React.FC<StatusStripProps> = ({ effects, rifts = [], powers = [], side, label }) => {
+  const empty = effects.length === 0 && rifts.length === 0 && powers.length === 0;
 
   const wrapperStyle: React.CSSProperties = {
     display: 'flex',
@@ -158,6 +159,16 @@ const StatusStrip: React.FC<StatusStripProps> = ({ effects, rifts = [], side, la
           </span>
         );
       })}
+      {powers.map((p) => (
+        <span
+          key={`pwr-${p.instanceId}`}
+          title={`${p.name}: ${p.cardText}`}
+          style={chipBase('#ffaa44')}
+        >
+          <span style={{ fontSize: 13, lineHeight: 1 }}>⚙</span>
+          <span>{p.name}</span>
+        </span>
+      ))}
     </div>
   );
 };
@@ -1103,8 +1114,8 @@ export const CombatView: React.FC = () => {
         {/* Combat log sits in the center of the battlefield */}
         <CombatLog log={cs.combatLog} cardPool={[...cs.hand, ...cs.drawPile, ...cs.discardPile, ...cs.playerBoard]} />
 
-        {/* Player buff/debuff/rift strip — below the combat log */}
-        <StatusStrip effects={cs.playerStatusEffects} rifts={cs.playerRifts} side="player" />
+        {/* Player buff/debuff/rift/power strip — below the combat log */}
+        <StatusStrip effects={cs.playerStatusEffects} rifts={cs.playerRifts} powers={cs.playerPowers} side="player" />
 
         <BoardRow
           cards={cs.playerBoard}
