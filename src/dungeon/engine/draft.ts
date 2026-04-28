@@ -1,4 +1,4 @@
-import type { CardDefinition, CardInstance, Faction } from '../types';
+import type { CardDefinition, CardInstance, ComplexityTier, Faction, Rarity } from '../types';
 import { CARD_POOL } from '../data/cards';
 
 // ─── Instance factory ─────────────────────────────────────────────────────────
@@ -104,4 +104,109 @@ export function generateDraftOptions(
   }
 
   return chosen;
+}
+
+// ─── Phase 1.5 — In-run reward roller ─────────────────────────────────────────
+//
+// Card rewards offered after combat are weighted by **room depth in the
+// current act** (NOT cumulative across acts — each act restarts at room 1).
+// A new player at room 1 sees mostly Tier 1 (foundational) cards. By room 8+
+// the curve flips toward Tier 2 (mechanic-introducing) and Tier 3 (mechanic-
+// payoff) so the deck builds engagement gradually.
+
+export interface RewardWeights {
+  tier1: number;
+  tier2: number;
+  tier3: number;
+}
+
+/** Tier weights by room depth (1-indexed). Restarts each act. */
+export function getRewardWeights(roomNumber: number): RewardWeights {
+  if (roomNumber <= 3) return { tier1: 80, tier2: 20, tier3: 0 };
+  if (roomNumber <= 7) return { tier1: 50, tier2: 40, tier3: 10 };
+  return { tier1: 25, tier2: 45, tier3: 30 };
+}
+
+/** Rarity weights by act number — same curve as the existing reward gen. */
+const ACT_RARITY_WEIGHTS: Record<1 | 2 | 3, Record<Rarity, number>> = {
+  1: { Common: 60, Uncommon: 30, Rare: 10, Epic: 0, Legendary: 0 },
+  2: { Common: 30, Uncommon: 45, Rare: 25, Epic: 0, Legendary: 0 },
+  3: { Common: 10, Uncommon: 40, Rare: 50, Epic: 0, Legendary: 0 },
+};
+
+function pickTier(rng: () => number, w: RewardWeights): ComplexityTier {
+  const total = w.tier1 + w.tier2 + w.tier3;
+  const roll = rng() * total;
+  if (roll < w.tier1) return 1;
+  if (roll < w.tier1 + w.tier2) return 2;
+  return 3;
+}
+
+function pickRarity(rng: () => number, weights: Record<Rarity, number>): Rarity {
+  const total = weights.Common + weights.Uncommon + weights.Rare;
+  const roll = rng() * total;
+  if (roll < weights.Common) return 'Common';
+  if (roll < weights.Common + weights.Uncommon) return 'Uncommon';
+  return 'Rare';
+}
+
+/**
+ * Generate 3 card-reward options weighted by room depth and act.
+ *
+ * @param roomNumber  1-indexed room number within the current act
+ * @param act         1, 2, or 3
+ * @param faction     player faction (70% of offers come from this faction)
+ * @param rng         RNG (defaults to Math.random; injectable for tests)
+ *
+ * The roller first picks a tier, then a rarity, then filters the pool. If no
+ * card matches both constraints (e.g. no T3 Commons exist for this faction),
+ * the tier is re-rolled up to a small attempt cap before falling back to any
+ * tier. This avoids blocking the offer when the matrix is sparse.
+ */
+export function generateRewardOptions(
+  roomNumber: number,
+  act: 1 | 2 | 3,
+  faction?: Faction,
+  rng: () => number = Math.random,
+): CardDefinition[] {
+  const tierWeights = getRewardWeights(roomNumber);
+  const rarityWeights = ACT_RARITY_WEIGHTS[act];
+
+  const picks: CardDefinition[] = [];
+  const usedIds = new Set<string>();
+  const maxAttempts = 200;
+  let attempts = 0;
+
+  while (picks.length < 3 && attempts < maxAttempts) {
+    attempts++;
+    // 70% draws from the player's faction, 30% from any faction (for variety).
+    const useFaction = faction && rng() < 0.7;
+    const factionPool = useFaction
+      ? CARD_POOL.filter((c) => c.faction === faction)
+      : CARD_POOL;
+
+    const tier = pickTier(rng, tierWeights);
+    const rarity = pickRarity(rng, rarityWeights);
+
+    let candidates = factionPool.filter(
+      (c) =>
+        (c.complexityTier ?? 1) === tier &&
+        c.rarity === rarity &&
+        !usedIds.has(c.id),
+    );
+
+    // Fallback: if the tier×rarity matrix is empty, drop the tier filter.
+    if (candidates.length === 0) {
+      candidates = factionPool.filter(
+        (c) => c.rarity === rarity && !usedIds.has(c.id),
+      );
+    }
+    if (candidates.length === 0) continue;
+
+    const pick = candidates[Math.floor(rng() * candidates.length)];
+    usedIds.add(pick.id);
+    picks.push(pick);
+  }
+
+  return picks;
 }

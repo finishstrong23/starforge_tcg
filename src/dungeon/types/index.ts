@@ -36,13 +36,8 @@ export interface CardDefinition {
   keywords: Keyword[];
   cardText: string;
   rarity: Rarity;
-  /**
-   * Complexity tier for reward weighting (see ComplexityTier).
-   * NOTE: optional during the Phase 1.5 per-faction rollout. Cards without
-   * this field are treated as Tier 1 by the reward roller. Will be tightened
-   * to required once all four factions are tagged.
-   */
-  complexityTier?: ComplexityTier;
+  /** Complexity tier for reward weighting (see ComplexityTier). */
+  complexityTier: ComplexityTier;
   upgradeText?: string;           // What changes on upgrade
   upgraded?: boolean;
 }
