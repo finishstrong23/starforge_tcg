@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { CardInstance, CombatState } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
-import { playCard, attackWithMinion, endPlayerTurn, executeEnemyTurn, getCardChoice } from '../engine/combat';
+import { playCard, attackWithMinion, endPlayerTurn, executeEnemyTurn, getCardChoice, applyAugment } from '../engine/combat';
 import { EnemyComponent } from './EnemyComponent';
 import { HandComponent } from './HandComponent';
 import { CardComponent } from './CardComponent';
@@ -504,12 +504,23 @@ export const CombatView: React.FC = () => {
     cardName: string;
   } | null>(null);
 
+  // Augment cards open a target-picker modal showing the player's hand.
+  const [pendingAugment, setPendingAugment] = useState<{ cardId: string; cardName: string } | null>(null);
+
   const handleCardSelect = useCallback((instanceId: string) => {
     if (!cs) return;
     if (cs.phase !== 'player_turn') return;
     const card = cs.hand.find((c) => c.instanceId === instanceId);
     if (!card) return;
     if (card.cost > cs.playerEnergy) return;
+
+    // Augment cards: show target-picker before playing.
+    if (card.type === 'Augment') {
+      setPendingAugment({ cardId: instanceId, cardName: card.name });
+      setSelectedCardId(null);
+      setSelectedMinionId(null);
+      return;
+    }
 
     // Choice cards: show modal, defer play until user picks.
     const choice = getCardChoice(card);
@@ -535,6 +546,15 @@ export const CombatView: React.FC = () => {
     setSelectedCardId(instanceId);
     setSelectedMinionId(null);
   }, [cs, selectedCardId, setCombatState]);
+
+  const handleAugmentTargetPick = useCallback((targetId: string) => {
+    if (!cs || !pendingAugment) return;
+    const next = applyAugment(cs, pendingAugment.cardId, targetId);
+    setPendingAugment(null);
+    setCombatState(next);
+  }, [cs, pendingAugment, setCombatState]);
+
+  const handleAugmentCancel = useCallback(() => setPendingAugment(null), []);
 
   const handleChoicePick = useCallback((optionText: string) => {
     if (!cs || !pendingChoice) return;
@@ -869,6 +889,92 @@ export const CombatView: React.FC = () => {
           <button
             type="button"
             onClick={handleChoiceCancel}
+            style={{
+              marginTop: 8,
+              padding: '6px 14px',
+              background: 'transparent',
+              border: '1px solid #444',
+              borderRadius: 4,
+              color: '#888',
+              fontSize: 10,
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* Augment target picker — for Cogsmiths "Attach to a card in hand" */}
+      {pendingAugment && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(0,0,0,0.82)',
+            zIndex: 30,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 14,
+            padding: 20,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: '0.25em',
+              opacity: 0.55,
+              textTransform: 'uppercase',
+              color: '#4aa8e0',
+            }}
+          >
+            ▸ {pendingAugment.cardName}
+          </div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: '#eee' }}>
+            Pick a card in hand to attach to:
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 8,
+              justifyContent: 'center',
+              maxWidth: 600,
+            }}
+          >
+            {cs.hand
+              .filter((c) => c.instanceId !== pendingAugment.cardId && c.type !== 'Augment')
+              .map((c) => (
+                <button
+                  key={c.instanceId}
+                  type="button"
+                  onClick={() => handleAugmentTargetPick(c.instanceId)}
+                  style={{
+                    padding: 0,
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <CardComponent card={c} selectable />
+                </button>
+              ))}
+          </div>
+
+          {cs.hand.filter((c) => c.instanceId !== pendingAugment.cardId && c.type !== 'Augment').length === 0 && (
+            <div style={{ color: '#aaa', fontSize: 12 }}>
+              No valid targets in hand.
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleAugmentCancel}
             style={{
               marginTop: 8,
               padding: '6px 14px',

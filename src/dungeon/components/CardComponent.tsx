@@ -282,6 +282,68 @@ export const CardComponent: React.FC<CardComponentProps> = ({
         </div>
       )}
 
+      {/* Summon badge — Cogsmiths drones/sentries/titans */}
+      {card.summonAutoDamage !== undefined && (
+        <div
+          title={
+            card.summonTurnsLeft === undefined || card.summonTurnsLeft < 0
+              ? `Auto-attacks for ${card.summonAutoDamage}${(card.summonActionsPerTurn ?? 1) > 1 ? `×${card.summonActionsPerTurn}` : ''} per turn — permanent`
+              : `Auto-attacks for ${card.summonAutoDamage}${(card.summonActionsPerTurn ?? 1) > 1 ? `×${card.summonActionsPerTurn}` : ''} per turn — ${card.summonTurnsLeft} turn${card.summonTurnsLeft === 1 ? '' : 's'} left`
+          }
+          style={{
+            position: 'absolute',
+            top: compact ? 2 : 4,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            padding: compact ? '0 4px' : '1px 6px',
+            fontSize: compact ? 8 : 10,
+            fontWeight: 900,
+            letterSpacing: '0.08em',
+            color: '#22cc88',
+            background: '#0a0a14',
+            border: '1px solid #22cc88',
+            borderRadius: 3,
+            boxShadow: '0 0 6px #22cc8866',
+            lineHeight: 1.2,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          🤖 {card.summonTurnsLeft === undefined || card.summonTurnsLeft < 0 ? '∞' : card.summonTurnsLeft}
+        </div>
+      )}
+
+      {/* Augment markers — Cogsmiths attached augments */}
+      {card.augments && card.augments.length > 0 && (
+        <div
+          title={`Augments: ${card.augments.join(', ')}`}
+          style={{
+            position: 'absolute',
+            bottom: compact ? 2 : 16,
+            left: compact ? 2 : 4,
+            display: 'flex',
+            gap: 2,
+          }}
+        >
+          {card.augments.map((aug, i) => (
+            <span
+              key={i}
+              style={{
+                fontSize: compact ? 7 : 9,
+                padding: '0 3px',
+                background: '#1a3050',
+                color: '#4aa8e0',
+                border: '1px solid #4aa8e0',
+                borderRadius: 2,
+                fontWeight: 700,
+                lineHeight: 1.2,
+              }}
+            >
+              ⚙
+            </span>
+          ))}
+        </div>
+      )}
+
       <div style={styles.body}>
         <div style={styles.name}>{card.name}</div>
 

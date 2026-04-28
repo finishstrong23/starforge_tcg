@@ -165,6 +165,97 @@ export function drawCards(state: CombatState, count: number): CombatState {
 // ─── playCard ────────────────────────────────────────────────────────────────
 
 /**
+ * Cogsmiths Augment helper. Applies an augment card's effect to a target
+ * card in hand. Returns the updated state with the target card buffed and
+ * the augment removed from the hand (exhausted). Returns the input state
+ * unchanged if either card isn't found.
+ */
+export function applyAugment(
+  state: CombatState,
+  augmentInstanceId: string,
+  targetInstanceId: string,
+): CombatState {
+  const augment = state.hand.find((c) => c.instanceId === augmentInstanceId);
+  if (!augment || augment.type !== 'Augment') return state;
+  const target = state.hand.find((c) => c.instanceId === targetInstanceId);
+  if (!target || target.instanceId === augmentInstanceId) return state;
+  if (state.playerEnergy < augment.cost) return state;
+
+  const augText = (augment.upgraded ? augment.upgradeText ?? augment.cardText : augment.cardText).toLowerCase();
+  let buffed: CardInstance = {
+    ...target,
+    augments: [...(target.augments ?? []), augment.name],
+  };
+
+  // +N damage  →  bump every "Deal X damage" / "Deal X to Y damage" in cardText
+  const dmgBonus = augText.match(/\+(\d+) damage/);
+  if (dmgBonus) {
+    const bonus = parseInt(dmgBonus[1]);
+    buffed = {
+      ...buffed,
+      cardText: buffed.cardText.replace(
+        /deal (\d+)( damage)/gi,
+        (_, n, rest) => `Deal ${parseInt(n) + bonus}${rest}`,
+      ).replace(
+        /deal (\d+) to (\d+)( damage)/gi,
+        (_, a, b, rest) => `Deal ${parseInt(a) + bonus} to ${parseInt(b) + bonus}${rest}`,
+      ),
+    };
+  }
+  // +N Block
+  const blockBonus = augText.match(/\+(\d+) block/);
+  if (blockBonus) {
+    const bonus = parseInt(blockBonus[1]);
+    buffed = {
+      ...buffed,
+      cardText: buffed.cardText.replace(
+        /gain (\d+)( block)/gi,
+        (_, n, rest) => `Gain ${parseInt(n) + bonus}${rest}`,
+      ),
+    };
+  }
+  // -N cost (Gyro)
+  const lessCostMatch = augText.match(/costs? (\d+) less/);
+  if (lessCostMatch) {
+    const reduction = parseInt(lessCostMatch[1]);
+    buffed = { ...buffed, cost: Math.max(0, buffed.cost - reduction) };
+  }
+  // 0 cost (Exotic Core)
+  if (/costs? 0 and does not exhaust|costs? 0$/.test(augText)) {
+    buffed = { ...buffed, cost: 0 };
+  }
+  // Apply Weak (Jolt)
+  if (/applies weak/.test(augText) && !/weak/i.test(buffed.cardText)) {
+    buffed = { ...buffed, cardText: buffed.cardText.trim() + ' Apply Weak 1.' };
+  }
+  // Draw a card (Core)
+  if (/draws? (?:a|\d+) cards?/.test(augText) && !/draw/i.test(buffed.cardText)) {
+    buffed = { ...buffed, cardText: buffed.cardText.trim() + ' Draw 1.' };
+  }
+  // Inverter (AoE) — fallback: bump damage by +5
+  if (/all enemies|all allies/.test(augText) && !dmgBonus && !blockBonus) {
+    buffed = {
+      ...buffed,
+      cardText: buffed.cardText.replace(
+        /deal (\d+)( damage)/gi,
+        (_, n, rest) => `Deal ${parseInt(n) + 5}${rest}`,
+      ),
+    };
+  }
+
+  // Spend energy, replace target in hand, exhaust augment.
+  return {
+    ...state,
+    playerEnergy: state.playerEnergy - augment.cost,
+    hand: state.hand
+      .filter((c) => c.instanceId !== augmentInstanceId)
+      .map((c) => (c.instanceId === targetInstanceId ? buffed : c)),
+    combatLog: [...state.combatLog, `🔧 ${augment.name} attached to ${target.name}`].slice(-8),
+    lastAction: `${augment.name} → ${target.name}`,
+  };
+}
+
+/**
  * Detect a "Choose one: A OR B" card. Returns the two option strings if found,
  * null otherwise. Used by the UI to present a choice modal.
  */
@@ -322,6 +413,54 @@ function applySpellEffect(
     const dmg = parseInt(loseHP[1]);
     s = { ...s, playerHealth: Math.max(0, s.playerHealth - dmg) };
     s = log(s, `💔 ${card.name} costs ${dmg} HP`);
+  }
+
+  // ── Cogsmiths summons (Deploy Drone / Sentry / Titan / Warmind / etc.) ──
+  // Two patterns in the existing card text:
+  //   "Summon a Drone (5 HP, deals 3 damage at turn end, lasts 3 turns)."
+  //   "Summon a Titan (25 HP, takes 2 actions per turn dealing 10 damage each)."
+  const summonTurnEnd = rawText.match(
+    /summon a ([\w\s]+?) \((\d+) hp, deals (\d+) damage at turn end(?:, lasts (\d+) turns?)?\)/i,
+  );
+  const summonActions = !summonTurnEnd
+    ? rawText.match(
+        /summon a ([\w\s]+?) \((\d+) hp, takes (\d+) actions? per turn dealing (\d+) damage each\)/i,
+      )
+    : null;
+
+  if (summonTurnEnd || summonActions) {
+    const m = (summonTurnEnd ?? summonActions)!;
+    const name      = m[1].trim();
+    const hp        = parseInt(m[2]);
+    const dmg       = summonTurnEnd ? parseInt(summonTurnEnd[3]) : parseInt(summonActions![4]);
+    const actions   = summonActions ? parseInt(summonActions[3]) : 1;
+    const turns     = summonTurnEnd && summonTurnEnd[4] ? parseInt(summonTurnEnd[4]) : -1; // -1 = permanent
+
+    const summon: CardInstance = {
+      id: `summon-${card.id}-${Date.now()}`,
+      instanceId: `summon-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name,
+      faction: 'Cogsmiths',
+      type: 'Minion',
+      cost: 0,
+      attack: dmg,
+      health: hp,
+      currentHealth: hp,
+      keywords: [],
+      cardText: `Summon. Auto-attacks for ${dmg} at turn end${actions > 1 ? ` (×${actions})` : ''}.`,
+      rarity: 'Common',
+      complexityTier: 1,
+      upgraded: false,
+      statusEffects: [],
+      hasAttacked: true, // doesn't act the turn it's summoned
+      summonAutoDamage: dmg,
+      summonActionsPerTurn: actions,
+      summonTurnsLeft: turns,
+    };
+
+    s = { ...s, playerBoard: [...s.playerBoard, summon] };
+    const turnsTxt = turns < 0 ? 'permanent' : `${turns} turn${turns === 1 ? '' : 's'}`;
+    s = log(s, `🤖 Summoned ${name} — ${hp} HP, ${dmg}${actions > 1 ? `×${actions}` : ''} dmg/turn, ${turnsTxt}`);
   }
 
   // ── Rifts (Warp Riders) ──────────────────────────────────────────────────
@@ -569,6 +708,36 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
     s = { ...s, playerStatusEffects: addEffect(removeEffect(s.playerStatusEffects, 'poison'), 'poison', poisonDmg + 1) };
     s = log(s, `☠ Poison deals ${poisonDmg} damage`);
   }
+
+  // Cogsmiths summons auto-attack the enemy at end of player turn.
+  for (const m of s.playerBoard) {
+    if (m.summonAutoDamage === undefined) continue;
+    const actions = m.summonActionsPerTurn ?? 1;
+    for (let i = 0; i < actions; i++) {
+      const dmg = calcDamage(m.summonAutoDamage, m.statusEffects, s.enemy.statusEffects);
+      const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
+      s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
+      s = log(s, `🤖 ${m.name} hits ${s.enemy.name} for ${dmg}`);
+      if (s.enemy.currentHealth <= 0) break;
+    }
+  }
+
+  // Tick summon durations. -1 = permanent. Remove expired.
+  const livingBoard = s.playerBoard
+    .map((m) => {
+      if (m.summonTurnsLeft === undefined || m.summonTurnsLeft < 0) return m;
+      const next = m.summonTurnsLeft - 1;
+      return { ...m, summonTurnsLeft: next };
+    })
+    .filter((m) => {
+      if (m.summonTurnsLeft === undefined || m.summonTurnsLeft < 0) return true;
+      if (m.summonTurnsLeft <= 0) {
+        s = log(s, `🤖 ${m.name} expires`);
+        return false;
+      }
+      return true;
+    });
+  s = { ...s, playerBoard: livingBoard };
 
   // Reset minions and energy. Shield is cleared at the START of the player's next turn
   // (inside executeEnemyTurn, before drawing), so it can still absorb the enemy's attack.
