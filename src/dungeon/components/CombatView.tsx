@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { CardInstance, CombatState } from '../types';
+import type { CardDefinition, CardInstance, CombatState } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { playCard, attackWithMinion, endPlayerTurn, executeEnemyTurn, getCardChoice, applyAugment } from '../engine/combat';
+import { CARD_POOL } from '../data/cards';
 import { EnemyComponent } from './EnemyComponent';
 import { HandComponent } from './HandComponent';
 import { CardComponent } from './CardComponent';
@@ -221,21 +222,28 @@ const BoardRow: React.FC<{
 const CombatLog: React.FC<{ log: string[]; cardPool: CardInstance[] }> = ({ log, cardPool }) => {
   const visible = log.slice(-7);
 
-  const cardByName = new Map<string, CardInstance>();
+  // Build the name → card lookup. Runtime instances (with live lumens /
+  // augments / fluxState) take priority. Static CARD_POOL is the fallback so
+  // exhausted / used-up cards (e.g. an augment that's been attached and
+  // removed from hand) still get tooltips in the log.
+  const cardByName = new Map<string, CardDefinition | CardInstance>();
+  for (const def of CARD_POOL) {
+    if (def.name) cardByName.set(def.name, def);
+  }
   for (const c of cardPool) {
     if (c.name) cardByName.set(c.name, c);
   }
-  // Sort longest first to avoid partial matches
+  // Sort longest first so e.g. "Heavy Wrench" matches before "Wrench".
   const names = [...cardByName.keys()].sort((a, b) => b.length - a.length);
 
-  function splitLogEntry(text: string): Array<{ text: string; card?: CardInstance }> {
+  function splitLogEntry(text: string): Array<{ text: string; card?: CardDefinition | CardInstance }> {
     if (names.length === 0) return [{ text }];
     const pattern = new RegExp(`(${names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'g');
     const parts = text.split(pattern);
     return parts.map(p => ({ text: p, card: cardByName.get(p) }));
   }
 
-  const [tooltip, setTooltip] = useState<{ card: CardInstance; x: number; y: number } | null>(null);
+  const [tooltip, setTooltip] = useState<{ card: CardDefinition | CardInstance; x: number; y: number } | null>(null);
 
   return (
     <div
