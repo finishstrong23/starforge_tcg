@@ -1,4 +1,4 @@
-import type { CardInstance, CombatPhase, CombatState, EnemyDefinition, RelicDefinition, StatusEffect, StatusEffectType } from '../types';
+import type { CardInstance, CombatPhase, CombatState, EnemyDefinition, RelicDefinition, Rift, StatusEffect, StatusEffectType } from '../types';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -131,6 +131,7 @@ export function initCombat(
     enemyBoard: [],
     lastAction: '',
     combatLog: ['⚔️ Combat begins!'],
+    playerRifts: [],
   };
   return drawCards(state, 5);
 }
@@ -163,7 +164,23 @@ export function drawCards(state: CombatState, count: number): CombatState {
 
 // ─── playCard ────────────────────────────────────────────────────────────────
 
-export function playCard(state: CombatState, cardInstanceId: string, targetId?: string): CombatState {
+/**
+ * Detect a "Choose one: A OR B" card. Returns the two option strings if found,
+ * null otherwise. Used by the UI to present a choice modal.
+ */
+export function getCardChoice(card: CardInstance): { optionA: string; optionB: string } | null {
+  const text = card.upgraded ? (card.upgradeText ?? card.cardText) : card.cardText;
+  const m = text.match(/choose(?:\s+one)?\s*:\s*(.+?)\s+or\s+(.+?)\.?$/i);
+  if (!m) return null;
+  return { optionA: m[1].trim(), optionB: m[2].trim() };
+}
+
+export function playCard(
+  state: CombatState,
+  cardInstanceId: string,
+  targetId?: string,
+  textOverride?: string,
+): CombatState {
   const card = state.hand.find((c) => c.instanceId === cardInstanceId);
   if (!card) return state;
   if (state.playerEnergy < card.cost) return state;
@@ -208,7 +225,7 @@ export function playCard(state: CombatState, cardInstanceId: string, targetId?: 
     s = { ...s, playerBoard: [...s.playerBoard, structure] };
   } else {
     // Spell
-    s = applySpellEffect(s, card, targetId);
+    s = applySpellEffect(s, card, targetId, textOverride);
     s = { ...s, discardPile: [...s.discardPile, card] };
   }
 
@@ -219,10 +236,16 @@ export function playCard(state: CombatState, cardInstanceId: string, targetId?: 
   return checkCombatEnd(s);
 }
 
-function applySpellEffect(state: CombatState, card: CardInstance, _targetId?: string): CombatState {
+function applySpellEffect(
+  state: CombatState,
+  card: CardInstance,
+  _targetId?: string,
+  textOverride?: string,
+): CombatState {
   let s = { ...state };
-  // Flux cards resolve only the body for the active state.
-  const rawText = isFluxCard(card) && card.fluxState ? activeFluxText(card) : card.cardText;
+  // Order of precedence: explicit choice override → active Flux body → card text.
+  const rawText = textOverride
+    ?? (isFluxCard(card) && card.fluxState ? activeFluxText(card) : card.cardText);
   const text = rawText.toLowerCase();
 
   // Random-range damage (e.g. Anomaly: "Deal 4 to 12 damage")
@@ -272,17 +295,77 @@ function applySpellEffect(state: CombatState, card: CardInstance, _targetId?: st
     s = log(s, `💚 Healed ${healed} HP`);
   }
 
+  // Self damage. Patterns:
+  //   "X% chance to take N (self) damage"  — Paradox Strike etc.
+  //   "take N (self) damage"               — Cauterize, Rally, Collapsing Star, Overdrive
+  //   "lose N HP"                           — Glass Cannon
+  const chanceSelfDmg = text.match(/(\d+)% chance to take (\d+) (?:self )?damage/);
+  if (chanceSelfDmg) {
+    const chance = parseInt(chanceSelfDmg[1]);
+    const dmg = parseInt(chanceSelfDmg[2]);
+    if (Math.random() * 100 < chance) {
+      s = { ...s, playerHealth: Math.max(0, s.playerHealth - dmg) };
+      s = log(s, `💥 ${card.name} backfires for ${dmg}`);
+    } else {
+      s = log(s, `🍀 ${card.name} backfire avoided`);
+    }
+  } else {
+    const flatSelfDmg = text.match(/take (\d+) (?:self )?damage/);
+    if (flatSelfDmg) {
+      const dmg = parseInt(flatSelfDmg[1]);
+      s = { ...s, playerHealth: Math.max(0, s.playerHealth - dmg) };
+      s = log(s, `💥 ${card.name} self-damage: ${dmg}`);
+    }
+  }
+  const loseHP = text.match(/lose (\d+) hp/);
+  if (loseHP) {
+    const dmg = parseInt(loseHP[1]);
+    s = { ...s, playerHealth: Math.max(0, s.playerHealth - dmg) };
+    s = log(s, `💔 ${card.name} costs ${dmg} HP`);
+  }
+
+  // ── Rifts (Warp Riders) ──────────────────────────────────────────────────
+  // Patterns:
+  //   "open a cost rift for N turns"
+  //   "open a genesis rift for N turns" (also matches: "Genesis Rift for 1 turn")
+  //   "open N random rifts" / "open a random rift for M turns"
+  //   "open 3 random rifts"
+  const namedRift = text.match(/open a (cost|genesis|energy|chaos) rift(?: for (\d+) turns?)?/);
+  if (namedRift) {
+    const type = namedRift[1] as Rift['type'];
+    const turns = namedRift[2] ? parseInt(namedRift[2]) : (type === 'genesis' ? 1 : 2);
+    s = { ...s, playerRifts: [...s.playerRifts, { type, turnsRemaining: turns }] };
+    s = log(s, `⚡ Opened a ${type[0].toUpperCase() + type.slice(1)} Rift for ${turns} turn${turns === 1 ? '' : 's'}`);
+  } else {
+    const randomRift = text.match(/open (\d+|a) random rifts?(?: for (\d+) turns?)?/);
+    if (randomRift) {
+      const count = randomRift[1] === 'a' ? 1 : parseInt(randomRift[1]);
+      const turns = randomRift[2] ? parseInt(randomRift[2]) : 2;
+      const types: Rift['type'][] = ['cost', 'energy', 'chaos'];
+      const newRifts: Rift[] = [];
+      for (let i = 0; i < count; i++) {
+        const type = types[Math.floor(Math.random() * types.length)];
+        newRifts.push({ type, turnsRemaining: turns });
+      }
+      s = { ...s, playerRifts: [...s.playerRifts, ...newRifts] };
+      const summary = newRifts.map((r) => r.type[0].toUpperCase() + r.type.slice(1)).join(', ');
+      s = log(s, `⚡ Opened ${count} random Rift${count === 1 ? '' : 's'}: ${summary}`);
+    }
+  }
+
   // Energy
   const energyMatch = text.match(/gain (\d+) energy/);
   if (energyMatch) {
     s = { ...s, playerEnergy: Math.min(s.playerMaxEnergy + 3, s.playerEnergy + parseInt(energyMatch[1])) };
   }
 
-  // Status: burn/poison on enemy
-  const burnMatch = text.match(/apply (\d+) burn/);
+  // Status: burn / Ignite (Pyroclast term, same status). Match all spellings:
+  //   "apply 2 burn", "apply ignite 2", "apply 2 ignite"
+  const burnMatch = text.match(/apply (?:(\d+) (?:burn|ignite)|ignite (\d+))/);
   if (burnMatch) {
-    s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'burn', parseInt(burnMatch[1])) } };
-    s = log(s, `🔥 Applied ${burnMatch[1]} Burn`);
+    const stacks = parseInt(burnMatch[1] ?? burnMatch[2]);
+    s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'burn', stacks) } };
+    s = log(s, `🔥 Applied ${stacks} Burn`);
   }
   const poisonMatch = text.match(/apply (\d+) poison/);
   if (poisonMatch) {
@@ -589,7 +672,65 @@ export function executeEnemyTurn(state: CombatState): CombatState {
       hand: [],
     };
     s = drawCards(s, 5);
+    s = applyRiftStartOfTurn(s);
   }
+
+  return s;
+}
+
+/**
+ * Apply rift effects at the start of the player's turn, then tick down
+ * each rift's remaining duration. Expired rifts are removed.
+ */
+function applyRiftStartOfTurn(state: CombatState): CombatState {
+  if (state.playerRifts.length === 0) return state;
+  let s = state;
+
+  for (const rift of s.playerRifts) {
+    switch (rift.type) {
+      case 'energy':
+        s = { ...s, playerEnergy: s.playerEnergy + 1 };
+        s = log(s, `⚡ Energy Rift grants +1 Energy`);
+        break;
+      case 'genesis':
+        // 1-turn burst: +2 energy this turn (proxy for "all cards cost -1")
+        s = { ...s, playerEnergy: s.playerEnergy + 2 };
+        s = log(s, `⚡ Genesis Rift grants +2 Energy`);
+        break;
+      case 'cost': {
+        // Discount one random card in hand by 1 (min 0) for this turn only.
+        if (s.hand.length > 0) {
+          const idx = Math.floor(Math.random() * s.hand.length);
+          const target = s.hand[idx];
+          const newCost = Math.max(0, (target.cost ?? 0) - 1);
+          if (newCost !== target.cost) {
+            const updated = { ...target, cost: newCost };
+            s = { ...s, hand: s.hand.map((c, i) => (i === idx ? updated : c)) };
+            s = log(s, `⚡ Cost Rift: ${target.name} costs ${newCost} this turn`);
+          }
+        }
+        break;
+      }
+      case 'chaos': {
+        // Random chaos damage on the enemy
+        const dmg = 3;
+        const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
+        s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
+        s = log(s, `⚡ Chaos Rift deals ${dmg} to ${s.enemy.name}`);
+        break;
+      }
+    }
+  }
+
+  // Tick down. Drop expired.
+  const ticked = s.playerRifts
+    .map((r) => ({ ...r, turnsRemaining: r.turnsRemaining - 1 }))
+    .filter((r) => r.turnsRemaining > 0);
+  const expired = s.playerRifts.length - ticked.length;
+  if (expired > 0) {
+    s = log(s, `⚡ ${expired} Rift${expired === 1 ? '' : 's'} expired`);
+  }
+  s = { ...s, playerRifts: ticked };
 
   return s;
 }
