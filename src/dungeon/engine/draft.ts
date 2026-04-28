@@ -22,7 +22,7 @@ export function createCardInstance(def: CardDefinition): CardInstance {
 // 10-card starting decks: 5 basic attack + 4 basic block + 1 utility per faction.
 const STARTER_IDS: Record<Faction, string[]> = {
   Cogsmiths:  ['C-001','C-001','C-001','C-001','C-001','C-002','C-002','C-002','C-002','C-003'],
-  Pyroclast:  ['P-001','P-001','P-001','P-001','P-001','P-002','P-002','P-002','P-002','P-003'],
+  Pyroclast:  ['P-001','P-001','P-001','P-001','P-001','P-002','P-002','P-002','P-002','P-041'],
   Luminar:    ['L-001','L-001','L-001','L-001','L-001','L-002','L-002','L-002','L-002','L-003'],
   WarpRiders: ['W-001','W-001','W-001','W-001','W-001','W-002','W-002','W-002','W-002','W-003'],
 };

@@ -2,6 +2,15 @@
 export type Faction = 'Cogsmiths' | 'Pyroclast' | 'Luminar' | 'WarpRiders';
 export type CardType = 'Minion' | 'Spell' | 'Structure' | 'Attack' | 'Skill' | 'Power' | 'Augment';
 export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary';
+/**
+ * Complexity tier — orthogonal to rarity. Drives reward roller weighting so
+ * brand-new players see foundational cards first and the faction mechanic
+ * is introduced gradually.
+ *   1 = Foundational     (no mechanic engagement)
+ *   2 = Mechanic-introducing (generates Heat / Channel / augments / Flux)
+ *   3 = Mechanic-payoff    (consumes or scales on mechanic state)
+ */
+export type ComplexityTier = 1 | 2 | 3;
 export type Keyword =
   | 'LAST_WORDS'
   | 'IMMOLATE'
@@ -27,6 +36,13 @@ export interface CardDefinition {
   keywords: Keyword[];
   cardText: string;
   rarity: Rarity;
+  /**
+   * Complexity tier for reward weighting (see ComplexityTier).
+   * NOTE: optional during the Phase 1.5 per-faction rollout. Cards without
+   * this field are treated as Tier 1 by the reward roller. Will be tightened
+   * to required once all four factions are tagged.
+   */
+  complexityTier?: ComplexityTier;
   upgradeText?: string;           // What changes on upgrade
   upgraded?: boolean;
 }
