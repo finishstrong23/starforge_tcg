@@ -26,6 +26,32 @@ function isChannelCard(card: CardInstance): boolean {
   return card.keywords.includes('ILLUMINATE') && /(^|\s)channel\./i.test(card.cardText);
 }
 
+// ─── Power-card segment parsing ──────────────────────────────────────────────
+// Power cards persist on the player side and emit effects on different
+// triggers. A card text like "At combat start, gain 1 Energy. Take 2 damage
+// at end of each turn." has TWO segments:
+//   - "gain 1 Energy" (trigger: play)
+//   - "take 2 damage" (trigger: turn-end)
+// We split on ". " and look for trigger keywords inside each sentence.
+
+type PowerTrigger = 'play' | 'turn-start' | 'turn-end';
+
+function classifyPowerSegment(sentence: string): PowerTrigger {
+  const s = sentence.toLowerCase();
+  if (/at end of (?:each |every |the )?turn|at turn end|end of turn/.test(s)) return 'turn-end';
+  if (/at (?:start of (?:each |every |the )?turn|turn start)|at start of each turn|at the start of/.test(s)) return 'turn-start';
+  return 'play';
+}
+
+function powerSegmentsForTrigger(card: CardInstance, trigger: PowerTrigger): string[] {
+  const text = card.upgraded ? (card.upgradeText ?? card.cardText) : card.cardText;
+  return text
+    .split(/\.\s+/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .filter((s) => classifyPowerSegment(s) === trigger);
+}
+
 function randomFluxState(): 'A' | 'B' | 'C' {
   return FLUX_STATES[Math.floor(Math.random() * 3)];
 }
@@ -140,6 +166,7 @@ export function initCombat(
     lastAction: '',
     combatLog: ['⚔️ Combat begins!'],
     playerRifts: [],
+    playerPowers: [],
   };
   return drawCards(state, 5);
 }
@@ -351,8 +378,17 @@ export function playCard(
       statusEffects: [],
     };
     s = { ...s, playerBoard: [...s.playerBoard, structure] };
+  } else if (card.type === 'Power') {
+    // Powers persist for the rest of combat and trigger on phase events.
+    // On play we ONLY run the segments tagged "at combat start" / non-conditional.
+    s = log(s, `⚙ ${card.name} comes online`);
+    const playSegments = powerSegmentsForTrigger(card, 'play');
+    for (const seg of playSegments) {
+      s = applySpellEffect(s, card, targetId, seg);
+    }
+    s = { ...s, playerPowers: [...s.playerPowers, card] };
   } else {
-    // Spell
+    // Spell / Attack / Skill / Augment
     s = applySpellEffect(s, card, targetId, textOverride);
     s = { ...s, discardPile: [...s.discardPile, card] };
   }
@@ -388,8 +424,34 @@ function applySpellEffect(
     s = log(s, `🎲 ${card.name} rolls ${roll} → ${dmg} damage`);
   }
 
-  // Extract damage amount from card text (skip if range pattern already fired)
-  const dmgMatch = !rangeDmgMatch ? text.match(/deal (\d+) damage/) : null;
+  // Multi-hit: "deal N damage X times" / "deal N damage twice" / "deal N damage 3 times"
+  const NUMBER_WORD: Record<string, number> = { twice: 2, thrice: 3 };
+  const multiHitMatch = !rangeDmgMatch
+    ? text.match(/deal (\d+) damage (\d+|twice|thrice) times?/)
+        ?? text.match(/deal (\d+) damage (twice|thrice)/)
+    : null;
+  if (multiHitMatch) {
+    const per = parseInt(multiHitMatch[1]);
+    const raw = multiHitMatch[2];
+    const hits = NUMBER_WORD[raw] ?? parseInt(raw);
+    let totalDealt = 0;
+    for (let i = 0; i < hits; i++) {
+      const dmg = calcDamage(per, s.playerStatusEffects, s.enemy.statusEffects);
+      const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
+      s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
+      totalDealt += dmg;
+      if (s.enemy.currentHealth <= 0) break;
+    }
+    s = log(s, `💥 ${card.name} hits ${hits}× for ${totalDealt} total`);
+    if (card.keywords.includes('DRAIN')) {
+      const heal = Math.floor(totalDealt / 2);
+      s = { ...s, playerHealth: Math.min(s.playerMaxHealth, s.playerHealth + heal) };
+      s = log(s, `💚 DRAIN heals ${heal} HP`);
+    }
+  }
+
+  // Single-hit damage. Skip if a range or multi-hit pattern already fired.
+  const dmgMatch = !rangeDmgMatch && !multiHitMatch ? text.match(/deal (\d+) damage/) : null;
   if (dmgMatch) {
     const dmg = calcDamage(parseInt(dmgMatch[1]), s.playerStatusEffects, s.enemy.statusEffects);
     const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
@@ -579,10 +641,12 @@ function applySpellEffect(
     }
   }
 
-  // Energy
-  const energyMatch = text.match(/gain (\d+) energy/);
+  // Energy. Accept "gain N energy", "gain N extra energy", "gain N more energy".
+  const energyMatch = text.match(/gain (\d+)(?:\s+(?:extra|more|additional))? energy/);
   if (energyMatch) {
-    s = { ...s, playerEnergy: Math.min(s.playerMaxEnergy + 3, s.playerEnergy + parseInt(energyMatch[1])) };
+    const gained = parseInt(energyMatch[1]);
+    s = { ...s, playerEnergy: Math.min(s.playerMaxEnergy + 3, s.playerEnergy + gained) };
+    s = log(s, `⚡ +${gained} Energy`);
   }
 
   // Status: burn / Ignite (Pyroclast term, same status). Match all spellings:
@@ -598,17 +662,19 @@ function applySpellEffect(
     s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'poison', parseInt(poisonMatch[1])) } };
     s = log(s, `☠ Applied ${poisonMatch[1]} Poison`);
   }
-  const vulnMatch = text.match(/apply vulnerable/);
+  // Vulnerable. Accept stacks: "apply vulnerable 3", "apply 3 vulnerable", or no number (default 2).
+  const vulnMatch = text.match(/apply vulnerable (\d+)|apply (\d+) vulnerable|apply vulnerable/);
   if (vulnMatch) {
-    s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'vulnerable', 2, 2) } };
-    s = log(s, `⬇ Applied Vulnerable`);
+    const stacks = parseInt(vulnMatch[1] ?? vulnMatch[2] ?? '2');
+    s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'vulnerable', stacks, 2) } };
+    s = log(s, `⬇ Applied Vulnerable ${stacks}`);
   }
-  const weakMatch = text.match(/apply weak/);
+  // Weak. Same shape as Vulnerable.
+  const weakMatch = text.match(/apply weak (\d+)|apply (\d+) weak|apply weak/);
   if (weakMatch) {
-    s = { ...s, playerStatusEffects: addEffect(s.playerStatusEffects, 'weak', 2, 2) };
-    // actually Weak should be on enemy
-    s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'weak', 2, 2) } };
-    s = log(s, `⬇ Applied Weak`);
+    const stacks = parseInt(weakMatch[1] ?? weakMatch[2] ?? '2');
+    s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'weak', stacks, 2) } };
+    s = log(s, `⬇ Applied Weak ${stacks}`);
   }
 
   // Strength
@@ -796,6 +862,14 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
     s = log(s, `☠ Poison deals ${poisonDmg} damage`);
   }
 
+  // Active Powers fire their "at end of turn" segments.
+  for (const power of s.playerPowers) {
+    const segs = powerSegmentsForTrigger(power, 'turn-end');
+    for (const seg of segs) {
+      s = applySpellEffect(s, power, undefined, seg);
+    }
+  }
+
   // Cogsmiths summons auto-attack the enemy at end of player turn.
   for (const m of s.playerBoard) {
     if (m.summonAutoDamage === undefined) continue;
@@ -929,6 +1003,14 @@ export function executeEnemyTurn(state: CombatState): CombatState {
     };
     s = drawCards(s, 5);
     s = applyRiftStartOfTurn(s);
+
+    // Active Powers fire their "at start of turn" segments.
+    for (const power of s.playerPowers) {
+      const segs = powerSegmentsForTrigger(power, 'turn-start');
+      for (const seg of segs) {
+        s = applySpellEffect(s, power, undefined, seg);
+      }
+    }
   }
 
   return s;

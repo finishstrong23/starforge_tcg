@@ -196,6 +196,8 @@ export interface CombatState {
   combatLog: string[];
   /** Active Warp Riders rifts (ticks down each player turn end). */
   playerRifts: Rift[];
+  /** Persistent Power cards in effect for the rest of combat. */
+  playerPowers: CardInstance[];
 }
 
 // ─── RUN STATE ───────────────────────────────────────────────────────────────
