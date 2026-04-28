@@ -1,38 +1,12 @@
 import React, { useState } from 'react';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { CardComponent } from './CardComponent';
-import { CARD_POOL } from '../data/cards';
 import { RELIC_POOL } from '../data/relics';
-import { createCardInstance } from '../engine/draft';
+import { createCardInstance, generateRewardOptions } from '../engine/draft';
 import type { CardDefinition, RelicDefinition } from '../types';
 
 function pickRandom<T>(arr: T[]): T | undefined {
   return arr.length ? arr[Math.floor(Math.random() * arr.length)] : undefined;
-}
-
-function generateRewardCards(act: 1 | 2 | 3): CardDefinition[] {
-  // Higher acts give better rarities
-  const weights: Record<string, number> =
-    act === 1 ? { Common: 60, Uncommon: 30, Rare: 10 }
-    : act === 2 ? { Common: 30, Uncommon: 45, Rare: 25 }
-    : { Common: 10, Uncommon: 40, Rare: 50 };
-
-  const picks: CardDefinition[] = [];
-  const used = new Set<string>();
-  let attempts = 0;
-
-  while (picks.length < 3 && attempts < 100) {
-    attempts++;
-    const roll = Math.random() * 100;
-    const rarity =
-      roll < weights['Common'] ? 'Common'
-      : roll < weights['Common'] + weights['Uncommon'] ? 'Uncommon'
-      : 'Rare';
-    const pool = CARD_POOL.filter((c) => c.rarity === rarity && !used.has(c.id));
-    const def = pickRandom(pool);
-    if (def) { used.add(def.id); picks.push(def); }
-  }
-  return picks;
 }
 
 function generateRewardRelic(isBoss: boolean): RelicDefinition | undefined {
@@ -43,17 +17,22 @@ function generateRewardRelic(isBoss: boolean): RelicDefinition | undefined {
 }
 
 export const RewardView: React.FC = () => {
-  const { runState, addCardToDeck, addRelic, returnToMap, advanceAct } = useDungeonRun();
+  const { runState, draftFaction, addCardToDeck, addRelic, returnToMap, advanceAct } = useDungeonRun();
 
   const act = runState?.currentAct ?? 1;
-  const isBossReward = (() => {
-    const map = runState?.actMaps[(runState?.currentAct ?? 1) - 1];
-    return map?.completed ?? false;
-  })();
+  const currentMap = runState?.actMaps[(runState?.currentAct ?? 1) - 1];
+  const isBossReward = currentMap?.completed ?? false;
   const combatIndex = runState?.runStats.totalCombats ?? 0;
   const showRelic = isBossReward || combatIndex % 3 === 0;
 
-  const [cardOptions] = useState<CardDefinition[]>(() => generateRewardCards(act));
+  // Per-act room number for tier-weighted rewards: count of visited nodes in
+  // the current act's map. Restarts each act per spec ("Act 2 room 1 is room
+  // 1 for weighting, NOT room 14").
+  const roomNumber = currentMap?.nodes.filter((n) => n.visited).length ?? 1;
+
+  const [cardOptions] = useState<CardDefinition[]>(() =>
+    generateRewardOptions(roomNumber, act as 1 | 2 | 3, draftFaction ?? undefined),
+  );
   const [relicOffer] = useState<RelicDefinition | undefined>(() =>
     showRelic ? generateRewardRelic(isBossReward) : undefined,
   );
