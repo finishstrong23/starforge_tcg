@@ -18,6 +18,14 @@ function isFluxCard(card: CardInstance): boolean {
   return /^\s*flux\./i.test(card.cardText);
 }
 
+/**
+ * Luminar Channel card: has the ILLUMINATE keyword AND its text starts with
+ * (or contains the word) "Channel.". Lumen generators target these cards in hand.
+ */
+function isChannelCard(card: CardInstance): boolean {
+  return card.keywords.includes('ILLUMINATE') && /(^|\s)channel\./i.test(card.cardText);
+}
+
 function randomFluxState(): 'A' | 'B' | 'C' {
   return FLUX_STATES[Math.floor(Math.random() * 3)];
 }
@@ -284,10 +292,39 @@ export function playCard(
 
   s = log(s, `▶ ${card.name} played`);
 
-  // ILLUMINATE trigger
-  if (card.keywords.includes('ILLUMINATE')) {
-    s = log(s, `✨ ILLUMINATE — ${card.name} shines brightly`);
-    s = { ...s, playerShield: s.playerShield + 4 };
+  // Luminar Channel: Release effect fires on play, scaled by accumulated Lumens.
+  // (Cards: Prism Strike "Channel. Deal 6. Release: +2 damage per Lumen", etc.)
+  if (isChannelCard(card)) {
+    const lumens = card.lumens ?? 0;
+    if (lumens > 0) {
+      const text = (card.upgraded ? card.upgradeText ?? card.cardText : card.cardText);
+      const releaseDmg = text.match(/release:\s*\+?(\d+)\s*damage\s*per lumen/i);
+      const releaseBlock = text.match(/release:\s*\+?(\d+)\s*block\s*per lumen/i);
+      const releaseWeak = text.match(/release:\s*apply\s*weak\s*\d+\s*per lumen/i);
+      const releaseVuln = text.match(/release:\s*\+?\d+\s*vulnerable\s*per lumen/i);
+
+      if (releaseDmg) {
+        const perLumen = parseInt(releaseDmg[1]);
+        const dmg = calcDamage(perLumen * lumens, s.playerStatusEffects, s.enemy.statusEffects);
+        const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
+        s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
+        s = log(s, `✨ Release: +${dmg} dmg from ${lumens} Lumen${lumens === 1 ? '' : 's'}`);
+      }
+      if (releaseBlock) {
+        const perLumen = parseInt(releaseBlock[1]);
+        const bonus = perLumen * lumens;
+        s = { ...s, playerShield: s.playerShield + bonus };
+        s = log(s, `✨ Release: +${bonus} Block from ${lumens} Lumen${lumens === 1 ? '' : 's'}`);
+      }
+      if (releaseWeak) {
+        s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'weak', lumens, 2) } };
+        s = log(s, `✨ Release: +${lumens} Weak from Lumens`);
+      }
+      if (releaseVuln) {
+        s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'vulnerable', lumens, 2) } };
+        s = log(s, `✨ Release: +${lumens} Vulnerable from Lumens`);
+      }
+    }
   }
 
   if (card.type === 'Minion') {
@@ -414,6 +451,56 @@ function applySpellEffect(
     s = { ...s, playerHealth: Math.max(0, s.playerHealth - dmg) };
     s = log(s, `💔 ${card.name} costs ${dmg} HP`);
   }
+
+  // ── Luminar Lumen generators ──────────────────────────────────────────────
+  // Patterns:
+  //   "Gain N Lumen on a Channel card in hand"
+  //   "Gain N Lumens on the leftmost Channel card in hand"
+  //   "Gain N Lumen on each Channel card in hand"
+  //   "Gain N Lumens on every Channel card in hand"
+  //   "Gain N Lumens distributed freely across Channel cards in hand"
+  const lumenEach = text.match(/gain (\d+) lumens? on (?:each|every) channel card/);
+  const lumenLeftmost = !lumenEach ? text.match(/gain (\d+) lumens? on (?:a|the leftmost) channel card/) : null;
+  const lumenDistributed = !lumenEach && !lumenLeftmost ? text.match(/gain (\d+) lumens? distributed/) : null;
+
+  const grantLumens = (n: number, mode: 'each' | 'first' | 'distributed'): void => {
+    const channels = s.hand.filter(isChannelCard);
+    if (channels.length === 0) return;
+    if (mode === 'each') {
+      s = {
+        ...s,
+        hand: s.hand.map((c) => isChannelCard(c) ? { ...c, lumens: (c.lumens ?? 0) + n } : c),
+      };
+      s = log(s, `✨ +${n} Lumen on ${channels.length} Channel card${channels.length === 1 ? '' : 's'}`);
+    } else if (mode === 'first') {
+      const idx = s.hand.findIndex(isChannelCard);
+      const target = s.hand[idx];
+      s = {
+        ...s,
+        hand: s.hand.map((c, i) => i === idx ? { ...c, lumens: (c.lumens ?? 0) + n } : c),
+      };
+      s = log(s, `✨ +${n} Lumen on ${target.name}`);
+    } else {
+      // distributed: spread evenly, remainder on the leftmost
+      const per = Math.floor(n / channels.length);
+      const remainder = n % channels.length;
+      let firstAssigned = false;
+      s = {
+        ...s,
+        hand: s.hand.map((c) => {
+          if (!isChannelCard(c)) return c;
+          const extra = !firstAssigned ? remainder : 0;
+          firstAssigned = true;
+          return { ...c, lumens: (c.lumens ?? 0) + per + extra };
+        }),
+      };
+      s = log(s, `✨ Distributed ${n} Lumens across ${channels.length} Channel card${channels.length === 1 ? '' : 's'}`);
+    }
+  };
+
+  if (lumenEach) grantLumens(parseInt(lumenEach[1]), 'each');
+  else if (lumenLeftmost) grantLumens(parseInt(lumenLeftmost[1]), 'first');
+  else if (lumenDistributed) grantLumens(parseInt(lumenDistributed[1]), 'distributed');
 
   // ── Cogsmiths summons (Deploy Drone / Sentry / Titan / Warmind / etc.) ──
   // Two patterns in the existing card text:
