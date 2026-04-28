@@ -153,6 +153,18 @@ export type CombatPhase =
   | 'combat_end_win'
   | 'combat_end_loss';
 
+/**
+ * Warp Riders Rift — a persistent buff that ticks each player turn.
+ * - cost: 1 random card in hand costs 0 next turn
+ * - genesis: all cards cost -1 this turn (1-turn burst)
+ * - energy: gain +1 energy at turn start
+ * - chaos: deal small damage to a random enemy at turn start
+ */
+export interface Rift {
+  type: 'cost' | 'genesis' | 'energy' | 'chaos';
+  turnsRemaining: number;
+}
+
 export interface CombatState {
   phase: CombatPhase;
   turn: number;
@@ -172,6 +184,8 @@ export interface CombatState {
   enemyBoard: CardInstance[];     // enemy minions in play
   lastAction: string;             // description of last thing that happened
   combatLog: string[];
+  /** Active Warp Riders rifts (ticks down each player turn end). */
+  playerRifts: Rift[];
 }
 
 // ─── RUN STATE ───────────────────────────────────────────────────────────────

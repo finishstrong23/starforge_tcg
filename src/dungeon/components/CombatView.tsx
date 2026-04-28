@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { CardInstance, CombatState } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
-import { playCard, attackWithMinion, endPlayerTurn, executeEnemyTurn } from '../engine/combat';
+import { playCard, attackWithMinion, endPlayerTurn, executeEnemyTurn, getCardChoice } from '../engine/combat';
 import { EnemyComponent } from './EnemyComponent';
 import { HandComponent } from './HandComponent';
 import { CardComponent } from './CardComponent';
@@ -273,9 +273,48 @@ const HUDBar: React.FC<HUDProps> = ({ cs, onEndTurn, isEnemyTurn, shakeKey }) =>
         flexShrink: 0,
       }}
     >
-      {/* Status effects (left) */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start', minWidth: 0 }}>
+      {/* Status effects + active Rifts (left) */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', minWidth: 0, gap: 3 }}>
         <StatusBadges effects={cs.playerStatusEffects} />
+        {cs.playerRifts.length > 0 && (
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            {cs.playerRifts.map((r, i) => {
+              const COLORS: Record<typeof r.type, string> = {
+                cost:    '#c27dff',
+                genesis: '#ff7acc',
+                energy:  '#4adfff',
+                chaos:   '#ffd24a',
+              };
+              const TIPS: Record<typeof r.type, string> = {
+                cost:    `Cost Rift: 1 random card costs -1 each turn (${r.turnsRemaining} left)`,
+                genesis: `Genesis Rift: +2 Energy this turn (${r.turnsRemaining} left)`,
+                energy:  `Energy Rift: +1 Energy each turn (${r.turnsRemaining} left)`,
+                chaos:   `Chaos Rift: deals 3 to enemy each turn (${r.turnsRemaining} left)`,
+              };
+              const c = COLORS[r.type];
+              return (
+                <span
+                  key={i}
+                  title={TIPS[r.type]}
+                  style={{
+                    fontSize: 9,
+                    fontWeight: 700,
+                    padding: '2px 6px',
+                    background: `${c}22`,
+                    border: `1px solid ${c}`,
+                    borderRadius: 3,
+                    color: c,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    boxShadow: `0 0 6px ${c}55`,
+                  }}
+                >
+                  ⚡ {r.type} · {r.turnsRemaining}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* HP block (center) */}
@@ -457,11 +496,29 @@ export const CombatView: React.FC = () => {
   // Attack cards need to click an enemy target. Everything else plays immediately.
   const needsTarget = (card: CardInstance): boolean => card.type === 'Attack';
 
+  // Choice cards present a modal with two options ("Choose one: A OR B").
+  const [pendingChoice, setPendingChoice] = useState<{
+    cardId: string;
+    optionA: string;
+    optionB: string;
+    cardName: string;
+  } | null>(null);
+
   const handleCardSelect = useCallback((instanceId: string) => {
     if (!cs) return;
     if (cs.phase !== 'player_turn') return;
     const card = cs.hand.find((c) => c.instanceId === instanceId);
     if (!card) return;
+    if (card.cost > cs.playerEnergy) return;
+
+    // Choice cards: show modal, defer play until user picks.
+    const choice = getCardChoice(card);
+    if (choice) {
+      setPendingChoice({ cardId: instanceId, ...choice, cardName: card.name });
+      setSelectedCardId(null);
+      setSelectedMinionId(null);
+      return;
+    }
 
     if (!needsTarget(card)) {
       const next = playCard(cs, instanceId, 'enemy');
@@ -478,6 +535,15 @@ export const CombatView: React.FC = () => {
     setSelectedCardId(instanceId);
     setSelectedMinionId(null);
   }, [cs, selectedCardId, setCombatState]);
+
+  const handleChoicePick = useCallback((optionText: string) => {
+    if (!cs || !pendingChoice) return;
+    const next = playCard(cs, pendingChoice.cardId, 'enemy', optionText);
+    setPendingChoice(null);
+    setCombatState(next);
+  }, [cs, pendingChoice, setCombatState]);
+
+  const handleChoiceCancel = useCallback(() => setPendingChoice(null), []);
 
   const handleEnemyClick = useCallback(() => {
     if (!cs) return;
@@ -740,6 +806,84 @@ export const CombatView: React.FC = () => {
               <span style={{ fontSize: 13, opacity: 0.6, fontWeight: 400 }}>The dungeon claims another soul.</span>
             </>
           )}
+        </div>
+      )}
+
+      {/* Choice modal — for "Choose one: A OR B" cards (e.g. Shimmer, Void Whisper) */}
+      {pendingChoice && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(0,0,0,0.78)',
+            zIndex: 30,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 16,
+            padding: 20,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: '0.25em',
+              opacity: 0.55,
+              textTransform: 'uppercase',
+              color: '#c89b3c',
+            }}
+          >
+            ▸ {pendingChoice.cardName}
+          </div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: '#eee' }}>Choose one:</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 320 }}>
+            {[pendingChoice.optionA, pendingChoice.optionB].map((opt, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => handleChoicePick(opt)}
+                style={{
+                  padding: '14px 18px',
+                  background: 'linear-gradient(180deg, #1a1a2e 0%, #0a0a18 100%)',
+                  color: '#fff',
+                  border: '1px solid #c89b3c',
+                  borderRadius: 6,
+                  fontSize: 13,
+                  fontWeight: 600,
+                  letterSpacing: '0.04em',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  boxShadow: '0 0 12px #c89b3c33',
+                  transition: 'background 100ms, transform 100ms',
+                }}
+                onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.98)')}
+                onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+              >
+                <span style={{ color: '#c89b3c', marginRight: 6 }}>{i === 0 ? 'A.' : 'B.'}</span>
+                {opt[0].toUpperCase() + opt.slice(1)}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={handleChoiceCancel}
+            style={{
+              marginTop: 8,
+              padding: '6px 14px',
+              background: 'transparent',
+              border: '1px solid #444',
+              borderRadius: 4,
+              color: '#888',
+              fontSize: 10,
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+            }}
+          >
+            Cancel
+          </button>
         </div>
       )}
 
