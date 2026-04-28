@@ -24,7 +24,7 @@ const STARTER_IDS: Record<Faction, string[]> = {
   Cogsmiths:  ['C-001','C-001','C-001','C-001','C-001','C-002','C-002','C-002','C-002','C-041'],
   Pyroclast:  ['P-001','P-001','P-001','P-001','P-001','P-002','P-002','P-002','P-002','P-041'],
   Luminar:    ['L-001','L-001','L-001','L-001','L-001','L-002','L-002','L-002','L-002','L-041'],
-  WarpRiders: ['W-001','W-001','W-001','W-001','W-001','W-002','W-002','W-002','W-002','W-003'],
+  WarpRiders: ['W-041','W-041','W-041','W-041','W-041','W-042','W-042','W-042','W-042','W-043'],
 };
 
 const DEF_BY_ID = new Map<string, CardDefinition>(CARD_POOL.map((c) => [c.id, c]));
