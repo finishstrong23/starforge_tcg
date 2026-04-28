@@ -44,28 +44,119 @@ const EnergyPips: React.FC<{ current: number; max: number }> = ({ current, max }
   </div>
 );
 
-const StatusBadges: React.FC<{ effects: CombatState['playerStatusEffects'] }> = ({ effects }) => {
-  const ICONS: Record<string, string> = {
-    burn: '🔥', poison: '☠', shield: '🛡', strength: '💪',
-    weak: '⬇', vulnerable: '↓', barrier: '🔷', stealth: '👤', phase: '✦',
+
+// ─── Status strip ─────────────────────────────────────────────────────────────
+// Horizontal bar that runs left-to-right above or below the combat log,
+// showing every active buff / debuff / rift on a side. Replaces the cramped
+// HUD-corner badges with a prominent, scannable row.
+
+const STATUS_META: Record<string, { emoji: string; color: string; label: string }> = {
+  burn:       { emoji: '🔥', color: '#ff5a2e', label: 'Burn'        },
+  poison:     { emoji: '☠',  color: '#44cc44', label: 'Poison'      },
+  shield:     { emoji: '🛡', color: '#3b8fff', label: 'Shield'      },
+  strength:   { emoji: '💪', color: '#ffcc00', label: 'Strength'    },
+  weak:       { emoji: '⬇',  color: '#aaaaaa', label: 'Weak'        },
+  vulnerable: { emoji: '↓',  color: '#ff8c00', label: 'Vulnerable'  },
+  barrier:    { emoji: '🔷', color: '#00aaff', label: 'Barrier'     },
+  stealth:    { emoji: '👤', color: '#cccccc', label: 'Stealth'     },
+  phase:      { emoji: '✦',  color: '#c27dff', label: 'Phase'       },
+};
+
+const RIFT_META: Record<string, { emoji: string; color: string; label: string; tip: (turns: number) => string }> = {
+  cost:    { emoji: '⚡', color: '#c27dff', label: 'Cost Rift',    tip: (t) => `Cost Rift: 1 random card costs −1 each turn (${t} left)` },
+  genesis: { emoji: '⚡', color: '#ff7acc', label: 'Genesis Rift', tip: (t) => `Genesis Rift: +2 Energy this turn (${t} left)`         },
+  energy:  { emoji: '⚡', color: '#4adfff', label: 'Energy Rift',  tip: (t) => `Energy Rift: +1 Energy each turn (${t} left)`          },
+  chaos:   { emoji: '⚡', color: '#ffd24a', label: 'Chaos Rift',   tip: (t) => `Chaos Rift: deals 3 to enemy each turn (${t} left)`    },
+};
+
+interface StatusStripProps {
+  effects: CombatState['playerStatusEffects'];
+  rifts?: CombatState['playerRifts'];
+  side: 'enemy' | 'player';
+  label?: string;
+}
+
+const StatusStrip: React.FC<StatusStripProps> = ({ effects, rifts = [], side, label }) => {
+  const empty = effects.length === 0 && rifts.length === 0;
+
+  const wrapperStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '5px 14px',
+    minHeight: 28,
+    background: side === 'enemy'
+      ? 'linear-gradient(180deg, rgba(60,16,28,0.32) 0%, rgba(10,10,22,0) 100%)'
+      : 'linear-gradient(0deg,  rgba(20,32,60,0.32) 0%, rgba(10,10,22,0) 100%)',
+    borderTop: side === 'enemy' ? 'none' : '1px solid #1a1a2e',
+    borderBottom: side === 'enemy' ? '1px solid #1a1a2e' : 'none',
+    flexShrink: 0,
+    flexWrap: 'wrap',
+    overflowX: 'auto',
   };
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: 8,
+    letterSpacing: '0.25em',
+    textTransform: 'uppercase',
+    color: side === 'enemy' ? '#cc7788' : '#88aacc',
+    opacity: 0.55,
+    flexShrink: 0,
+    minWidth: 50,
+  };
+
+  const chipBase = (color: string): React.CSSProperties => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
+    fontSize: 11,
+    fontWeight: 700,
+    padding: '3px 8px',
+    background: `${color}22`,
+    border: `1px solid ${color}88`,
+    borderRadius: 4,
+    color,
+    letterSpacing: '0.04em',
+    boxShadow: `0 0 6px ${color}44`,
+    whiteSpace: 'nowrap',
+    lineHeight: 1.2,
+  });
+
   return (
-    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-      {effects.map((e) => (
-        <span
-          key={e.type}
-          title={`${e.type} ×${e.stacks}`}
-          style={{
-            fontSize: 10,
-            padding: '2px 5px',
-            background: '#ffffff14',
-            borderRadius: 3,
-            letterSpacing: '0.04em',
-          }}
-        >
-          {ICONS[e.type] ?? '?'} {e.stacks}
-        </span>
-      ))}
+    <div style={wrapperStyle}>
+      <span style={labelStyle}>{label ?? (side === 'enemy' ? 'Enemy' : 'You')}</span>
+      {empty && (
+        <span style={{ fontSize: 10, color: '#555', fontStyle: 'italic' }}>—</span>
+      )}
+      {effects.map((e) => {
+        const meta = STATUS_META[e.type] ?? { emoji: '?', color: '#888', label: e.type };
+        return (
+          <span
+            key={e.type}
+            title={`${meta.label} ×${e.stacks}`}
+            style={chipBase(meta.color)}
+          >
+            <span style={{ fontSize: 13, lineHeight: 1 }}>{meta.emoji}</span>
+            <span>{meta.label}</span>
+            <span style={{ opacity: 0.7 }}>×{e.stacks}</span>
+          </span>
+        );
+      })}
+      {rifts.map((r, i) => {
+        const meta = RIFT_META[r.type];
+        if (!meta) return null;
+        return (
+          <span
+            key={`rift-${i}`}
+            title={meta.tip(r.turnsRemaining)}
+            style={chipBase(meta.color)}
+          >
+            <span style={{ fontSize: 13, lineHeight: 1 }}>{meta.emoji}</span>
+            <span>{meta.label}</span>
+            <span style={{ opacity: 0.7 }}>{r.turnsRemaining}t</span>
+          </span>
+        );
+      })}
     </div>
   );
 };
@@ -273,49 +364,9 @@ const HUDBar: React.FC<HUDProps> = ({ cs, onEndTurn, isEnemyTurn, shakeKey }) =>
         flexShrink: 0,
       }}
     >
-      {/* Status effects + active Rifts (left) */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'flex-start', minWidth: 0, gap: 3 }}>
-        <StatusBadges effects={cs.playerStatusEffects} />
-        {cs.playerRifts.length > 0 && (
-          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-            {cs.playerRifts.map((r, i) => {
-              const COLORS: Record<typeof r.type, string> = {
-                cost:    '#c27dff',
-                genesis: '#ff7acc',
-                energy:  '#4adfff',
-                chaos:   '#ffd24a',
-              };
-              const TIPS: Record<typeof r.type, string> = {
-                cost:    `Cost Rift: 1 random card costs -1 each turn (${r.turnsRemaining} left)`,
-                genesis: `Genesis Rift: +2 Energy this turn (${r.turnsRemaining} left)`,
-                energy:  `Energy Rift: +1 Energy each turn (${r.turnsRemaining} left)`,
-                chaos:   `Chaos Rift: deals 3 to enemy each turn (${r.turnsRemaining} left)`,
-              };
-              const c = COLORS[r.type];
-              return (
-                <span
-                  key={i}
-                  title={TIPS[r.type]}
-                  style={{
-                    fontSize: 9,
-                    fontWeight: 700,
-                    padding: '2px 6px',
-                    background: `${c}22`,
-                    border: `1px solid ${c}`,
-                    borderRadius: 3,
-                    color: c,
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.06em',
-                    boxShadow: `0 0 6px ${c}55`,
-                  }}
-                >
-                  ⚡ {r.type} · {r.turnsRemaining}
-                </span>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      {/* Spacer to balance the right-side controls; statuses live in the
+          dedicated strip above the player minion row. */}
+      <div style={{ flex: 1, minWidth: 0 }} />
 
       {/* HP block (center) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 140, alignItems: 'center' }}>
@@ -1038,8 +1089,14 @@ export const CombatView: React.FC = () => {
           onCardClick={handleEnemyMinionClick}
         />
 
+        {/* Enemy buff/debuff strip — above the combat log */}
+        <StatusStrip effects={cs.enemy.statusEffects} side="enemy" label={cs.enemy.name} />
+
         {/* Combat log sits in the center of the battlefield */}
         <CombatLog log={cs.combatLog} cardPool={[...cs.hand, ...cs.drawPile, ...cs.discardPile, ...cs.playerBoard]} />
+
+        {/* Player buff/debuff/rift strip — below the combat log */}
+        <StatusStrip effects={cs.playerStatusEffects} rifts={cs.playerRifts} side="player" />
 
         <BoardRow
           cards={cs.playerBoard}

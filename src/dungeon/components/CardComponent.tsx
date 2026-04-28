@@ -282,6 +282,31 @@ export const CardComponent: React.FC<CardComponentProps> = ({
         </div>
       )}
 
+      {/* Lumens — Luminar Channel cards */}
+      {card.lumens !== undefined && card.lumens > 0 && (
+        <div
+          title={`${card.lumens} Lumen${card.lumens === 1 ? '' : 's'} — released when this card is played`}
+          style={{
+            position: 'absolute',
+            top: compact ? 2 : 4,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            padding: compact ? '0 4px' : '1px 6px',
+            fontSize: compact ? 8 : 10,
+            fontWeight: 900,
+            letterSpacing: '0.06em',
+            color: '#ffe87a',
+            background: '#0a0a14',
+            border: '1px solid #ffe87a',
+            borderRadius: 3,
+            boxShadow: '0 0 8px #ffe87a99',
+            lineHeight: 1.2,
+          }}
+        >
+          ✨ {card.lumens}
+        </div>
+      )}
+
       {/* Summon badge — Cogsmiths drones/sentries/titans */}
       {card.summonAutoDamage !== undefined && (
         <div

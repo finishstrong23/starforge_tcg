@@ -57,6 +57,8 @@ export interface CardInstance extends CardDefinition {
   summonTurnsLeft?: number;
   /** Cogsmiths augment buffs attached to this card (display + bonus tags). */
   augments?: string[];
+  /** Luminar Channel cards: number of Lumens accumulated on this card. */
+  lumens?: number;
 }
 
 // ─── STATUS EFFECTS ─────────────────────────────────────────────────────────
