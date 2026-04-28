@@ -49,6 +49,14 @@ export interface CardInstance extends CardDefinition {
   hasAttacked?: boolean;
   statusEffects: StatusEffect[];
   fluxState?: 'A' | 'B' | 'C';    // WarpRiders Flux cards: which mode is active
+  /** Cogsmiths summons: auto-attack damage at end of player turn. */
+  summonAutoDamage?: number;
+  /** Cogsmiths summons: how many actions per turn (e.g. Titan = 2). */
+  summonActionsPerTurn?: number;
+  /** Cogsmiths summons: how many turns the summon persists. -1 = permanent. */
+  summonTurnsLeft?: number;
+  /** Cogsmiths augment buffs attached to this card (display + bonus tags). */
+  augments?: string[];
 }
 
 // ─── STATUS EFFECTS ─────────────────────────────────────────────────────────
