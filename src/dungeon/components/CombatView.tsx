@@ -7,6 +7,8 @@ import { pickRandomBackground } from '../assets/backgrounds';
 import { EnemyComponent } from './EnemyComponent';
 import { HandComponent } from './HandComponent';
 import { CardComponent } from './CardComponent';
+import { PotionInventory } from './PotionInventory';
+import { getPotionDef } from '../data/potions';
 
 const ENEMY_TURN_DELAY_MS = 1200;
 const ENEMY_ACTION_LINGER_MS = 900;
@@ -370,7 +372,14 @@ interface HUDProps {
  * potion-slot row underneath. Mirrors the "PLAYER" panel from the dungeon
  * mockups.
  */
-const PlayerHUD: React.FC<{ cs: CombatState; gold: number; shakeKey: number }> = ({ cs, gold, shakeKey }) => {
+const PlayerHUD: React.FC<{
+  cs: CombatState;
+  gold: number;
+  shakeKey: number;
+  potions: import('../types').PotionInstance[] | (import('../types').PotionInstance | null)[];
+  onDrinkPotion: (slotIndex: number) => void;
+  potionsDisabled: boolean;
+}> = ({ cs, gold, shakeKey, potions, onDrinkPotion, potionsDisabled }) => {
   const hpPct = Math.max(0, (cs.playerHealth / cs.playerMaxHealth) * 100);
   const hpColor = hpPct > 60 ? '#22cc44' : hpPct > 30 ? '#ffcc00' : '#ff4444';
 
@@ -434,6 +443,29 @@ const PlayerHUD: React.FC<{ cs: CombatState; gold: number; shakeKey: number }> =
           🛡 {cs.playerShield} Block
         </div>
       )}
+
+      {/* Potion inventory — 3 slots, always visible. Drinking is disabled
+          during enemy turns / combat-end. */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+        <span
+          style={{
+            fontSize: 7,
+            letterSpacing: '0.25em',
+            opacity: 0.45,
+            textTransform: 'uppercase',
+            color: '#aaa',
+            minWidth: 38,
+          }}
+        >
+          Potions
+        </span>
+        <PotionInventory
+          slots={potions}
+          onUse={onDrinkPotion}
+          disabled={potionsDisabled}
+          compact
+        />
+      </div>
 
       {/* Inline status icons row — keeps player buffs/debuffs visible without
           a full-width strip. */}
@@ -806,7 +838,7 @@ let _xSlot = 0;
 const nextX = () => `${X_SLOTS[_xSlot++ % X_SLOTS.length]}%`;
 
 export const CombatView: React.FC = () => {
-  const { runState, setCombatState } = useDungeonRun();
+  const { runState, setCombatState, usePotion } = useDungeonRun();
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [selectedMinionId, setSelectedMinionId] = useState<string | null>(null);
   const [enemyActing, setEnemyActing] = useState(false);
@@ -1041,6 +1073,27 @@ export const CombatView: React.FC = () => {
     const next = endPlayerTurn(cs, relics);
     setCombatState(next);
   }, [cs, relics, setCombatState]);
+
+  // ── Potion drinking ───────────────────────────────────────────────────
+  // Phase 2 minimum:
+  //   - Self-targeted potions drink immediately.
+  //   - Forgefire Flask defaults to the main enemy (full target picker in Phase 4).
+  //   - Lumen Infusion defaults to even-distribution (proper allocator in Phase 4).
+  // The reducer guards against drinking outside the player turn / mid-resolution.
+  const handleDrinkPotion = useCallback((slotIndex: number) => {
+    if (!runState) return;
+    const slot = runState.potions[slotIndex];
+    if (!slot) return;
+    const def = getPotionDef(slot.definitionId);
+    if (!def) return;
+
+    if (def.targeting === 'enemy') {
+      // Default to main enemy. Phase 4 will add a target-picker modal.
+      usePotion(slotIndex, { targetId: 'enemy' });
+    } else {
+      usePotion(slotIndex);
+    }
+  }, [runState, usePotion]);
 
   // Drive enemy turn with staged delay
   useEffect(() => {
@@ -1424,7 +1477,14 @@ export const CombatView: React.FC = () => {
       )}
 
       {/* ── Top-left: Player HUD ────────────────────────────────────── */}
-      <PlayerHUD cs={cs} gold={runState?.gold ?? 0} shakeKey={playerShakeKey} />
+      <PlayerHUD
+        cs={cs}
+        gold={runState?.gold ?? 0}
+        shakeKey={playerShakeKey}
+        potions={runState?.potions ?? [null, null, null]}
+        onDrinkPotion={handleDrinkPotion}
+        potionsDisabled={isEnemyTurn || isCombatOver}
+      />
 
       {/* ── Top-right: Utility buttons (combat log toggle) ─────────── */}
       <UtilityButtons logOpen={logOpen} onToggleLog={() => setLogOpen((v) => !v)} />

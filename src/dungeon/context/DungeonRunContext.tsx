@@ -4,6 +4,8 @@ import type {
   CardInstance,
   CombatState,
   Faction,
+  PotionContext,
+  PotionInstance,
   RelicDefinition,
   RunPhase,
   RunState,
@@ -12,6 +14,7 @@ import { getEnemiesByAct, getElitesByAct, getBossByAct } from '../data/enemies';
 import { generateActMap, visitNode } from '../engine/mapgen';
 import { createCardInstance, generateDraftOptions, getStarterCards } from '../engine/draft';
 import { initCombat } from '../engine/combat';
+import { applyPotion } from '../data/potions';
 import { applyRelicsToCombat, applyRelicsToRun } from '../engine/relicEffects';
 
 // ─── Context value ─────────────────────────────────────────────────────────────
@@ -43,6 +46,15 @@ export interface DungeonRunContextValue {
   endRun: (won: boolean) => void;
   /** Return to the map from a non-combat node (rest/shop/reward/treasure). */
   returnToMap: () => void;
+
+  // ── Potions ──────────────────────────────────────────────────────────
+  /** Add a potion to the first empty inventory slot, or a specific slot if given.
+   *  Caller must check if inventory is full (returns false in that case). */
+  addPotion: (potion: PotionInstance, slotIndex?: number) => boolean;
+  /** Drink the potion in `slotIndex` and clear the slot. No-op if empty / not in combat / not on player turn. */
+  usePotion: (slotIndex: number, ctx?: PotionContext) => void;
+  /** Discard the potion in `slotIndex` (used by the full-inventory pickup picker). */
+  discardPotion: (slotIndex: number) => void;
 }
 
 // ─── Reducer ───────────────────────────────────────────────────────────────────
@@ -72,7 +84,10 @@ type Action =
   | { type: 'SET_COMBAT'; state: CombatState | null }
   | { type: 'ADVANCE_ACT' }
   | { type: 'END_RUN'; won: boolean }
-  | { type: 'RETURN_TO_MAP' };
+  | { type: 'RETURN_TO_MAP' }
+  | { type: 'ADD_POTION'; potion: PotionInstance; slotIndex?: number }
+  | { type: 'DISCARD_POTION'; slotIndex: number }
+  | { type: 'USE_POTION'; slotIndex: number; ctx?: PotionContext };
 
 const INITIAL: ContextState = {
   run: null,
@@ -341,6 +356,47 @@ function reducer(state: ContextState, action: Action): ContextState {
       };
     }
 
+    // ── Potion inventory ──────────────────────────────────────────────────────
+    case 'ADD_POTION': {
+      if (!state.run) return state;
+      const slots = [...state.run.potions];
+      const target = action.slotIndex ?? slots.findIndex((p) => p === null);
+      if (target < 0 || target > 2) return state; // inventory full and no slot specified
+      slots[target] = action.potion;
+      return { ...state, run: { ...state.run, potions: slots } };
+    }
+    case 'DISCARD_POTION': {
+      if (!state.run) return state;
+      if (action.slotIndex < 0 || action.slotIndex > 2) return state;
+      const slots = [...state.run.potions];
+      slots[action.slotIndex] = null;
+      return { ...state, run: { ...state.run, potions: slots } };
+    }
+    case 'USE_POTION': {
+      if (!state.run) return state;
+      const cs = state.run.combatState;
+      if (!cs) return state;                // no combat → can't drink
+      if (cs.phase !== 'player_turn') return state;
+      if (action.slotIndex < 0 || action.slotIndex > 2) return state;
+
+      const potion = state.run.potions[action.slotIndex];
+      if (!potion) return state;            // slot empty
+
+      const result = applyPotion(cs, potion.definitionId, action.ctx);
+      if (!result.ok) return state;         // unknown potion id
+
+      const slots = [...state.run.potions];
+      slots[action.slotIndex] = null;
+      return {
+        ...state,
+        run: {
+          ...state.run,
+          potions: slots,
+          combatState: result.state,
+        },
+      };
+    }
+
     // ── Advance act ───────────────────────────────────────────────────────────
     case 'ADVANCE_ACT': {
       if (!state.run) return state;
@@ -441,6 +497,22 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     dispatch({ type: 'RETURN_TO_MAP' });
   }, []);
 
+  const addPotion = useCallback((potion: PotionInstance, slotIndex?: number) => {
+    const slots = s.run?.potions ?? [];
+    const empty = slots.findIndex((p) => p === null);
+    if (slotIndex === undefined && empty === -1) return false; // inventory full
+    dispatch({ type: 'ADD_POTION', potion, slotIndex });
+    return true;
+  }, [s.run?.potions]);
+
+  const usePotion = useCallback((slotIndex: number, ctx?: PotionContext) => {
+    dispatch({ type: 'USE_POTION', slotIndex, ctx });
+  }, []);
+
+  const discardPotion = useCallback((slotIndex: number) => {
+    dispatch({ type: 'DISCARD_POTION', slotIndex });
+  }, []);
+
   const value = useMemo<DungeonRunContextValue>(
     () => ({
       runState: s.run,
@@ -464,6 +536,9 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       advanceAct,
       endRun,
       returnToMap,
+      addPotion,
+      usePotion,
+      discardPotion,
     }),
     [
       s,
@@ -471,6 +546,7 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       addRelic, addGold, spendGold, healPlayer, damagePlayer,
       addCardToDeck, removeCardFromDeck, upgradeCard, setCombatState,
       advanceAct, endRun, returnToMap,
+      addPotion, usePotion, discardPotion,
     ],
   );
 
