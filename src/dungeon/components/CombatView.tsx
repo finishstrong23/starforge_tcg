@@ -1566,22 +1566,22 @@ export const CombatView: React.FC = () => {
         isEnemyTurn={isEnemyTurn || isCombatOver}
       />
 
-      {/* ── Combat log overlay (toggleable) ────────────────────────── */}
+      {/* ── Combat log overlay (toggleable) ────────────────────────────
+          NOTE: avoid `backdrop-filter` and `overflow: hidden` here. Either
+          one creates a CSS containing block that traps the tooltip's
+          `position: fixed` element inside this overlay, hiding the
+          card-name tooltips. CombatLog already has its own border / scroll
+          so we just need to position the panel. */}
       {logOpen && (
         <div
           style={{
             position: 'absolute',
             top: 60,
             right: 12,
-            width: 320,
-            maxHeight: 380,
+            width: 340,
             zIndex: 6,
-            background: 'rgba(8,8,20,0.92)',
-            border: '1px solid #2a2a4a',
-            borderRadius: 8,
             boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
-            overflow: 'hidden',
-            backdropFilter: 'blur(6px)',
+            borderRadius: 8,
           }}
         >
           <CombatLog log={cs.combatLog} cardPool={[...cs.hand, ...cs.drawPile, ...cs.discardPile, ...cs.playerBoard]} />

@@ -684,10 +684,14 @@ function applySpellEffect(
     s = log(s, `💪 Gained ${strMatch[1]} Strength`);
   }
 
-  // Gain Heat
-  const heatGainMatch = text.match(/gain (\d+) heat/);
+  // Gain Heat. Match three phrasings:
+  //   "Gain N Heat"        — Kindle, Ember Tap, Hot Wind, Spirit of Fire, etc.
+  //   "Generate N Heat"    — Spark (new starter)
+  //   "...and N Heat"      — Scale Guard upgrade ("Gain 7 Block and 1 Heat"),
+  //                          Heat Shimmer ("Gain 4 Block and 1 Heat"), etc.
+  const heatGainMatch = text.match(/(?:gain|generate) (\d+) heat|and (\d+) (?:more |extra )?heat/);
   if (heatGainMatch) {
-    const gained = parseInt(heatGainMatch[1]);
+    const gained = parseInt(heatGainMatch[1] ?? heatGainMatch[2]);
     s = { ...s, playerHeat: s.playerHeat + gained };
     s = log(s, `🔥 Gained ${gained} Heat (total: ${s.playerHeat})`);
   }
