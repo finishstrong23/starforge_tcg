@@ -358,103 +358,442 @@ const CombatLog: React.FC<{ log: string[]; cardPool: CardInstance[] }> = ({ log,
   );
 };
 
-// ─── HUD bar ─────────────────────────────────────────────────────────────────
+// ─── HUD corner panels (mockup-style) ────────────────────────────────────────
 
 interface HUDProps {
   cs: CombatState;
-  onEndTurn: () => void;
-  isEnemyTurn: boolean;
   shakeKey: number;
 }
 
-const HUDBar: React.FC<HUDProps> = ({ cs, onEndTurn, isEnemyTurn, shakeKey }) => {
+/**
+ * Top-left player card. Shows avatar circle, HP bar, gold count, and a small
+ * potion-slot row underneath. Mirrors the "PLAYER" panel from the dungeon
+ * mockups.
+ */
+const PlayerHUD: React.FC<{ cs: CombatState; gold: number; shakeKey: number }> = ({ cs, gold, shakeKey }) => {
   const hpPct = Math.max(0, (cs.playerHealth / cs.playerMaxHealth) * 100);
   const hpColor = hpPct > 60 ? '#22cc44' : hpPct > 30 ? '#ffcc00' : '#ff4444';
 
   return (
     <div
       style={{
+        position: 'absolute',
+        top: 12,
+        left: 12,
+        zIndex: 4,
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        flexDirection: 'column',
+        gap: 6,
+        background: 'linear-gradient(180deg, rgba(10,10,22,0.86) 0%, rgba(10,10,22,0.62) 100%)',
+        border: '1px solid #2a2a4a',
+        borderRadius: 10,
         padding: '8px 12px',
-        background: '#08081a',
-        borderTop: '1px solid #1a1a2e',
-        gap: 10,
-        flexShrink: 0,
+        minWidth: 180,
+        backdropFilter: 'blur(6px)',
       }}
     >
-      {/* Spacer to balance the right-side controls; statuses live in the
-          dedicated strip above the player minion row. */}
-      <div style={{ flex: 1, minWidth: 0 }} />
-
-      {/* HP block (center) */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 140, alignItems: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, color: '#aaa', width: '100%' }}>
-          <span>HP</span>
-          <span style={{ color: hpColor, fontWeight: 700 }}>
-            {cs.playerHealth}/{cs.playerMaxHealth}
-          </span>
-        </div>
-        {/* HP bar shakes when player takes damage */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div
-          key={`shake-${shakeKey}`}
           style={{
-            width: '100%',
-            height: 6,
-            background: '#1a1a2e',
-            borderRadius: 3,
-            overflow: 'hidden',
-            animation: shakeKey > 0 ? 'dungeonShake 320ms ease-out' : undefined,
+            width: 28,
+            height: 28,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #3a3a5a, #1a1a2e)',
+            border: '1px solid #5a5a7a',
+            flexShrink: 0,
           }}
-        >
-          <div style={{ width: `${hpPct}%`, height: '100%', background: hpColor, borderRadius: 3, transition: 'width 300ms' }} />
-        </div>
-        {cs.playerShield > 0 && (
-          <div style={{ fontSize: 10, color: '#3b8fff', fontWeight: 700, textShadow: '0 0 6px #3b8fff66' }}>
-            🛡 {cs.playerShield}
+        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0, flex: 1 }}>
+          <div style={{ fontSize: 9, letterSpacing: '0.18em', color: '#aaa', textTransform: 'uppercase' }}>
+            Player
           </div>
-        )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
+            <span style={{ color: hpColor, fontWeight: 700 }}>♥ {cs.playerHealth}/{cs.playerMaxHealth}</span>
+            <span style={{ color: '#ffcc00', fontWeight: 700 }}>● {gold}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Heat (Pyroclast) */}
+      {/* HP bar with shake on damage */}
+      <div
+        key={`hp-shake-${shakeKey}`}
+        style={{
+          width: '100%',
+          height: 5,
+          background: '#1a1a2e',
+          borderRadius: 3,
+          overflow: 'hidden',
+          animation: shakeKey > 0 ? 'dungeonShake 320ms ease-out' : undefined,
+        }}
+      >
+        <div style={{ width: `${hpPct}%`, height: '100%', background: hpColor, borderRadius: 3, transition: 'width 300ms' }} />
+      </div>
+
+      {cs.playerShield > 0 && (
+        <div style={{ fontSize: 10, color: '#3b8fff', fontWeight: 700, textShadow: '0 0 6px #3b8fff66' }}>
+          🛡 {cs.playerShield} Block
+        </div>
+      )}
+
+      {/* Inline status icons row — keeps player buffs/debuffs visible without
+          a full-width strip. */}
+      {(cs.playerStatusEffects.length > 0 || cs.playerRifts.length > 0 || cs.playerPowers.length > 0) && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
+          {cs.playerStatusEffects.map((e) => {
+            const meta = STATUS_META[e.type] ?? { emoji: '?', color: '#888', label: e.type };
+            return (
+              <span
+                key={e.type}
+                title={`${meta.label} ×${e.stacks}`}
+                style={{
+                  fontSize: 11,
+                  padding: '1px 4px',
+                  background: `${meta.color}22`,
+                  border: `1px solid ${meta.color}66`,
+                  borderRadius: 3,
+                  color: meta.color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                }}
+              >
+                {meta.emoji}
+                <span style={{ fontSize: 9 }}>{e.stacks}</span>
+              </span>
+            );
+          })}
+          {cs.playerRifts.map((r, i) => {
+            const m = RIFT_META[r.type];
+            return m ? (
+              <span
+                key={`rift-${i}`}
+                title={m.tip(r.turnsRemaining)}
+                style={{
+                  fontSize: 11,
+                  padding: '1px 4px',
+                  background: `${m.color}22`,
+                  border: `1px solid ${m.color}66`,
+                  borderRadius: 3,
+                  color: m.color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                }}
+              >
+                ⚡<span style={{ fontSize: 9 }}>{r.turnsRemaining}</span>
+              </span>
+            ) : null;
+          })}
+          {cs.playerPowers.map((p) => (
+            <span
+              key={`pwr-${p.instanceId}`}
+              title={`${p.name}: ${p.cardText}`}
+              style={{
+                fontSize: 11,
+                padding: '1px 4px',
+                background: '#ffaa4422',
+                border: '1px solid #ffaa4488',
+                borderRadius: 3,
+                color: '#ffaa44',
+              }}
+            >
+              ⚙
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+/**
+ * Top-right utility button row: combat log toggle and (placeholder) settings.
+ */
+const UtilityButtons: React.FC<{ logOpen: boolean; onToggleLog: () => void }> = ({ logOpen, onToggleLog }) => {
+  const baseStyle: React.CSSProperties = {
+    width: 38,
+    height: 38,
+    borderRadius: 8,
+    background: 'linear-gradient(180deg, rgba(10,10,22,0.86), rgba(10,10,22,0.62))',
+    border: '1px solid #2a2a4a',
+    color: '#ccc',
+    fontSize: 16,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backdropFilter: 'blur(6px)',
+    transition: 'border-color 100ms, color 100ms, background 100ms',
+  };
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        zIndex: 4,
+        display: 'flex',
+        gap: 6,
+      }}
+    >
+      <button
+        type="button"
+        onClick={onToggleLog}
+        title={logOpen ? 'Hide combat log' : 'Show combat log'}
+        style={{
+          ...baseStyle,
+          borderColor: logOpen ? '#c89b3c' : '#2a2a4a',
+          color: logOpen ? '#c89b3c' : '#ccc',
+        }}
+      >
+        ▤
+      </button>
+    </div>
+  );
+};
+
+/**
+ * Big hex/orb energy display in the bottom-left corner.
+ */
+const EnergyOrb: React.FC<{ current: number; max: number }> = ({ current, max }) => {
+  const color = '#3b8fff';
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: 18,
+        left: 18,
+        zIndex: 4,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 4,
+      }}
+    >
+      <div
+        style={{
+          width: 72,
+          height: 72,
+          clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+          background: `radial-gradient(circle at 50% 40%, ${color}55 0%, ${color}22 60%, transparent 100%)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          position: 'relative',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 3,
+            clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+            background: 'rgba(8,8,20,0.85)',
+            border: `2px solid ${color}`,
+            boxShadow: `0 0 18px ${color}88, inset 0 0 12px ${color}44`,
+          }}
+        />
+        <span style={{ position: 'relative', fontSize: 22, fontWeight: 900, color: '#fff', textShadow: `0 0 10px ${color}` }}>
+          {current}/{max}
+        </span>
+      </div>
+      <div style={{ fontSize: 9, letterSpacing: '0.25em', color: '#88aacc', textTransform: 'uppercase' }}>
+        Energy
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Bottom-right HUD: Heat (Pyroclast only), discard count, end turn button.
+ */
+const RightHUD: React.FC<{
+  cs: CombatState;
+  onEndTurn: () => void;
+  isEnemyTurn: boolean;
+}> = ({ cs, onEndTurn, isEnemyTurn }) => {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        bottom: 18,
+        right: 18,
+        zIndex: 4,
+        display: 'flex',
+        alignItems: 'flex-end',
+        gap: 10,
+      }}
+    >
       {cs.playerFaction === 'Pyroclast' && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-          <div style={{ fontSize: 8, opacity: 0.5, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Heat</div>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#ff6622', textShadow: '0 0 10px #ff662299', lineHeight: 1 }}>
+          <div style={{ fontSize: 8, opacity: 0.55, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#ff8866' }}>
+            Heat
+          </div>
+          <div
+            style={{
+              fontSize: 22,
+              fontWeight: 900,
+              color: '#ff6622',
+              textShadow: '0 0 12px #ff662299',
+              lineHeight: 1,
+              padding: '4px 8px',
+              background: 'rgba(8,8,20,0.7)',
+              border: '1px solid #ff662266',
+              borderRadius: 6,
+            }}
+          >
             🔥 {cs.playerHeat}
           </div>
         </div>
       )}
 
-      {/* Energy + End turn (right) */}
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-          <div style={{ fontSize: 8, opacity: 0.4, letterSpacing: '0.15em', textTransform: 'uppercase' }}>Energy</div>
-          <EnergyPips current={cs.playerEnergy} max={cs.playerMaxEnergy} />
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+        <div style={{ fontSize: 8, opacity: 0.55, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#aaa' }}>
+          Discard
         </div>
-
-        <button
-          type="button"
-          onClick={onEndTurn}
-          disabled={isEnemyTurn}
+        <div
           style={{
-            padding: '7px 14px',
-            background: isEnemyTurn ? 'transparent' : 'linear-gradient(180deg, #ffcc00, #cc9900)',
-            color: isEnemyTurn ? '#555' : '#0a0a12',
-            border: isEnemyTurn ? '1px solid #2a2a3a' : '1px solid #ffcc00',
-            borderRadius: 4,
-            fontWeight: 700,
-            fontSize: 10,
-            letterSpacing: '0.12em',
-            cursor: isEnemyTurn ? 'default' : 'pointer',
-            textTransform: 'uppercase',
-            flexShrink: 0,
+            fontSize: 18,
+            fontWeight: 800,
+            color: '#c89b3c',
+            padding: '4px 10px',
+            background: 'rgba(8,8,20,0.7)',
+            border: '1px solid #c89b3c66',
+            borderRadius: 6,
+            minWidth: 36,
+            textAlign: 'center',
           }}
         >
-          {isEnemyTurn ? 'Enemy Turn' : 'End Turn'}
-        </button>
+          {cs.discardPile.length}
+        </div>
       </div>
+
+      <button
+        type="button"
+        onClick={onEndTurn}
+        disabled={isEnemyTurn}
+        style={{
+          padding: '12px 22px',
+          background: isEnemyTurn
+            ? 'rgba(20,20,30,0.7)'
+            : 'linear-gradient(180deg, #ffd24a 0%, #c89b3c 100%)',
+          color: isEnemyTurn ? '#666' : '#0a0a12',
+          border: isEnemyTurn ? '1px solid #2a2a3a' : '1px solid #ffe18a',
+          borderRadius: 6,
+          fontWeight: 800,
+          fontSize: 11,
+          letterSpacing: '0.18em',
+          cursor: isEnemyTurn ? 'default' : 'pointer',
+          textTransform: 'uppercase',
+          flexShrink: 0,
+          boxShadow: isEnemyTurn ? 'none' : '0 0 16px rgba(255,210,74,0.4)',
+        }}
+      >
+        {isEnemyTurn ? 'Enemy Turn' : 'End Turn'}
+      </button>
+    </div>
+  );
+};
+
+/**
+ * Vertical relic column on the left side of the screen, mockup-style.
+ * Replaces the existing horizontal RelicBar overlay during combat.
+ */
+const VerticalRelicColumn: React.FC<{ relics: import('../types').RelicDefinition[]; drawCount: number; deckTotal: number }> = ({ relics, drawCount, deckTotal }) => {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [hoverPos, setHoverPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  if (relics.length === 0 && drawCount === 0) return null;
+
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: '32%',
+        left: 12,
+        zIndex: 4,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 6,
+        padding: '8px 6px',
+        background: 'linear-gradient(180deg, rgba(10,10,22,0.78), rgba(10,10,22,0.52))',
+        border: '1px solid #2a2a4a',
+        borderRadius: 10,
+        backdropFilter: 'blur(6px)',
+      }}
+    >
+      {relics.length > 0 && (
+        <div style={{ fontSize: 7, letterSpacing: '0.25em', color: '#aaa', textTransform: 'uppercase' }}>
+          Relics
+        </div>
+      )}
+      {relics.map((relic) => (
+        <div
+          key={relic.id}
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: 6,
+            background: hoveredId === relic.id ? '#1e1e3a' : '#12121e',
+            border: hoveredId === relic.id ? '1px solid #5a5a7a' : '1px solid #2a2a3a',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 16,
+            cursor: 'default',
+          }}
+          onMouseEnter={(e) => {
+            setHoveredId(relic.id);
+            const r = e.currentTarget.getBoundingClientRect();
+            setHoverPos({ x: r.right + 6, y: r.top });
+          }}
+          onMouseLeave={() => setHoveredId(null)}
+        >
+          {relic.art}
+        </div>
+      ))}
+
+      {/* Deck count below relics */}
+      <div
+        style={{
+          marginTop: 4,
+          fontSize: 14,
+          color: '#88aacc',
+          fontWeight: 700,
+          textAlign: 'center',
+          lineHeight: 1.1,
+        }}
+      >
+        🂠
+        <div style={{ fontSize: 10, color: '#aaa' }}>{drawCount}/{deckTotal}</div>
+      </div>
+
+      {hoveredId && (() => {
+        const r = relics.find((x) => x.id === hoveredId)!;
+        return (
+          <div
+            style={{
+              position: 'fixed',
+              left: hoverPos.x,
+              top: hoverPos.y,
+              width: 200,
+              padding: '8px 10px',
+              background: '#0d0d1e',
+              border: '1px solid #3a3a5a',
+              borderRadius: 6,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.7)',
+              zIndex: 50,
+              pointerEvents: 'none',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+              <span style={{ fontSize: 18 }}>{r.art}</span>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#eee' }}>{r.name}</div>
+            </div>
+            <div style={{ fontSize: 9, color: '#ccc', lineHeight: 1.4, marginBottom: 4 }}>{r.description}</div>
+            <div style={{ fontSize: 8, fontStyle: 'italic', color: '#888' }}>"{r.flavor}"</div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
@@ -471,6 +810,9 @@ export const CombatView: React.FC = () => {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [selectedMinionId, setSelectedMinionId] = useState<string | null>(null);
   const [enemyActing, setEnemyActing] = useState(false);
+  // Combat log is hidden by default (clean center view); toggled via the
+  // top-right button to keep the mockup-style layout uncluttered.
+  const [logOpen, setLogOpen] = useState(false);
 
   // ── Floating numbers + flash state ─────────────────────────────────────────
   const [floatNums, setFloatNums] = useState<FloatNum[]>([]);
@@ -1081,24 +1423,52 @@ export const CombatView: React.FC = () => {
         </div>
       )}
 
-      {/* ── Enemy section ── */}
-      <div style={s.enemySection}>
-        {/* Red flash on enemy damage */}
+      {/* ── Top-left: Player HUD ────────────────────────────────────── */}
+      <PlayerHUD cs={cs} gold={runState?.gold ?? 0} shakeKey={playerShakeKey} />
+
+      {/* ── Top-right: Utility buttons (combat log toggle) ─────────── */}
+      <UtilityButtons logOpen={logOpen} onToggleLog={() => setLogOpen((v) => !v)} />
+
+      {/* ── Left: Vertical relic + deck column ─────────────────────── */}
+      <VerticalRelicColumn
+        relics={runState?.relics ?? []}
+        drawCount={cs.drawPile.length}
+        deckTotal={runState?.deck.length ?? 0}
+      />
+
+      {/* ── Center: Enemy area (transparent so background art shows) ─ */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          paddingTop: 80,
+          gap: 16,
+          minHeight: 0,
+          position: 'relative',
+        }}
+      >
+        {/* Red flash overlay on enemy damage */}
         {enemyFlashKey > 0 && (
           <div
             key={`ef-${enemyFlashKey}`}
             style={{
               position: 'absolute',
-              inset: 0,
-              background: 'rgba(255,40,60,0.30)',
+              top: 60,
+              left: '20%',
+              right: '20%',
+              height: 260,
+              background: 'radial-gradient(ellipse at center, rgba(255,40,60,0.40) 0%, rgba(255,40,60,0) 75%)',
               pointerEvents: 'none',
               zIndex: 3,
               animation: 'dungeonDmgFlash 500ms ease-out forwards',
             }}
           />
         )}
-        {/* Enemy "lunge" — re-keyed on every player damage event so the enemy
-            visibly dives toward the player instead of just flashing the screen */}
+
+        {/* Enemy + intent. Lunges down on player-damage events. */}
         <div
           key={`lunge-${playerFlashKey}`}
           style={{
@@ -1114,36 +1484,30 @@ export const CombatView: React.FC = () => {
             onClick={canTargetEnemy ? handleEnemyClick : undefined}
           />
         </div>
+
+        {/* Enemy minions row, shown only if any */}
+        {cs.enemyBoard.length > 0 && (
+          <BoardRow
+            cards={cs.enemyBoard}
+            label="Enemy Minions"
+            selectedId={null}
+            targetableIds={targetableEnemyMinionIds}
+            onCardClick={handleEnemyMinionClick}
+          />
+        )}
+
+        {/* Player minions row, shown only if any */}
+        {cs.playerBoard.length > 0 && (
+          <BoardRow
+            cards={cs.playerBoard}
+            label="Your Minions"
+            selectedId={selectedMinionId}
+            onCardClick={handlePlayerMinionClick}
+          />
+        )}
       </div>
 
-      {/* ── Board section ── */}
-      <div style={s.boardSection}>
-        <BoardRow
-          cards={cs.enemyBoard}
-          label="Enemy Minions"
-          selectedId={null}
-          targetableIds={targetableEnemyMinionIds}
-          onCardClick={handleEnemyMinionClick}
-        />
-
-        {/* Enemy buff/debuff strip — above the combat log */}
-        <StatusStrip effects={cs.enemy.statusEffects} side="enemy" label={cs.enemy.name} />
-
-        {/* Combat log sits in the center of the battlefield */}
-        <CombatLog log={cs.combatLog} cardPool={[...cs.hand, ...cs.drawPile, ...cs.discardPile, ...cs.playerBoard]} />
-
-        {/* Player buff/debuff/rift/power strip — below the combat log */}
-        <StatusStrip effects={cs.playerStatusEffects} rifts={cs.playerRifts} powers={cs.playerPowers} side="player" />
-
-        <BoardRow
-          cards={cs.playerBoard}
-          label="Your Minions"
-          selectedId={selectedMinionId}
-          onCardClick={handlePlayerMinionClick}
-        />
-      </div>
-
-      {/* Full-screen red vignette on player damage (sits at screen edges) */}
+      {/* Full-screen red vignette on player damage */}
       {playerFlashKey > 0 && (
         <div
           key={`pf-${playerFlashKey}`}
@@ -1173,26 +1537,56 @@ export const CombatView: React.FC = () => {
         />
       )}
 
-      {/* ── Hand (always visible — held during enemy turn) ── */}
-      <div style={s.handSection}>
+      {/* ── Bottom-center: Hand. Sits between the energy orb and the right HUD. */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 14,
+          left: 110,    // clear the energy orb
+          right: 220,   // clear the right HUD (heat + discard + end turn)
+          zIndex: 4,
+        }}
+      >
         <HandComponent
           hand={cs.hand}
           energy={cs.playerEnergy}
           selectedId={selectedCardId}
           onCardSelect={handleCardSelect}
           disabled={isEnemyTurn || isCombatOver}
-          drawCount={cs.drawPile.length}
-          discardCount={cs.discardPile.length}
         />
       </div>
 
-      {/* ── HUD ── */}
-      <HUDBar
+      {/* ── Bottom-left: Energy orb ────────────────────────────────── */}
+      <EnergyOrb current={cs.playerEnergy} max={cs.playerMaxEnergy} />
+
+      {/* ── Bottom-right: Heat + Discard + End Turn ────────────────── */}
+      <RightHUD
         cs={cs}
         onEndTurn={handleEndTurn}
         isEnemyTurn={isEnemyTurn || isCombatOver}
-        shakeKey={playerShakeKey}
       />
+
+      {/* ── Combat log overlay (toggleable) ────────────────────────── */}
+      {logOpen && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 60,
+            right: 12,
+            width: 320,
+            maxHeight: 380,
+            zIndex: 6,
+            background: 'rgba(8,8,20,0.92)',
+            border: '1px solid #2a2a4a',
+            borderRadius: 8,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.7)',
+            overflow: 'hidden',
+            backdropFilter: 'blur(6px)',
+          }}
+        >
+          <CombatLog log={cs.combatLog} cardPool={[...cs.hand, ...cs.drawPile, ...cs.discardPile, ...cs.playerBoard]} />
+        </div>
+      )}
     </div>
   );
 };
