@@ -101,6 +101,7 @@ function makeRunState(faction: Faction, seed: string): RunState {
     energy: 3,
     maxEnergy: 3,
     combatState: null,
+    potions: [null, null, null],
     runStats: {
       totalCombats: 0,
       elitesDefeated: 0,
