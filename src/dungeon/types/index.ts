@@ -67,6 +67,7 @@ export type StatusEffectType =
   | 'burn'
   | 'shield'
   | 'strength'
+  | 'dexterity'
   | 'weak'
   | 'vulnerable'
   | 'barrier'
@@ -198,6 +199,59 @@ export interface CombatState {
   playerRifts: Rift[];
   /** Persistent Power cards in effect for the rest of combat. */
   playerPowers: CardInstance[];
+  /** Cards permanently removed for the rest of combat (Phoenix Vial, Exhaust keyword). */
+  exhaustPile: CardInstance[];
+  /** Set by Chronoshift Philter — short-circuits the next enemy turn entirely. */
+  skipNextEnemyTurn?: boolean;
+  /** Block grants queued for the start of the next player turn (Aegis Mixture). */
+  pendingTurnStartBlock?: number;
+}
+
+// ─── POTIONS ─────────────────────────────────────────────────────────────────
+
+export type PotionRarity = 'common' | 'uncommon' | 'rare';
+export type PotionId = string;
+
+/**
+ * How a potion needs to be resolved by the UI before its onUse can run.
+ *   - 'self'             → drink resolves immediately
+ *   - 'enemy'            → player must click an enemy first
+ *   - 'lumen-allocation' → if Channel cards are in hand, prompt distribution; otherwise self
+ */
+export type PotionTargeting = 'self' | 'enemy' | 'lumen-allocation';
+
+export type PotionCategory =
+  | 'Defense'
+  | 'Tempo'
+  | 'Damage'
+  | 'Buff'
+  | 'Debuff'
+  | 'Utility'
+  | 'Recovery'
+  | 'Extreme';
+
+export interface PotionContext {
+  /** For target-required potions (Forgefire Flask). 'enemy' = main enemy, otherwise an enemy minion instanceId. */
+  targetId?: string;
+  /** For Lumen Infusion: { cardInstanceId → lumens to add } (must sum to 3). */
+  lumenAllocation?: Record<string, number>;
+}
+
+export interface PotionDefinition {
+  id: PotionId;
+  name: string;
+  rarity: PotionRarity;
+  category: PotionCategory;
+  /** One-sentence tooltip description. */
+  effect: string;
+  flavorText: string;
+  targeting: PotionTargeting;
+  /** Pure functional effect: returns the new combat state. */
+  onUse: (state: CombatState, ctx?: PotionContext) => CombatState;
+}
+
+export interface PotionInstance {
+  definitionId: PotionId;
 }
 
 // ─── RUN STATE ───────────────────────────────────────────────────────────────
@@ -226,6 +280,8 @@ export interface RunState {
   energy: number;
   maxEnergy: number;
   combatState: CombatState | null;
+  /** 3-slot potion inventory. Nulls are empty slots. Persists across combats. */
+  potions: (PotionInstance | null)[];
   runStats: {
     totalCombats: number;
     elitesDefeated: number;

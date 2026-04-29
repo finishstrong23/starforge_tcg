@@ -18,11 +18,24 @@ function isFluxCard(card: CardInstance): boolean {
   return /^\s*flux\./i.test(card.cardText);
 }
 
+// ─── Block / Dexterity helper ────────────────────────────────────────────────
+
+/**
+ * Player gains block. Auto-adds the player's Dexterity stack count to every
+ * block grant (STS-style). All player-source block routes through this so
+ * Dexterity scales them uniformly.
+ */
+export function gainBlock(state: CombatState, amount: number): CombatState {
+  if (amount <= 0) return state;
+  const dex = getStack(state.playerStatusEffects, 'dexterity');
+  return { ...state, playerShield: state.playerShield + amount + dex };
+}
+
 /**
  * Luminar Channel card: has the ILLUMINATE keyword AND its text starts with
  * (or contains the word) "Channel.". Lumen generators target these cards in hand.
  */
-function isChannelCard(card: CardInstance): boolean {
+export function isChannelCard(card: CardInstance): boolean {
   return card.keywords.includes('ILLUMINATE') && /(^|\s)channel\./i.test(card.cardText);
 }
 
@@ -86,7 +99,7 @@ export function getStack(effects: StatusEffect[], type: StatusEffectType): numbe
   return effects.find((e) => e.type === type)?.stacks ?? 0;
 }
 
-function addEffect(effects: StatusEffect[], type: StatusEffectType, stacks: number, duration?: number): StatusEffect[] {
+export function addEffect(effects: StatusEffect[], type: StatusEffectType, stacks: number, duration?: number): StatusEffect[] {
   const existing = effects.find((e) => e.type === type);
   if (existing) {
     return effects.map((e) => e.type === type ? { ...e, stacks: e.stacks + stacks } : e);
@@ -119,7 +132,7 @@ function calcDamage(base: number, attackerEffects: StatusEffect[], defenderEffec
 }
 
 // Apply damage to a target. targetId: 'player' | 'enemy' | cardInstanceId
-function applyShieldedDamage(shield: number, health: number, damage: number): { health: number; shield: number } {
+export function applyShieldedDamage(shield: number, health: number, damage: number): { health: number; shield: number } {
   const shieldAbsorb = Math.min(shield, damage);
   const remainder = damage - shieldAbsorb;
   return {
@@ -167,6 +180,9 @@ export function initCombat(
     combatLog: ['⚔️ Combat begins!'],
     playerRifts: [],
     playerPowers: [],
+    exhaustPile: [],
+    skipNextEnemyTurn: false,
+    pendingTurnStartBlock: 0,
   };
   return drawCards(state, 5);
 }
@@ -340,7 +356,7 @@ export function playCard(
       if (releaseBlock) {
         const perLumen = parseInt(releaseBlock[1]);
         const bonus = perLumen * lumens;
-        s = { ...s, playerShield: s.playerShield + bonus };
+        s = gainBlock(s, bonus);
         s = log(s, `✨ Release: +${bonus} Block from ${lumens} Lumen${lumens === 1 ? '' : 's'}`);
       }
       if (releaseWeak) {
@@ -467,7 +483,7 @@ function applySpellEffect(
   // Shield / block
   const shieldMatch = text.match(/gain (\d+) (?:shield|block)/);
   if (shieldMatch) {
-    s = { ...s, playerShield: s.playerShield + parseInt(shieldMatch[1]) };
+    s = gainBlock(s, parseInt(shieldMatch[1]));
     s = log(s, `🛡 Gained ${shieldMatch[1]} Shield`);
   }
 
@@ -925,6 +941,24 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
 
 export function executeEnemyTurn(state: CombatState): CombatState {
   let s: CombatState = { ...state };
+
+  // Chronoshift Philter: short-circuit. Enemy doesn't act this turn; their
+  // intent stays the same so the player still sees what's coming next.
+  if (s.skipNextEnemyTurn) {
+    s = log(s, `⏳ Time freezes — ${s.enemy.name} loses a turn`);
+    s = { ...s, skipNextEnemyTurn: false, phase: 'player_turn' };
+    s = { ...s, playerShield: 0, discardPile: [...s.discardPile, ...s.hand], hand: [] };
+    s = drawCards(s, 5);
+    s = applyRiftStartOfTurn(s);
+    if ((s.pendingTurnStartBlock ?? 0) > 0) {
+      const queued = s.pendingTurnStartBlock!;
+      s = gainBlock(s, queued);
+      s = log(s, `🛡 Aegis residue grants ${queued} Block`);
+      s = { ...s, pendingTurnStartBlock: 0 };
+    }
+    return s;
+  }
+
   const { enemy } = s;
   const intent = enemy.intents[enemy.intentIndex % enemy.intents.length];
 
@@ -1007,6 +1041,14 @@ export function executeEnemyTurn(state: CombatState): CombatState {
     };
     s = drawCards(s, 5);
     s = applyRiftStartOfTurn(s);
+
+    // Aegis Mixture residue: queued block for the start of next turn.
+    if ((s.pendingTurnStartBlock ?? 0) > 0) {
+      const queued = s.pendingTurnStartBlock!;
+      s = gainBlock(s, queued);
+      s = log(s, `🛡 Aegis residue grants ${queued} Block`);
+      s = { ...s, pendingTurnStartBlock: 0 };
+    }
 
     // Active Powers fire their "at start of turn" segments.
     for (const power of s.playerPowers) {
@@ -1127,4 +1169,5 @@ export function checkCombatEnd(state: CombatState): CombatState {
 }
 
 // Export helpers for tests / relics
-export { addEffect, removeEffect, getStack as getStatusStack, uid as generateId, clamp };
+// addEffect is exported inline at its declaration; export the rest here.
+export { removeEffect, getStack as getStatusStack, uid as generateId, clamp };
