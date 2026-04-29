@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CardDefinition, CardInstance, CombatState } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { playCard, attackWithMinion, endPlayerTurn, executeEnemyTurn, getCardChoice, applyAugment } from '../engine/combat';
 import { CARD_POOL } from '../data/cards';
+import { pickRandomBackground } from '../assets/backgrounds';
 import { EnemyComponent } from './EnemyComponent';
 import { HandComponent } from './HandComponent';
 import { CardComponent } from './CardComponent';
@@ -484,6 +485,13 @@ export const CombatView: React.FC = () => {
   const prevEnemyShield  = useRef<number | null>(null);
 
   const cs = runState?.combatState;
+
+  // Pick a stable random background per encounter, seeded by enemy ID so the
+  // same fight always shows the same scene (and re-renders don't flicker).
+  const bgUrl = useMemo(
+    () => pickRandomBackground(cs?.enemy.id ?? 'default'),
+    [cs?.enemy.id],
+  );
   const relics = runState?.relics ?? [];
 
   // Spawn a floating number and auto-remove after animation
@@ -734,7 +742,17 @@ export const CombatView: React.FC = () => {
       display: 'flex',
       flexDirection: 'column',
       height: '100vh',
-      background: 'radial-gradient(ellipse at 50% 0%, #1a1830 0%, #0a0a18 45%, #050510 100%)',
+      // Layered background: a dark vertical gradient + the encounter art (if any).
+      // Gradient is stronger at the top and bottom so combat-log + HUD text stay legible.
+      backgroundImage: bgUrl
+        ? [
+            'linear-gradient(180deg, rgba(5,5,16,0.85) 0%, rgba(5,5,16,0.45) 35%, rgba(5,5,16,0.45) 65%, rgba(5,5,16,0.92) 100%)',
+            `url("${bgUrl}")`,
+          ].join(', ')
+        : 'radial-gradient(ellipse at 50% 0%, #1a1830 0%, #0a0a18 45%, #050510 100%)',
+      backgroundSize: bgUrl ? 'cover, cover' : 'auto',
+      backgroundPosition: bgUrl ? 'center, center' : 'center',
+      backgroundRepeat: 'no-repeat',
       color: '#f0f0f8',
       overflow: 'hidden',
       userSelect: 'none',
