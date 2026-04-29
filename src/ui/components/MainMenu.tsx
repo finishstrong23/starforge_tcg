@@ -1,10 +1,14 @@
 /**
- * STARFORGE TCG - Main Menu Component
+ * STARFORGE TCG — Main Menu
  *
- * Clean Hearthstone-inspired layout:
- * - Central play area with mode selection
- * - Bottom navigation bar for collection/shop/progression
- * - Minimal, elegant, not cluttered
+ * Trimmed to two modes only:
+ *   1. 1v1 Match — standard Hearthstone / MTG-style versus AI (race + difficulty)
+ *   2. Dungeon Run — STS2-style roguelite mode
+ *
+ * Logo and background preserved. All other modes (story, puzzles, co-op,
+ * collection, shop, crafting, battle pass, achievements, ladder, replays,
+ * meta, stats, daily quests, settings, tutorial, play-vs-friend) are
+ * removed from the landing page per design.
  */
 
 import React, { useState } from 'react';
@@ -16,10 +20,15 @@ import { SpaceBackground } from './SpaceBackground';
 
 interface MainMenuProps {
   onStartGame: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
+  onDungeonRun?: () => void;
+  onDeckbuilder?: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
+
+  // ── Deprecated props ───────────────────────────────────────────────────
+  // These are kept for prop-interface compatibility with App.tsx but are no
+  // longer rendered on the landing page.
   onPlayFriend?: () => void;
   onBalanceTest?: () => void;
   onCampaign?: () => void;
-  onDeckbuilder?: (playerRace: Race, aiDifficulty: AIDifficulty) => void;
   onTutorial?: () => void;
   onSettings?: () => void;
   onStats?: () => void;
@@ -34,38 +43,32 @@ interface MainMenuProps {
   onLeaderboard?: () => void;
   onMetaDashboard?: () => void;
   onSpectate?: () => void;
-  onDungeonRun?: () => void;
   onCoopDungeon?: () => void;
   onPuzzles?: () => void;
 }
 
 type MenuView = 'main' | 'play';
 
-export const MainMenu: React.FC<MainMenuProps> = (props) => {
-  const {
-    onStartGame, onPlayFriend, onBalanceTest, onCampaign, onDeckbuilder,
-    onTutorial, onSettings, onStats, onCollection, onCrafting,
-    onBattlePass, onPacks, onAchievements, onDaily,
-    onTournament, onReplays, onLeaderboard, onMetaDashboard, onSpectate,
-    onDungeonRun, onCoopDungeon, onPuzzles,
-  } = props;
-
+export const MainMenu: React.FC<MainMenuProps> = ({
+  onStartGame,
+  onDungeonRun,
+  onDeckbuilder,
+}) => {
   const [view, setView] = useState<MenuView>('main');
   const [selectedRace, setSelectedRace] = useState<Race>(Race.PYROCLAST);
   const [selectedDifficulty, setSelectedDifficulty] = useState<AIDifficulty>(AIDifficulty.MEDIUM);
-
 
   const availableRaces = [
     Race.PYROCLAST, Race.COGSMITHS, Race.LUMINAR, Race.WARP_RIDERS,
   ];
 
   const difficulties = [
-    { value: AIDifficulty.EASY, label: 'Easy' },
+    { value: AIDifficulty.EASY,   label: 'Easy'   },
     { value: AIDifficulty.MEDIUM, label: 'Medium' },
-    { value: AIDifficulty.HARD, label: 'Hard' },
+    { value: AIDifficulty.HARD,   label: 'Hard'   },
   ];
 
-  // ── Play Mode Selection ──
+  // ── 1v1 Match: race + difficulty selection ──
   if (view === 'play') {
     return (
       <div style={s.container}>
@@ -73,7 +76,6 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
         <div style={s.playView}>
           <h2 style={s.playTitle}>Select Race & Difficulty</h2>
 
-          {/* Race Grid */}
           <div style={s.raceGrid}>
             {availableRaces.map((race) => {
               const info = RaceData[race];
@@ -92,13 +94,14 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
                   <div style={{ color: sel ? '#00ff88' : '#ddd', fontWeight: 'bold', fontSize: '14px' }}>
                     {info.name}
                   </div>
-                  <div style={{ color: sel ? '#aaffcc' : '#aaa', fontSize: '11px' }}>{info.playstyle}</div>
+                  <div style={{ color: sel ? '#aaffcc' : '#aaa', fontSize: '11px' }}>
+                    {info.playstyle}
+                  </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Difficulty */}
           <div style={s.diffRow}>
             {difficulties.map((d) => (
               <button
@@ -115,13 +118,19 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
             ))}
           </div>
 
-          {/* Action Buttons */}
           <div style={s.playActions}>
-            <button data-testid="quick-play-button" style={s.goBtn} onClick={() => { hapticTap(); onStartGame(selectedRace, selectedDifficulty); }}>
+            <button
+              data-testid="quick-play-button"
+              style={s.goBtn}
+              onClick={() => { hapticTap(); onStartGame(selectedRace, selectedDifficulty); }}
+            >
               Quick Play
             </button>
             {onDeckbuilder && (
-              <button style={s.buildBtn} onClick={() => { hapticTap(); onDeckbuilder(selectedRace, selectedDifficulty); }}>
+              <button
+                style={s.buildBtn}
+                onClick={() => { hapticTap(); onDeckbuilder(selectedRace, selectedDifficulty); }}
+              >
                 Build Deck & Play
               </button>
             )}
@@ -135,131 +144,36 @@ export const MainMenu: React.FC<MainMenuProps> = (props) => {
     );
   }
 
-  // ── Main View ──
+  // ── Main view: just the logo and the two mode buttons ──
   return (
     <div style={s.container}>
-      {/* Animated space background */}
       <SpaceBackground />
 
-      {/* Top bar: settings & info */}
-      <div style={s.topBar}>
-        {onDaily && <button style={s.topBtn} onClick={onDaily}>Quests</button>}
-        {onSettings && <button style={s.topBtn} onClick={onSettings}>Settings</button>}
-        {onTutorial && <button style={s.topBtn} onClick={onTutorial}>How to Play</button>}
-      </div>
-
-      {/* Center: Logo + Play Modes */}
       <div style={s.center}>
-        {/* Logo — wide across the top */}
         <div style={s.logoArea}>
           <StarforgeLogo width="100%" />
         </div>
 
-        {/* Primary Play Buttons - vertical stack */}
         <div style={s.modeStack}>
-          {onCampaign && (
-            <button style={s.modeBtn} onClick={() => { hapticTap(); onCampaign(); }}>
-              <span style={s.modeBtnIcon}>&#x2694;</span>
-              <span style={s.modeBtnLabel}>Story Mode</span>
-            </button>
-          )}
-          <button data-testid="menu-quick-play" style={{ ...s.modeBtn, ...s.modeBtnAlt }} onClick={() => { hapticTap(); setView('play'); }}>
+          <button
+            data-testid="menu-quick-play"
+            style={{ ...s.modeBtn, ...s.modeBtnVersus }}
+            onClick={() => { hapticTap(); setView('play'); }}
+          >
             <span style={s.modeBtnIcon}>&#x269B;</span>
-            <span style={s.modeBtnLabel}>Quick Play</span>
+            <span style={s.modeBtnLabel}>1v1 Match</span>
           </button>
-          {onPlayFriend && (
-            <button style={{ ...s.modeBtn, ...s.modeBtnFriend }} onClick={() => { hapticTap(); onPlayFriend(); }}>
-              <span style={s.modeBtnIcon}>&#x2699;</span>
-              <span style={s.modeBtnLabel}>Play vs Friend</span>
-            </button>
-          )}
-        </div>
 
-        {/* Game Modes Row */}
-        <div style={s.modesRow}>
           {onDungeonRun && (
-            <button style={s.modeChip} onClick={() => { hapticTap(); onDungeonRun(); }}>
-              <span style={s.modeChipIcon}>&#x1F3F0;</span>
-              <span>Dungeon</span>
-            </button>
-          )}
-          {onCoopDungeon && (
-            <button style={s.modeChip} onClick={() => { hapticTap(); onCoopDungeon(); }}>
-              <span style={s.modeChipIcon}>&#x1F91D;</span>
-              <span>Co-op</span>
-            </button>
-          )}
-          {onPuzzles && (
-            <button style={s.modeChip} onClick={() => { hapticTap(); onPuzzles(); }}>
-              <span style={s.modeChipIcon}>&#x1F9E9;</span>
-              <span>Puzzles</span>
+            <button
+              style={{ ...s.modeBtn, ...s.modeBtnDungeon }}
+              onClick={() => { hapticTap(); onDungeonRun(); }}
+            >
+              <span style={s.modeBtnIcon}>&#x1F3F0;</span>
+              <span style={s.modeBtnLabel}>Dungeon Run</span>
             </button>
           )}
         </div>
-      </div>
-
-      {/* Bottom Nav Bar */}
-      <div style={s.bottomBar}>
-        {onCollection && (
-          <button style={s.navBtn} onClick={onCollection}>
-            <div style={s.navIcon}>&#x1F0CF;</div>
-            <div style={s.navLabel}>Collection</div>
-          </button>
-        )}
-        {onPacks && (
-          <button style={s.navBtn} onClick={onPacks}>
-            <div style={s.navIcon}>&#x1F381;</div>
-            <div style={s.navLabel}>Shop</div>
-          </button>
-        )}
-        {onCrafting && (
-          <button style={s.navBtn} onClick={onCrafting}>
-            <div style={s.navIcon}>&#x2728;</div>
-            <div style={s.navLabel}>Craft</div>
-          </button>
-        )}
-        {onBattlePass && (
-          <button style={s.navBtn} onClick={onBattlePass}>
-            <div style={s.navIcon}>&#x1F525;</div>
-            <div style={s.navLabel}>Battle Pass</div>
-          </button>
-        )}
-        {onAchievements && (
-          <button style={s.navBtn} onClick={onAchievements}>
-            <div style={s.navIcon}>&#x1F3C6;</div>
-            <div style={s.navLabel}>Achieve</div>
-          </button>
-        )}
-        {onLeaderboard && (
-          <button style={s.navBtn} onClick={onLeaderboard}>
-            <div style={s.navIcon}>&#x1F4CA;</div>
-            <div style={s.navLabel}>Ladder</div>
-          </button>
-        )}
-        {onSpectate && (
-          <button style={s.navBtn} onClick={onSpectate}>
-            <div style={s.navIcon}>&#x1F441;</div>
-            <div style={s.navLabel}>Spectate</div>
-          </button>
-        )}
-        {onReplays && (
-          <button style={s.navBtn} onClick={onReplays}>
-            <div style={s.navIcon}>&#x1F3AC;</div>
-            <div style={s.navLabel}>Replays</div>
-          </button>
-        )}
-        {onMetaDashboard && (
-          <button style={s.navBtn} onClick={onMetaDashboard}>
-            <div style={s.navIcon}>&#x1F4C8;</div>
-            <div style={s.navLabel}>Meta</div>
-          </button>
-        )}
-        {onStats && (
-          <button style={s.navBtn} onClick={onStats}>
-            <div style={s.navIcon}>&#x1F4CB;</div>
-            <div style={s.navLabel}>Stats</div>
-          </button>
-        )}
       </div>
     </div>
   );
@@ -278,38 +192,15 @@ const s: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
   },
 
-  // Top bar
-  topBar: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '8px',
-    padding: '12px 16px',
-    position: 'relative',
-    zIndex: 10,
-  },
-  topBtn: {
-    background: 'rgba(0,0,0,0.5)',
-    border: '1px solid rgba(255,255,255,0.2)',
-    borderRadius: '8px',
-    padding: '10px 16px',
-    minHeight: '44px',
-    color: '#ccc',
-    fontSize: '13px',
-    cursor: 'pointer',
-    backdropFilter: 'blur(8px)',
-    textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-  },
-
-  // Center area
+  // Center (main view)
   center: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '16px',
-    padding: '0 20px',
-    overflowY: 'auto',
+    gap: '32px',
+    padding: '40px 20px',
     minHeight: 0,
     position: 'relative',
     zIndex: 5,
@@ -317,121 +208,51 @@ const s: Record<string, React.CSSProperties> = {
   logoArea: {
     textAlign: 'center',
     width: '100%',
-    maxWidth: '600px',
+    maxWidth: '640px',
     padding: '0 20px',
   },
 
-  // Mode stack
+  // Mode buttons (only two)
   modeStack: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '8px',
+    gap: '14px',
     width: '100%',
-    maxWidth: '320px',
+    maxWidth: '360px',
   },
   modeBtn: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    padding: '12px 24px',
-    borderRadius: '10px',
+    gap: '14px',
+    padding: '18px 28px',
+    borderRadius: '12px',
     border: 'none',
     cursor: 'pointer',
-    background: 'linear-gradient(135deg, #ff6600 0%, #cc4400 100%)',
     color: '#fff',
-    fontSize: '15px',
+    fontSize: '18px',
     fontWeight: 'bold',
-    boxShadow: '0 4px 16px rgba(255,102,0,0.3)',
-    transition: 'transform 0.15s',
+    transition: 'transform 0.15s, box-shadow 0.15s',
+    minHeight: '64px',
   },
-  modeBtnAlt: {
+  modeBtnVersus: {
     background: 'linear-gradient(135deg, #00cc66 0%, #009944 100%)',
-    boxShadow: '0 4px 16px rgba(0,204,102,0.3)',
+    boxShadow: '0 6px 24px rgba(0,204,102,0.35)',
   },
-  modeBtnTourney: {
-    background: 'linear-gradient(135deg, #ffcc00 0%, #dd9900 100%)',
-    color: '#000',
-    boxShadow: '0 4px 16px rgba(255,204,0,0.3)',
-  },
-  modeBtnFriend: {
-    background: 'linear-gradient(135deg, #4488ff 0%, #2266cc 100%)',
-    boxShadow: '0 4px 16px rgba(68,136,255,0.3)',
+  modeBtnDungeon: {
+    background: 'linear-gradient(135deg, #9933ff 0%, #6620cc 100%)',
+    boxShadow: '0 6px 24px rgba(153,51,255,0.35)',
   },
   modeBtnIcon: {
-    fontSize: '20px',
-    width: '28px',
+    fontSize: '24px',
+    width: '32px',
     textAlign: 'center',
   },
   modeBtnLabel: {
     flex: 1,
+    letterSpacing: '0.04em',
   },
 
-  // Game modes row (Dungeon, Puzzles, etc.)
-  modesRow: {
-    display: 'flex',
-    gap: '8px',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-  },
-  modeChip: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '8px 16px',
-    borderRadius: '8px',
-    border: '1px solid rgba(255,255,255,0.15)',
-    background: 'rgba(255,255,255,0.06)',
-    color: '#ccc',
-    fontSize: '13px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    backdropFilter: 'blur(6px)',
-    transition: 'all 0.15s',
-    minHeight: '44px',
-  },
-  modeChipIcon: {
-    fontSize: '16px',
-  },
-
-  // Bottom nav bar
-  bottomBar: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '4px',
-    padding: '10px 8px 14px',
-    background: 'linear-gradient(0deg, rgba(0,0,0,0.7) 0%, transparent 100%)',
-    flexWrap: 'wrap',
-    overflowX: 'auto',
-    WebkitOverflowScrolling: 'touch',
-    flexShrink: 0,
-    position: 'relative',
-    zIndex: 5,
-  } as React.CSSProperties,
-  navBtn: {
-    background: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '3px',
-    padding: '8px 12px',
-    borderRadius: '8px',
-    minWidth: '58px',
-    minHeight: '48px',
-  },
-  navIcon: {
-    fontSize: '22px',
-    lineHeight: '1',
-  },
-  navLabel: {
-    fontSize: '11px',
-    color: '#aab',
-    letterSpacing: '0.5px',
-    textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-  },
-
-  // Play view
+  // 1v1 Match selection view
   playView: {
     flex: 1,
     display: 'flex',
