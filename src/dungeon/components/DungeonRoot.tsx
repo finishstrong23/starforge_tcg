@@ -509,26 +509,36 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     <div style={s.runWrap}>
       {mainView}
 
-      {/* Persistent run overlays */}
-      <RelicBar />
+      {/* Persistent run overlays. The combat view has its own corner-positioned
+          relic column, so suppress the bottom RelicBar during any combat phase
+          to avoid double-display. */}
+      {phase !== 'combat' && phase !== 'elite_combat' && phase !== 'boss_combat' && <RelicBar />}
 
-      <button
-        type="button"
-        style={s.deckBtn}
-        onClick={() => setDeckOpen((o) => !o)}
-      >
-        View Deck ({runState.deck.length})
-      </button>
+      {/* View Deck and Abandon overlays clash with the new combat-view corner
+          panels (player card top-left, right HUD bottom-right). Hide them
+          during combat — the relic column already shows draw count, and
+          abandon happens naturally between encounters. */}
+      {phase !== 'combat' && phase !== 'elite_combat' && phase !== 'boss_combat' && (
+        <>
+          <button
+            type="button"
+            style={s.deckBtn}
+            onClick={() => setDeckOpen((o) => !o)}
+          >
+            View Deck ({runState.deck.length})
+          </button>
 
-      <button
-        type="button"
-        style={s.abandonBtn}
-        onClick={() => {
-          if (window.confirm('Abandon this run?')) endRun(false);
-        }}
-      >
-        ✕ Abandon
-      </button>
+          <button
+            type="button"
+            style={s.abandonBtn}
+            onClick={() => {
+              if (window.confirm('Abandon this run?')) endRun(false);
+            }}
+          >
+            ✕ Abandon
+          </button>
+        </>
+      )}
 
       {deckOpen && <DeckViewer onClose={() => setDeckOpen(false)} />}
     </div>
