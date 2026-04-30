@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { CardComponent } from './CardComponent';
+import { PotionPickupModal } from './PotionPickupModal';
 import { RELIC_POOL } from '../data/relics';
 import { createCardInstance, generateRewardOptions } from '../engine/draft';
-import type { CardDefinition, RelicDefinition } from '../types';
+import { getPotionDef, rollPotionDrop } from '../data/potions';
+import type { CardDefinition, PotionInstance, RelicDefinition } from '../types';
 
 function pickRandom<T>(arr: T[]): T | undefined {
   return arr.length ? arr[Math.floor(Math.random() * arr.length)] : undefined;
@@ -17,7 +19,7 @@ function generateRewardRelic(isBoss: boolean): RelicDefinition | undefined {
 }
 
 export const RewardView: React.FC = () => {
-  const { runState, draftFaction, addCardToDeck, addRelic, returnToMap, advanceAct } = useDungeonRun();
+  const { runState, draftFaction, addCardToDeck, addRelic, addPotion, discardPotion, returnToMap, advanceAct } = useDungeonRun();
 
   const act = runState?.currentAct ?? 1;
   const currentMap = runState?.actMaps[(runState?.currentAct ?? 1) - 1];
@@ -30,14 +32,26 @@ export const RewardView: React.FC = () => {
   // 1 for weighting, NOT room 14").
   const roomNumber = currentMap?.nodes.filter((n) => n.visited).length ?? 1;
 
+  // Determine elite from the most-recently-visited node's type.
+  const lastNode = currentMap?.nodes.find((n) => n.id === currentMap?.currentNodeId);
+  const isElite = lastNode?.type === 'elite';
+
   const [cardOptions] = useState<CardDefinition[]>(() =>
     generateRewardOptions(roomNumber, act as 1 | 2 | 3, draftFaction ?? undefined),
   );
   const [relicOffer] = useState<RelicDefinition | undefined>(() =>
     showRelic ? generateRewardRelic(isBossReward) : undefined,
   );
+  // Roll a potion drop once per reward screen. Elites + bosses always drop,
+  // regular combats roll at 40 % per spec.
+  const [potionOffer] = useState<PotionInstance | null>(() =>
+    rollPotionDrop({ isElite, isBoss: isBossReward }),
+  );
+
   const [picked, setPicked] = useState(false);
   const [relicTaken, setRelicTaken] = useState(false);
+  const [potionTaken, setPotionTaken] = useState(false);
+  const [pickupModalOpen, setPickupModalOpen] = useState(false);
 
   const handleCardPick = (def: CardDefinition) => {
     addCardToDeck(createCardInstance(def));
@@ -47,6 +61,32 @@ export const RewardView: React.FC = () => {
   const handleRelicTake = (relic: RelicDefinition) => {
     addRelic(relic);
     setRelicTaken(true);
+  };
+
+  const handlePotionTake = (potion: PotionInstance) => {
+    if (!runState) return;
+    const slots = runState.potions ?? [];
+    const empty = slots.findIndex((p) => p === null);
+    if (empty === -1) {
+      // Inventory full → open the pickup picker
+      setPickupModalOpen(true);
+      return;
+    }
+    const ok = addPotion(potion);
+    if (ok) setPotionTaken(true);
+  };
+
+  const handlePotionSwap = (slotIndex: number) => {
+    if (!potionOffer) return;
+    discardPotion(slotIndex);          // free the slot
+    addPotion(potionOffer, slotIndex); // and immediately fill it with the new potion
+    setPotionTaken(true);
+    setPickupModalOpen(false);
+  };
+
+  const handlePotionSkip = () => {
+    setPotionTaken(true);
+    setPickupModalOpen(false);
   };
 
   const handleContinue = () => {
@@ -210,6 +250,61 @@ export const RewardView: React.FC = () => {
             </div>
           </div>
         </>
+      )}
+
+      {/* Potion drop */}
+      {potionOffer && !potionTaken && (() => {
+        const def = getPotionDef(potionOffer.definitionId);
+        if (!def) return null;
+        const rarityColor = def.rarity === 'rare' ? '#ffcc00' : def.rarity === 'uncommon' ? '#3b8fff' : '#aaaaaa';
+        return (
+          <>
+            <div style={s.sectionLabel}>
+              {isElite ? 'Elite drop' : isBossReward ? 'Boss drop' : 'Potion found'}
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '10px 16px',
+                background: `${rarityColor}11`,
+                border: `1px solid ${rarityColor}66`,
+                borderRadius: 8,
+                cursor: 'pointer',
+                maxWidth: 320,
+                width: '100%',
+                boxShadow: `0 0 12px ${rarityColor}33`,
+              }}
+              onClick={() => handlePotionTake(potionOffer)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter') handlePotionTake(potionOffer); }}
+            >
+              <span style={{ fontSize: 28 }}>🧪</span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: rarityColor }}>{def.name}</div>
+                <div style={{ fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.55 }}>
+                  {def.rarity} · {def.category}
+                </div>
+                <div style={{ fontSize: 10, opacity: 0.85, lineHeight: 1.4 }}>{def.effect}</div>
+              </div>
+            </div>
+            <button type="button" style={s.skipBtn} onClick={() => setPotionTaken(true)}>
+              Skip potion
+            </button>
+          </>
+        );
+      })()}
+
+      {/* Full-inventory pickup picker */}
+      {pickupModalOpen && potionOffer && runState && (
+        <PotionPickupModal
+          incoming={potionOffer}
+          currentSlots={runState.potions}
+          onSwap={handlePotionSwap}
+          onDiscardIncoming={handlePotionSkip}
+        />
       )}
 
       {/* Continue */}
