@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { PotionDefinition, PotionInstance, PotionRarity } from '../types';
 import { getPotionDef } from '../data/potions';
 
@@ -110,6 +110,27 @@ export const PotionInventory: React.FC<PotionInventoryProps> = ({
     slots[1] ?? null,
     slots[2] ?? null,
   ];
+
+  // Track slot transitions filled → null and play a one-shot "drain" key on
+  // the affected slot. Re-keyed each transition so the CSS animation restarts.
+  const prev = useRef<(string | null)[]>([null, null, null]);
+  const [drainKey, setDrainKey] = useState<[number, number, number]>([0, 0, 0]);
+  useEffect(() => {
+    setDrainKey((cur) => {
+      const next: [number, number, number] = [...cur];
+      let changed = false;
+      for (let i = 0; i < 3; i++) {
+        const wasFilled = prev.current[i] !== null;
+        const nowEmpty = padded[i] === null;
+        if (wasFilled && nowEmpty) {
+          next[i] = cur[i] + 1;
+          changed = true;
+        }
+        prev.current[i] = padded[i]?.definitionId ?? null;
+      }
+      return changed ? next : cur;
+    });
+  }, [padded[0]?.definitionId, padded[1]?.definitionId, padded[2]?.definitionId]); // eslint-disable-line react-hooks/exhaustive-deps
   const hoveredDef = hovered !== null
     ? (() => {
         const inst = padded[hovered.index];
@@ -127,7 +148,7 @@ export const PotionInventory: React.FC<PotionInventoryProps> = ({
 
         return (
           <button
-            key={i}
+            key={`${i}-${drainKey[i]}`}
             type="button"
             onClick={interactive ? () => onUse(i) : undefined}
             onMouseEnter={(e) => {
@@ -157,6 +178,7 @@ export const PotionInventory: React.FC<PotionInventoryProps> = ({
               opacity: filled ? (disabled ? 0.4 : 1) : 0.4,
               transition: 'box-shadow 100ms, opacity 100ms, background 100ms',
               position: 'relative',
+              animation: !filled && drainKey[i] > 0 ? 'dungeonPotionDrain 380ms ease-out' : undefined,
             }}
           >
             {def ? (POTION_EMOJI[def.id] ?? '🧪') : '·'}
