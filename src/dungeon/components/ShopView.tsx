@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { CardComponent } from './CardComponent';
+import { PotionPickupModal } from './PotionPickupModal';
 import { CARD_POOL } from '../data/cards';
 import { RELIC_POOL } from '../data/relics';
 import { createCardInstance } from '../engine/draft';
-import type { CardDefinition, RelicDefinition } from '../types';
+import { getPotionDef, potionShopPrice, rollShopPotions } from '../data/potions';
+import type { CardDefinition, PotionInstance, RelicDefinition } from '../types';
 
 const CARD_PRICE: Record<string, number> = {
   Common: 50, Uncommon: 75, Rare: 100, Epic: 140, Legendary: 175,
@@ -44,15 +46,22 @@ function relicPrice(relic: RelicDefinition): number {
 }
 
 export const ShopView: React.FC = () => {
-  const { runState, addCardToDeck, addRelic, removeCardFromDeck, spendGold, returnToMap } = useDungeonRun();
+  const { runState, addCardToDeck, addRelic, addPotion, discardPotion, removeCardFromDeck, spendGold, returnToMap } = useDungeonRun();
+  const act = (runState?.currentAct ?? 1) as 1 | 2 | 3;
   const [shopCards] = useState<CardDefinition[]>(() => randomCards(4));
   const [shopRelics] = useState<RelicDefinition[]>(() => randomRelics(2));
+  // 2-3 potions per shop. Roll deterministically once on mount.
+  const [shopPotions] = useState<PotionInstance[]>(() => rollShopPotions(2 + Math.floor(Math.random() * 2)));
   const [boughtCardIds, setBoughtCardIds] = useState<Set<string>>(new Set());
   const [boughtRelicIds, setBoughtRelicIds] = useState<Set<string>>(new Set());
+  const [boughtPotionIdx, setBoughtPotionIdx] = useState<Set<number>>(new Set());
   const [removingCard, setRemovingCard] = useState(false);
+  // Pending potion purchase (when inventory is full and we need a discard pick).
+  const [pendingPurchase, setPendingPurchase] = useState<{ potion: PotionInstance; shopIndex: number; price: number } | null>(null);
 
   const gold = runState?.gold ?? 0;
   const deck = runState?.deck ?? [];
+  const potionPrice = potionShopPrice(act);
 
   const itemWrapperStyle = (bought: boolean, affordable: boolean): React.CSSProperties => ({
     display: 'flex',
@@ -122,6 +131,32 @@ export const ShopView: React.FC = () => {
     spendGold(price);
     setBoughtRelicIds((prev) => new Set([...prev, relic.id]));
   };
+
+  const buyPotion = (potion: PotionInstance, shopIndex: number) => {
+    if (gold < potionPrice || boughtPotionIdx.has(shopIndex)) return;
+    const slots = runState?.potions ?? [];
+    const empty = slots.findIndex((p) => p === null);
+    if (empty === -1) {
+      // Inventory full — defer the purchase, show the pickup modal so the
+      // player picks a slot (or cancels). Gold is only spent if they accept.
+      setPendingPurchase({ potion, shopIndex, price: potionPrice });
+      return;
+    }
+    addPotion(potion);
+    spendGold(potionPrice);
+    setBoughtPotionIdx((prev) => new Set([...prev, shopIndex]));
+  };
+
+  const handlePurchaseSwap = (slotIndex: number) => {
+    if (!pendingPurchase) return;
+    discardPotion(slotIndex);
+    addPotion(pendingPurchase.potion, slotIndex);
+    spendGold(pendingPurchase.price);
+    setBoughtPotionIdx((prev) => new Set([...prev, pendingPurchase.shopIndex]));
+    setPendingPurchase(null);
+  };
+
+  const handlePurchaseCancel = () => setPendingPurchase(null);
 
   const removeCard = (instanceId: string) => {
     if (gold < REMOVAL_COST) return;
@@ -341,6 +376,64 @@ export const ShopView: React.FC = () => {
             Cancel
           </button>
         </>
+      )}
+
+      {/* Potions for sale */}
+      {shopPotions.length > 0 && (
+        <>
+          <div style={s.sectionLabel}>Potions for sale</div>
+          <div style={s.relicRow}>
+            {shopPotions.map((inst, idx) => {
+              const def = getPotionDef(inst.definitionId);
+              if (!def) return null;
+              const bought = boughtPotionIdx.has(idx);
+              const affordable = gold >= potionPrice;
+              const rarityColor =
+                def.rarity === 'rare' ? '#ffcc00' : def.rarity === 'uncommon' ? '#3b8fff' : '#aaaaaa';
+              return (
+                <div
+                  key={`${inst.definitionId}-${idx}`}
+                  role={!bought && affordable ? 'button' : undefined}
+                  tabIndex={!bought && affordable ? 0 : -1}
+                  onClick={!bought && affordable ? () => buyPotion(inst, idx) : undefined}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !bought && affordable) buyPotion(inst, idx); }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    padding: '10px 14px',
+                    background: bought ? '#0a0a0a' : affordable ? `${rarityColor}11` : '#0d0d0d',
+                    border: bought ? '1px solid #1a1a1a' : `1px solid ${affordable ? rarityColor + '66' : '#1a1a2e'}`,
+                    borderRadius: 7,
+                    cursor: bought || !affordable ? 'default' : 'pointer',
+                    opacity: bought ? 0.35 : 1,
+                    flex: 1,
+                    minWidth: 180,
+                  }}
+                >
+                  <span style={s.relicArt}>🧪</span>
+                  <div style={s.relicInfo}>
+                    <div style={{ ...s.relicName, color: bought ? '#666' : rarityColor }}>{def.name}</div>
+                    <div style={s.relicDesc}>{def.effect}</div>
+                  </div>
+                  <div style={relicPriceStyle(affordable && !bought)}>
+                    {bought ? '✓' : `${potionPrice}g`}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {/* Pickup picker — appears when buying a potion would overflow inventory */}
+      {pendingPurchase && runState && (
+        <PotionPickupModal
+          incoming={pendingPurchase.potion}
+          currentSlots={runState.potions}
+          onSwap={handlePurchaseSwap}
+          onDiscardIncoming={handlePurchaseCancel}
+        />
       )}
 
       <button type="button" style={s.leaveBtn} onClick={returnToMap}>

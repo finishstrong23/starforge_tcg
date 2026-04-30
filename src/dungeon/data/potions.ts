@@ -12,6 +12,7 @@ import type {
   CombatState,
   PotionContext,
   PotionDefinition,
+  PotionInstance,
 } from '../types';
 import {
   addEffect,
@@ -338,6 +339,75 @@ export function getPotionDef(id: string): PotionDefinition | undefined {
 
 export function getPotionsByRarity(rarity: PotionDefinition['rarity']): PotionDefinition[] {
   return POTION_POOL.filter((p) => p.rarity === rarity);
+}
+
+// ─── Acquisition rolls ───────────────────────────────────────────────────────
+
+const RARITY_WEIGHTS: { rarity: PotionDefinition['rarity']; weight: number }[] = [
+  { rarity: 'common',   weight: 65 },
+  { rarity: 'uncommon', weight: 28 },
+  { rarity: 'rare',     weight: 7 },
+];
+
+function pickWeighted<T extends { weight: number }>(items: T[], rng: () => number): T {
+  const total = items.reduce((sum, x) => sum + x.weight, 0);
+  let roll = rng() * total;
+  for (const item of items) {
+    roll -= item.weight;
+    if (roll <= 0) return item;
+  }
+  return items[items.length - 1];
+}
+
+function pickFromArray<T>(arr: T[], rng: () => number): T {
+  return arr[Math.floor(rng() * arr.length)];
+}
+
+/** Pick any potion at the rarity-weighted distribution. */
+export function rollPotion(rng: () => number = Math.random): PotionInstance {
+  const { rarity } = pickWeighted(RARITY_WEIGHTS, rng);
+  const pool = POTION_POOL.filter((p) => p.rarity === rarity);
+  const def = pickFromArray(pool, rng);
+  return { definitionId: def.id };
+}
+
+/**
+ * Roll a potion drop after a combat win. Per spec:
+ *   - Boss combats → always drop a potion
+ *   - Elite combats → always drop a potion
+ *   - Regular combats → 40% chance
+ */
+export function rollPotionDrop(opts: {
+  isElite: boolean;
+  isBoss: boolean;
+  rng?: () => number;
+}): PotionInstance | null {
+  const rng = opts.rng ?? Math.random;
+  if (opts.isElite || opts.isBoss) return rollPotion(rng);
+  if (rng() < 0.40) return rollPotion(rng);
+  return null;
+}
+
+/**
+ * Pick `count` distinct potions for a shop's stock. Rarity-weighted, no
+ * duplicates within the same shop's inventory.
+ */
+export function rollShopPotions(count: number, rng: () => number = Math.random): PotionInstance[] {
+  const out: PotionInstance[] = [];
+  const used = new Set<string>();
+  let attempts = 0;
+  while (out.length < count && attempts++ < 100) {
+    const inst = rollPotion(rng);
+    if (used.has(inst.definitionId)) continue;
+    used.add(inst.definitionId);
+    out.push(inst);
+  }
+  return out;
+}
+
+/** Per-act gold price for a single potion in shops. */
+export function potionShopPrice(act: 1 | 2 | 3): number {
+  return act === 1 ? 50 : act === 2 ? 75 : 100;
 }
 
 /**
