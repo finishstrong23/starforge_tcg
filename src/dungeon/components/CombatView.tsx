@@ -8,7 +8,9 @@ import { EnemyComponent } from './EnemyComponent';
 import { HandComponent } from './HandComponent';
 import { CardComponent } from './CardComponent';
 import { PotionInventory } from './PotionInventory';
+import { LumenAllocatorModal } from './LumenAllocatorModal';
 import { getPotionDef } from '../data/potions';
+import { isChannelCard } from '../engine/combat';
 
 const ENEMY_TURN_DELAY_MS = 1200;
 const ENEMY_ACTION_LINGER_MS = 900;
@@ -959,6 +961,14 @@ export const CombatView: React.FC = () => {
   // Augment cards open a target-picker modal showing the player's hand.
   const [pendingAugment, setPendingAugment] = useState<{ cardId: string; cardName: string } | null>(null);
 
+  // Potion targeting modes:
+  //   - pendingPotionTarget = slot index of a Forgefire-Flask-style potion
+  //     awaiting a target click. Highlights enemies as selectable.
+  //   - pendingLumenAllocation = slot index of Lumen Infusion awaiting a
+  //     distribution from the lumen-allocator modal.
+  const [pendingPotionTarget, setPendingPotionTarget] = useState<number | null>(null);
+  const [pendingLumenAllocation, setPendingLumenAllocation] = useState<number | null>(null);
+
   const handleCardSelect = useCallback((instanceId: string) => {
     if (!cs) return;
     if (cs.phase !== 'player_turn') return;
@@ -1021,6 +1031,14 @@ export const CombatView: React.FC = () => {
     if (!cs) return;
     if (cs.phase !== 'player_turn') return;
 
+    // Potion target-pick mode (Forgefire Flask) takes priority over card/minion
+    // attacks.
+    if (pendingPotionTarget !== null) {
+      usePotion(pendingPotionTarget, { targetId: 'enemy' });
+      setPendingPotionTarget(null);
+      return;
+    }
+
     if (selectedCardId) {
       const next = playCard(cs, selectedCardId, 'enemy');
       setSelectedCardId(null);
@@ -1035,11 +1053,17 @@ export const CombatView: React.FC = () => {
       setSelectedMinionId(null);
       setCombatState(next);
     }
-  }, [cs, selectedCardId, selectedMinionId, setCombatState]);
+  }, [cs, selectedCardId, selectedMinionId, setCombatState, pendingPotionTarget, usePotion]);
 
   const handleEnemyMinionClick = useCallback((minionId: string) => {
     if (!cs) return;
     if (cs.phase !== 'player_turn') return;
+
+    if (pendingPotionTarget !== null) {
+      usePotion(pendingPotionTarget, { targetId: minionId });
+      setPendingPotionTarget(null);
+      return;
+    }
 
     if (selectedCardId) {
       const next = playCard(cs, selectedCardId, minionId);
@@ -1053,7 +1077,7 @@ export const CombatView: React.FC = () => {
       setSelectedMinionId(null);
       setCombatState(next);
     }
-  }, [cs, selectedCardId, selectedMinionId, setCombatState]);
+  }, [cs, selectedCardId, selectedMinionId, setCombatState, pendingPotionTarget, usePotion]);
 
   const handlePlayerMinionClick = useCallback((minionId: string) => {
     if (!cs) return;
@@ -1088,12 +1112,47 @@ export const CombatView: React.FC = () => {
     if (!def) return;
 
     if (def.targeting === 'enemy') {
-      // Default to main enemy. Phase 4 will add a target-picker modal.
-      usePotion(slotIndex, { targetId: 'enemy' });
-    } else {
-      usePotion(slotIndex);
+      // Enter target-pick mode. The user clicks an enemy or minion to resolve.
+      setPendingPotionTarget(slotIndex);
+      setSelectedCardId(null);
+      setSelectedMinionId(null);
+      return;
     }
-  }, [runState, usePotion]);
+
+    if (def.targeting === 'lumen-allocation') {
+      // If there are Channel cards in hand, show the allocator. If not, the
+      // engine's fallback (12 Block) is fine — drink immediately.
+      const hasChannel = (cs?.hand ?? []).some((c) => c.keywords.includes('ILLUMINATE') && /(^|\s)channel\./i.test(c.cardText));
+      if (hasChannel) {
+        setPendingLumenAllocation(slotIndex);
+        return;
+      }
+      usePotion(slotIndex);
+      return;
+    }
+
+    usePotion(slotIndex);
+  }, [runState, cs, usePotion]);
+
+  const handlePotionTargetPick = useCallback((targetId: string) => {
+    if (pendingPotionTarget === null) return;
+    usePotion(pendingPotionTarget, { targetId });
+    setPendingPotionTarget(null);
+  }, [pendingPotionTarget, usePotion]);
+
+  const handlePotionTargetCancel = useCallback(() => {
+    setPendingPotionTarget(null);
+  }, []);
+
+  const handleLumenAllocate = useCallback((allocation: Record<string, number>) => {
+    if (pendingLumenAllocation === null) return;
+    usePotion(pendingLumenAllocation, { lumenAllocation: allocation });
+    setPendingLumenAllocation(null);
+  }, [pendingLumenAllocation, usePotion]);
+
+  const handleLumenCancel = useCallback(() => {
+    setPendingLumenAllocation(null);
+  }, []);
 
   // Drive enemy turn with staged delay
   useEffect(() => {
@@ -1122,15 +1181,20 @@ export const CombatView: React.FC = () => {
   const isCombatOver = cs.phase === 'combat_end_win' || cs.phase === 'combat_end_loss';
 
   const enemyGuardians = cs.enemyBoard.filter((m) => m.keywords.includes('GUARDIAN'));
+  // Potion targeting bypasses GUARDIAN — Forgefire Flask can hit any enemy.
+  const isPotionTargeting = pendingPotionTarget !== null;
   const targetableEnemyMinionIds = new Set<string>(
-    enemyGuardians.length > 0
+    isPotionTargeting
+      ? cs.enemyBoard.map((m) => m.instanceId)
+      : enemyGuardians.length > 0
       ? enemyGuardians.map((m) => m.instanceId)
       : (selectedCardId || selectedMinionId)
       ? cs.enemyBoard.map((m) => m.instanceId)
       : [],
   );
   const canTargetEnemy =
-    (selectedCardId !== null || selectedMinionId !== null) && enemyGuardians.length === 0;
+    isPotionTargeting ||
+    ((selectedCardId !== null || selectedMinionId !== null) && enemyGuardians.length === 0);
 
   const s: Record<string, React.CSSProperties> = {
     root: {
@@ -1264,6 +1328,11 @@ export const CombatView: React.FC = () => {
           40%  { transform: translateY(38px) scale(1.05); }
           70%  { transform: translateY(8px) scale(1.02); }
           100% { transform: translateY(0) scale(1); }
+        }
+        @keyframes dungeonPotionDrain {
+          0%   { transform: scale(1.18); opacity: 0.95; box-shadow: 0 0 16px currentColor; }
+          50%  { transform: scale(0.92); opacity: 0.55; }
+          100% { transform: scale(1);    opacity: 0.4;  box-shadow: none; }
         }
       `}</style>
 
@@ -1632,6 +1701,66 @@ export const CombatView: React.FC = () => {
           `position: fixed` element inside this overlay, hiding the
           card-name tooltips. CombatLog already has its own border / scroll
           so we just need to position the panel. */}
+
+      {/* Potion targeting banner — appears while waiting for enemy click */}
+      {pendingPotionTarget !== null && (() => {
+        const slot = runState?.potions[pendingPotionTarget];
+        const def = slot ? getPotionDef(slot.definitionId) : null;
+        if (!def) return null;
+        return (
+          <div
+            style={{
+              position: 'absolute',
+              top: 12,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 10,
+              padding: '10px 22px',
+              background: 'rgba(8,8,20,0.92)',
+              border: '1px solid #ff6622',
+              borderRadius: 6,
+              color: '#ff8866',
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              boxShadow: '0 0 18px rgba(255,102,34,0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+            }}
+          >
+            🌋 {def.name} — pick a target
+            <button
+              type="button"
+              onClick={handlePotionTargetCancel}
+              style={{
+                padding: '3px 10px',
+                background: 'transparent',
+                border: '1px solid #555',
+                color: '#aaa',
+                fontSize: 9,
+                letterSpacing: '0.15em',
+                borderRadius: 3,
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        );
+      })()}
+
+      {/* Lumen allocator — for Lumen Infusion when Channel cards are in hand */}
+      {pendingLumenAllocation !== null && cs && (
+        <LumenAllocatorModal
+          channelCards={cs.hand.filter(isChannelCard)}
+          total={3}
+          onCancel={handleLumenCancel}
+          onConfirm={handleLumenAllocate}
+        />
+      )}
+
       {logOpen && (
         <div
           style={{
