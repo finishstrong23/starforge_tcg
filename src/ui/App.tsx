@@ -7,17 +7,29 @@
  * selection (handled inside DungeonRoot itself).
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { DungeonRoot } from '../dungeon';
+import { TelemetryDebugPanel } from '../dungeon/components/TelemetryDebugPanel';
+import { logEvent } from '../dungeon/engine/telemetry';
 
 export const App: React.FC = () => {
+  // Emit one session_start per tab. (The session id is stable for the life
+  // of the tab so server-side aggregation can group events by session.)
+  useEffect(() => {
+    logEvent('session_start', {
+      ua: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+      url: typeof window !== 'undefined' ? window.location.href : 'unknown',
+    });
+  }, []);
+
   return (
     <ErrorBoundary>
       {/* onBack is intentionally a no-op: there is no "back" — only a
           new run. DungeonRoot's "Abandon Run" already wipes state and
           shows faction-select again. */}
       <DungeonRoot onBack={() => { /* no-op */ }} />
+      <TelemetryDebugPanel />
     </ErrorBoundary>
   );
 };
