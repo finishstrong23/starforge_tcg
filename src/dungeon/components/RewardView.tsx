@@ -1,25 +1,35 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { CardComponent } from './CardComponent';
 import { PotionPickupModal } from './PotionPickupModal';
 import { RELIC_POOL } from '../data/relics';
 import { createCardInstance, generateRewardOptions } from '../engine/draft';
 import { getPotionDef, rollPotionDrop } from '../data/potions';
+import { getAscensionMods } from '../engine/ascension';
 import type { CardDefinition, PotionInstance, RelicDefinition } from '../types';
 
 function pickRandom<T>(arr: T[]): T | undefined {
   return arr.length ? arr[Math.floor(Math.random() * arr.length)] : undefined;
 }
 
-function generateRewardRelic(isBoss: boolean): RelicDefinition | undefined {
-  const pool = isBoss
-    ? RELIC_POOL.filter((r) => r.rarity === 'Boss')
-    : RELIC_POOL.filter((r) => r.rarity === 'Rare' || r.rarity === 'Uncommon');
-  return pickRandom(pool);
+function generateRewardRelic(isBoss: boolean, rareWeightMul = 1): RelicDefinition | undefined {
+  if (isBoss) return pickRandom(RELIC_POOL.filter((r) => r.rarity === 'Boss'));
+
+  // Weighted pick across Uncommon (weight 1) and Rare (weight rareWeightMul).
+  // A8 halves rareWeightMul to 0.5 → a Rare drop is half as likely.
+  const uncommons = RELIC_POOL.filter((r) => r.rarity === 'Uncommon');
+  const rares     = RELIC_POOL.filter((r) => r.rarity === 'Rare');
+  if (uncommons.length === 0 && rares.length === 0) return undefined;
+
+  const totalW = uncommons.length + rares.length * rareWeightMul;
+  if (totalW <= 0) return pickRandom(uncommons);
+  const roll = Math.random() * totalW;
+  if (roll < uncommons.length) return pickRandom(uncommons);
+  return pickRandom(rares) ?? pickRandom(uncommons);
 }
 
 export const RewardView: React.FC = () => {
-  const { runState, draftFaction, addCardToDeck, addRelic, addPotion, discardPotion, returnToMap, advanceAct } = useDungeonRun();
+  const { runState, draftFaction, addCardToDeck, addRelic, addGold, addPotion, discardPotion, returnToMap, advanceAct } = useDungeonRun();
 
   const act = runState?.currentAct ?? 1;
   const currentMap = runState?.actMaps[(runState?.currentAct ?? 1) - 1];
@@ -36,17 +46,40 @@ export const RewardView: React.FC = () => {
   const lastNode = currentMap?.nodes.find((n) => n.id === currentMap?.currentNodeId);
   const isElite = lastNode?.type === 'elite';
 
+  // Ascension modifiers — A7 scales gold reward, A8 halves rare relic odds.
+  const ascensionMods = getAscensionMods(runState?.ascensionLevel ?? 0);
+
+  // Combat gold rewards (rolled once on mount). Regular ~10-18, elite ~25-35,
+  // boss ~45-60. Scaled by A7's goldRewardMul.
+  const [goldGained] = useState<number>(() => {
+    const base = isBossReward ? 45 + Math.floor(Math.random() * 16)  // 45-60
+               : isElite       ? 25 + Math.floor(Math.random() * 11) // 25-35
+                               : 10 + Math.floor(Math.random() * 9); // 10-18
+    return Math.max(1, Math.round(base * ascensionMods.goldRewardMul));
+  });
+  // Award the gold once on mount (StrictMode-safe: initialiser of useState only runs once).
+  const [, setGoldAwarded] = useState(false);
+
   const [cardOptions] = useState<CardDefinition[]>(() =>
     generateRewardOptions(roomNumber, act as 1 | 2 | 3, draftFaction ?? undefined),
   );
   const [relicOffer] = useState<RelicDefinition | undefined>(() =>
-    showRelic ? generateRewardRelic(isBossReward) : undefined,
+    showRelic ? generateRewardRelic(isBossReward, ascensionMods.rareRelicMul) : undefined,
   );
   // Roll a potion drop once per reward screen. Elites + bosses always drop,
   // regular combats roll at 40 % per spec.
   const [potionOffer] = useState<PotionInstance | null>(() =>
     rollPotionDrop({ isElite, isBoss: isBossReward }),
   );
+
+  // Award the rolled gold exactly once when the reward screen mounts.
+  useEffect(() => {
+    setGoldAwarded((awarded) => {
+      if (!awarded && goldGained > 0) addGold(goldGained);
+      return true;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [picked, setPicked] = useState(false);
   const [relicTaken, setRelicTaken] = useState(false);
@@ -194,6 +227,11 @@ export const RewardView: React.FC = () => {
         <div style={s.subtitle}>
           {picked ? 'Card added to deck.' : 'Choose a card to add to your deck.'}
         </div>
+        {goldGained > 0 && (
+          <div style={{ marginTop: 6, color: '#f0d060', fontWeight: 700, fontSize: 14 }}>
+            +{goldGained}g
+          </div>
+        )}
       </div>
 
       {/* Card choices */}

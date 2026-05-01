@@ -205,6 +205,8 @@ export interface CombatState {
   skipNextEnemyTurn?: boolean;
   /** Block grants queued for the start of the next player turn (Aegis Mixture). */
   pendingTurnStartBlock?: number;
+  /** Cards drawn at the start of every player turn. Default 5, lowered to 4 by Ascension A9. */
+  drawPerTurn?: number;
 }
 
 // ─── POTIONS ─────────────────────────────────────────────────────────────────
@@ -267,6 +269,13 @@ export type RunPhase =
   | 'run_end_win'
   | 'run_end_loss';
 
+/**
+ * Ascension level — STS-style difficulty escalation. Each level adds a
+ * specific modifier on top of the previous ones; the 10 mods are defined
+ * inside getAscensionMods (engine/ascension.ts).
+ */
+export type AscensionLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+
 export interface RunState {
   phase: RunPhase;
   currentAct: 1 | 2 | 3;
@@ -279,6 +288,8 @@ export interface RunState {
   currentHealth: number;
   energy: number;
   maxEnergy: number;
+  /** Difficulty tier for this run (0 = no modifiers, 10 = stacked modifiers). */
+  ascensionLevel: AscensionLevel;
   combatState: CombatState | null;
   /** 3-slot potion inventory. Nulls are empty slots. Persists across combats. */
   potions: (PotionInstance | null)[];

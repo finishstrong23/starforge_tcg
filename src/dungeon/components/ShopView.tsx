@@ -6,6 +6,7 @@ import { CARD_POOL } from '../data/cards';
 import { RELIC_POOL } from '../data/relics';
 import { createCardInstance } from '../engine/draft';
 import { getPotionDef, potionShopPrice, rollShopPotions } from '../data/potions';
+import { getAscensionMods } from '../engine/ascension';
 import type { CardDefinition, PotionInstance, RelicDefinition } from '../types';
 
 const CARD_PRICE: Record<string, number> = {
@@ -64,7 +65,10 @@ export const ShopView: React.FC = () => {
 
   const gold = runState?.gold ?? 0;
   const deck = runState?.deck ?? [];
-  const potionPrice = potionShopPrice(act);
+  const ascensionMods = getAscensionMods(runState?.ascensionLevel ?? 0);
+  // A3 — shop price multiplier. Round up so the multiplier always actually bites.
+  const scalePrice = (n: number): number => Math.ceil(n * ascensionMods.shopPriceMul);
+  const potionPrice = scalePrice(potionShopPrice(act));
 
   const itemWrapperStyle = (bought: boolean, affordable: boolean): React.CSSProperties => ({
     display: 'flex',
@@ -120,7 +124,7 @@ export const ShopView: React.FC = () => {
   });
 
   const buyCard = (def: CardDefinition) => {
-    const price = CARD_PRICE[def.rarity] ?? 75;
+    const price = scalePrice(CARD_PRICE[def.rarity] ?? 75);
     if (gold < price || boughtCardIds.has(def.id)) return;
     addCardToDeck(createCardInstance(def));
     spendGold(price);
@@ -128,7 +132,7 @@ export const ShopView: React.FC = () => {
   };
 
   const buyRelic = (relic: RelicDefinition) => {
-    const price = relicPrice(relic);
+    const price = scalePrice(relicPrice(relic));
     if (gold < price || boughtRelicIds.has(relic.id)) return;
     addRelic(relic);
     spendGold(price);
@@ -291,7 +295,7 @@ export const ShopView: React.FC = () => {
       <div style={s.sectionLabel}>Cards for sale</div>
       <div style={s.cardRow}>
         {shopCards.map((def) => {
-          const price = CARD_PRICE[def.rarity] ?? 75;
+          const price = scalePrice(CARD_PRICE[def.rarity] ?? 75);
           const bought = boughtCardIds.has(def.id);
           const affordable = gold >= price;
           return (
@@ -316,7 +320,7 @@ export const ShopView: React.FC = () => {
       <div style={s.sectionLabel}>Relics for sale</div>
       <div style={s.relicRow}>
         {shopRelics.map((relic) => {
-          const price = relicPrice(relic);
+          const price = scalePrice(relicPrice(relic));
           const bought = boughtRelicIds.has(relic.id);
           const affordable = gold >= price;
           return (
