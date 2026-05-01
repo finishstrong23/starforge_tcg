@@ -9,6 +9,7 @@ import { HandComponent } from './HandComponent';
 import { CardComponent } from './CardComponent';
 import { PotionInventory } from './PotionInventory';
 import { LumenAllocatorModal } from './LumenAllocatorModal';
+import { PotionDrinkBurst } from './PotionDrinkBurst';
 import { getPotionDef } from '../data/potions';
 import { isChannelCard } from '../engine/combat';
 
@@ -860,6 +861,16 @@ export const CombatView: React.FC = () => {
   const prevPlayerShield = useRef<number | null>(null);
   const prevEnemyShield  = useRef<number | null>(null);
 
+  // Track per-slot potion definition ids so we can detect a "drink" event:
+  // a slot transitions from a known potion id → null. Re-keys the burst.
+  const prevPotionSlots = useRef<(string | null)[]>([null, null, null]);
+  const [potionBurst, setPotionBurst] = useState<{
+    key: number;
+    category: import('../types').PotionCategory;
+    potionId: string;
+    potionName: string;
+  } | null>(null);
+
   const cs = runState?.combatState;
 
   // Pick a stable random background per encounter, seeded by enemy ID so the
@@ -946,6 +957,31 @@ export const CombatView: React.FC = () => {
     prevPlayerShield.current  = cs.playerShield;
     prevEnemyShield.current   = cs.enemy.currentShield;
   }, [cs]);
+
+  // Detect a drink event: a slot transitions from a known potion id → null.
+  // Look up the prior definition and trigger the burst overlay.
+  useEffect(() => {
+    const slots: (string | null)[] = (runState?.potions ?? [null, null, null]).map(
+      (p) => p?.definitionId ?? null,
+    );
+    for (let i = 0; i < 3; i++) {
+      const before = prevPotionSlots.current[i];
+      const after = slots[i];
+      if (before && !after) {
+        const def = getPotionDef(before);
+        if (def) {
+          setPotionBurst({
+            key: Date.now() + i,
+            category: def.category,
+            potionId: def.id,
+            potionName: def.name,
+          });
+        }
+      }
+    }
+    prevPotionSlots.current = slots;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runState?.potions[0]?.definitionId, runState?.potions[1]?.definitionId, runState?.potions[2]?.definitionId]);
 
   // Attack cards need to click an enemy target. Everything else plays immediately.
   const needsTarget = (card: CardInstance): boolean => card.type === 'Attack';
@@ -1335,6 +1371,16 @@ export const CombatView: React.FC = () => {
           100% { transform: scale(1);    opacity: 0.4;  box-shadow: none; }
         }
       `}</style>
+
+      {/* ── Potion drink burst overlay ─── */}
+      {potionBurst && (
+        <PotionDrinkBurst
+          burstKey={potionBurst.key}
+          category={potionBurst.category}
+          potionId={potionBurst.potionId}
+          potionName={potionBurst.potionName}
+        />
+      )}
 
       {/* ── Floating combat numbers (absolute over root) ─── */}
       {floatNums.map((f) => (
