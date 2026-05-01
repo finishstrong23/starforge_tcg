@@ -82,11 +82,11 @@ export function generateDraftOptions(
   while (chosen.length < 4 && attempts < maxAttempts) {
     attempts++;
 
-    // Decide pool: 70 % faction, 30 % any (or all when no faction given)
-    const useFaction = faction && Math.random() < 0.7;
-    const pool = useFaction
-      ? CARD_POOL.filter((c) => c.faction === faction)
-      : CARD_POOL;
+    // Faction lock: only show cards from the player's chosen faction. Other
+    // factions' cards reference mechanics this player can't use (Channel /
+    // Lumens, Augments, Flux, Heat) and feel like dead picks. If no faction
+    // was provided, fall back to the full pool.
+    const pool = faction ? CARD_POOL.filter((c) => c.faction === faction) : CARD_POOL;
 
     const rarity = weightedRarityPick(round);
     const candidates = pool.filter(
@@ -177,13 +177,15 @@ export function generateRewardOptions(
   const maxAttempts = 200;
   let attempts = 0;
 
+  // Faction lock: every reward card comes from the player's chosen faction.
+  // Cross-faction picks (Channel cards for a Pyroclast, Augments for a Luminar,
+  // Flux for a Cogsmith, etc.) are mechanically dead because the player can't
+  // engage with the other faction's mechanic. Unlock requires a future
+  // "neutral / colourless" tag which doesn't exist yet.
+  const factionPool = faction ? CARD_POOL.filter((c) => c.faction === faction) : CARD_POOL;
+
   while (picks.length < 3 && attempts < maxAttempts) {
     attempts++;
-    // 70% draws from the player's faction, 30% from any faction (for variety).
-    const useFaction = faction && rng() < 0.7;
-    const factionPool = useFaction
-      ? CARD_POOL.filter((c) => c.faction === faction)
-      : CARD_POOL;
 
     const tier = pickTier(rng, tierWeights);
     const rarity = pickRarity(rng, rarityWeights);
@@ -200,6 +202,11 @@ export function generateRewardOptions(
       candidates = factionPool.filter(
         (c) => c.rarity === rarity && !usedIds.has(c.id),
       );
+    }
+    // Last-resort fallback: if rarity is also empty (small faction pools),
+    // accept any unused card from the faction so we never offer 0 options.
+    if (candidates.length === 0) {
+      candidates = factionPool.filter((c) => !usedIds.has(c.id));
     }
     if (candidates.length === 0) continue;
 

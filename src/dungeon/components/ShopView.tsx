@@ -18,12 +18,15 @@ function pickRandom<T>(arr: T[]): T | undefined {
   return arr.length ? arr[Math.floor(Math.random() * arr.length)] : undefined;
 }
 
-function randomCards(count: number): CardDefinition[] {
+function randomCards(count: number, faction?: string): CardDefinition[] {
+  // Same faction-lock rationale as generateRewardOptions: cross-faction cards
+  // are mechanically useless and feel like dead picks.
+  const pool = faction ? CARD_POOL.filter((c) => c.faction === faction) : CARD_POOL;
   const used = new Set<string>();
   const out: CardDefinition[] = [];
   let tries = 0;
   while (out.length < count && tries++ < 200) {
-    const c = pickRandom(CARD_POOL);
+    const c = pickRandom(pool);
     if (c && !used.has(c.id)) { used.add(c.id); out.push(c); }
   }
   return out;
@@ -46,9 +49,9 @@ function relicPrice(relic: RelicDefinition): number {
 }
 
 export const ShopView: React.FC = () => {
-  const { runState, addCardToDeck, addRelic, addPotion, discardPotion, removeCardFromDeck, spendGold, returnToMap } = useDungeonRun();
+  const { runState, draftFaction, addCardToDeck, addRelic, addPotion, discardPotion, removeCardFromDeck, spendGold, returnToMap } = useDungeonRun();
   const act = (runState?.currentAct ?? 1) as 1 | 2 | 3;
-  const [shopCards] = useState<CardDefinition[]>(() => randomCards(4));
+  const [shopCards] = useState<CardDefinition[]>(() => randomCards(4, draftFaction ?? undefined));
   const [shopRelics] = useState<RelicDefinition[]>(() => randomRelics(2));
   // 2-3 potions per shop. Roll deterministically once on mount.
   const [shopPotions] = useState<PotionInstance[]>(() => rollShopPotions(2 + Math.floor(Math.random() * 2)));
