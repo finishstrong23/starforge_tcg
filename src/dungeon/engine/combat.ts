@@ -406,7 +406,19 @@ export function playCard(
   } else {
     // Spell / Attack / Skill / Augment
     s = applySpellEffect(s, card, targetId, textOverride);
-    s = { ...s, discardPile: [...s.discardPile, card] };
+    // Exhaust if the card text says so OR the card is an Augment (augment
+    // cards always exhaust on play per their text). Exhausted cards go to
+    // the exhaustPile and don't return on reshuffle. Everything else goes
+    // to the discardPile and reshuffles into the draw pile when it empties.
+    const isExhaust = card.type === 'Augment'
+      || /\bexhaust\.?\b/i.test(card.cardText)
+      || (card.upgraded && card.upgradeText !== undefined && /\bexhaust\.?\b/i.test(card.upgradeText));
+    if (isExhaust) {
+      s = { ...s, exhaustPile: [...s.exhaustPile, card] };
+      s = log(s, `🚫 ${card.name} exhausted`);
+    } else {
+      s = { ...s, discardPile: [...s.discardPile, card] };
+    }
   }
 
   s = { ...s, discardPile: card.type !== 'Spell' ? s.discardPile : [...s.discardPile] };
@@ -440,9 +452,45 @@ function applySpellEffect(
     s = log(s, `🎲 ${card.name} rolls ${roll} → ${dmg} damage`);
   }
 
+  // ── Cogsmiths augment-scaled damage ───────────────────────────────────
+  // "Deal N damage + M damage per Augment on this card."   — Socket Wrench, Colossus Strike
+  // "Deal N damage + M damage per Augment on any card in your deck." — Modular Strike
+  const augOnThis    = text.match(/deal (\d+) damage \+ (\d+) damage per augment on this card/);
+  const augInDeck    = !augOnThis
+    ? text.match(/deal (\d+) damage \+ (\d+) damage per augment on any card in your deck/)
+    : null;
+
+  let augBonus: { base: number; perAug: number; count: number } | null = null;
+  if (augOnThis) {
+    augBonus = {
+      base: parseInt(augOnThis[1]),
+      perAug: parseInt(augOnThis[2]),
+      count: card.augments?.length ?? 0,
+    };
+  } else if (augInDeck) {
+    // Sum augments across every card the engine can see right now: deck-equivalent
+    // is the union of hand + drawPile + discardPile + exhaustPile + playerBoard.
+    let total = 0;
+    for (const c of [...s.hand, ...s.drawPile, ...s.discardPile, ...s.exhaustPile, ...s.playerBoard]) {
+      total += c.augments?.length ?? 0;
+    }
+    augBonus = {
+      base: parseInt(augInDeck[1]),
+      perAug: parseInt(augInDeck[2]),
+      count: total,
+    };
+  }
+  if (augBonus) {
+    const raw = augBonus.base + augBonus.perAug * augBonus.count;
+    const dmg = calcDamage(raw, s.playerStatusEffects, s.enemy.statusEffects);
+    const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
+    s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
+    s = log(s, `⚙ ${card.name} deals ${dmg} (${augBonus.count} augment${augBonus.count === 1 ? '' : 's'} counted)`);
+  }
+
   // Multi-hit: "deal N damage X times" / "deal N damage twice" / "deal N damage 3 times"
   const NUMBER_WORD: Record<string, number> = { twice: 2, thrice: 3 };
-  const multiHitMatch = !rangeDmgMatch
+  const multiHitMatch = !rangeDmgMatch && !augBonus
     ? text.match(/deal (\d+) damage (\d+|twice|thrice) times?/)
         ?? text.match(/deal (\d+) damage (twice|thrice)/)
     : null;
@@ -466,8 +514,9 @@ function applySpellEffect(
     }
   }
 
-  // Single-hit damage. Skip if a range or multi-hit pattern already fired.
-  const dmgMatch = !rangeDmgMatch && !multiHitMatch ? text.match(/deal (\d+) damage/) : null;
+  // Single-hit damage. Skip if a range, multi-hit, or augment-scaled pattern already fired.
+  const dmgMatch = !rangeDmgMatch && !multiHitMatch && !augBonus
+    ? text.match(/deal (\d+) damage/) : null;
   if (dmgMatch) {
     const dmg = calcDamage(parseInt(dmgMatch[1]), s.playerStatusEffects, s.enemy.statusEffects);
     const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
