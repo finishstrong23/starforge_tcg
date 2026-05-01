@@ -16,6 +16,7 @@ import { generateActMap, visitNode } from '../engine/mapgen';
 import { createCardInstance, generateDraftOptions, getStarterCards } from '../engine/draft';
 import { initCombat } from '../engine/combat';
 import { applyPotion } from '../data/potions';
+import { BLESSING_POOL, applyBlessing as resolveBlessing, type BlessingId } from '../data/blessings';
 import { applyRelicsToCombat, applyRelicsToRun } from '../engine/relicEffects';
 import { logEvent } from '../engine/telemetry';
 import { getAscensionMods, recordWin as recordAscensionWin } from '../engine/ascension';
@@ -58,6 +59,11 @@ export interface DungeonRunContextValue {
   usePotion: (slotIndex: number, ctx?: PotionContext) => void;
   /** Discard the potion in `slotIndex` (used by the full-inventory pickup picker). */
   discardPotion: (slotIndex: number) => void;
+
+  // ── Blessings ────────────────────────────────────────────────────────
+  /** Apply an act-start blessing and route into the new act's map. No-op
+   *  if not currently in the 'blessing' phase or the id is unknown. */
+  applyBlessing: (blessingId: BlessingId) => void;
 }
 
 // ─── Reducer ───────────────────────────────────────────────────────────────────
@@ -90,7 +96,8 @@ type Action =
   | { type: 'RETURN_TO_MAP' }
   | { type: 'ADD_POTION'; potion: PotionInstance; slotIndex?: number }
   | { type: 'DISCARD_POTION'; slotIndex: number }
-  | { type: 'USE_POTION'; slotIndex: number; ctx?: PotionContext };
+  | { type: 'USE_POTION'; slotIndex: number; ctx?: PotionContext }
+  | { type: 'APPLY_BLESSING'; blessingId: BlessingId };
 
 const INITIAL: ContextState = {
   run: null,
@@ -179,9 +186,11 @@ function reducer(state: ContextState, action: Action): ContextState {
     // ── Complete draft ────────────────────────────────────────────────────────
     case 'COMPLETE_DRAFT': {
       if (!state.run) return state;
+      // After draft, route into the Act 1 blessing screen instead of
+      // straight to the map (mirrors STS Neow's Bounty).
       return {
         ...state,
-        run: { ...state.run, deck: action.deck, phase: 'map' },
+        run: { ...state.run, deck: action.deck, phase: 'blessing' },
         draftPicks: [],
       };
     }
@@ -444,13 +453,55 @@ function reducer(state: ContextState, action: Action): ContextState {
       };
     }
 
+    // ── Act-start blessing ────────────────────────────────────────────────────
+    case 'APPLY_BLESSING': {
+      if (!state.run) return state;
+      if (state.run.phase !== 'blessing') return state;
+
+      const blessing = BLESSING_POOL.find((b) => b.id === action.blessingId);
+      if (!blessing) return state;
+
+      const result = resolveBlessing(blessing, state.run);
+
+      // Build the new deck if the blessing added a card. The reducer owns
+      // instance creation so the helper stays pure.
+      let newDeck = state.run.deck;
+      if (result.pickedCard) {
+        newDeck = [...newDeck, createCardInstance(result.pickedCard)];
+      }
+
+      logEvent('relic_picked', {
+        // Re-uses the relic_picked event channel for now — blessings are
+        // quasi-relics for analytics purposes (run-long pickup).
+        kind: 'blessing',
+        blessingId: blessing.id,
+        act: state.run.currentAct,
+      });
+
+      const merged: RunState = {
+        ...state.run,
+        ...result.patch,
+        deck: newDeck,
+        phase: 'map',
+      };
+
+      return { ...state, run: merged };
+    }
+
     // ── Advance act ───────────────────────────────────────────────────────────
     case 'ADVANCE_ACT': {
       if (!state.run) return state;
       const nextAct = Math.min(3, state.run.currentAct + 1) as 1 | 2 | 3;
+      // STS-style act transition: full heal + new blessing screen before
+      // entering the new act's map.
       return {
         ...state,
-        run: { ...state.run, currentAct: nextAct, phase: 'map' },
+        run: {
+          ...state.run,
+          currentAct: nextAct,
+          currentHealth: state.run.maxHealth,
+          phase: 'blessing',
+        },
       };
     }
 
@@ -626,6 +677,10 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     dispatch({ type: 'DISCARD_POTION', slotIndex });
   }, []);
 
+  const applyBlessing = useCallback((blessingId: BlessingId) => {
+    dispatch({ type: 'APPLY_BLESSING', blessingId });
+  }, []);
+
   const value = useMemo<DungeonRunContextValue>(
     () => ({
       runState: s.run,
@@ -652,6 +707,7 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       addPotion,
       usePotion,
       discardPotion,
+      applyBlessing,
     }),
     [
       s,
@@ -659,7 +715,7 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       addRelic, addGold, spendGold, healPlayer, damagePlayer,
       addCardToDeck, removeCardFromDeck, upgradeCard, setCombatState,
       advanceAct, endRun, returnToMap,
-      addPotion, usePotion, discardPotion,
+      addPotion, usePotion, discardPotion, applyBlessing,
     ],
   );
 
