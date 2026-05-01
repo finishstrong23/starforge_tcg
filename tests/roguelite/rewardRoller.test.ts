@@ -54,7 +54,7 @@ describe('generateRewardOptions', () => {
     }
   });
 
-  it('honors faction bias (faction cards majority over many runs)', () => {
+  it('faction-locks rewards to the player faction', () => {
     let factionCount = 0;
     let total = 0;
     for (let i = 0; i < 500; i++) {
@@ -64,8 +64,8 @@ describe('generateRewardOptions', () => {
         if (c.faction === 'Cogsmiths') factionCount++;
       }
     }
-    // 70% bias should land somewhere comfortably above half
-    expect(factionCount / total).toBeGreaterThan(0.55);
+    // No cross-faction picks — every card must be from the player's faction.
+    expect(factionCount).toBe(total);
   });
 });
 
