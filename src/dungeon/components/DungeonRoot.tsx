@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { DungeonRunProvider, useDungeonRun } from '../context/DungeonRunContext';
-import type { Faction } from '../types';
+import type { AscensionLevel, Faction } from '../types';
+import { describeAscension, getMaxUnlockedAscension, recordWin as recordAscensionWin } from '../engine/ascension';
 import {
   STARTER_DECKS,
   CARD_BY_ID,
@@ -387,9 +388,21 @@ const FactionDetail: React.FC<{
 // ─── Run-end screen ──────────────────────────────────────────────────────────
 
 const RunEndScreen: React.FC<{ won: boolean; onBack: () => void }> = ({ won, onBack }) => {
-  const { runState } = useDungeonRun();
+  const { runState, draftFaction } = useDungeonRun();
   const stats = runState?.runStats;
   const act = runState?.currentAct ?? 1;
+  const ascension = runState?.ascensionLevel ?? 0;
+
+  // On a winning run, persist the ascension unlock once and remember which
+  // level (if any) was newly unlocked so we can show a banner.
+  const [newlyUnlocked, setNewlyUnlocked] = React.useState<AscensionLevel | null>(null);
+  React.useEffect(() => {
+    if (won && draftFaction) {
+      const newLevel = recordAscensionWin(draftFaction, ascension);
+      setNewlyUnlocked(newLevel);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div style={s.endRoot}>
@@ -397,19 +410,125 @@ const RunEndScreen: React.FC<{ won: boolean; onBack: () => void }> = ({ won, onB
         {won ? '👑 Victory!' : '💀 Defeated'}
       </h1>
       <div style={{ ...s.endTitle, fontSize: '1rem', opacity: 0.5, letterSpacing: '0.2em' }}>
-        {won ? 'The dungeon falls before you.' : `Fell in Act ${act}.`}
+        {won ? `${draftFaction ?? ''} · A${ascension} cleared` : `Fell in Act ${act}`}
       </div>
       <div style={s.endStats}>
+        <div>Faction: <strong>{draftFaction ?? '—'}</strong></div>
+        <div>Ascension: <strong>A{ascension}</strong></div>
         <div>Combats won: {stats?.totalCombats ?? 0}</div>
         <div>Elites defeated: {stats?.elitesDefeated ?? 0}</div>
         <div>Bosses defeated: {stats?.bossesDefeated ?? 0}</div>
+        <div>Cards played: {stats?.cardsPlayed ?? 0}</div>
         <div>Gold remaining: {runState?.gold ?? 0}g</div>
         <div>Relics collected: {runState?.relics.length ?? 0}</div>
         <div>Deck size: {runState?.deck.length ?? 0} cards</div>
+        <div>HP at end: {runState?.currentHealth ?? 0}/{runState?.maxHealth ?? 0}</div>
       </div>
+
+      {won && newlyUnlocked !== null && (
+        <div
+          style={{
+            marginTop: 12,
+            padding: '10px 18px',
+            background: 'rgba(255,210,74,0.14)',
+            border: '1px solid #ffd24a',
+            color: '#ffe18a',
+            borderRadius: 6,
+            fontSize: 13,
+            fontWeight: 700,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            boxShadow: '0 0 16px rgba(255,210,74,0.3)',
+          }}
+        >
+          ✨ Ascension {newlyUnlocked} unlocked for {draftFaction}
+        </div>
+      )}
+
       <button type="button" style={s.endBtn} onClick={onBack}>
-        Main Menu
+        Start New Run
       </button>
+    </div>
+  );
+};
+
+// ─── Ascension picker ────────────────────────────────────────────────────────
+const AscensionPicker: React.FC<{
+  level: AscensionLevel;
+  maxUnlocked: AscensionLevel;
+  accent: string;
+  onChange: (level: AscensionLevel) => void;
+}> = ({ level, maxUnlocked, accent, onChange }) => {
+  const lines = describeAscension(level);
+
+  const stepBtn = (n: AscensionLevel, locked: boolean): React.CSSProperties => ({
+    minWidth: 30,
+    padding: '4px 6px',
+    background: n === level ? accent : '#0a0a14',
+    color:      n === level ? '#000'  : locked ? '#444' : '#ccc',
+    border: `1px solid ${locked ? '#222' : accent}`,
+    borderRadius: 4,
+    fontSize: 11,
+    fontWeight: 800,
+    letterSpacing: '0.06em',
+    cursor: locked ? 'not-allowed' : 'pointer',
+    opacity: locked ? 0.45 : 1,
+  });
+
+  return (
+    <div
+      style={{
+        width: '100%',
+        maxWidth: 560,
+        padding: '12px 14px',
+        background: 'rgba(10,10,22,0.6)',
+        border: '1px solid #2a2a4a',
+        borderRadius: 8,
+        marginTop: 16,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 9,
+          letterSpacing: '0.25em',
+          color: '#aaa',
+          textTransform: 'uppercase',
+          marginBottom: 6,
+        }}
+      >
+        Ascension · {maxUnlocked === 0 ? 'no unlocks yet' : `unlocked through A${maxUnlocked}`}
+      </div>
+
+      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8 }}>
+        {Array.from({ length: 11 }, (_, i) => i as AscensionLevel).map((n) => {
+          const locked = n > maxUnlocked;
+          return (
+            <button
+              key={n}
+              type="button"
+              disabled={locked}
+              onClick={() => !locked && onChange(n)}
+              style={stepBtn(n, locked)}
+            >
+              {n === 0 ? 'A0' : `A${n}`}
+            </button>
+          );
+        })}
+      </div>
+
+      {lines.length === 0 ? (
+        <div style={{ fontSize: 11, color: '#aaa', fontStyle: 'italic' }}>
+          Standard difficulty — no modifiers.
+        </div>
+      ) : (
+        <ul style={{ margin: 0, paddingLeft: 16, color: '#ddd' }}>
+          {lines.map((line) => (
+            <li key={line} style={{ fontSize: 11, lineHeight: 1.5, marginBottom: 1 }}>
+              {line}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
@@ -419,6 +538,14 @@ const RunEndScreen: React.FC<{ won: boolean; onBack: () => void }> = ({ won, onB
 const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const { runState, startNewRun, endRun } = useDungeonRun();
   const [selectedId, setSelectedId] = useState<FactionId>('Pyroclast');
+  // Ascension selection. Default to the highest level the player has unlocked
+  // for the chosen faction. Reset whenever the faction picker changes.
+  const maxUnlocked = getMaxUnlockedAscension(selectedId as Faction);
+  const [ascensionLevel, setAscensionLevel] = useState<AscensionLevel>(maxUnlocked);
+  // Keep the slider in sync when the faction changes.
+  React.useEffect(() => {
+    setAscensionLevel(getMaxUnlockedAscension(selectedId as Faction));
+  }, [selectedId]);
   const [deckOpen, setDeckOpen] = useState(false);
 
   // ── Faction selection (pre-run) ──
@@ -472,13 +599,20 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         <FactionDetail faction={selected} deck={selectedDeck} />
 
+        <AscensionPicker
+          level={ascensionLevel}
+          maxUnlocked={maxUnlocked}
+          accent={selected.accent}
+          onChange={setAscensionLevel}
+        />
+
         <div style={s.startRow}>
           <button
             type="button"
             style={beginBtnStyle(selected.accent, false)}
-            onClick={() => startNewRun(selectedId as Faction)}
+            onClick={() => startNewRun(selectedId as Faction, undefined, ascensionLevel)}
           >
-            Begin Run
+            Begin Run · A{ascensionLevel}
           </button>
         </div>
       </div>

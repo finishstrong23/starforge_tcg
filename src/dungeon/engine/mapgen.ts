@@ -65,7 +65,7 @@ function pickRandom<T>(arr: T[], rng: () => number): T {
 
 // ─── Map generation ───────────────────────────────────────────────────────────
 
-export function generateActMap(actNumber: 1 | 2 | 3, seed: string): ActMap {
+export function generateActMap(actNumber: 1 | 2 | 3, seed: string, extraElites = 0): ActMap {
   const rng = mulberry32(hashSeed(`${seed}-act${actNumber}`));
   const nodes: MapNode[] = [];
 
@@ -81,8 +81,15 @@ export function generateActMap(actNumber: 1 | 2 | 3, seed: string): ActMap {
     });
   }
 
-  // Rows 1–6: procedural distribution (18 slots)
-  const dist = ACT_DISTRIBUTIONS[actNumber];
+  // Rows 1–6: procedural distribution (18 slots).
+  // Ascension A2+ adds `extraElites` elite nodes to each act, taken from
+  // the combat pool (so the total slot count stays at 18).
+  const dist = { ...ACT_DISTRIBUTIONS[actNumber] };
+  for (let i = 0; i < extraElites; i++) {
+    if (dist.combat <= 0) break;
+    dist.combat -= 1;
+    dist.elite  += 1;
+  }
   const typePool: Exclude<NodeType, 'boss'>[] = [];
   (Object.keys(dist) as Exclude<NodeType, 'boss'>[]).forEach((t) => {
     for (let i = 0; i < dist[t]; i++) typePool.push(t);

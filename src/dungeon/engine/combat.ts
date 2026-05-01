@@ -150,8 +150,32 @@ export function initCombat(
   _relics: RelicDefinition[],
   enemy: EnemyDefinition,
   faction: string = 'Cogsmiths',
+  ascensionMods?: { enemyHpMul?: number; enemyDamageMul?: number; bossStrength?: number; drawPerTurn?: number },
 ): CombatState {
   const shuffled = shuffleDeck([...deck]);
+  const hpMul    = ascensionMods?.enemyHpMul ?? 1;
+  const dmgMul   = ascensionMods?.enemyDamageMul ?? 1;
+  const drawPer  = ascensionMods?.drawPerTurn ?? 5;
+  const bossStr  = ascensionMods?.bossStrength ?? 0;
+  const enemyMaxHp = Math.round(enemy.maxHealth * hpMul);
+
+  // A6 / A10: scale enemy attack and every per-intent attack/special value.
+  const scaledEnemy: EnemyDefinition = {
+    ...enemy,
+    maxHealth: enemyMaxHp,
+    attack: Math.round(enemy.attack * dmgMul),
+    intents: enemy.intents.map((it) =>
+      (it.type === 'attack' || it.type === 'special') && it.value !== undefined
+        ? { ...it, value: Math.round(it.value * dmgMul) }
+        : it,
+    ),
+  };
+
+  // A4 / A10: bosses spawn with Strength.
+  const bossStartingEffects: StatusEffect[] = (enemy.isBoss && bossStr > 0)
+    ? [{ type: 'strength', stacks: bossStr }]
+    : [];
+
   const state: CombatState = {
     phase: 'draw',
     turn: 1,
@@ -168,10 +192,10 @@ export function initCombat(
     drawPile: shuffled,
     discardPile: [],
     enemy: {
-      ...enemy,
-      currentHealth: enemy.maxHealth,
+      ...scaledEnemy,
+      currentHealth: enemyMaxHp,
       currentShield: 0,
-      statusEffects: [],
+      statusEffects: bossStartingEffects,
       intentIndex: 0,
       minionsInPlay: [],
     },
@@ -183,8 +207,9 @@ export function initCombat(
     exhaustPile: [],
     skipNextEnemyTurn: false,
     pendingTurnStartBlock: 0,
+    drawPerTurn: drawPer,
   };
-  return drawCards(state, 5);
+  return drawCards(state, drawPer);
 }
 
 function shuffleDeck(cards: CardInstance[]): CardInstance[] {
@@ -997,7 +1022,7 @@ export function executeEnemyTurn(state: CombatState): CombatState {
     s = log(s, `⏳ Time freezes — ${s.enemy.name} loses a turn`);
     s = { ...s, skipNextEnemyTurn: false, phase: 'player_turn' };
     s = { ...s, playerShield: 0, discardPile: [...s.discardPile, ...s.hand], hand: [] };
-    s = drawCards(s, 5);
+    s = drawCards(s, s.drawPerTurn ?? 5);
     s = applyRiftStartOfTurn(s);
     if ((s.pendingTurnStartBlock ?? 0) > 0) {
       const queued = s.pendingTurnStartBlock!;
@@ -1088,7 +1113,7 @@ export function executeEnemyTurn(state: CombatState): CombatState {
       discardPile: [...s.discardPile, ...s.hand],
       hand: [],
     };
-    s = drawCards(s, 5);
+    s = drawCards(s, s.drawPerTurn ?? 5);
     s = applyRiftStartOfTurn(s);
 
     // Aegis Mixture residue: queued block for the start of next turn.

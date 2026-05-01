@@ -25,10 +25,11 @@ export const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      {/* onBack is intentionally a no-op: there is no "back" — only a
-          new run. DungeonRoot's "Abandon Run" already wipes state and
-          shows faction-select again. */}
-      <DungeonRoot onBack={() => { /* no-op */ }} />
+      {/* "Start New Run" reloads the page so we get a fresh DungeonRunProvider
+          state — simpler and more reliable than a soft-reset reducer action. */}
+      <DungeonRoot onBack={() => {
+        if (typeof window !== 'undefined') window.location.reload();
+      }} />
       <TelemetryDebugPanel />
     </ErrorBoundary>
   );

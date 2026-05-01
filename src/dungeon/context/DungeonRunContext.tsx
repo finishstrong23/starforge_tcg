@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
 import type {
+  AscensionLevel,
   CardDefinition,
   CardInstance,
   CombatState,
@@ -17,6 +18,7 @@ import { initCombat } from '../engine/combat';
 import { applyPotion } from '../data/potions';
 import { applyRelicsToCombat, applyRelicsToRun } from '../engine/relicEffects';
 import { logEvent } from '../engine/telemetry';
+import { getAscensionMods, recordWin as recordAscensionWin } from '../engine/ascension';
 
 // ─── Context value ─────────────────────────────────────────────────────────────
 
@@ -28,7 +30,7 @@ export interface DungeonRunContextValue {
   draftOptions: CardDefinition[];
   draftPicks: CardInstance[];
 
-  startNewRun: (faction: Faction, seed?: string) => void;
+  startNewRun: (faction: Faction, seed?: string, ascensionLevel?: AscensionLevel) => void;
   /** Pick a card from the current draft round. Advances round; auto-completes on round 3. */
   pickDraftCard: (card: CardDefinition) => void;
   /** Directly finalise the deck and move to 'map'. */
@@ -70,7 +72,7 @@ interface ContextState {
 }
 
 type Action =
-  | { type: 'START_RUN'; faction: Faction; seed: string }
+  | { type: 'START_RUN'; faction: Faction; seed: string; ascensionLevel?: AscensionLevel }
   | { type: 'PICK_DRAFT'; card: CardDefinition }
   | { type: 'COMPLETE_DRAFT'; deck: CardInstance[] }
   | { type: 'TRAVEL_TO_NODE'; nodeId: string }
@@ -99,23 +101,26 @@ const INITIAL: ContextState = {
   seed: '',
 };
 
-function makeRunState(faction: Faction, seed: string): RunState {
+function makeRunState(faction: Faction, seed: string, ascensionLevel: AscensionLevel = 0): RunState {
+  const mods = getAscensionMods(ascensionLevel);
+  const baseHp = 72 - mods.startingHpPenalty;          // A5
   return {
     phase: 'draft',
     currentAct: 1,
     actMaps: [
-      generateActMap(1, seed),
-      generateActMap(2, seed),
-      generateActMap(3, seed),
+      generateActMap(1, seed, mods.extraEliteNodes),    // A2
+      generateActMap(2, seed, mods.extraEliteNodes),
+      generateActMap(3, seed, mods.extraEliteNodes),
     ],
     deck: getStarterCards(faction),
     hand: [],
     relics: [],
     gold: 99,
-    maxHealth: 72,
-    currentHealth: 72,
+    maxHealth: baseHp,
+    currentHealth: baseHp,
     energy: 3,
     maxEnergy: 3,
+    ascensionLevel,
     combatState: null,
     potions: [null, null, null],
     runStats: {
@@ -136,10 +141,11 @@ function reducer(state: ContextState, action: Action): ContextState {
   switch (action.type) {
     // ── Start new run ─────────────────────────────────────────────────────────
     case 'START_RUN': {
-      const run = makeRunState(action.faction, action.seed);
+      const ascension = action.ascensionLevel ?? 0;
+      const run = makeRunState(action.faction, action.seed, ascension);
       const options = generateDraftOptions(1, run.deck, action.faction);
       logEvent('faction_picked', { faction: action.faction });
-      logEvent('run_start', { faction: action.faction, seed: action.seed });
+      logEvent('run_start', { faction: action.faction, seed: action.seed, ascensionLevel: ascension });
       return {
         run,
         draftFaction: action.faction,
@@ -214,6 +220,7 @@ function reducer(state: ContextState, action: Action): ContextState {
         }
 
         if (enemy) {
+          const mods = getAscensionMods(state.run.ascensionLevel);
           combatState = initCombat(
             state.run.deck,
             state.run.currentHealth,
@@ -221,6 +228,12 @@ function reducer(state: ContextState, action: Action): ContextState {
             state.run.relics,
             enemy,
             state.draftFaction ?? 'Cogsmiths',
+            {
+              enemyHpMul:     mods.enemyHpMul,
+              enemyDamageMul: mods.enemyDamageMul,
+              bossStrength:   mods.bossStrength,
+              drawPerTurn:    mods.drawPerTurn,
+            },
           );
           combatState = applyRelicsToCombat('combat_start', state.run.relics, combatState, {
             combatIndex: state.run.runStats.totalCombats,
@@ -480,8 +493,13 @@ const DungeonRunContext = createContext<DungeonRunContextValue | null>(null);
 export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [s, dispatch] = useReducer(reducer, INITIAL);
 
-  const startNewRun = useCallback((faction: Faction, seed?: string) => {
-    dispatch({ type: 'START_RUN', faction, seed: seed ?? String(Date.now()) });
+  const startNewRun = useCallback((faction: Faction, seed?: string, ascensionLevel: AscensionLevel = 0) => {
+    dispatch({
+      type: 'START_RUN',
+      faction,
+      seed: seed ?? String(Date.now()),
+      ascensionLevel,
+    });
   }, []);
 
   const pickDraftCard = useCallback((card: CardDefinition) => {
