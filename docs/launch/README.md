@@ -90,13 +90,65 @@ Communities to post in (in priority order):
 5. r/webgames — broad, expect drive-by traffic
 6. Twitter / Discord — your usual channels
 
-## Telemetry endpoint (post-launch task)
+## Telemetry pipeline
 
-Right now telemetry is localStorage only. To get aggregate data:
+Already wired end-to-end. Three pieces:
 
-1. Add a Vercel Function at `/api/event` that POSTs incoming events
-   somewhere durable (PostHog / a Supabase table / a Neon DB / etc.).
-2. In `src/ui/main.tsx`, after `App` mount, call
-   `setTelemetryEndpoint('/api/event')`.
+### 1. Client → server
 
-That's a one-day follow-up after the URL is up, not a day-zero blocker.
+Production builds POST every event to `/api/event`. Disabled in dev so
+local work doesn't spam the endpoint. Wiring lives in
+`src/ui/main.tsx` (`setTelemetryEndpoint('/api/event')` behind
+`import.meta.env.PROD`).
+
+### 2. Server (`api/event.ts`, Vercel Edge Function)
+
+- Validates event shape (allowlist of types, size cap, sane timestamps
+  + session ids).
+- `console.log`s the event as a single-line JSON object (including
+  Vercel-provided country code, no IP stored).
+- Returns 204 on success, 4xx on validation failure.
+
+Reading the data (free tier):
+1. Vercel dashboard → your project → Logs tab.
+2. Filter for `src":"starforge.event"`.
+3. Copy the matching lines into a file: `events.ndjson`.
+4. Run `npm run telemetry:summary events.ndjson`.
+
+Vercel keeps function logs ~24h on the Hobby (free) tier. For longer
+retention, the function body is the right place to swap `console.log`
+for a PostHog SDK call, a Vercel KV write, or a webhook to Supabase /
+Neon. The client doesn't need to change — it already POSTs to the
+same endpoint.
+
+### 3. Aggregation (`scripts/aggregate-telemetry.mjs`)
+
+`npm run telemetry:summary <events.json>`
+
+Accepts either:
+- A JSON array of events (the format the in-game `?debug=1` panel's
+  "Copy JSON" button produces).
+- NDJSON, one event per line (the format Vercel logs export to).
+
+Prints, in order:
+- Sessions, total runs, completion rate, avg runs per session.
+- Faction-pick distribution.
+- Win rate per `faction × ascension`.
+- Funnel (% of sessions reaching each milestone — picked → started →
+  first combat → won first combat → first elite → won a run).
+- Top 10 causes of death, by enemy.
+- Most-picked / least-picked cards (top 15 / bottom 10) with tier tags.
+- Run-length distribution (avg, min, max combats per run).
+
+This is the day-1 dashboard. Run it daily for the first two weeks
+post-launch; the win-rate-per-faction × ascension table is the most
+actionable thing — anything outside the 10–25% target band on common
+ascension levels is your next balance patch.
+
+### Privacy note
+
+No accounts, no IPs stored, no cookies. The only identifier is a
+random per-tab session id. Country comes from a Vercel HTTP header
+(geolocation by IP at request time, not stored). Stop reading events
+from any test session by adding their session id to a deny-list in
+`api/event.ts` if needed.
