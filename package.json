@@ -12,7 +12,8 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint src --ext .ts,.tsx",
     "dev": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "telemetry:summary": "node scripts/aggregate-telemetry.mjs"
   },
   "keywords": [
     "roguelite",
