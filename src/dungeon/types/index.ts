@@ -259,6 +259,7 @@ export interface PotionInstance {
 // ─── RUN STATE ───────────────────────────────────────────────────────────────
 export type RunPhase =
   | 'draft'
+  | 'blessing'      // Act-start blessing screen (after draft for Act 1, after each boss for Acts 2 & 3)
   | 'map'
   | 'combat'
   | 'elite_combat'

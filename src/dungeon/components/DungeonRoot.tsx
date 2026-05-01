@@ -10,6 +10,7 @@ import {
   type Card,
 } from '../../roguelite';
 import { DraftView } from './DraftView';
+import { BlessingView } from './BlessingView';
 import { MapView } from './MapView';
 import { CombatView } from './CombatView';
 import { RewardView } from './RewardView';
@@ -633,6 +634,7 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   let mainView: React.ReactNode;
   switch (phase) {
     case 'draft':      mainView = <DraftView />; break;
+    case 'blessing':   mainView = <BlessingView />; break;
     case 'map':        mainView = <MapView />; break;
     case 'combat':
     case 'elite_combat':
