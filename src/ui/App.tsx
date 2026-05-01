@@ -12,6 +12,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { DungeonRoot } from '../dungeon';
 import { TelemetryDebugPanel } from '../dungeon/components/TelemetryDebugPanel';
 import { logEvent } from '../dungeon/engine/telemetry';
+import { clearDungeonSave } from '../dungeon/context/DungeonRunContext';
 
 export const App: React.FC = () => {
   // Emit one session_start per tab. (The session id is stable for the life
@@ -25,9 +26,11 @@ export const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      {/* "Start New Run" reloads the page so we get a fresh DungeonRunProvider
-          state — simpler and more reliable than a soft-reset reducer action. */}
+      {/* "Start New Run" clears the saved run, then reloads. The reload
+          gives us a fresh DungeonRunProvider state (cleaner than wiring
+          a soft-reset reducer action just for one entry point). */}
       <DungeonRoot onBack={() => {
+        clearDungeonSave();
         if (typeof window !== 'undefined') window.location.reload();
       }} />
       <TelemetryDebugPanel />

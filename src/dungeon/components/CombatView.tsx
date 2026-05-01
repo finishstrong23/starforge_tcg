@@ -10,6 +10,7 @@ import { CardComponent } from './CardComponent';
 import { PotionInventory } from './PotionInventory';
 import { LumenAllocatorModal } from './LumenAllocatorModal';
 import { PotionDrinkBurst } from './PotionDrinkBurst';
+import { TutorialOverlay, isTutorialDismissed } from './TutorialOverlay';
 import { getPotionDef } from '../data/potions';
 import { isChannelCard } from '../engine/combat';
 
@@ -1409,6 +1410,16 @@ export const CombatView: React.FC = () => {
       <div style={s.turnBanner}>
         {isEnemyTurn ? '⚠ Enemy Turn' : `Your Turn · ${cs.turn}`}
       </div>
+
+      {/* First-run tutorial overlay (combat #1, #2, #3 of the player's
+          first run, on turn 1 only). Permanently dismissible. */}
+      {(() => {
+        if (isTutorialDismissed()) return null;
+        if (cs.turn !== 1) return null;
+        const combatNum = (runState?.runStats.totalCombats ?? 0); // 0-indexed = combat #1, 1 = #2, 2 = #3
+        if (combatNum > 2) return null;
+        return <TutorialOverlay step={combatNum as 0 | 1 | 2} />;
+      })()}
 
       {/* Combat-end overlay */}
       {isCombatOver && (
