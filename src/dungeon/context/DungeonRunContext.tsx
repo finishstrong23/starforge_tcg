@@ -16,6 +16,7 @@ import { createCardInstance, generateDraftOptions, getStarterCards } from '../en
 import { initCombat } from '../engine/combat';
 import { applyPotion } from '../data/potions';
 import { applyRelicsToCombat, applyRelicsToRun } from '../engine/relicEffects';
+import { logEvent } from '../engine/telemetry';
 
 // ─── Context value ─────────────────────────────────────────────────────────────
 
@@ -137,6 +138,8 @@ function reducer(state: ContextState, action: Action): ContextState {
     case 'START_RUN': {
       const run = makeRunState(action.faction, action.seed);
       const options = generateDraftOptions(1, run.deck, action.faction);
+      logEvent('faction_picked', { faction: action.faction });
+      logEvent('run_start', { faction: action.faction, seed: action.seed });
       return {
         run,
         draftFaction: action.faction,
@@ -222,7 +225,21 @@ function reducer(state: ContextState, action: Action): ContextState {
           combatState = applyRelicsToCombat('combat_start', state.run.relics, combatState, {
             combatIndex: state.run.runStats.totalCombats,
           });
+          logEvent('combat_start', {
+            faction: state.draftFaction,
+            act: state.run.currentAct,
+            nodeType: node.type,
+            enemyId: enemy.id,
+            enemyName: enemy.name,
+            playerHP: state.run.currentHealth,
+            playerMaxHP: state.run.maxHealth,
+            relicCount: state.run.relics.length,
+          });
         }
+      } else if (node.type === 'shop') {
+        logEvent('shop_visited', { faction: state.draftFaction, act: state.run.currentAct });
+      } else if (node.type === 'rest') {
+        logEvent('rest_used', { faction: state.draftFaction, act: state.run.currentAct });
       }
 
       return {
@@ -234,6 +251,12 @@ function reducer(state: ContextState, action: Action): ContextState {
     // ── Relic / resource mutations ────────────────────────────────────────────
     case 'ADD_RELIC': {
       if (!state.run) return state;
+      logEvent('relic_picked', {
+        faction: state.draftFaction,
+        relicId: action.relic.id,
+        relicName: action.relic.name,
+        relicRarity: action.relic.rarity,
+      });
       return { ...state, run: { ...state.run, relics: [...state.run.relics, action.relic] } };
     }
     case 'ADD_GOLD': {
@@ -268,6 +291,13 @@ function reducer(state: ContextState, action: Action): ContextState {
     // ── Deck mutations ────────────────────────────────────────────────────────
     case 'ADD_CARD': {
       if (!state.run) return state;
+      logEvent('card_picked', {
+        faction: state.draftFaction,
+        cardId: action.card.id,
+        cardName: action.card.name,
+        rarity: action.card.rarity,
+        complexityTier: action.card.complexityTier,
+      });
       return { ...state, run: { ...state.run, deck: [...state.run.deck, action.card] } };
     }
     case 'REMOVE_CARD': {
@@ -363,6 +393,10 @@ function reducer(state: ContextState, action: Action): ContextState {
       const target = action.slotIndex ?? slots.findIndex((p) => p === null);
       if (target < 0 || target > 2) return state; // inventory full and no slot specified
       slots[target] = action.potion;
+      logEvent('potion_picked', {
+        faction: state.draftFaction,
+        potionId: action.potion.definitionId,
+      });
       return { ...state, run: { ...state.run, potions: slots } };
     }
     case 'DISCARD_POTION': {
@@ -410,6 +444,19 @@ function reducer(state: ContextState, action: Action): ContextState {
     // ── End run ───────────────────────────────────────────────────────────────
     case 'END_RUN': {
       if (!state.run) return state;
+      logEvent('run_end', {
+        faction: state.draftFaction,
+        victory: action.won,
+        currentAct: state.run.currentAct,
+        totalCombats: state.run.runStats.totalCombats,
+        elitesDefeated: state.run.runStats.elitesDefeated,
+        bossesDefeated: state.run.runStats.bossesDefeated,
+        cardsPlayed: state.run.runStats.cardsPlayed,
+        deckSize: state.run.deck.length,
+        relicCount: state.run.relics.length,
+        finalHP: state.run.currentHealth,
+        gold: state.run.gold,
+      });
       return {
         ...state,
         run: { ...state.run, phase: action.won ? 'run_end_win' : 'run_end_loss' },

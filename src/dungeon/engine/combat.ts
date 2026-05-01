@@ -1158,11 +1158,31 @@ export function applyDamage(state: CombatState, targetId: string, amount: number
 
 // ─── checkCombatEnd ──────────────────────────────────────────────────────────
 
+import { logEvent } from './telemetry';
+
 export function checkCombatEnd(state: CombatState): CombatState {
-  if (state.playerHealth <= 0) {
+  // Only emit a telemetry event on the transition into a terminal phase,
+  // not on subsequent calls in the same terminal state.
+  if (state.playerHealth <= 0 && state.phase !== 'combat_end_loss') {
+    logEvent('combat_end', {
+      victory: false,
+      faction: state.playerFaction,
+      enemyId: state.enemy.id,
+      enemyName: state.enemy.name,
+      enemyHpRemaining: state.enemy.currentHealth,
+      turn: state.turn,
+    });
     return log({ ...state, phase: 'combat_end_loss' }, '💀 You have been defeated!');
   }
-  if (state.enemy.currentHealth <= 0) {
+  if (state.enemy.currentHealth <= 0 && state.phase !== 'combat_end_win') {
+    logEvent('combat_end', {
+      victory: true,
+      faction: state.playerFaction,
+      enemyId: state.enemy.id,
+      enemyName: state.enemy.name,
+      playerHpRemaining: state.playerHealth,
+      turn: state.turn,
+    });
     return log({ ...state, phase: 'combat_end_win' }, `🏆 ${state.enemy.name} defeated!`);
   }
   return state;
