@@ -508,6 +508,10 @@ const AscensionPicker: React.FC<{
               type="button"
               disabled={locked}
               onClick={() => !locked && onChange(n)}
+              aria-label={locked
+                ? `Ascension ${n} (locked — beat A${maxUnlocked} to unlock)`
+                : `Choose Ascension ${n}${n === level ? ' (selected)' : ''}`}
+              aria-pressed={n === level}
               style={stepBtn(n, locked)}
             >
               {n === 0 ? 'A0' : `A${n}`}
