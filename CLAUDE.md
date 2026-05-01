@@ -138,31 +138,6 @@ src/
 | `StarforgeLogo.tsx` | Logo component (uses raw GitHub URLs with commit SHAs) |
 | `SpaceBackground.tsx` | Animated space background |
 
-### Backend Server (`server/`)
-Separate Node.js backend with its own `package.json`:
-```
-server/
-├── src/
-│   ├── index.ts        # Express server entry point
-│   ├── config/         # Server configuration
-│   ├── middleware/      # Auth, CORS, etc.
-│   ├── migrations/     # PostgreSQL schema migrations
-│   ├── models/         # Database models
-│   ├── routes/         # API route handlers
-│   └── services/       # Business logic services
-└── package.json        # Server-specific dependencies
-```
-
-**Server commands** (run from `server/`):
-```bash
-npm run dev       # Start dev server (ts-node)
-npm run build     # Compile TypeScript
-npm start         # Run compiled server
-npm run migrate   # Run database migrations
-```
-
-**Server tech**: Express 4, PostgreSQL (pg), JWT auth, bcrypt, WebSocket (ws)
-
 ### Root-Level Utility Scripts
 Data processing and balance tools (run with `node`):
 - `convert-cards.mjs` — Convert card data formats
@@ -175,8 +150,6 @@ Data processing and balance tools (run with `node`):
 ## Tech Stack
 - **Language**: TypeScript 5.3 (strict mode, ES2020 target)
 - **UI**: React 18 + Vite 5
-- **Backend**: Express 4 + PostgreSQL + WebSocket
-- **Auth**: JWT + bcrypt
 - **Testing**: Jest 29 + ts-jest
 - **Linting**: ESLint 8 + @typescript-eslint
 - **Mobile**: Capacitor 8 (Android + iOS)
@@ -240,7 +213,6 @@ Three workflows in `.github/workflows/`:
 
 2. **`deploy.yml`** — Runs on push to `main` or manual dispatch
    - Deploys web to Vercel (staging → production)
-   - Deploys server (via secrets)
    - Builds mobile on macOS with Fastlane (production only)
 
 3. **`auto-deploy.yml`** — Runs on pushes to `claude/**` branches
