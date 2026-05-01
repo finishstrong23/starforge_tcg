@@ -1,22 +1,12 @@
 /**
- * STARFORGE TCG - UI Components Index
+ * STARFORGE — UI components barrel export.
+ *
+ * Dungeon-run-only build. Only the components actually used by the dungeon
+ * tree (or rendered globally like ErrorBoundary / SpaceBackground / Logo)
+ * are re-exported here. Legacy 1v1 components (GameBoard, Card,
+ * HeroPortrait, CrystalBar, etc.) were removed during the launch pivot.
  */
 
-export { GameBoard } from './GameBoard';
-export { MainMenu } from './MainMenu';
-export { Card } from './Card';
-export { HeroPortrait } from './HeroPortrait';
-export { CrystalBar } from './CrystalBar';
-export { EndTurnButton } from './EndTurnButton';
-export { GameOverlay } from './GameOverlay';
-export { TurnTimer } from './TurnTimer';
-export { KeywordTooltip, KEYWORD_DESCRIPTIONS } from './KeywordTooltip';
-export { PuzzleMode } from './PuzzleMode';
-export { PostGameStats } from './PostGameStats';
-export { BoardVFXOverlay, useBoardVFX } from './BoardVFX';
-export { TagTeamMode } from './TagTeamMode';
-export { LegendaryCinematic, useLegendaryCinematic } from './LegendaryCinematic';
-export { FactionWarsScreen } from './FactionWarsScreen';
-export { BoardPet, PetSelector, firePetEvent } from './BoardPet';
+export { ErrorBoundary } from './ErrorBoundary';
 export { StarforgeLogo } from './StarforgeLogo';
 export { SpaceBackground } from './SpaceBackground';

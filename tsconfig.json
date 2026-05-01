@@ -30,16 +30,7 @@
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
-      "@types/*": ["./types/*"],
-      "@cards/*": ["./cards/*"],
-      "@game/*": ["./game/*"],
-      "@combat/*": ["./combat/*"],
-      "@keywords/*": ["./keywords/*"],
-      "@effects/*": ["./effects/*"],
-      "@events/*": ["./events/*"],
-      "@heroes/*": ["./heroes/*"],
-      "@races/*": ["./races/*"],
-      "@starforge/*": ["./starforge/*"],
+      "@dungeon/*": ["./dungeon/*"],
       "@utils/*": ["./utils/*"]
     }
   },
