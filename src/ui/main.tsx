@@ -1,18 +1,18 @@
 /**
- * STARFORGE TCG - UI Entry Point
+ * STARFORGE — UI entry point.
+ *
+ * Web-only build. Capacitor mobile shell was removed during the
+ * dungeon-only pivot — if mobile shipping comes back, reintroduce
+ * `initCapacitor()` here behind a build-time flag.
  */
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';
 import './styles/global.css';
-import { initCapacitor } from './capacitor';
-
-// Initialize Capacitor plugins (status bar, splash screen, etc.)
-initCapacitor();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />
-  </React.StrictMode>
+  </React.StrictMode>,
 );
