@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 import type {
   AscensionLevel,
   CardDefinition,
@@ -490,8 +490,56 @@ function reducer(state: ContextState, action: Action): ContextState {
 
 const DungeonRunContext = createContext<DungeonRunContextValue | null>(null);
 
+// ── Save / hydrate ────────────────────────────────────────────────────────
+// localStorage-based run persistence. Snapshots every state change. On
+// mount, if a saved run exists, hydrate from it so the player is returned
+// to the exact phase they left (combat / map / shop / reward / etc.).
+// Cleared by the run-end "Start New Run" flow so a finished run doesn't
+// resurrect.
+const SAVE_KEY = 'sf:dungeon:save:v1';
+
+function hydrate(initial: ContextState): ContextState {
+  if (typeof localStorage === 'undefined') return initial;
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return initial;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return initial;
+    // If the player abandoned at the run-end screen, treat as no save —
+    // they shouldn't be locked on a corpse.
+    const phase = parsed?.run?.phase;
+    if (phase === 'run_end_win' || phase === 'run_end_loss') return initial;
+    return parsed as ContextState;
+  } catch {
+    return initial;
+  }
+}
+
+function persist(state: ContextState): void {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    if (state.run) {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    } else {
+      // Pre-run lobby state is uninteresting; don't bloat localStorage.
+      localStorage.removeItem(SAVE_KEY);
+    }
+  } catch {
+    // localStorage may be quota-exceeded or disabled. Save is best-effort.
+  }
+}
+
+export function clearDungeonSave(): void {
+  if (typeof localStorage === 'undefined') return;
+  try { localStorage.removeItem(SAVE_KEY); } catch { /* swallow */ }
+}
+
 export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [s, dispatch] = useReducer(reducer, INITIAL);
+  const [s, dispatch] = useReducer(reducer, INITIAL, hydrate);
+
+  // Persist on every state transition. cheap (~1KB per write); the buffer
+  // of typical runs stays well under 50KB.
+  useEffect(() => { persist(s); }, [s]);
 
   const startNewRun = useCallback((faction: Faction, seed?: string, ascensionLevel: AscensionLevel = 0) => {
     dispatch({
