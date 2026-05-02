@@ -39,11 +39,25 @@ export interface RunCard extends DungeonCardDefinition {
 }
 
 // ─── Enemies ────────────────────────────────────────────────
-export type IntentType = 'ATTACK' | 'DEFEND' | 'BUFF' | 'DEBUFF' | 'SPECIAL';
+export type IntentType =
+  | 'ATTACK'
+  | 'MULTI_ATTACK'
+  | 'AOE_ATTACK'
+  | 'DEFEND'
+  | 'BUFF'
+  | 'DEBUFF'
+  | 'ATTACK_BUFF'
+  | 'ATTACK_DEBUFF'
+  | 'SPECIAL'
+  | 'UNKNOWN';
 
 export interface EnemyIntent {
   type: IntentType;
-  value?: number;
+  damage?: number;
+  hits?: number;
+  block?: number;
+  buffName?: string;
+  debuffName?: string;
   description: string;
 }
 

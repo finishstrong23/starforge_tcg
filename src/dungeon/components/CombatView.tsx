@@ -134,6 +134,7 @@ export function CombatView({
             enemy={e}
             onClick={() => handleEnemyClick(e.id)}
             isTargetable={!!state.selectedMinionId && isPlayerTurn}
+            heroStatusEffects={state.heroStatusEffects}
           />
         ))}
       </div>

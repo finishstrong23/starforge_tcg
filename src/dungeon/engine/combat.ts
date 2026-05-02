@@ -229,6 +229,29 @@ export function tickStatuses(effects: StatusEffect[]): StatusEffect[] {
   return result;
 }
 
+// ─── Intent Damage Preview ────────────────────────────────
+
+/**
+ * Compute the damage number displayed on an enemy's intent icon.
+ * Accounts for attacker Strength/Weak and defender Vulnerable.
+ * This is the single source of truth for what the player sees.
+ */
+export function computeDisplayedDamage(
+  baseDamage: number,
+  attackerEffects: StatusEffect[],
+  defenderEffects: StatusEffect[],
+): number {
+  let damage = baseDamage + getStatusStacks(attackerEffects, 'STRENGTH');
+  damage = Math.max(0, damage);
+  if (hasStatus(attackerEffects, 'WEAK')) {
+    damage = Math.floor(damage * 0.75);
+  }
+  if (hasStatus(defenderEffects, 'VULNERABLE')) {
+    damage = Math.floor(damage * 1.5);
+  }
+  return Math.max(0, damage);
+}
+
 // ─── Damage Resolution ─────────────────────────────────────
 
 /**

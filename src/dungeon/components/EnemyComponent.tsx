@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import type { DungeonEnemy, IntentType, StatusEffect } from '../types';
+import { computeDisplayedDamage } from '../engine/combat';
 
 interface EnemyComponentProps {
   enemy: DungeonEnemy;
   onClick?: () => void;
   isTargetable?: boolean;
   showDamage?: number;
+  heroStatusEffects?: StatusEffect[];
 }
 
 const INTENT_CONFIG: Record<IntentType, { icon: string; color: string; label: (v?: number) => string }> = {
@@ -13,6 +15,16 @@ const INTENT_CONFIG: Record<IntentType, { icon: string; color: string; label: (v
     icon: '⚔️',
     color: '#e63946',
     label: (v) => `Attacks for ${v ?? '?'}`,
+  },
+  MULTI_ATTACK: {
+    icon: '⚔️',
+    color: '#e63946',
+    label: (v) => `Multi-attack`,
+  },
+  AOE_ATTACK: {
+    icon: '💥',
+    color: '#ff6b35',
+    label: (v) => `Attacks ALL for ${v ?? '?'}`,
   },
   DEFEND: {
     icon: '🛡️',
@@ -29,10 +41,25 @@ const INTENT_CONFIG: Record<IntentType, { icon: string; color: string; label: (v
     color: '#9b59b6',
     label: () => 'Debuffing',
   },
+  ATTACK_BUFF: {
+    icon: '⚔️',
+    color: '#e63946',
+    label: (v) => `Attacks for ${v ?? '?'} + Buff`,
+  },
+  ATTACK_DEBUFF: {
+    icon: '⚔️',
+    color: '#9b59b6',
+    label: (v) => `Attacks for ${v ?? '?'} + Debuff`,
+  },
   SPECIAL: {
     icon: '⭐',
     color: '#ff9800',
     label: () => 'Special',
+  },
+  UNKNOWN: {
+    icon: '❓',
+    color: '#666',
+    label: () => 'Unknown',
   },
 };
 
@@ -82,6 +109,7 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
   onClick,
   isTargetable = false,
   showDamage,
+  heroStatusEffects = [],
 }) => {
   const [damageVisible, setDamageVisible] = useState(false);
 
@@ -101,6 +129,17 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
   const healthColor = healthPct > 50 ? '#4caf50' : healthPct > 25 ? '#ffc107' : '#e63946';
   const intent = enemy.intent;
   const intentCfg = INTENT_CONFIG[intent.type];
+
+  // Live-updated displayed damage accounting for Strength, Weak, Vulnerable
+  const displayedDamage = useMemo(() => {
+    const baseDmg = intent.damage ?? intent.value ?? 0;
+    if (baseDmg <= 0) return 0;
+    return computeDisplayedDamage(baseDmg, enemy.statusEffects, heroStatusEffects);
+  }, [intent.damage, intent.value, enemy.statusEffects, heroStatusEffects]);
+
+  const hasAttackDamage = intent.type === 'ATTACK' || intent.type === 'MULTI_ATTACK'
+    || intent.type === 'AOE_ATTACK' || intent.type === 'ATTACK_BUFF'
+    || intent.type === 'ATTACK_DEBUFF';
 
   const isBoss = enemy.isBoss;
   const containerWidth = isBoss ? 280 : 220;
@@ -264,7 +303,22 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
     <div style={containerStyle} onClick={isTargetable ? onClick : undefined}>
       {/* Intent indicator */}
       <div style={intentContainerStyle}>
-        <div style={intentIconStyle}>{intentCfg.icon}</div>
+        <div style={intentIconStyle}>
+          {intentCfg.icon}
+          {hasAttackDamage && (
+            <span style={{ fontSize: isBoss ? 18 : 15, marginLeft: 4, fontFamily: 'monospace', fontWeight: 'bold' }}>
+              {displayedDamage}
+              {intent.type === 'MULTI_ATTACK' && intent.hits && (
+                <span style={{ fontSize: isBoss ? 13 : 11, opacity: 0.9 }}> x{intent.hits}</span>
+              )}
+            </span>
+          )}
+          {intent.type === 'DEFEND' && (intent.block ?? intent.value) != null && (
+            <span style={{ fontSize: isBoss ? 18 : 15, marginLeft: 4, fontFamily: 'monospace', fontWeight: 'bold' }}>
+              {intent.block ?? intent.value}
+            </span>
+          )}
+        </div>
         <div style={intentTextStyle}>
           {intent.description || intentCfg.label(intent.value)}
         </div>
@@ -322,4 +376,5 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
   );
 };
 
+export { EnemyComponent };
 export default EnemyComponent;

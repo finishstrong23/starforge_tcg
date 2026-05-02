@@ -22,19 +22,53 @@ function cycle(turn: number, length: number): number {
 
 // ─── Intent Builders ───────────────────────────────────────
 function attack(value: number, description?: string): EnemyIntent {
-  return { type: 'ATTACK', value, description: description ?? `Attack for ${value}` };
+  return { type: 'ATTACK', damage: value, value, description: description ?? `Attack for ${value}` };
+}
+
+function multiAttack(perHit: number, hits: number, description?: string): EnemyIntent {
+  return {
+    type: 'MULTI_ATTACK',
+    damage: perHit,
+    hits,
+    value: perHit,
+    description: description ?? `Attack for ${perHit} x${hits} (${perHit * hits} total)`,
+  };
+}
+
+function aoeAttack(value: number, description?: string): EnemyIntent {
+  return { type: 'AOE_ATTACK', damage: value, value, description: description ?? `Attack ALL for ${value}` };
 }
 
 function defend(value: number, description?: string): EnemyIntent {
-  return { type: 'DEFEND', value, description: description ?? `Block for ${value}` };
+  return { type: 'DEFEND', block: value, value, description: description ?? `Block for ${value}` };
 }
 
 function buff(description: string, value?: number): EnemyIntent {
-  return { type: 'BUFF', value, description };
+  return { type: 'BUFF', value, buffName: description, description };
 }
 
 function debuff(description: string, value?: number): EnemyIntent {
-  return { type: 'DEBUFF', value, description };
+  return { type: 'DEBUFF', value, debuffName: description, description };
+}
+
+function attackBuff(damage: number, buffDesc: string, buffValue?: number): EnemyIntent {
+  return {
+    type: 'ATTACK_BUFF',
+    damage,
+    value: damage,
+    buffName: buffDesc,
+    description: `Attack for ${damage} and ${buffDesc}`,
+  };
+}
+
+function attackDebuff(damage: number, debuffDesc: string, debuffValue?: number): EnemyIntent {
+  return {
+    type: 'ATTACK_DEBUFF',
+    damage,
+    value: damage,
+    debuffName: debuffDesc,
+    description: `Attack for ${damage} and ${debuffDesc}`,
+  };
 }
 
 function special(description: string, value?: number): EnemyIntent {
@@ -71,7 +105,7 @@ const crystalHatchling: EnemyTemplate = {
     name: 'attack_with_low_hp_block',
     getIntent: (_turn: number, enemy: DungeonEnemy) => {
       if (enemy.currentHealth < enemy.maxHealth / 2) {
-        return { type: 'ATTACK', value: 4, description: 'Attack for 4 and gain 4 Block' };
+        return attackBuff(4, 'gain 4 Block');
       }
       return attack(4);
     },
@@ -105,7 +139,7 @@ const emberWisp: EnemyTemplate = {
     name: 'aoe_and_heal',
     getIntent: (turn: number) => {
       const phase = cycle(turn, 3);
-      if (phase < 2) return attack(3, 'Attack ALL for 3');
+      if (phase < 2) return aoeAttack(3);
       return special('Heal for 6', 6);
     },
   },
@@ -121,7 +155,7 @@ const phantomScout: EnemyTemplate = {
     name: 'phase_attack_debuff',
     getIntent: (turn: number) => {
       const phase = cycle(turn, 2);
-      if (phase === 0) return attack(5, 'Attack for 5 (PHASE)');
+      if (phase === 0) return attackDebuff(5, 'apply Weak 1');
       return debuff('Apply WEAK', 1);
     },
   },
@@ -244,9 +278,9 @@ const pyroclastCultist: EnemyTemplate = {
     name: 'buff_attack_immolate',
     getIntent: (turn: number) => {
       const phase = cycle(turn, 3);
-      if (phase === 0) return buff('Buff all enemies: +3 Attack', 3);
+      if (phase === 0) return buff('Buff all enemies: +3 Strength', 3);
       if (phase === 1) return attack(10);
-      return special('IMMOLATE burst: deal 8 to all', 8);
+      return aoeAttack(8, 'IMMOLATE burst: Attack ALL for 8');
     },
   },
 };
@@ -425,7 +459,7 @@ const astralJuggernaut: EnemyTemplate = {
     name: 'juggernaut_cycle',
     getIntent: (turn: number) => {
       const phase = cycle(turn, 3);
-      if (phase === 0) return attack(10, 'Attack ALL for 10');
+      if (phase === 0) return aoeAttack(10);
       if (phase === 1) return defend(20);
       return attack(20);
     },
@@ -493,7 +527,7 @@ const forgebornSentinel: EnemyTemplate = {
 
       if (cycleIndex === 0) return defend(15 + escalation, `Block for ${15 + escalation}`);
       if (cycleIndex === 1) return attack(14 + escalation + bonus);
-      if (cycleIndex === 2) return special(`Overload: deal ${6 + escalation + bonus} to ALL`, 6 + escalation + bonus);
+      if (cycleIndex === 2) return aoeAttack(6 + escalation + bonus, `Overload: Attack ALL for ${6 + escalation + bonus}`);
       return attack(18 + escalation + bonus);
     },
   },
@@ -537,7 +571,7 @@ const starDevourer: EnemyTemplate = {
       const phase = adjustedTurn % 4;
 
       if (phase === 0) return attack(20 + escalation);
-      if (phase === 1) return attack(12 + escalation, `Attack ALL for ${12 + escalation}`);
+      if (phase === 1) return aoeAttack(12 + escalation);
       if (phase === 2) return special('SUPERNOVA WARNING — brace yourself!');
       return special(`SUPERNOVA: deal ${30 + escalation} to hero!`, 30 + escalation);
     },

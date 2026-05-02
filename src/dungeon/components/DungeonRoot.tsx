@@ -87,7 +87,7 @@ function DungeonGame({ onBack }: DungeonRootProps) {
             onEndTurn={actions.endPlayerTurn}
             onSelectMinion={actions.selectMinion}
             onSelectCard={actions.selectCard}
-            onExecuteEnemyTurn={() => actions.endPlayerTurn()}
+            onExecuteEnemyTurn={actions.executeEnemyTurn}
           />
         );
 
