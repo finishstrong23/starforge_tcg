@@ -74,6 +74,7 @@ export interface DungeonEnemy {
   currentHealth: number;
   block: number;
   intent: EnemyIntent;
+  upcomingIntents: EnemyIntent[];
   statusEffects: StatusEffect[];
   actTier: 1 | 2 | 3;
   isElite: boolean;

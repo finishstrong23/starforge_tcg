@@ -289,6 +289,7 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
   const intentBubbleSize = isBoss ? 40 : 34;
   const intentColor = intentCfg.color;
   const intentGlowColor = intentColor + '66';
+  const upcomingIntents = enemy.upcomingIntents ?? [];
 
   const intentWrapperStyle: React.CSSProperties = {
     display: 'flex',
@@ -348,64 +349,118 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
     maxWidth: 200,
   };
 
+  // Upcoming intent mini-bubble styles
+  const upcomingBubbleSize = isBoss ? 24 : 20;
+  const upcomingIconFontSize = isBoss ? 13 : 11;
+
   return (
     <div style={containerStyle} onClick={isTargetable ? onClick : undefined}>
-      {/* Intent bubble */}
+      {/* Intent row: current bubble + upcoming trail */}
       <div style={intentWrapperStyle}>
         {/* Tooltip */}
         <div style={tooltipStyle}>{tooltipText}</div>
 
-        <div
-          style={intentBubbleStyle}
-          onMouseEnter={() => setIntentHovered(true)}
-          onMouseLeave={() => setIntentHovered(false)}
-        >
-          {/* Primary icon */}
-          <span style={{ fontSize: intentIconFontSize, lineHeight: 1 }}>
-            {intentCfg.icon}
-          </span>
-
-          {/* Secondary icon for composite intents */}
-          {isCompositeIntent && secondaryIcon && (
-            <span style={{
-              fontSize: intentIconFontSize - 4,
-              lineHeight: 1,
-              opacity: 0.9,
-            }}>
-              {secondaryIcon}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+        }}>
+          {/* Main intent bubble */}
+          <div
+            style={intentBubbleStyle}
+            onMouseEnter={() => setIntentHovered(true)}
+            onMouseLeave={() => setIntentHovered(false)}
+          >
+            {/* Primary icon */}
+            <span style={{ fontSize: intentIconFontSize, lineHeight: 1 }}>
+              {intentCfg.icon}
             </span>
-          )}
 
-          {/* Damage number */}
-          {hasAttackDamage && (
-            <span style={{
-              fontSize: isBoss ? 16 : 14,
-              fontFamily: 'monospace',
-              fontWeight: 'bold',
-              color: intentColor,
-              lineHeight: 1,
-            }}>
-              {displayedDamage}
-              {intent.type === 'MULTI_ATTACK' && intent.hits && (
-                <span style={{ fontSize: isBoss ? 11 : 10, opacity: 0.85 }}>
-                  x{intent.hits}
-                </span>
-              )}
-            </span>
-          )}
+            {/* Secondary icon for composite intents */}
+            {isCompositeIntent && secondaryIcon && (
+              <span style={{
+                fontSize: intentIconFontSize - 4,
+                lineHeight: 1,
+                opacity: 0.9,
+              }}>
+                {secondaryIcon}
+              </span>
+            )}
 
-          {/* Block number */}
-          {intent.type === 'DEFEND' && (intent.block ?? intent.value) != null && (
-            <span style={{
-              fontSize: isBoss ? 16 : 14,
-              fontFamily: 'monospace',
-              fontWeight: 'bold',
-              color: intentColor,
-              lineHeight: 1,
-            }}>
-              {intent.block ?? intent.value}
-            </span>
-          )}
+            {/* Damage number */}
+            {hasAttackDamage && (
+              <span style={{
+                fontSize: isBoss ? 16 : 14,
+                fontFamily: 'monospace',
+                fontWeight: 'bold',
+                color: intentColor,
+                lineHeight: 1,
+              }}>
+                {displayedDamage}
+                {intent.type === 'MULTI_ATTACK' && intent.hits && (
+                  <span style={{ fontSize: isBoss ? 11 : 10, opacity: 0.85 }}>
+                    x{intent.hits}
+                  </span>
+                )}
+              </span>
+            )}
+
+            {/* Block number */}
+            {intent.type === 'DEFEND' && (intent.block ?? intent.value) != null && (
+              <span style={{
+                fontSize: isBoss ? 16 : 14,
+                fontFamily: 'monospace',
+                fontWeight: 'bold',
+                color: intentColor,
+                lineHeight: 1,
+              }}>
+                {intent.block ?? intent.value}
+              </span>
+            )}
+          </div>
+
+          {/* Upcoming intent trail */}
+          {upcomingIntents.length > 0 && upcomingIntents.map((upcoming, idx) => {
+            const upCfg = INTENT_CONFIG[upcoming.type];
+            const upColor = upCfg.color;
+            const opacity = idx === 0 ? 0.5 : 0.3;
+            return (
+              <React.Fragment key={idx}>
+                {/* Connector dot */}
+                <div style={{
+                  width: 3,
+                  height: 3,
+                  borderRadius: '50%',
+                  background: `rgba(255,255,255,${opacity * 0.6})`,
+                  flexShrink: 0,
+                }} />
+                {/* Mini bubble */}
+                <div
+                  title={upcoming.description || upCfg.label(upcoming.value)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 2,
+                    minWidth: upcomingBubbleSize,
+                    height: upcomingBubbleSize,
+                    padding: '2px 5px',
+                    background: `${upColor}15`,
+                    border: `1.5px solid ${upColor}44`,
+                    borderRadius: upcomingBubbleSize / 2,
+                    opacity,
+                    transition: 'opacity 0.3s ease',
+                    cursor: 'default',
+                    flexShrink: 0,
+                  }}
+                >
+                  <span style={{ fontSize: upcomingIconFontSize, lineHeight: 1 }}>
+                    {upCfg.icon}
+                  </span>
+                </div>
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
 

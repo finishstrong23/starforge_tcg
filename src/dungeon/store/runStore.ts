@@ -130,13 +130,29 @@ function rollIntent(enemy: DungeonEnemy, turn: number): EnemyIntent {
 }
 
 /**
- * Roll intents for all enemies in the group.
+ * Peek ahead N turns from the given turn for an enemy.
+ * Uses current enemy state, so state-dependent patterns give best-guess predictions.
+ */
+function peekFutureIntents(enemy: DungeonEnemy, currentTurn: number, count: number): EnemyIntent[] {
+  const results: EnemyIntent[] = [];
+  for (let i = 1; i <= count; i++) {
+    results.push(enemy.aiPattern.getIntent(currentTurn + i, enemy));
+  }
+  return results;
+}
+
+/**
+ * Roll intents for all enemies in the group, including 2-turn lookahead.
  */
 function rollAllIntents(enemies: DungeonEnemy[], turn: number): DungeonEnemy[] {
-  return enemies.map(e => ({
-    ...e,
-    intent: rollIntent(e, turn),
-  }));
+  return enemies.map(e => {
+    const intent = rollIntent(e, turn);
+    const updated = { ...e, intent };
+    return {
+      ...updated,
+      upcomingIntents: peekFutureIntents(updated, turn, 2),
+    };
+  });
 }
 
 // ─── Context ──────────────────────────────────────────────────
