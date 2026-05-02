@@ -56,6 +56,7 @@ export interface EnemyIntent {
   damage?: number;
   hits?: number;
   block?: number;
+  value?: number;
   buffName?: string;
   debuffName?: string;
   description: string;

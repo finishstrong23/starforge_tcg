@@ -8,6 +8,7 @@ interface EnemyComponentProps {
   isTargetable?: boolean;
   showDamage?: number;
   heroStatusEffects?: StatusEffect[];
+  isEnemyTurn?: boolean;
 }
 
 const INTENT_CONFIG: Record<IntentType, { icon: string; color: string; label: (v?: number) => string }> = {
@@ -84,10 +85,18 @@ const STATUS_ICONS: Record<string, { icon: string; color: string }> = {
 };
 
 // CSS keyframe animation injected once
-const PULSE_KEYFRAMES = `
+const INTENT_KEYFRAMES = `
 @keyframes dungeonIntentPulse {
   0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.15); opacity: 0.85; }
+  50% { transform: scale(1.08); opacity: 0.9; }
+}
+@keyframes dungeonIntentFadeIn {
+  0% { opacity: 0; transform: translateY(6px) scale(0.85); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes dungeonIntentGlow {
+  0%, 100% { box-shadow: 0 0 6px var(--intent-glow-color, rgba(255,255,255,0.2)); }
+  50% { box-shadow: 0 0 14px var(--intent-glow-color, rgba(255,255,255,0.4)); }
 }
 @keyframes dungeonDamageFloat {
   0% { opacity: 1; transform: translateY(0); }
@@ -100,7 +109,7 @@ function injectStyles() {
   if (stylesInjected) return;
   stylesInjected = true;
   const style = document.createElement('style');
-  style.textContent = PULSE_KEYFRAMES;
+  style.textContent = INTENT_KEYFRAMES;
   document.head.appendChild(style);
 }
 
@@ -110,8 +119,10 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
   isTargetable = false,
   showDamage,
   heroStatusEffects = [],
+  isEnemyTurn = false,
 }) => {
   const [damageVisible, setDamageVisible] = useState(false);
+  const [intentHovered, setIntentHovered] = useState(false);
 
   useEffect(() => {
     injectStyles();
@@ -123,6 +134,7 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
       const timer = setTimeout(() => setDamageVisible(false), 800);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [showDamage]);
 
   const healthPct = enemy.maxHealth > 0 ? (enemy.currentHealth / enemy.maxHealth) * 100 : 0;
@@ -130,7 +142,6 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
   const intent = enemy.intent;
   const intentCfg = INTENT_CONFIG[intent.type];
 
-  // Live-updated displayed damage accounting for Strength, Weak, Vulnerable
   const displayedDamage = useMemo(() => {
     const baseDmg = intent.damage ?? intent.value ?? 0;
     if (baseDmg <= 0) return 0;
@@ -140,6 +151,9 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
   const hasAttackDamage = intent.type === 'ATTACK' || intent.type === 'MULTI_ATTACK'
     || intent.type === 'AOE_ATTACK' || intent.type === 'ATTACK_BUFF'
     || intent.type === 'ATTACK_DEBUFF';
+
+  const isCompositeIntent = intent.type === 'ATTACK_BUFF' || intent.type === 'ATTACK_DEBUFF';
+  const secondaryIcon = intent.type === 'ATTACK_BUFF' ? '💪' : intent.type === 'ATTACK_DEBUFF' ? '💀' : null;
 
   const isBoss = enemy.isBoss;
   const containerWidth = isBoss ? 280 : 220;
@@ -168,29 +182,6 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
     transition: 'border-color 0.2s, box-shadow 0.2s',
   };
 
-  // Intent indicator
-  const intentContainerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginBottom: 8,
-    minHeight: 48,
-  };
-
-  const intentIconStyle: React.CSSProperties = {
-    fontSize: isBoss ? 32 : 26,
-    animation: 'dungeonIntentPulse 2s ease-in-out infinite',
-  };
-
-  const intentTextStyle: React.CSSProperties = {
-    fontSize: 11,
-    color: intentCfg.color,
-    fontWeight: 600,
-    marginTop: 2,
-    textAlign: 'center',
-  };
-
-  // Name
   const nameStyle: React.CSSProperties = {
     fontSize: isBoss ? 18 : 15,
     fontWeight: 'bold',
@@ -201,7 +192,6 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
     letterSpacing: isBoss ? 1 : 0,
   };
 
-  // Elite badge
   const eliteBadgeStyle: React.CSSProperties = {
     fontSize: 9,
     color: '#ffd700',
@@ -214,7 +204,6 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
     letterSpacing: 1,
   };
 
-  // HP bar
   const hpBarOuterStyle: React.CSSProperties = {
     width: '100%',
     height: isBoss ? 22 : 18,
@@ -249,7 +238,6 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
     textShadow: '0 1px 2px rgba(0,0,0,0.8)',
   };
 
-  // Block
   const blockStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
@@ -260,7 +248,6 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
     marginBottom: 4,
   };
 
-  // Status effects row
   const statusRowStyle: React.CSSProperties = {
     display: 'flex',
     flexWrap: 'wrap',
@@ -284,7 +271,6 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
     };
   };
 
-  // Floating damage
   const floatingDamageStyle: React.CSSProperties = {
     position: 'absolute',
     top: '30%',
@@ -299,28 +285,127 @@ const EnemyComponent: React.FC<EnemyComponentProps> = ({
     zIndex: 10,
   };
 
+  // --- Intent bubble styles ---
+  const intentBubbleSize = isBoss ? 40 : 34;
+  const intentColor = intentCfg.color;
+  const intentGlowColor = intentColor + '66';
+
+  const intentWrapperStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: 8,
+    minHeight: intentBubbleSize + 14,
+    position: 'relative',
+    opacity: isEnemyTurn ? 0 : 1,
+    transition: 'opacity 0.4s ease',
+    animation: isEnemyTurn ? 'none' : 'dungeonIntentFadeIn 0.5s ease-out',
+  };
+
+  const intentBubbleStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    minWidth: intentBubbleSize,
+    height: intentBubbleSize,
+    padding: '4px 10px',
+    background: `${intentColor}22`,
+    border: `2px solid ${intentColor}88`,
+    borderRadius: intentBubbleSize / 2,
+    animation: intentHovered
+      ? 'none'
+      : 'dungeonIntentPulse 2.5s ease-in-out infinite',
+    boxShadow: intentHovered
+      ? `0 0 16px ${intentGlowColor}, 0 0 4px ${intentGlowColor}`
+      : `0 0 6px ${intentGlowColor}`,
+    transition: 'box-shadow 0.2s ease, background 0.2s ease',
+    cursor: 'default',
+    position: 'relative',
+  };
+
+  const intentIconFontSize = isBoss ? 22 : 18;
+
+  const tooltipText = intent.description || intentCfg.label(intent.value);
+  const tooltipStyle: React.CSSProperties = {
+    position: 'absolute',
+    bottom: '100%',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    marginBottom: 6,
+    padding: '5px 10px',
+    background: 'rgba(0,0,0,0.9)',
+    border: `1px solid ${intentColor}66`,
+    borderRadius: 6,
+    fontSize: 11,
+    color: '#ddd',
+    whiteSpace: 'nowrap',
+    pointerEvents: 'none',
+    zIndex: 20,
+    opacity: intentHovered ? 1 : 0,
+    transition: 'opacity 0.2s ease',
+    textAlign: 'center',
+    maxWidth: 200,
+  };
+
   return (
     <div style={containerStyle} onClick={isTargetable ? onClick : undefined}>
-      {/* Intent indicator */}
-      <div style={intentContainerStyle}>
-        <div style={intentIconStyle}>
-          {intentCfg.icon}
+      {/* Intent bubble */}
+      <div style={intentWrapperStyle}>
+        {/* Tooltip */}
+        <div style={tooltipStyle}>{tooltipText}</div>
+
+        <div
+          style={intentBubbleStyle}
+          onMouseEnter={() => setIntentHovered(true)}
+          onMouseLeave={() => setIntentHovered(false)}
+        >
+          {/* Primary icon */}
+          <span style={{ fontSize: intentIconFontSize, lineHeight: 1 }}>
+            {intentCfg.icon}
+          </span>
+
+          {/* Secondary icon for composite intents */}
+          {isCompositeIntent && secondaryIcon && (
+            <span style={{
+              fontSize: intentIconFontSize - 4,
+              lineHeight: 1,
+              opacity: 0.9,
+            }}>
+              {secondaryIcon}
+            </span>
+          )}
+
+          {/* Damage number */}
           {hasAttackDamage && (
-            <span style={{ fontSize: isBoss ? 18 : 15, marginLeft: 4, fontFamily: 'monospace', fontWeight: 'bold' }}>
+            <span style={{
+              fontSize: isBoss ? 16 : 14,
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              color: intentColor,
+              lineHeight: 1,
+            }}>
               {displayedDamage}
               {intent.type === 'MULTI_ATTACK' && intent.hits && (
-                <span style={{ fontSize: isBoss ? 13 : 11, opacity: 0.9 }}> x{intent.hits}</span>
+                <span style={{ fontSize: isBoss ? 11 : 10, opacity: 0.85 }}>
+                  x{intent.hits}
+                </span>
               )}
             </span>
           )}
+
+          {/* Block number */}
           {intent.type === 'DEFEND' && (intent.block ?? intent.value) != null && (
-            <span style={{ fontSize: isBoss ? 18 : 15, marginLeft: 4, fontFamily: 'monospace', fontWeight: 'bold' }}>
+            <span style={{
+              fontSize: isBoss ? 16 : 14,
+              fontFamily: 'monospace',
+              fontWeight: 'bold',
+              color: intentColor,
+              lineHeight: 1,
+            }}>
               {intent.block ?? intent.value}
             </span>
           )}
-        </div>
-        <div style={intentTextStyle}>
-          {intent.description || intentCfg.label(intent.value)}
         </div>
       </div>
 
