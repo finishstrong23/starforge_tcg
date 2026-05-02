@@ -103,6 +103,13 @@ function createInitialState(): RunState {
       relicsCollected: 0,
       enemiesKilled: 0,
       floorReached: 0,
+      goldEarned: 0,
+      runStartTime: Date.now(),
+      biggestHitDealt: { damage: 0, cardName: '' },
+      biggestHitTaken: { damage: 0, enemyName: '' },
+      cardPlayCounts: {},
+      lastDamageSource: null,
+      roomsCleared: 0,
     },
     reward: null,
     draftRound: 1,
@@ -402,6 +409,8 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
     let newDrawPile = [...s.drawPile];
     let newExhaustPile = [...s.exhaustPile];
     let newStats = { ...s.stats };
+    newStats.cardPlayCounts = { ...newStats.cardPlayCounts };
+    newStats.cardPlayCounts[card.name] = (newStats.cardPlayCounts[card.name] ?? 0) + 1;
     const newLog = [...s.combatLog];
     let cardsPlayed = s.cardsPlayedThisTurn + 1;
     let healed = s.hasHealedThisTurn;
@@ -420,6 +429,9 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
             currentHealth: enemy.currentHealth - effects.damage,
           }));
           newStats.damageDealt += effects.damage * newEnemyGroup.length;
+          if (effects.damage > newStats.biggestHitDealt.damage) {
+            newStats.biggestHitDealt = { damage: effects.damage, cardName: card.name };
+          }
         } else {
           const target = newEnemyGroup[0];
           if (target) {
@@ -429,6 +441,9 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
                 : e
             );
             newStats.damageDealt += effects.damage;
+            if (effects.damage > newStats.biggestHitDealt.damage) {
+              newStats.biggestHitDealt = { damage: effects.damage, cardName: card.name };
+            }
           }
         }
       }
@@ -538,6 +553,9 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
     let newEnemyGroup = s.currentEnemyGroup.map(e => e.id === targetId ? result.enemy : e);
     let newHeroHealth = s.heroHealth;
     let newStats = { ...s.stats, damageDealt: s.stats.damageDealt + result.damageDealt };
+    if (result.damageDealt > newStats.biggestHitDealt.damage) {
+      newStats.biggestHitDealt = { damage: result.damageDealt, cardName: minion.card.name };
+    }
     const newLog = [...s.combatLog, `${minion.card.name} attacks ${targetEnemy.name} for ${result.damageDealt}`];
 
     if (result.drainHeal > 0) {
@@ -635,6 +653,7 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
         case 'MULTI_ATTACK': {
           const hits = intent.hits ?? 1;
           for (let h = 0; h < hits; h++) {
+            const hpBefore = heroHealth;
             const result = resolveEnemyAttack(
               enemy,
               heroHealth,
@@ -644,16 +663,28 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
             heroHealth = result.heroHealth;
             heroBlock = result.heroBlock;
             stats.damageTaken += result.damageDealt;
+            if (result.damageDealt > 0) {
+              stats.lastDamageSource = { enemyName: enemy.name, attackName: intent.description, damage: result.damageDealt, heroHpBefore: hpBefore };
+              if (result.damageDealt > stats.biggestHitTaken.damage) {
+                stats.biggestHitTaken = { damage: result.damageDealt, enemyName: enemy.name };
+              }
+            }
           }
           log.push(`${enemy.name}: ${intent.description}`);
           break;
         }
         case 'AOE_ATTACK': {
-          // Damage hero
+          const hpBefore = heroHealth;
           const heroResult = resolveEnemyAttack(enemy, heroHealth, heroBlock, heroEffects);
           heroHealth = heroResult.heroHealth;
           heroBlock = heroResult.heroBlock;
           stats.damageTaken += heroResult.damageDealt;
+          if (heroResult.damageDealt > 0) {
+            stats.lastDamageSource = { enemyName: enemy.name, attackName: intent.description, damage: heroResult.damageDealt, heroHpBefore: hpBefore };
+            if (heroResult.damageDealt > stats.biggestHitTaken.damage) {
+              stats.biggestHitTaken = { damage: heroResult.damageDealt, enemyName: enemy.name };
+            }
+          }
           // Damage all board minions
           board = board.map(m => {
             const dmg = intent.damage ?? 0;
@@ -716,11 +747,17 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
           break;
         }
         case 'ATTACK_BUFF': {
-          // Attack portion
+          const hpBeforeAB = heroHealth;
           const atkResult = resolveEnemyAttack(enemy, heroHealth, heroBlock, heroEffects);
           heroHealth = atkResult.heroHealth;
           heroBlock = atkResult.heroBlock;
           stats.damageTaken += atkResult.damageDealt;
+          if (atkResult.damageDealt > 0) {
+            stats.lastDamageSource = { enemyName: enemy.name, attackName: intent.description, damage: atkResult.damageDealt, heroHpBefore: hpBeforeAB };
+            if (atkResult.damageDealt > stats.biggestHitTaken.damage) {
+              stats.biggestHitTaken = { damage: atkResult.damageDealt, enemyName: enemy.name };
+            }
+          }
           // Buff portion
           const bVal = intent.value ?? 0;
           if (intent.buffName?.toLowerCase().includes('strength') || intent.description.toLowerCase().includes('strength')) {
@@ -734,11 +771,17 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
           break;
         }
         case 'ATTACK_DEBUFF': {
-          // Attack portion
+          const hpBeforeAD = heroHealth;
           const atkResult2 = resolveEnemyAttack(enemy, heroHealth, heroBlock, heroEffects);
           heroHealth = atkResult2.heroHealth;
           heroBlock = atkResult2.heroBlock;
           stats.damageTaken += atkResult2.damageDealt;
+          if (atkResult2.damageDealt > 0) {
+            stats.lastDamageSource = { enemyName: enemy.name, attackName: intent.description, damage: atkResult2.damageDealt, heroHpBefore: hpBeforeAD };
+            if (atkResult2.damageDealt > stats.biggestHitTaken.damage) {
+              stats.biggestHitTaken = { damage: atkResult2.damageDealt, enemyName: enemy.name };
+            }
+          }
           // Debuff portion
           if (intent.debuffName?.toLowerCase().includes('weak') || intent.description.toLowerCase().includes('weak')) {
             heroEffects = applyStatus(heroEffects, 'WEAK', 1, 2);
@@ -761,15 +804,23 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
             );
           } else if (desc.includes('deal') && desc.includes('all')) {
             const dmg = intent.value ?? 0;
+            const hpBS = heroHealth;
             heroHealth -= dmg;
             board = board.map(m => ({
               ...m, currentHealth: m.currentHealth - dmg,
             })).filter(m => m.currentHealth > 0);
             stats.damageTaken += dmg;
+            if (dmg > 0) {
+              stats.lastDamageSource = { enemyName: enemy.name, attackName: intent.description, damage: dmg, heroHpBefore: hpBS };
+            }
           } else if (desc.includes('deal') || desc.includes('supernova')) {
             const dmg = intent.value ?? 0;
+            const hpBS2 = heroHealth;
             heroHealth -= dmg;
             stats.damageTaken += dmg;
+            if (dmg > 0) {
+              stats.lastDamageSource = { enemyName: enemy.name, attackName: intent.description, damage: dmg, heroHpBefore: hpBS2 };
+            }
           } else if (desc.includes('summon')) {
             // Summon logic would go here
           } else if (desc.includes('steal')) {
@@ -802,8 +853,12 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
     const burnStacks = getStatusStacks(heroEffects, 'BURN');
     if (burnStacks > 0) {
       burnDamage = burnStacks;
+      const hpBeforeBurn = heroHealth;
       heroHealth -= burnDamage;
       stats.damageTaken += burnDamage;
+      if (burnDamage > 0) {
+        stats.lastDamageSource = { enemyName: 'Burn', attackName: 'Burn damage', damage: burnDamage, heroHpBefore: hpBeforeBurn };
+      }
     }
     heroEffects = tickStatuses(heroEffects);
 
@@ -948,7 +1003,12 @@ export function RunProvider({ children }: { children: React.ReactNode }) {
         picked: false,
       },
       gold: s.gold + goldReward,
-      stats: { ...s.stats, floorReached: s.stats.floorReached + 1 },
+      stats: {
+        ...s.stats,
+        floorReached: s.stats.floorReached + 1,
+        goldEarned: s.stats.goldEarned + goldReward,
+        roomsCleared: s.stats.roomsCleared + 1,
+      },
     }));
   }, [update]);
 

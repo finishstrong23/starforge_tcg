@@ -159,6 +159,8 @@ function DungeonGame({ onBack }: DungeonRootProps) {
             deck={state.deck}
             relics={state.relics}
             act={state.act}
+            faction={state.draftFaction}
+            gold={state.gold}
             onPlayAgain={handlePlayAgain}
             onMainMenu={handleMainMenu}
           />
@@ -172,6 +174,8 @@ function DungeonGame({ onBack }: DungeonRootProps) {
             deck={state.deck}
             relics={state.relics}
             act={state.act}
+            faction={state.draftFaction}
+            gold={state.gold}
             onPlayAgain={handlePlayAgain}
             onMainMenu={handleMainMenu}
           />

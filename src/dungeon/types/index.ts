@@ -198,6 +198,18 @@ export interface RunStats {
   relicsCollected: number;
   enemiesKilled: number;
   floorReached: number;
+  goldEarned: number;
+  runStartTime: number;
+  biggestHitDealt: { damage: number; cardName: string };
+  biggestHitTaken: { damage: number; enemyName: string };
+  cardPlayCounts: Record<string, number>;
+  lastDamageSource: {
+    enemyName: string;
+    attackName: string;
+    damage: number;
+    heroHpBefore: number;
+  } | null;
+  roomsCleared: number;
 }
 
 export interface RunState {
