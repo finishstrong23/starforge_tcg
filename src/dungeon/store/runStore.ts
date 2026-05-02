@@ -150,7 +150,9 @@ function rollAllIntents(enemies: DungeonEnemy[], turn: number): DungeonEnemy[] {
     const updated = { ...e, intent };
     return {
       ...updated,
-      upcomingIntents: peekFutureIntents(updated, turn, 2),
+      upcomingIntents: (e.isElite || e.isBoss)
+        ? peekFutureIntents(updated, turn, 2)
+        : [],
     };
   });
 }

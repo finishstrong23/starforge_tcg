@@ -692,12 +692,11 @@ export function createEnemy(templateId: string): DungeonEnemy {
     aiPattern: template.aiPattern,
   };
 
-  // Resolve the first turn's intent and peek ahead
+  // Resolve the first turn's intent; elites/bosses get multi-turn preview
   enemy.intent = template.aiPattern.getIntent(1, enemy);
-  enemy.upcomingIntents = [
-    template.aiPattern.getIntent(2, enemy),
-    template.aiPattern.getIntent(3, enemy),
-  ];
+  enemy.upcomingIntents = (template.isElite || template.isBoss)
+    ? [template.aiPattern.getIntent(2, enemy), template.aiPattern.getIntent(3, enemy)]
+    : [];
 
   return enemy;
 }
