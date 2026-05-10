@@ -1,5 +1,5 @@
 import type { CardInstance, CombatPhase, CombatState, EnemyDefinition, RelicDefinition, Rift, StatusEffect, StatusEffectType } from '../types';
-import { getCardStats, getCardText, getCardCost } from './cardStats';
+import { getCardStats, getCardText, getCardCost, setActiveCardText, setActiveCardCost } from './cardStats';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -15,7 +15,7 @@ function clamp(n: number, min: number, max: number): number {
 
 const FLUX_STATES: Array<'A' | 'B' | 'C'> = ['A', 'B', 'C'];
 
-function isFluxCard(card: CardInstance): boolean {
+export function isFluxCard(card: CardInstance): boolean {
   return /^\s*flux\./i.test(card.cardText);
 }
 
@@ -74,13 +74,29 @@ function shiftFlux(s: 'A' | 'B' | 'C'): 'A' | 'B' | 'C' {
   return s === 'A' ? 'B' : s === 'B' ? 'C' : 'A';
 }
 
-/** Pull just the active state's body out of "Flux. A: ... B: ... C: ..." text. */
+/**
+ * Pull just the active state's body out of "Flux. A: ... B: ... C: ..." text.
+ *
+ * Splits on uppercase variant labels (A:/B:/C:) — anything between two
+ * labels is the prior label's body. Phase 4 fix: previous regex used
+ * `[^A-C]*?` with case-insensitive flag, which silently excluded
+ * lowercase a/b/c too — so any variant body starting with words like
+ * "Deal" / "Apply" / "Gain" got cut after the first non-vowel character
+ * and the function fell back to returning the WHOLE text. The fall-back
+ * caused the regex parser to read the FIRST variant's numbers instead
+ * of the active variant's. Discovered by Phase 4 cross-cut tests.
+ */
 export function activeFluxText(card: CardInstance): string {
   if (!isFluxCard(card) || !card.fluxState) return getCardText(card);
   const text = getCardText(card);
-  const re = new RegExp(`${card.fluxState}:\\s*([^A-C]*?)(?=\\s*[A-C]:|$)`, 'i');
-  const m = text.match(re);
-  return m ? m[1].trim() : text;
+  const parts = text.split(/\b([A-C]):\s*/);
+  // parts[0] = "Flux. " preamble; then alternating [label, body, label, body, ...]
+  for (let i = 1; i < parts.length; i += 2) {
+    if (parts[i] === card.fluxState) {
+      return (parts[i + 1] ?? '').trim();
+    }
+  }
+  return text;
 }
 
 function ensureFluxState<T extends CardInstance>(card: T): T {
@@ -260,92 +276,77 @@ export function applyAugment(
   if (state.playerEnergy < augStats.cost) return state;
 
   const augText = augStats.text.toLowerCase();
-  // CRITICAL: read the ACTIVE text (upgrade-aware) as the patch base. Without
-  // this, augments would silently no-op on upgraded cards because the engine
-  // reads `getCardText(card)` on play (Phase 1 chokepoint), which returns
-  // upgradeText if upgraded — but pre-Phase-3 augments only patched cardText.
-  // After patching, sync BOTH cardText and upgradeText so subsequent
-  // `getCardText` calls return the patched text regardless of the upgraded
-  // flag. (Phase 3 fix; verified by augment+upgrade cross-cut tests.)
+  // Patch the ACTIVE text via `setActiveCardText` (Phase 4 chokepoint write
+  // helper). All text mutations route through this — direct cardText writes
+  // would silently no-op on upgraded cards (cf. Phase 3 applyAugment bug).
+  // The augments-array mutation is stat-state, not text/cost-state, so it
+  // doesn't need the chokepoint.
+  let activeText = getCardText(target);
   let buffed: CardInstance = {
     ...target,
-    cardText: getCardText(target),
     augments: [...(target.augments ?? []), augment.name],
   };
 
-  // +N damage  →  bump every "Deal X damage" / "Deal X to Y damage" in cardText
+  // +N damage  →  bump every "Deal X damage" / "Deal X to Y damage"
   const dmgBonus = augText.match(/\+(\d+) damage/);
   if (dmgBonus) {
     const bonus = parseInt(dmgBonus[1]);
-    buffed = {
-      ...buffed,
-      cardText: buffed.cardText.replace(
-        /deal (\d+)( damage)/gi,
-        (_, n, rest) => `Deal ${parseInt(n) + bonus}${rest}`,
-      ).replace(
-        /deal (\d+) to (\d+)( damage)/gi,
-        (_, a, b, rest) => `Deal ${parseInt(a) + bonus} to ${parseInt(b) + bonus}${rest}`,
-      ),
-    };
+    activeText = activeText.replace(
+      /deal (\d+)( damage)/gi,
+      (_, n, rest) => `Deal ${parseInt(n) + bonus}${rest}`,
+    ).replace(
+      /deal (\d+) to (\d+)( damage)/gi,
+      (_, a, b, rest) => `Deal ${parseInt(a) + bonus} to ${parseInt(b) + bonus}${rest}`,
+    );
   }
   // +N Block
   const blockBonus = augText.match(/\+(\d+) block/);
   if (blockBonus) {
     const bonus = parseInt(blockBonus[1]);
-    buffed = {
-      ...buffed,
-      cardText: buffed.cardText.replace(
-        /gain (\d+)( block)/gi,
-        (_, n, rest) => `Gain ${parseInt(n) + bonus}${rest}`,
-      ),
-    };
+    activeText = activeText.replace(
+      /gain (\d+)( block)/gi,
+      (_, n, rest) => `Gain ${parseInt(n) + bonus}${rest}`,
+    );
   }
   // -N cost (Gyro)
   const lessCostMatch = augText.match(/costs? (\d+) less/);
   if (lessCostMatch) {
     const reduction = parseInt(lessCostMatch[1]);
-    buffed = { ...buffed, cost: Math.max(0, buffed.cost - reduction) };
+    buffed = setActiveCardCost(buffed, Math.max(0, getCardCost(buffed) - reduction));
   }
   // 0 cost (Exotic Core) — matches "costs 0" anywhere (relaxed in Phase 3
   // to support "card costs 0 and deals +N damage" rewrite).
   if (/costs? 0\b/.test(augText)) {
-    buffed = { ...buffed, cost: 0 };
+    buffed = setActiveCardCost(buffed, 0);
   }
   // Apply Weak (Jolt) — captures stack count from "+N Weak". Falls back to
-  // 1 if a legacy "applies weak" form is encountered (no current card uses
-  // the legacy form, but keep the regex permissive for safety).
+  // 1 if a legacy "applies weak" form is encountered.
   const weakBonus = augText.match(/\+(\d+)\s*weak/) ?? augText.match(/applies\s*\+?(\d+)?\s*weak/);
-  if (weakBonus && !/weak/i.test(buffed.cardText)) {
+  if (weakBonus && !/weak/i.test(activeText)) {
     const stacks = weakBonus[1] ? parseInt(weakBonus[1]) : 1;
-    buffed = { ...buffed, cardText: buffed.cardText.trim() + ` Apply Weak ${stacks}.` };
+    activeText = activeText.trim() + ` Apply Weak ${stacks}.`;
   }
   // Draw cards (Core) — captures count from "+N draw" / "draws N cards" / "draws a card".
   const drawBonus =
     augText.match(/draws?\s*\+(\d+)/)
     ?? augText.match(/draws?\s+(\d+)\s*cards?/)
     ?? (augText.match(/draws?\s+a\s+card/) ? ['', '1'] as RegExpMatchArray : null);
-  if (drawBonus && !/draw/i.test(buffed.cardText)) {
+  if (drawBonus && !/draw/i.test(activeText)) {
     const count = parseInt(drawBonus[1]);
-    buffed = { ...buffed, cardText: buffed.cardText.trim() + ` Draw ${count}.` };
+    activeText = activeText.trim() + ` Draw ${count}.`;
   }
   // Inverter (AoE) — fallback: bump damage by +5
   if (/all enemies|all allies/.test(augText) && !dmgBonus && !blockBonus) {
-    buffed = {
-      ...buffed,
-      cardText: buffed.cardText.replace(
-        /deal (\d+)( damage)/gi,
-        (_, n, rest) => `Deal ${parseInt(n) + 5}${rest}`,
-      ),
-    };
+    activeText = activeText.replace(
+      /deal (\d+)( damage)/gi,
+      (_, n, rest) => `Deal ${parseInt(n) + 5}${rest}`,
+    );
   }
 
-  // Phase 3 fix: sync the patched text into upgradeText so getCardText
-  // (which the engine uses on play) returns the patched text regardless
-  // of the upgraded flag. Without this, augments would silently lose
-  // their effect on upgraded cards.
-  if (buffed.upgraded) {
-    buffed = { ...buffed, upgradeText: buffed.cardText };
-  }
+  // Single chokepoint write at the end — both cardText and upgradeText (if
+  // upgraded) get the patched value. Future readers via getCardText see
+  // the patched text regardless of upgrade state.
+  buffed = setActiveCardText(buffed, activeText);
 
   // Spend energy, replace target in hand, exhaust augment.
   return {
@@ -1243,8 +1244,8 @@ function applyRiftStartOfTurn(state: CombatState): CombatState {
           const target = s.hand[idx];
           const effectiveCost = getCardCost(target);
           const newCost = Math.max(0, effectiveCost - 1);
-          if (newCost !== target.cost) {
-            const updated = { ...target, cost: newCost };
+          if (newCost !== effectiveCost) {
+            const updated = setActiveCardCost(target, newCost);
             s = { ...s, hand: s.hand.map((c, i) => (i === idx ? updated : c)) };
             s = log(s, `⚡ Cost Rift: ${target.name} costs ${newCost} this turn`);
           }
