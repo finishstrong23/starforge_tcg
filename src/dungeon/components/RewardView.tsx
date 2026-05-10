@@ -61,7 +61,15 @@ export const RewardView: React.FC = () => {
   const [, setGoldAwarded] = useState(false);
 
   const [cardOptions] = useState<CardDefinition[]>(() =>
-    generateRewardOptions(roomNumber, act as 1 | 2 | 3, draftFaction ?? undefined),
+    // Pass the deck so the roller can skip cards the player already owns
+    // in upgraded form (Phase 5 integration policy).
+    generateRewardOptions(
+      roomNumber,
+      act as 1 | 2 | 3,
+      draftFaction ?? undefined,
+      Math.random,
+      runState?.deck ?? [],
+    ),
   );
   const [relicOffer] = useState<RelicDefinition | undefined>(() =>
     showRelic ? generateRewardRelic(isBossReward, ascensionMods.rareRelicMul) : undefined,

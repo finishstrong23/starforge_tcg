@@ -155,7 +155,14 @@ function pickRarity(rng: () => number, weights: Record<Rarity, number>): Rarity 
  *
  * @param roomNumber  1-indexed room number within the current act
  * @param act         1, 2, or 3
- * @param faction     player faction (70% of offers come from this faction)
+ * @param faction     player faction (every offer comes from this faction)
+ * @param deck        player's current deck — used to skip cards the player
+ *                    already owns in upgraded form. (Phase 5 integration:
+ *                    if a player has Cinder Strike+, the roller must NOT
+ *                    offer base Cinder Strike — it would be strictly weaker
+ *                    than what they already own. Locked-in policy: skip the
+ *                    card entirely. Players who want more copies must
+ *                    re-roll via shop or another reward.)
  * @param rng         RNG (defaults to Math.random; injectable for tests)
  *
  * The roller first picks a tier, then a rarity, then filters the pool. If no
@@ -168,9 +175,17 @@ export function generateRewardOptions(
   act: 1 | 2 | 3,
   faction?: Faction,
   rng: () => number = Math.random,
+  deck: CardInstance[] = [],
 ): CardDefinition[] {
   const tierWeights = getRewardWeights(roomNumber);
   const rarityWeights = ACT_RARITY_WEIGHTS[act];
+
+  // Phase 5: ids of cards the player already owns in upgraded form. The
+  // reward roller never offers a base copy of a card whose upgraded variant
+  // is already in the player's deck.
+  const ownedUpgradedIds = new Set(
+    deck.filter((c) => c.upgraded).map((c) => c.id),
+  );
 
   const picks: CardDefinition[] = [];
   const usedIds = new Set<string>();
@@ -182,7 +197,9 @@ export function generateRewardOptions(
   // Flux for a Cogsmith, etc.) are mechanically dead because the player can't
   // engage with the other faction's mechanic. Unlock requires a future
   // "neutral / colourless" tag which doesn't exist yet.
-  const factionPool = faction ? CARD_POOL.filter((c) => c.faction === faction) : CARD_POOL;
+  const factionPool = faction
+    ? CARD_POOL.filter((c) => c.faction === faction && !ownedUpgradedIds.has(c.id))
+    : CARD_POOL.filter((c) => !ownedUpgradedIds.has(c.id));
 
   while (picks.length < 3 && attempts < maxAttempts) {
     attempts++;

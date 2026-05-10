@@ -19,10 +19,15 @@ function pickRandom<T>(arr: T[]): T | undefined {
   return arr.length ? arr[Math.floor(Math.random() * arr.length)] : undefined;
 }
 
-function randomCards(count: number, faction?: string): CardDefinition[] {
+function randomCards(count: number, faction?: string, deck: { id: string; upgraded: boolean }[] = []): CardDefinition[] {
   // Same faction-lock rationale as generateRewardOptions: cross-faction cards
   // are mechanically useless and feel like dead picks.
-  const pool = faction ? CARD_POOL.filter((c) => c.faction === faction) : CARD_POOL;
+  // Phase 5 integration: also skip cards the player already owns in upgraded
+  // form. Selling the player a base copy of Cinder Strike when they have
+  // Cinder Strike+ in their deck would be strictly worse than what they own.
+  const ownedUpgradedIds = new Set(deck.filter((c) => c.upgraded).map((c) => c.id));
+  const pool = (faction ? CARD_POOL.filter((c) => c.faction === faction) : CARD_POOL)
+    .filter((c) => !ownedUpgradedIds.has(c.id));
   const used = new Set<string>();
   const out: CardDefinition[] = [];
   let tries = 0;
@@ -52,7 +57,10 @@ function relicPrice(relic: RelicDefinition): number {
 export const ShopView: React.FC = () => {
   const { runState, draftFaction, addCardToDeck, addRelic, addPotion, discardPotion, removeCardFromDeck, spendGold, returnToMap } = useDungeonRun();
   const act = (runState?.currentAct ?? 1) as 1 | 2 | 3;
-  const [shopCards] = useState<CardDefinition[]>(() => randomCards(4, draftFaction ?? undefined));
+  // Phase 5: pass deck so the shop skips cards the player already owns in upgraded form.
+  const [shopCards] = useState<CardDefinition[]>(() =>
+    randomCards(4, draftFaction ?? undefined, runState?.deck ?? []),
+  );
   const [shopRelics] = useState<RelicDefinition[]>(() => randomRelics(2));
   // 2-3 potions per shop. Roll deterministically once on mount.
   const [shopPotions] = useState<PotionInstance[]>(() => rollShopPotions(2 + Math.floor(Math.random() * 2)));
