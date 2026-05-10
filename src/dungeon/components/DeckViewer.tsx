@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { CardInstance } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { CardComponent } from './CardComponent';
+import { getCardCost } from '../engine/cardStats';
 
 interface DeckViewerProps {
   onClose: () => void;
@@ -11,11 +12,13 @@ type SortKey = 'cost' | 'name' | 'type' | 'faction';
 
 function sortDeck(deck: CardInstance[], key: SortKey): CardInstance[] {
   return [...deck].sort((a, b) => {
+    const ac = getCardCost(a);
+    const bc = getCardCost(b);
     switch (key) {
-      case 'cost': return a.cost - b.cost || a.name.localeCompare(b.name);
+      case 'cost': return ac - bc || a.name.localeCompare(b.name);
       case 'name': return a.name.localeCompare(b.name);
-      case 'type': return a.type.localeCompare(b.type) || a.cost - b.cost;
-      case 'faction': return a.faction.localeCompare(b.faction) || a.cost - b.cost;
+      case 'type': return a.type.localeCompare(b.type) || ac - bc;
+      case 'faction': return a.faction.localeCompare(b.faction) || ac - bc;
       default: return 0;
     }
   });

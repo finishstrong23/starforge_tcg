@@ -8,6 +8,7 @@ import type {
 } from '../types';
 import { CARD_POOL } from '../data/cards';
 import { createCardInstance } from './draft';
+import { getCardText } from './cardStats';
 
 // ─── Context types ────────────────────────────────────────────────────────────
 
@@ -178,7 +179,7 @@ export function applyRelicsToCombat(
       // R-R04 The Unmoored Eye: lock one Flux card to a random state (AI auto-picks)
       if (hasRelic(relics, 'R-R04')) {
         const fluxCards = s.hand.filter(
-          (c) => c.cardText.toLowerCase().includes('flux'),
+          (c) => getCardText(c).toLowerCase().includes('flux'),
         );
         const card = pickRandom(fluxCards);
         if (card) {
@@ -212,7 +213,7 @@ export function applyRelicsToCombat(
         s = addLog(s, '🎵 Shard of the Choir: took 1 damage');
 
         // If a Flux card shifted, deal 2 damage to enemy
-        if (ctx.cardPlayed?.cardText.toLowerCase().includes('flux')) {
+        if (ctx.cardPlayed && getCardText(ctx.cardPlayed).toLowerCase().includes('flux')) {
           s = {
             ...s,
             enemy: {

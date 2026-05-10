@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CardInstance } from '../types';
 import { CardComponent } from './CardComponent';
+import { getCardCost } from '../engine/cardStats';
 
 export interface HandComponentProps {
   hand: CardInstance[];
@@ -106,7 +107,7 @@ export const HandComponent: React.FC<HandComponentProps> = ({
         ) : (
           <div style={s.row}>
             {hand.map((card) => {
-              const affordable = card.cost <= energy;
+              const affordable = getCardCost(card) <= energy;
               const isSelected = card.instanceId === selectedId;
               return (
                 <CardComponent

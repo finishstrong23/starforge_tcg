@@ -38,7 +38,17 @@ export interface CardDefinition {
   rarity: Rarity;
   /** Complexity tier for reward weighting (see ComplexityTier). */
   complexityTier: ComplexityTier;
-  upgradeText?: string;           // What changes on upgrade
+  /** Active text after upgrade. The engine is regex-driven on card text, so
+   *  upgradeText IS the primary effect-override mechanism — most effect
+   *  changes (new status riders, new clauses, removed exhaust) are expressed
+   *  here, not via a structured effect object. */
+  upgradeText?: string;
+  /** Optional numeric overrides for upgrades that change stats outside
+   *  the natural-language card text (cost reductions, minion stat bumps).
+   *  When omitted, the upgraded card uses the same stat as the base card. */
+  upgradedCost?: number;
+  upgradedAttack?: number;
+  upgradedHealth?: number;
   upgraded?: boolean;
 }
 

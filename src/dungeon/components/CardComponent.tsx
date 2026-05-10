@@ -1,5 +1,6 @@
 import React from 'react';
 import type { CardInstance, Faction, Keyword, StatusEffect } from '../types';
+import { getCardStats } from '../engine/cardStats';
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
@@ -85,6 +86,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
   const rarityColor = RARITY_COLOR[card.rarity] ?? '#9d9d9d';
   const typeBg = TYPE_BG[card.type] ?? '#121220';
   const isMinion = card.type === 'Minion';
+  const stats = getCardStats(card);
 
   const w = compact ? 64 : 108;
   const h = compact ? 88 : 155;
@@ -232,10 +234,10 @@ export const CardComponent: React.FC<CardComponentProps> = ({
   };
 
   // Flux: extract just the active body so the player sees their actual outcome inline
-  const isFlux = /^\s*flux\./i.test(card.cardText);
+  const isFlux = /^\s*flux\./i.test(stats.text);
   const fluxBody = isFlux && card.fluxState
     ? (() => {
-        const t = card.upgraded ? (card.upgradeText ?? card.cardText) : card.cardText;
+        const t = stats.text;
         const re = new RegExp(`${card.fluxState}:\\s*([^A-C]*?)(?=\\s*[A-C]:|$)`, 'i');
         const m = t.match(re);
         return m ? m[1].trim() : t;
@@ -253,7 +255,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
   return (
     <div style={styles.card} onClick={onClick} role={onClick ? 'button' : undefined}>
       {/* Cost */}
-      <div style={styles.costBadge}>{card.cost}</div>
+      <div style={styles.costBadge}>{stats.cost}</div>
       {/* Type / rarity */}
       <div style={styles.typeTag}>{card.rarity[0]}</div>
 
@@ -384,7 +386,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
                 {fluxBody}
               </>
             ) : (
-              card.upgraded ? (card.upgradeText ?? card.cardText) : card.cardText
+              stats.text
             )}
           </div>
         )}
@@ -401,8 +403,8 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       {/* Minion stats */}
       {isMinion && (
         <div style={styles.stats}>
-          <span style={{ color: '#ffcc00' }}>⚔{card.attack ?? 0}</span>
-          <span style={{ color: '#22cc44' }}>♥{card.currentHealth ?? card.health ?? 0}</span>
+          <span style={{ color: '#ffcc00' }}>⚔{stats.attack ?? 0}</span>
+          <span style={{ color: '#22cc44' }}>♥{card.currentHealth ?? stats.health ?? 0}</span>
         </div>
       )}
 
