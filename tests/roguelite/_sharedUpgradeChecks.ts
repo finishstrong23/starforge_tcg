@@ -31,6 +31,76 @@ interface ForbiddenPattern {
   discoveredIn: string;
 }
 
+/**
+ * Structural checks: positive assertions about the SHAPE of a card's
+ * text (vs forbidden patterns, which are negative assertions about
+ * substrings). Each check returns either null (clean) or a short
+ * description of what's missing.
+ */
+interface StructuralCheck {
+  id: string;
+  /** Returns null if the card passes, or a description of the failure. */
+  check: (card: CardDefinition) => string | null;
+  rationale: string;
+  discoveredIn: string;
+}
+
+const STRUCTURAL_CHECKS: StructuralCheck[] = [
+  {
+    id: 'flux-upgrade-must-cover-all-three-variants',
+    check: (card) => {
+      // Only applies to cards whose base text starts with "Flux." and has
+      // explicit A:/B:/C: variant bodies.
+      if (!/^\s*flux\.\s*a:/i.test(card.cardText)) return null;
+      const upgrade = card.upgradeText ?? '';
+      if (!/^\s*flux\./i.test(upgrade)) {
+        return 'upgrade text dropped the "Flux." prefix entirely';
+      }
+      if (!/\ba:/i.test(upgrade)) return 'upgrade text missing A: variant body';
+      if (!/\bb:/i.test(upgrade)) return 'upgrade text missing B: variant body';
+      if (!/\bc:/i.test(upgrade)) return 'upgrade text missing C: variant body';
+      return null;
+    },
+    rationale:
+      'Flux state shifts deterministically per turn. If only one variant is upgraded, two of three flux states silently revert to the base text on play. Players upgrading the card hoping for better A and randomly landing in B with no improvement is a designer trap.',
+    discoveredIn: 'Phase 4 Warp Riders audit (the user-flagged "non-negotiable" rule).',
+  },
+  {
+    id: 'flux-variant-must-include-mechanic-keyword',
+    check: (card) => {
+      // For Flux upgrade text, every variant body should contain a parser-
+      // recognized mechanic keyword (damage / block / draw / heat / heal /
+      // energy / etc.). Variants that say "Deal 22" without "damage", or
+      // "Gain 4" without "block", silently drop their effect on play
+      // because the active flux body extracted by `activeFluxText` won't
+      // hit any regex.
+      const upgrade = card.upgradeText ?? '';
+      if (!/^\s*flux\./i.test(upgrade)) return null;
+      // Split on uppercase variant labels "A:" / "B:" / "C:" — anything
+      // between two labels is the prior variant's body. The trailing slice
+      // after the last label is the C: body.
+      const parts = upgrade.split(/\b([A-C]):\s*/);
+      // parts[0] = "Flux. " preamble; then alternating [label, body]
+      const failures: string[] = [];
+      for (let i = 1; i < parts.length; i += 2) {
+        const label = parts[i];
+        const body = (parts[i + 1] ?? '').trim();
+        if (!body) continue;
+        const hasMechanic =
+          /\b(damage|block|draw|heat|heal|energy|burn|ignite|vulnerable|weak|strength|lumen|rift|poison)\b/i.test(body)
+          || /(twice|thrice)/i.test(body);
+        if (!hasMechanic) {
+          failures.push(`${label}: "${body}" — no parser-recognized mechanic keyword`);
+        }
+      }
+      return failures.length > 0 ? failures.join('; ') : null;
+    },
+    rationale:
+      'Flux variant bodies are extracted by activeFluxText() at play time and fed to the same regex parser as normal cards. Variants that drop the mechanic keyword (e.g. "Deal 22" instead of "Deal 22 damage") silently match no regex and fire nothing.',
+    discoveredIn: 'Phase 4 Warp Riders audit (W-015, W-024, W-025 all had this bug in upgrade text).',
+  },
+];
+
 export const FORBIDDEN_UPGRADE_PATTERNS: ForbiddenPattern[] = [
   {
     id: 'and-weak-N',
@@ -120,6 +190,20 @@ export function findWellFormednessFailures(
           patternId: pattern.id,
           rationale: pattern.rationale,
           matchedText: upMatch[0],
+        });
+      }
+    }
+    for (const sc of STRUCTURAL_CHECKS) {
+      const failure = sc.check(card);
+      if (failure) {
+        failures.push({
+          cardId: card.id,
+          cardName: card.name,
+          faction: card.faction,
+          field: 'upgradeText',
+          patternId: sc.id,
+          rationale: sc.rationale,
+          matchedText: failure,
         });
       }
     }
