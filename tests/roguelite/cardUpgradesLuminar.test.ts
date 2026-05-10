@@ -19,6 +19,7 @@ import { CARD_POOL } from '../../src/dungeon/data/cards';
 import { createCardInstance } from '../../src/dungeon/engine/draft';
 import { initCombat, playCard, endPlayerTurn, executeEnemyTurn, isChannelCard } from '../../src/dungeon/engine/combat';
 import type { CardInstance, CardDefinition, EnemyDefinition } from '../../src/dungeon/types';
+import { findWellFormednessFailures, formatFailures } from './_sharedUpgradeChecks';
 
 const dummyEnemy: EnemyDefinition = {
   id: 'e-test',
@@ -334,23 +335,13 @@ describe('Luminar upgrade pool — well-formedness', () => {
     }
   });
 
-  it('no Luminar upgrade text references the unimplemented Retain keyword', () => {
+  it('no Luminar card hits a forbidden upgrade-text pattern (shared check)', () => {
     const lum = CARD_POOL.filter((c) => c.faction === 'Luminar');
-    for (const c of lum) {
-      expect((c.upgradeText ?? '').toLowerCase()).not.toMatch(/\bretain\b/);
-      expect(c.cardText.toLowerCase()).not.toMatch(/\bretain\b/);
-    }
-  });
-
-  it('no Luminar upgrade text uses "and Weak/Vulnerable N" (silent partial-fire pattern)', () => {
-    const lum = CARD_POOL.filter((c) => c.faction === 'Luminar');
-    for (const c of lum) {
-      const txt = (c.upgradeText ?? '');
-      // The bug is "X and Weak N" / "X and Vulnerable N" without an "Apply"
-      // before each. Splitting into separate "Apply" sentences works around it.
-      expect(txt).not.toMatch(/\band Weak \d/);
-      expect(txt).not.toMatch(/\band Vulnerable \d/);
-    }
+    const failures = findWellFormednessFailures(lum);
+    expect({ count: failures.length, details: formatFailures(failures) }).toEqual({
+      count: 0,
+      details: '(clean)',
+    });
   });
 });
 

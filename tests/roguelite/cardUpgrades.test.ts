@@ -14,6 +14,7 @@ import { CARD_POOL } from '../../src/dungeon/data/cards';
 import { createCardInstance } from '../../src/dungeon/engine/draft';
 import { initCombat, playCard, endPlayerTurn, executeEnemyTurn } from '../../src/dungeon/engine/combat';
 import type { CardInstance, CardDefinition, EnemyDefinition } from '../../src/dungeon/types';
+import { findWellFormednessFailures, formatFailures } from './_sharedUpgradeChecks';
 
 const dummyEnemy: EnemyDefinition = {
   id: 'e-test',
@@ -171,6 +172,15 @@ describe('Pyroclast upgrade pool — well-formedness', () => {
     for (const c of pyro) {
       expect(c.upgradeText).not.toBe(c.cardText);
     }
+  });
+
+  it('no Pyroclast card hits a forbidden upgrade-text pattern (shared check)', () => {
+    const pyro = CARD_POOL.filter((c) => c.faction === 'Pyroclast');
+    const failures = findWellFormednessFailures(pyro);
+    expect({ count: failures.length, details: formatFailures(failures) }).toEqual({
+      count: 0,
+      details: '(clean)',
+    });
   });
 });
 
