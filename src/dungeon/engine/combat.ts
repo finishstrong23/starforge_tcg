@@ -260,8 +260,16 @@ export function applyAugment(
   if (state.playerEnergy < augStats.cost) return state;
 
   const augText = augStats.text.toLowerCase();
+  // CRITICAL: read the ACTIVE text (upgrade-aware) as the patch base. Without
+  // this, augments would silently no-op on upgraded cards because the engine
+  // reads `getCardText(card)` on play (Phase 1 chokepoint), which returns
+  // upgradeText if upgraded — but pre-Phase-3 augments only patched cardText.
+  // After patching, sync BOTH cardText and upgradeText so subsequent
+  // `getCardText` calls return the patched text regardless of the upgraded
+  // flag. (Phase 3 fix; verified by augment+upgrade cross-cut tests.)
   let buffed: CardInstance = {
     ...target,
+    cardText: getCardText(target),
     augments: [...(target.augments ?? []), augment.name],
   };
 
@@ -298,17 +306,27 @@ export function applyAugment(
     const reduction = parseInt(lessCostMatch[1]);
     buffed = { ...buffed, cost: Math.max(0, buffed.cost - reduction) };
   }
-  // 0 cost (Exotic Core)
-  if (/costs? 0 and does not exhaust|costs? 0$/.test(augText)) {
+  // 0 cost (Exotic Core) — matches "costs 0" anywhere (relaxed in Phase 3
+  // to support "card costs 0 and deals +N damage" rewrite).
+  if (/costs? 0\b/.test(augText)) {
     buffed = { ...buffed, cost: 0 };
   }
-  // Apply Weak (Jolt)
-  if (/applies weak/.test(augText) && !/weak/i.test(buffed.cardText)) {
-    buffed = { ...buffed, cardText: buffed.cardText.trim() + ' Apply Weak 1.' };
+  // Apply Weak (Jolt) — captures stack count from "+N Weak". Falls back to
+  // 1 if a legacy "applies weak" form is encountered (no current card uses
+  // the legacy form, but keep the regex permissive for safety).
+  const weakBonus = augText.match(/\+(\d+)\s*weak/) ?? augText.match(/applies\s*\+?(\d+)?\s*weak/);
+  if (weakBonus && !/weak/i.test(buffed.cardText)) {
+    const stacks = weakBonus[1] ? parseInt(weakBonus[1]) : 1;
+    buffed = { ...buffed, cardText: buffed.cardText.trim() + ` Apply Weak ${stacks}.` };
   }
-  // Draw a card (Core)
-  if (/draws? (?:a|\d+) cards?/.test(augText) && !/draw/i.test(buffed.cardText)) {
-    buffed = { ...buffed, cardText: buffed.cardText.trim() + ' Draw 1.' };
+  // Draw cards (Core) — captures count from "+N draw" / "draws N cards" / "draws a card".
+  const drawBonus =
+    augText.match(/draws?\s*\+(\d+)/)
+    ?? augText.match(/draws?\s+(\d+)\s*cards?/)
+    ?? (augText.match(/draws?\s+a\s+card/) ? ['', '1'] as RegExpMatchArray : null);
+  if (drawBonus && !/draw/i.test(buffed.cardText)) {
+    const count = parseInt(drawBonus[1]);
+    buffed = { ...buffed, cardText: buffed.cardText.trim() + ` Draw ${count}.` };
   }
   // Inverter (AoE) — fallback: bump damage by +5
   if (/all enemies|all allies/.test(augText) && !dmgBonus && !blockBonus) {
@@ -319,6 +337,14 @@ export function applyAugment(
         (_, n, rest) => `Deal ${parseInt(n) + 5}${rest}`,
       ),
     };
+  }
+
+  // Phase 3 fix: sync the patched text into upgradeText so getCardText
+  // (which the engine uses on play) returns the patched text regardless
+  // of the upgraded flag. Without this, augments would silently lose
+  // their effect on upgraded cards.
+  if (buffed.upgraded) {
+    buffed = { ...buffed, upgradeText: buffed.cardText };
   }
 
   // Spend energy, replace target in hand, exhaust augment.

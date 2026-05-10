@@ -18,8 +18,8 @@ const COGSMITHS_CARDS: CardDefinition[] = [
   {
     id: 'C-003', name: 'Tinker', faction: 'Cogsmiths', type: 'Skill', cost: 0,
     keywords: [], rarity: 'Common', complexityTier: 2,
-    cardText: 'Draw 1 card. The next Augment you play this turn costs 0.',
-    upgradeText: 'Draw 1 card. The next 2 Augments you play this turn cost 0.',
+    cardText: 'Draw 1 card. Gain 1 Energy.',
+    upgradeText: 'Draw 2 cards. Gain 1 Energy.',
   },
   {
     id: 'C-004', name: 'Socket Wrench', faction: 'Cogsmiths', type: 'Attack', cost: 1,
@@ -54,8 +54,8 @@ const COGSMITHS_CARDS: CardDefinition[] = [
   {
     id: 'C-009', name: 'Crosswire', faction: 'Cogsmiths', type: 'Skill', cost: 0,
     keywords: [], rarity: 'Common', complexityTier: 1,
-    cardText: 'Your next Attack this turn costs 0.',
-    upgradeText: 'Your next 2 Attacks this turn cost 0.',
+    cardText: 'Gain 1 Energy. Draw 1 card.',
+    upgradeText: 'Gain 2 Energy. Draw 1 card.',
   },
   {
     id: 'C-010', name: 'Servo Shield', faction: 'Cogsmiths', type: 'Power', cost: 1,
@@ -72,8 +72,8 @@ const COGSMITHS_CARDS: CardDefinition[] = [
   {
     id: 'C-012', name: 'Toolkit', faction: 'Cogsmiths', type: 'Skill', cost: 1,
     keywords: [], rarity: 'Common', complexityTier: 2,
-    cardText: 'Add a random Augment to your hand.',
-    upgradeText: 'Add 2 random Augments to your hand.',
+    cardText: 'Draw 2 cards. Gain 4 Block.',
+    upgradeText: 'Draw 3 cards. Gain 4 Block.',
   },
   {
     id: 'C-013', name: 'Overdrive', faction: 'Cogsmiths', type: 'Skill', cost: 1,
@@ -96,8 +96,8 @@ const COGSMITHS_CARDS: CardDefinition[] = [
   {
     id: 'C-016', name: 'Augment: Jolt', faction: 'Cogsmiths', type: 'Augment', cost: 1,
     keywords: ['UPGRADE'], rarity: 'Common', complexityTier: 2,
-    cardText: 'Attach to an Attack in hand: attack applies Weak 1. Exhaust.',
-    upgradeText: 'Attach to an Attack in hand: attack applies Weak 2. Exhaust.',
+    cardText: 'Attach to an Attack in hand: attack applies +1 Weak. Exhaust.',
+    upgradeText: 'Attach to an Attack in hand: attack applies +2 Weak. Exhaust.',
   },
   {
     id: 'C-017', name: 'Heavy Wrench', faction: 'Cogsmiths', type: 'Attack', cost: 2,
@@ -132,14 +132,14 @@ const COGSMITHS_CARDS: CardDefinition[] = [
   {
     id: 'C-022', name: 'Automate', faction: 'Cogsmiths', type: 'Skill', cost: 1,
     keywords: [], rarity: 'Uncommon', complexityTier: 3,
-    cardText: 'Copy an Augment from a card in your deck and add it to your hand.',
-    upgradeText: 'Copy 2 Augments from cards in your deck and add them to your hand.',
+    cardText: 'Gain 1 Energy. Draw 2 cards.',
+    upgradeText: 'Gain 2 Energy. Draw 2 cards.',
   },
   {
     id: 'C-023', name: 'Precision Bore', faction: 'Cogsmiths', type: 'Attack', cost: 2,
     keywords: [], rarity: 'Uncommon', complexityTier: 1,
-    cardText: 'Deal 10 damage that ignores Block.',
-    upgradeText: 'Deal 14 damage that ignores Block.',
+    cardText: 'Deal 14 damage.',
+    upgradeText: 'Deal 18 damage.',
   },
   {
     id: 'C-024', name: 'Whirring Blades', faction: 'Cogsmiths', type: 'Attack', cost: 2,
@@ -156,14 +156,14 @@ const COGSMITHS_CARDS: CardDefinition[] = [
   {
     id: 'C-026', name: 'Assembly Line', faction: 'Cogsmiths', type: 'Power', cost: 2,
     keywords: [], rarity: 'Uncommon', complexityTier: 1,
-    cardText: 'At end of turn, if you played 3 or more cards this turn, draw 1 card.',
-    upgradeText: 'At end of turn, if you played 3 or more cards this turn, draw 2 cards.',
+    cardText: 'At end of turn, draw 1 card.',
+    upgradeText: 'At end of turn, draw 2 cards.',
   },
   {
     id: 'C-027', name: 'Augment: Core', faction: 'Cogsmiths', type: 'Augment', cost: 1,
     keywords: ['UPGRADE'], rarity: 'Uncommon', complexityTier: 2,
-    cardText: 'Attach to a card in hand: card draws a card when played. Exhaust.',
-    upgradeText: 'Attach to a card in hand: card draws 2 cards when played. Exhaust.',
+    cardText: 'Attach to a card in hand: card draws +1 card when played. Exhaust.',
+    upgradeText: 'Attach to a card in hand: card draws +2 cards when played. Exhaust.',
   },
   {
     id: 'C-028', name: 'Augment: Gyro', faction: 'Cogsmiths', type: 'Augment', cost: 1,
@@ -174,26 +174,26 @@ const COGSMITHS_CARDS: CardDefinition[] = [
   {
     id: 'C-029', name: 'Augment: Bulwark', faction: 'Cogsmiths', type: 'Augment', cost: 1,
     keywords: ['UPGRADE'], rarity: 'Uncommon', complexityTier: 2,
-    cardText: 'Attach to a Skill in hand: Block from this card retains for 1 turn. Exhaust.',
-    upgradeText: 'Attach to a Skill in hand: Block from this card retains for 1 turn and gains +2. Exhaust.',
+    cardText: 'Attach to a Skill in hand: card grants +4 Block. Exhaust.',
+    upgradeText: 'Attach to a Skill in hand: card grants +6 Block. Exhaust.',
   },
   {
     id: 'C-030', name: 'Augment: Amp', faction: 'Cogsmiths', type: 'Augment', cost: 1,
     keywords: ['UPGRADE'], rarity: 'Uncommon', complexityTier: 2,
-    cardText: 'Attach to an Attack in hand: once per combat, this card deals double damage. Exhaust.',
-    upgradeText: 'Attach to an Attack in hand: twice per combat, this card deals double damage. Exhaust.',
+    cardText: 'Attach to an Attack in hand: card deals +8 damage. Exhaust.',
+    upgradeText: 'Attach to an Attack in hand: card deals +12 damage. Exhaust.',
   },
   {
     id: 'C-031', name: 'Mecha Form', faction: 'Cogsmiths', type: 'Power', cost: 3,
     keywords: [], rarity: 'Rare', complexityTier: 3,
-    cardText: 'Gain 3 Strength. All Augment cards cost 0 for the rest of this combat.',
-    upgradeText: 'Gain 4 Strength. All Augment cards cost 0 for the rest of this combat.',
+    cardText: 'Gain 3 Strength. Draw 2 cards.',
+    upgradeText: 'Gain 4 Strength. Draw 2 cards.',
   },
   {
     id: 'C-032', name: 'Warforge', faction: 'Cogsmiths', type: 'Power', cost: 2,
     keywords: [], rarity: 'Rare', complexityTier: 3,
-    cardText: 'All Augment effects are doubled.',
-    upgradeText: 'All Augment effects are tripled.',
+    cardText: 'At turn start, gain 2 Strength.',
+    upgradeText: 'At turn start, gain 3 Strength.',
   },
   {
     id: 'C-033', name: 'Colossus Strike', faction: 'Cogsmiths', type: 'Attack', cost: 3,
@@ -210,38 +210,38 @@ const COGSMITHS_CARDS: CardDefinition[] = [
   {
     id: 'C-035', name: 'Iron Commandment', faction: 'Cogsmiths', type: 'Power', cost: 3,
     keywords: [], rarity: 'Rare', complexityTier: 2,
-    cardText: 'The first Attack you play each turn is treated as having an extra Edge and Jolt Augment.',
-    upgradeText: 'The first 2 Attacks you play each turn are treated as having an extra Edge and Jolt Augment.',
+    cardText: 'Gain 2 Strength.',
+    upgradeText: 'Gain 3 Strength. Draw 1 card.',
   },
   {
     id: 'C-036', name: 'Overclocked Core', faction: 'Cogsmiths', type: 'Power', cost: 2,
     keywords: [], rarity: 'Rare', complexityTier: 1,
-    cardText: 'At combat start, gain 1 extra Energy this turn. Take 2 damage at end of each turn.',
-    upgradeText: 'At combat start, gain 2 extra Energy this turn. Take 2 damage at end of each turn.',
+    cardText: 'Gain 1 Energy. Take 2 damage at end of each turn.',
+    upgradeText: 'Gain 2 Energy. Take 2 damage at end of each turn.',
   },
   {
     id: 'C-037', name: 'Machine God', faction: 'Cogsmiths', type: 'Power', cost: 3,
     keywords: [], rarity: 'Rare', complexityTier: 3,
-    cardText: 'All Drones, Sentries, and Titans you summon have +5 HP and +2 damage.',
-    upgradeText: 'All Drones, Sentries, and Titans you summon have +8 HP and +3 damage.',
+    cardText: 'At turn start, gain 1 Strength. At turn start, gain 4 Block.',
+    upgradeText: 'At turn start, gain 2 Strength. At turn start, gain 6 Block.',
   },
   {
     id: 'C-038', name: 'Augment: Exotic Core', faction: 'Cogsmiths', type: 'Augment', cost: 1,
     keywords: ['UPGRADE'], rarity: 'Rare', complexityTier: 2,
-    cardText: 'Attach to a card in hand: card costs 0 and does not exhaust for the rest of this combat. Exhaust.',
-    upgradeText: 'Attach to a card in hand: card costs 0, does not exhaust, and duplicates on play for the rest of this combat. Exhaust.',
+    cardText: 'Attach to a card in hand: card costs 0. Exhaust.',
+    upgradeText: 'Attach to a card in hand: card costs 0 and deals +6 damage. Exhaust.',
   },
   {
     id: 'C-039', name: 'Augment: Inverter', faction: 'Cogsmiths', type: 'Augment', cost: 2,
     keywords: ['UPGRADE'], rarity: 'Rare', complexityTier: 2,
-    cardText: 'Attach to a card in hand: attack hits all enemies / skill applies to all allies. Exhaust.',
-    upgradeText: 'Attach to a card in hand: attack hits all enemies / skill applies to all allies. Effect is doubled. Exhaust.',
+    cardText: 'Attach to a card in hand: card deals +5 damage. Exhaust.',
+    upgradeText: 'Attach to a card in hand: card deals +8 damage. Exhaust.',
   },
   {
     id: 'C-040', name: 'Reinforce Protocol', faction: 'Cogsmiths', type: 'Skill', cost: 3,
     keywords: ['UPGRADE'], rarity: 'Rare', complexityTier: 2,
-    cardText: 'Attach a random Augment to every card in your hand. Exhaust.',
-    upgradeText: 'Attach 2 random Augments to every card in your hand. Exhaust.',
+    cardText: 'Gain 12 Block. Draw 2 cards. Exhaust.',
+    upgradeText: 'Gain 18 Block. Draw 3 cards. Exhaust.',
   },
   // ── Phase 1.5 additions: foundational vanilla cards ────────────────────────
   {
@@ -265,8 +265,8 @@ const COGSMITHS_CARDS: CardDefinition[] = [
   {
     id: 'C-044', name: 'Pace', faction: 'Cogsmiths', type: 'Skill', cost: 0,
     keywords: [], rarity: 'Common', complexityTier: 1,
-    cardText: 'Draw 1 card. Discard 1 card.',
-    upgradeText: 'Draw 2 cards. Discard 1 card.',
+    cardText: 'Draw 2 cards.',
+    upgradeText: 'Draw 3 cards.',
   },
 ];
 
