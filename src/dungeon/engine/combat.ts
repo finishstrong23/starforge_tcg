@@ -541,8 +541,23 @@ function applySpellEffect(
     }
   }
 
-  // Single-hit damage. Skip if a range, multi-hit, or augment-scaled pattern already fired.
-  const dmgMatch = !rangeDmgMatch && !multiHitMatch && !augBonus
+  // ── Heat-scaled damage: "deal damage equal to (your)(current) heat (× N)" ──
+  // Pyroclast: P-023 Meltdown ("Heat × 3"), P-039 Magma Tide ("equal to Heat").
+  // Does NOT consume Heat — purely scaling.
+  const heatScaleMatch = text.match(
+    /deal damage equal to (?:your\s+)?(?:current\s+)?heat(?:\s*[x×*]\s*(\d+))?/,
+  );
+  if (heatScaleMatch) {
+    const mult = heatScaleMatch[1] ? parseInt(heatScaleMatch[1]) : 1;
+    const raw = s.playerHeat * mult;
+    const dmg = calcDamage(raw, s.playerStatusEffects, s.enemy.statusEffects);
+    const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
+    s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
+    s = log(s, `🔥 ${card.name} deals ${dmg} (Heat ${s.playerHeat}${mult > 1 ? `×${mult}` : ''})`);
+  }
+
+  // Single-hit damage. Skip if a range, multi-hit, augment-scaled, or heat-scaled pattern already fired.
+  const dmgMatch = !rangeDmgMatch && !multiHitMatch && !augBonus && !heatScaleMatch
     ? text.match(/deal (\d+) damage/) : null;
   if (dmgMatch) {
     const dmg = calcDamage(parseInt(dmgMatch[1]), s.playerStatusEffects, s.enemy.statusEffects);
@@ -556,8 +571,26 @@ function applySpellEffect(
     }
   }
 
-  // Shield / block
-  const shieldMatch = text.match(/gain (\d+) (?:shield|block)/);
+  // ── Heat-scaled block: "Gain N Block per Heat (up to M Heat counted)" ──
+  // Pyroclast P-016 Glowing Resolve. Does NOT consume Heat.
+  const blockPerHeatMatch = text.match(
+    /gain (\d+) block per heat(?:\s*\(up to (\d+) heat(?:\s+counted)?\))?/,
+  );
+  if (blockPerHeatMatch) {
+    const perHeat = parseInt(blockPerHeatMatch[1]);
+    const cap = blockPerHeatMatch[2] ? parseInt(blockPerHeatMatch[2]) : Infinity;
+    const heatCounted = Math.min(s.playerHeat, cap);
+    const block = perHeat * heatCounted;
+    if (block > 0) {
+      s = gainBlock(s, block);
+      s = log(s, `🛡 ${card.name} gains ${block} Block (${heatCounted} Heat × ${perHeat})`);
+    }
+  }
+
+  // Shield / block. Skip if heat-per-block already fired (its text contains "Gain N Block").
+  const shieldMatch = !blockPerHeatMatch
+    ? text.match(/gain (\d+) (?:shield|block)/)
+    : null;
   if (shieldMatch) {
     s = gainBlock(s, parseInt(shieldMatch[1]));
     s = log(s, `🛡 Gained ${shieldMatch[1]} Shield`);
@@ -743,11 +776,22 @@ function applySpellEffect(
 
   // Status: burn / Ignite (Pyroclast term, same status). Match all spellings:
   //   "apply 2 burn", "apply ignite 2", "apply 2 ignite"
-  const burnMatch = text.match(/apply (?:(\d+) (?:burn|ignite)|ignite (\d+))/);
-  if (burnMatch) {
-    const stacks = parseInt(burnMatch[1] ?? burnMatch[2]);
-    s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'burn', stacks) } };
-    s = log(s, `🔥 Applied ${stacks} Burn`);
+  // Self-targeted variant ("...to yourself") routes to playerStatusEffects, not enemy.
+  // Pre-existing bug: Overclock's "Apply Ignite 2 to yourself" used to mis-target the enemy.
+  const selfBurnMatch = text.match(
+    /apply (?:(\d+) (?:burn|ignite)|ignite (\d+))\s+to\s+(?:yourself|you)/,
+  );
+  if (selfBurnMatch) {
+    const stacks = parseInt(selfBurnMatch[1] ?? selfBurnMatch[2]);
+    s = { ...s, playerStatusEffects: addEffect(s.playerStatusEffects, 'burn', stacks) };
+    s = log(s, `🔥 ${card.name}: ${stacks} Burn applied to you`);
+  } else {
+    const burnMatch = text.match(/apply (?:(\d+) (?:burn|ignite)|ignite (\d+))/);
+    if (burnMatch) {
+      const stacks = parseInt(burnMatch[1] ?? burnMatch[2]);
+      s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'burn', stacks) } };
+      s = log(s, `🔥 Applied ${stacks} Burn`);
+    }
   }
   const poisonMatch = text.match(/apply (\d+) poison/);
   if (poisonMatch) {
@@ -817,14 +861,22 @@ function applySpellEffect(
   }
 
   // Conditional: "if heat >= N, ..."
-  const heatCondMatch = text.match(/if heat >= (\d+)/);
+  const heatCondMatch = text.match(/if heat >=? (\d+)/);
   if (heatCondMatch && s.playerHeat >= parseInt(heatCondMatch[1])) {
     // Apply burn as conditional bonus (cards like "If Heat >= 3, apply Ignite 2" — treat Ignite as Burn)
-    const condBurnMatch = text.match(/if heat >= \d+,\s*apply (?:ignite|burn) (\d+)/);
+    const condBurnMatch = text.match(/if heat >=? \d+,\s*apply (?:ignite|burn) (\d+)/);
     if (condBurnMatch) {
       const stacks = parseInt(condBurnMatch[1]);
       s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'burn', stacks) } };
       s = log(s, `🔥 Heat condition met — applied ${stacks} Burn`);
+    }
+    // Conditional bonus damage: "If Heat >= N, deal M more damage." (Pyroclast P-036 Sun's Fury)
+    const condDmgMatch = text.match(/if heat >=? \d+,\s*deal (\d+) more damage/);
+    if (condDmgMatch) {
+      const bonus = calcDamage(parseInt(condDmgMatch[1]), s.playerStatusEffects, s.enemy.statusEffects);
+      const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, bonus);
+      s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
+      s = log(s, `🔥 Heat condition met — +${bonus} bonus damage`);
     }
   }
 

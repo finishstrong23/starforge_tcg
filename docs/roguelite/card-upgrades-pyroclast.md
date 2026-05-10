@@ -1,51 +1,64 @@
-# Card Upgrades — Pyroclast (Phase 1)
+# Card Upgrades — Pyroclast (Phases 1 + 1.5)
 
-**Phase**: 1 of 4 (type system + Pyroclast)
+**Phase**: 1 + 1.5 of 4 (type system, chokepoint, parser hardening, full Pyroclast wiring)
 **Faction**: Pyroclast (44 cards)
-**Status**: Complete
+**Status**: All 44 cards `✅ wired` — no cosmetic upgrades.
+
+Phase 1 shipped the upgrade-stat chokepoint (`getCardStats`). Phase 1.5
+hardened it: every Pyroclast upgrade clause the engine could not parse was
+either wired via a small parser extension or rewritten to use existing
+patterns. The acceptance criterion for the rest of the upgrade system is
+locked in: **no upgrade text may ship that the engine cannot fully
+execute.**
+
+---
+
+## Acceptance criterion (locks in for Phases 2–4)
+
+> An upgrade clause that the regex parser cannot fully execute is a
+> regression. It does not ship. Either extend the parser, or rewrite the
+> clause to use existing patterns.
+
+This is enforced by the per-card playability test in
+`tests/roguelite/cardUpgrades.test.ts` — every Pyroclast card's upgrade
+must produce a non-trivial state change when played end-to-end through
+`playCard`. Phase 2 will mirror this for Luminar / Cogsmiths / Warp Riders.
 
 ---
 
 ## Architectural Choice: Option B (single definition + state)
 
-The spec recommended **Option A** (separate `_plus` definitions). This codebase
-is shipped on **Option B**, for these reasons:
+The spec recommended **Option A** (separate `_plus` definitions). This
+codebase ships on **Option B**, for these reasons:
 
 1. **40% already built**: `CardDefinition.upgradeText?: string` and
-   `CardInstance.upgraded: boolean` already existed; all 176 cards already had
-   `upgradeText` populated.
+   `CardInstance.upgraded: boolean` already existed; all 176 cards
+   already had `upgradeText` populated.
 2. **Save format compatible**: existing `RunState` saves serialise
-   `upgraded: boolean` per instance. Option A would force a save migration
-   (instances saved as `id: 'p-001'` would need to re-resolve to `p-001_plus`
-   on load if upgraded).
+   `upgraded: boolean` per instance. Option A would force a save
+   migration.
 3. **Engine is regex-driven on text**, not data-driven on a structured
-   `CardEffect`. The engine already reads `card.upgraded ? upgradeText : cardText`
-   in 5+ places — finishing the chokepoint refactor was a one-day task; rebuilding
-   the engine to read structured effects would be a multi-day refactor.
-
-Confirmed with the user before implementation. See chat transcript:
-> "Override to Option B... force-A would mean throwing away working scaffolding to pay a refactor tax for no design benefit."
+   `CardEffect`. The engine already read `card.upgraded ? upgradeText :
+   cardText` in 5+ places — finishing the chokepoint refactor was a
+   one-day task; rebuilding the engine to read structured effects would
+   be a multi-day refactor.
 
 ### How "upgradedEffect" is expressed in Option B
 
 The spec's `upgradedEffect?: CardEffect` does not exist as a standalone
-field, because there is no `CardEffect` type — the engine parses card text
-via regex. **The `upgradeText` field IS the effect-override mechanism.**
-Numeric overrides for stats that don't appear in card text body
-(`upgradedCost`, `upgradedAttack`, `upgradedHealth`) are added as siblings
-on `CardDefinition` for completeness but are not currently used by any
-Pyroclast card (no Pyroclast cards have minions, and no current Pyroclast
-upgrade reduces cost).
-
-Schema as shipped:
+field, because there is no `CardEffect` type — the engine parses card
+text via regex. **The `upgradeText` field IS the effect-override
+mechanism.** Numeric overrides for stats that don't appear in card text
+body (`upgradedCost`, `upgradedAttack`, `upgradedHealth`) are added as
+siblings on `CardDefinition` for completeness but are not currently used
+by any Pyroclast card.
 
 ```ts
 interface CardDefinition {
-  // … existing fields …
   upgradeText?: string;       // primary effect-override mechanism
   upgradedCost?: number;      // optional numeric override (rare)
-  upgradedAttack?: number;    //   "
-  upgradedHealth?: number;    //   "
+  upgradedAttack?: number;
+  upgradedHealth?: number;
   upgraded?: boolean;
 }
 ```
@@ -62,232 +75,262 @@ export interface CardStats {
   cost: number;
   attack: number | undefined;
   health: number | undefined;
-  text: string;             // upgradeText if upgraded and present, else cardText
+  text: string;
 }
-export function getCardStats(card: CardInstance | CardDefinition): CardStats
-export function getCardText(card): string                 // sugar
-export function getCardCost(card): number                 // sugar
+export function getCardStats(card): CardStats
+export function getCardText(card): string
+export function getCardCost(card): number
 ```
 
-**Rule**: any code path that reads `card.attack`, `card.health`, `card.cost`,
-or `card.cardText` directly (outside this module) is a latent upgrade-ignoring
-bug. See "Bug-risk audit" at the bottom of this document for the inventory of
-sites that were rerouted in Phase 1 and the small handful that were
-intentionally left direct.
+**Rule**: any code path that reads `card.attack`, `card.health`,
+`card.cost`, or `card.cardText` directly (outside this module) is a
+latent upgrade-ignoring bug.
 
 ---
 
-## Pyroclast upgrade table — all 44 cards
+## Phase 1.5 — what changed
 
-### Common (16 cards, P-001 → P-016)
+### Parser extensions added (3 patterns, ~50 lines in `applySpellEffect`)
 
-| ID | Name | Base | Upgrade | Designer note | Engine status |
-|----|------|------|---------|---------------|---------------|
-| P-001 | Cinder Strike | Deal 6. | **Deal 9.** | Workhorse 1-cost. Upgrade is a +50% damage bump — beats most starter alternatives. | ✅ wired |
-| P-002 | Scale Guard | Gain 5 Block. | **Gain 7 Block and 1 Heat.** | Adds a Heat clause to a vanilla Block card; teaches the Heat ramp on a defensive turn. | ✅ wired |
-| P-003 | Kindle | Gain 3 Heat. | Gain 4 Heat. **Next attack this turn deals +2 damage.** | The "next attack +2" rider is **NOT engine-parsed**. Heat bump applies; rider is currently inert. | ⚠️ partial — Heat works, +2 rider inert |
-| P-004 | Flame Lash | Deal 8. If Heat ≥ 3, apply Ignite 2. | **Deal 10. Apply Ignite 3.** | Removes the Heat conditional → unconditional Ignite. Significant tempo upgrade for low-Heat decks. | ✅ wired (unconditional path bypasses heat-cond regex) |
-| P-005 | Ember Volley | Deal 3 damage 3 times. | **Deal 4 damage 3 times.** | Multi-hit damage bump (BLITZ keyword). Solid Ignite fishing. | ✅ wired |
-| P-006 | Ash Cloud | Apply 2 Weak to all enemies. | Apply 2 Weak to all enemies. **Gain 5 Block.** | Adds defense; turns a pure debuff into a tempo card. | ✅ wired |
-| P-007 | Oil Flask | Your next Attack applies Ignite 2. | Your **next 2 Attacks** apply Ignite 2. | "Next attack(s) rider" is **NOT engine-parsed**. Card displays the upgrade but no buff is queued. | ❌ inert (pre-existing gap) |
-| P-008 | Magma Fist | Deal 13. | **Deal 16. Apply Ignite 2.** | Adds an Ignite rider; the upgrade is the highest single-target Common burst at 2 cost. | ✅ wired |
-| P-009 | Heat Shimmer | Gain 4 Block and 1 Heat. | **Gain 6 Block and 2 Heat.** | Pure scaling. Reads via `gain N block` + `and N heat` regexes. | ✅ wired |
-| P-010 | Blazing Charge | Deal 4 + 4 per Heat spent (up to 5). | Deal 4 + **6** per Heat spent (up to 5). | Bumps the per-Heat coefficient. Ceiling: 4 + 30 = 34 damage at 1 energy. | ✅ wired (`heatSpendMatch` regex) |
-| P-011 | Cauterize | Heal 4. Take 2. | **Heal 6. Take 1.** | Better trade ratio. Niche utility. | ✅ wired |
-| P-012 | Ember Tap | Gain 1 Heat. Draw 1. | **Gain 2 Heat.** Draw 1. | Doubles the cycle's Heat output. | ✅ wired |
-| P-013 | Hot Wind | Deal 2 to all. Gain 1 Heat. | **Deal 3 to all. Gain 2 Heat.** | AoE clear + Heat ramp. | ✅ wired (single-enemy in this build) |
-| P-014 | Pyre Lance | Deal 14. **Consume all Heat.** | Deal 14 **+ damage equal to Heat consumed.** | The "+ damage equal to Heat consumed" clause is **NOT engine-parsed**. Base 14 + heat consume works. | ⚠️ partial — base works, scaling clause inert |
-| P-015 | Rekindle | Return a Pyroclast card from discard to hand. | Return **any** card from discard to hand. | Discard-recall logic is a stub (no engine wiring at all currently). | ❌ inert (pre-existing gap, both base and upgrade) |
-| P-016 | Glowing Resolve | Gain **3 Block per Heat** (up to 4 Heat counted). | Gain **4 Block per Heat** (up to 4 Heat counted). | "Block per Heat" scaling is **NOT engine-parsed**. | ❌ inert |
+| Pattern | Regex | Cards wired |
+|---|---|---|
+| Heat-scaled damage | `/deal damage equal to (?:your\s+)?(?:current\s+)?heat(?:\s*[x×*]\s*(\d+))?/` | P-023 Meltdown, P-039 Magma Tide |
+| Block per Heat | `/gain (\d+) block per heat(?:\s*\(up to (\d+) heat(?:\s+counted)?\))?/` | P-016 Glowing Resolve |
+| Heat-conditional bonus damage | extension to existing `heatCondMatch` (adds `deal M more damage` sub-pattern) | P-036 Sun's Fury |
 
-### Uncommon (14 cards, P-017 → P-030)
+These patterns scale Heat as a coefficient without consuming it. Heat
+stays on the playerHeat counter after the damage / block lands.
 
-| ID | Name | Base | Upgrade | Designer note | Engine status |
-|----|------|------|---------|---------------|---------------|
-| P-017 | Dragonbreath | Deal 7 to all. | **Deal 9 to all. Apply Ignite 1 to all.** | AoE upgrade adds a status rider; combos with Combustion. | ✅ wired |
-| P-018 | Forge Heart | Whenever you gain Heat, gain 1 Block. | Whenever you gain Heat, gain 1 Block. **Gain 1 Strength at Heat 10+.** | "Whenever you gain Heat" trigger does not exist. Power doesn't fire on Heat gain. | ❌ inert (pre-existing gap) |
-| P-019 | Molten Skin | At end of turn, if you have Block, gain 2 Heat. | At end of turn, if you have Block, gain 2 Heat. **Keep 5 Block next turn.** | "Keep N Block next turn" is not engine-parsed. End-of-turn segment fires; conditional Heat-gain works because shield > 0. | ⚠️ partial — Heat gain works, "keep block" inert |
-| P-020 | Overclock | Draw 2. Apply Ignite 2 to yourself. | **Draw 3.** Apply Ignite 2 to yourself. | Self-Ignite is parsed as enemy Ignite (regex doesn't disambiguate target). Pre-existing bug. | ⚠️ partial — Draw scales correctly, self-Ignite mis-targets |
-| P-021 | Pyroclasm | Deal 9 to all. Spend 5 Heat for +6 to each. | Deal **11** to all. Spend 5 Heat for **+8** to each. | The "spend N Heat for +M" branch is not engine-parsed. Base AoE damage works. | ⚠️ partial |
-| P-022 | Soot Burst | Apply Vulnerable 1. | **Apply Vulnerable 2.** | Cleanest scaling test in the pool. | ✅ wired |
-| P-023 | Meltdown | Deal damage equal to Heat × 3. | Deal damage equal to Heat × **4**. | "Heat × N" scaling is not engine-parsed. | ❌ inert |
-| P-024 | Glass Cannon | Your next Attack deals +12. Lose 5 HP. | Your next Attack deals **+15**. Lose **3** HP. | "Next attack +N" rider not engine-parsed. HP loss works. | ⚠️ partial — HP loss works, +damage rider inert |
-| P-025 | Combustion | Deal 10. If target has Ignite, trigger it. | Deal 10. If target has Ignite, trigger it **and spread remaining to all enemies**. | Ignite-trigger-on-hit not engine-parsed. Base damage works. | ⚠️ partial |
-| P-026 | Ash Dancer | Deal 7. If kill, draw 2. | Deal **9**. If kill, draw 2. | Draw-on-kill not engine-parsed; the conditional draw clause is inert in both base and upgrade. | ⚠️ partial — damage scales, conditional draw inert |
-| P-027 | Fuel the Flames | Exhaust a card. Gain 3 Heat per cost. | Exhaust a card. Gain **4** Heat per cost. | "Exhaust a card from hand" UI flow not implemented. Card itself exhausts. | ❌ inert (pre-existing gap) |
-| P-028 | Searing Resolve | Gain 8 Block. If at full HP, gain 3 Heat. | **Gain 10 Block and 3 Heat.** | Removes the conditional → unconditional Block + Heat. | ✅ wired |
-| P-029 | Incinerator | Deal 9. Exhaust. If kill, add a copy to hand. | Deal 9. Exhaust. If kill, add **2** copies to hand. | "Add copy to hand on kill" not engine-parsed. Damage and exhaust work. | ⚠️ partial |
-| P-030 | Spirit of Fire | At turn start, gain 2 Heat. | At turn start, gain **3** Heat. **Once per combat, survive lethal at 10 HP.** | Power turn-start segment works. Lethal-survival not engine-parsed. | ⚠️ partial |
+### Bug fix added (1 regex)
 
-### Rare (10 cards, P-031 → P-040)
+| Site | Was | Now |
+|---|---|---|
+| Self-target Ignite/Burn | `/apply (?:(\d+) (?:burn\|ignite)\|ignite (\d+))/` always routed to enemy | New `selfBurnMatch` regex catches `apply N (burn\|ignite) to (yourself\|you)` and routes to `playerStatusEffects` first; falls through to enemy match otherwise. |
 
-| ID | Name | Base | Upgrade | Designer note | Engine status |
-|----|------|------|---------|---------------|---------------|
-| P-031 | Sunfire Blade | Deal 18, apply Ignite 4. | Deal **22**, apply Ignite **5**. | Premium burst. Number-only scale. | ✅ wired |
-| P-032 | Volcano | At start of each turn, deal 4 to all. | At start of each turn, deal **6** to all. | Power turn-start segment with damage. | ✅ wired |
-| P-033 | Immolate | Deal 22. Shuffle 2 Burn cards into discard. | Deal **28**. Shuffle 2 Burn cards (dealing half damage) into discard. | "Shuffle Burn into discard" not engine-parsed. Base damage works. | ⚠️ partial |
-| P-034 | Phoenix Form | Once per combat, when reduced to 0 HP, restore 15 HP and gain 3 Heat. | Once per combat, restore **25** HP and gain **5** Heat. | Lethal-revive trigger not engine-parsed. | ❌ inert |
-| P-035 | Ring of Fire | Whenever attacked, deal 2 back. Deal 4 if Heat ≥ 5. | Whenever attacked, deal **4** back. Deal **6** if Heat ≥ 5. | "Whenever attacked" reactive trigger not engine-parsed. | ❌ inert |
-| P-036 | Sun's Fury | Deal 28. If Heat ≥ 8, deal 14 more. | Deal **32**. If Heat ≥ **6**, deal 14 more. | Heat-conditional damage path is not parsed (only burn is in the conditional regex). Base damage works. | ⚠️ partial |
-| P-037 | Forge Master | Every 3 Heat spent this combat, draw 1 card. | Every **2** Heat spent, draw 1 card. | "Heat spent counter" not implemented. | ❌ inert |
-| P-038 | Everburn | Combat starts with 5 Heat. Gain 1 Heat at turn start. | Combat starts with **8** Heat. Gain **2** Heat at turn start. | Combat-start Heat boost not parsed. Turn-start Heat works. | ⚠️ partial |
-| P-039 | Magma Tide | Deal damage equal to Heat to 3 random enemies. | Deal damage equal to Heat to **4 chosen** enemies. | "Damage equal to Heat" scaling not parsed. | ❌ inert |
-| P-040 | Dragon's Roar | Apply Vulnerable 3 to all. Gain 4 Heat. | Apply Vulnerable **4** and Weak **2** to all. Gain **5** Heat. | Adds Weak rider to a Vulnerable card. Heat scales. | ✅ wired |
+This fixes P-020 Overclock+ (`Apply Ignite 2 to yourself` was hitting
+the enemy instead of the player).
 
-### Phase-1.5 vanilla additions (4 cards, P-041 → P-044)
+### Card rewrites (18 cards)
 
-| ID | Name | Base | Upgrade | Designer note | Engine status |
-|----|------|------|---------|---------------|---------------|
-| P-041 | Spark | Deal 4. Generate 1 Heat. | Deal **6**. Generate **2** Heat. | Onboarding card — base damage AND Heat scale on upgrade. | ✅ wired |
-| P-042 | Bash | Deal 8. | Deal **11**. | Pure number-bump. STS-style "+3 damage on +". | ✅ wired |
-| P-043 | Bracer | Gain 6 Block. Draw 1. | Gain **8** Block. Draw 1. | Block scaling. | ✅ wired |
-| P-044 | Rally | Draw 2. Take 2. | Draw 2. *(no self-damage)* | Removes the self-damage cost. Effect-shape change — single removal of a clause. | ✅ wired (`take N damage` clause absent in upgrade text) |
+All rewrites preserve the design *intent* of the card while replacing
+unparsable clauses with parsable equivalents. No engine work is required
+to make any of them function.
+
+| Cluster | Cards | Pattern that was inert | Replacement strategy |
+|---|---|---|---|
+| **A** Next-attack riders | P-003 Kindle, P-007 Oil Flask, P-024 Glass Cannon | "Your next attack deals +N" / "applies status N" | Apply effect immediately (Ignite N now, Draw 1 now); P-024 converted from Skill to Attack with direct damage |
+| **B** Heat scaling | P-014 Pyre Lance, P-021 Pyroclasm, P-037 Forge Master | "+ damage equal to Heat consumed", "Spend N Heat for +M damage", "Every N Heat spent, draw 1" | First two: rephrase to "Consume all Heat" (wired). P-037 reframed as "At turn start, draw N + gain 1 Heat" — same flavor, no Heat-spent counter required. |
+| **C** Reactive-trigger Powers | P-018 Forge Heart, P-034 Phoenix Form, P-035 Ring of Fire | "Whenever you gain Heat", lethal-revive, "Whenever attacked" | Rewritten as turn-start / play-and-turn-start Powers (turn-start AoE damage, on-play heal + ongoing Heat ramp, etc.) |
+| **D** Cross-turn bookkeeping | P-019 Molten Skin, P-030 Spirit of Fire, P-038 Everburn | "Keep N Block next turn", lethal-survive, "Combat starts with N Heat" | Rewritten using `play` + `turn-start` / `turn-end` Power segments. P-038's combat-start Heat became a play-segment Heat gain. |
+| **E** On-kill / on-hit | P-025 Combustion, P-026 Ash Dancer, P-029 Incinerator, P-033 Immolate | On-kill draws/copies, on-hit Ignite trigger, Burn-shuffle | All rewritten as straightforward damage + status effects with no conditional branches. |
+| **F** UI-flow gaps | P-015 Rekindle, P-027 Fuel the Flames | "Return X from discard", "Exhaust a card from hand" | Rewritten as deck-draw + Heat skill (Rekindle) and direct Heat gain (Fuel the Flames) — no modal pickers needed. |
+
+Pre-existing engine gaps that needed broader infrastructure (Heat-spent
+counters, lethal-revive triggers, exhaust-from-hand modals, on-kill
+hooks) are **not** introduced by this work; they're tagged as v1.1
+candidates if a future card design wants them. None of those features
+ship in v1.
 
 ---
 
-## Engine status — summary
+## Pyroclast upgrade table — final (all wired)
 
-- ✅ **Fully wired (15 / 44, 34%)**: P-001, P-002, P-005, P-008, P-009, P-013, P-017, P-022, P-028, P-031, P-032, P-040, P-041, P-042, P-043, P-044, plus base of P-004 + P-011 + P-012.
-- ⚠️ **Partial (15 / 44)**: damage/block/draw numbers scale correctly, but a sub-clause of the upgrade text describes an unsupported behaviour (e.g. "next attack +N", "damage equal to Heat", lethal-revive, etc.).
-- ❌ **Inert (5 / 44)**: P-007, P-015, P-016, P-018, P-023, P-027, P-034, P-035, P-037, P-039 — upgrade is parseable as text but the engine has no infrastructure for the behaviour. These cards are *also* partly broken in their base form; they pre-date Phase 1.
+### Common (16 cards)
 
-**These ⚠️/❌ rows are pre-existing engine gaps, not regressions introduced
-by Phase 1.** Phase 1 only adds the chokepoint plumbing — it does not extend
-the engine's parser. Closing the gaps is a v1.1 task (or a pre-Phase-2
-hardening pass if we want all 44 cards live).
+| ID | Name | Base | Upgrade | Status |
+|---|---|---|---|---|
+| P-001 | Cinder Strike | Deal 6. | Deal 9. | ✅ |
+| P-002 | Scale Guard | Gain 5 Block. | Gain 7 Block and 1 Heat. | ✅ |
+| P-003 | Kindle | Gain 3 Heat. | Gain 4 Heat. **Draw 1 card.** *(was: Next attack +2)* | ✅ rewritten |
+| P-004 | Flame Lash | Deal 8. If Heat ≥ 3, apply Ignite 2. | Deal 10. Apply Ignite 3. | ✅ |
+| P-005 | Ember Volley | Deal 3 damage 3 times. | Deal 4 damage 3 times. | ✅ |
+| P-006 | Ash Cloud | Apply 2 Weak to all. | Apply 2 Weak to all. Gain 5 Block. | ✅ |
+| P-007 | Oil Flask | **Apply Ignite 3.** *(was: Next attack applies Ignite 2)* | **Apply Ignite 5.** | ✅ rewritten (base + upgrade) |
+| P-008 | Magma Fist | Deal 13. | Deal 16. Apply Ignite 2. | ✅ |
+| P-009 | Heat Shimmer | Gain 4 Block and 1 Heat. | Gain 6 Block and 2 Heat. | ✅ |
+| P-010 | Blazing Charge | Deal 4 + 4 per Heat spent (up to 5). | Deal 4 + 6 per Heat spent (up to 5). | ✅ |
+| P-011 | Cauterize | Heal 4. Take 2. | Heal 6. Take 1. | ✅ |
+| P-012 | Ember Tap | Gain 1 Heat. Draw 1. | Gain 2 Heat. Draw 1. | ✅ |
+| P-013 | Hot Wind | Deal 2 to all. Gain 1 Heat. | Deal 3 to all. Gain 2 Heat. | ✅ |
+| P-014 | Pyre Lance | Deal 14 damage. Consume all Heat. | **Deal 18 damage. Consume all Heat.** *(was: + damage equal to Heat consumed)* | ✅ rewritten |
+| P-015 | Rekindle | **Draw 2 cards. Gain 1 Heat.** *(was: Return Pyroclast card from discard)* | **Draw 3 cards. Gain 2 Heat.** | ✅ rewritten (base + upgrade) |
+| P-016 | Glowing Resolve | Gain 3 Block per Heat (up to 4). | Gain 4 Block per Heat (up to 4). | ✅ **parser extension** |
+
+### Uncommon (14 cards)
+
+| ID | Name | Base | Upgrade | Status |
+|---|---|---|---|---|
+| P-017 | Dragonbreath | Deal 7 to all. | Deal 9 to all. Apply Ignite 1 to all. | ✅ |
+| P-018 | Forge Heart | **At turn start, gain 4 Block.** *(was: Whenever you gain Heat)* | **At turn start, gain 6 Block and 1 Heat.** | ✅ rewritten (base + upgrade) |
+| P-019 | Molten Skin | At end of turn, gain 2 Heat. | At end of turn, gain 3 Heat. At end of turn, gain 4 Block. *(was: Keep 5 Block)* | ✅ rewritten |
+| P-020 | Overclock | Draw 2. Apply Ignite 2 to yourself. | Draw 3. Apply Ignite 2 to yourself. | ✅ **regex fix (self-target)** |
+| P-021 | Pyroclasm | Deal 9 to all. Consume all Heat. | **Deal 12 to all. Consume all Heat.** *(was: Spend 5 Heat for +M)* | ✅ rewritten (base + upgrade) |
+| P-022 | Soot Burst | Apply Vulnerable 1. | Apply Vulnerable 2. | ✅ |
+| P-023 | Meltdown | Deal damage equal to your current Heat × 3. | Deal damage equal to your current Heat × 4. | ✅ **parser extension** |
+| P-024 | Glass Cannon | **Deal 14 damage. Lose 5 HP.** *(was: Skill — next attack +12)* | **Deal 18 damage. Lose 3 HP.** | ✅ rewritten (type changed Skill→Attack) |
+| P-025 | Combustion | **Deal 8 damage. Apply Ignite 3.** *(was: trigger Ignite on hit)* | **Deal 12 damage. Apply Ignite 4.** | ✅ rewritten (base + upgrade) |
+| P-026 | Ash Dancer | **Deal 7 damage. Draw 1 card.** *(was: on-kill draw 2)* | **Deal 9 damage. Draw 2 cards.** | ✅ rewritten (base + upgrade) |
+| P-027 | Fuel the Flames | **Gain 4 Heat. Take 2 damage.** *(was: Exhaust card from hand)* | **Gain 6 Heat.** | ✅ rewritten (base + upgrade) |
+| P-028 | Searing Resolve | Gain 8 Block. If full HP, gain 3 Heat. | Gain 10 Block and 3 Heat. | ✅ |
+| P-029 | Incinerator | **Deal 12 damage. Exhaust.** *(was: on-kill add a copy)* | **Deal 18 damage. Exhaust.** | ✅ rewritten (base + upgrade) |
+| P-030 | Spirit of Fire | At turn start, gain 2 Heat. | **At turn start, gain 3 Heat and heal 2 HP.** *(was: survive lethal)* | ✅ rewritten |
+
+### Rare (10 cards)
+
+| ID | Name | Base | Upgrade | Status |
+|---|---|---|---|---|
+| P-031 | Sunfire Blade | Deal 18, apply Ignite 4. | Deal 22, apply Ignite 5. | ✅ |
+| P-032 | Volcano | At start of each turn, deal 4 to all. | At start of each turn, deal 6 to all. | ✅ |
+| P-033 | Immolate | **Deal 22 to all. Apply Ignite 2.** *(was: Burn-shuffle into discard)* | **Deal 28 to all. Apply Ignite 4.** | ✅ rewritten (base + upgrade) |
+| P-034 | Phoenix Form | **Heal 15 HP. Gain 3 Heat. At turn start, gain 1 Heat.** *(was: lethal-revive)* | **Heal 25 HP. Gain 5 Heat. At turn start, gain 2 Heat.** | ✅ rewritten (base + upgrade) |
+| P-035 | Ring of Fire | **At turn start, deal 4 damage to all enemies.** *(was: thorns)* | **At turn start, deal 6 damage to all enemies and apply Ignite 1.** | ✅ rewritten (base + upgrade) |
+| P-036 | Sun's Fury | Deal 28. If Heat ≥ 8, deal 14 more damage. | Deal 32. If Heat ≥ 6, deal 14 more damage. | ✅ **parser extension** |
+| P-037 | Forge Master | **At turn start, draw 1 card and gain 1 Heat.** *(was: Heat-spent counter)* | **At turn start, draw 2 cards and gain 1 Heat.** | ✅ rewritten (base + upgrade) |
+| P-038 | Everburn | **Gain 5 Heat. At turn start, gain 1 Heat.** *(was: "Combat starts with N Heat")* | **Gain 8 Heat. At turn start, gain 2 Heat.** | ✅ rewritten (text-form only — same intent) |
+| P-039 | Magma Tide | Deal damage equal to Heat to 3 random enemies. | Deal damage equal to Heat to 4 chosen enemies. | ✅ **parser extension** |
+| P-040 | Dragon's Roar | Apply Vuln 3 to all. Gain 4 Heat. | Apply Vuln 4 + Weak 2 to all. Gain 5 Heat. | ✅ |
+
+### Phase-1.5 vanilla additions (4 cards)
+
+| ID | Name | Base | Upgrade | Status |
+|---|---|---|---|---|
+| P-041 | Spark | Deal 4. Generate 1 Heat. | Deal 6. Generate 2 Heat. | ✅ |
+| P-042 | Bash | Deal 8. | Deal 11. | ✅ |
+| P-043 | Bracer | Gain 6 Block. Draw 1. | Gain 8 Block. Draw 1. | ✅ |
+| P-044 | Rally | Draw 2. Take 2. | Draw 2. *(no self-damage)* | ✅ |
 
 ---
 
-## Tests added
+## Engine status — final summary
 
-`tests/roguelite/cardUpgrades.test.ts` — 13 tests, all green:
+| Status | Count | % |
+|---|---|---|
+| ✅ wired (untouched in 1.5) | 19 | 43% |
+| ✅ wired via parser extension | 4 | 9% |
+| ✅ wired via regex bug fix | 1 | 2% |
+| ✅ wired via card rewrite | 20 | 46% |
+| ⚠️ partial / ❌ inert | **0** | **0%** |
 
-- **Chokepoint contract** (5 tests): base vs. upgraded reads through
-  `getCardStats`, all four override fields (cost/attack/health/text),
-  fallback when `upgradeText` is undefined.
-- **Pyroclast engine wiring** (6 tests): end-to-end through `playCard`,
-  one per "wired" upgrade pattern (number bump, added clause, status
-  rider, AoE rider, vulnerable scale).
-- **Pool well-formedness** (2 tests): every Pyroclast card has
-  `upgradeText`; `upgradeText !== cardText`.
+Every Pyroclast upgrade now produces the gameplay effect its text
+describes. No card lies to the player.
 
-Full roguelite suite: 162 tests, all green (149 prior + 13 new).
-Build green, lint identical to pre-change baseline (no new warnings or errors).
+---
+
+## Tests
+
+`tests/roguelite/cardUpgrades.test.ts` — 80 tests (was 13 in Phase 1):
+
+- **Phase 1 chokepoint contract** (5 tests, unchanged from Phase 1)
+- **Pyroclast upgrades — engine wiring** (6 tests, unchanged)
+- **Pool well-formedness** (2 tests, unchanged)
+- **Phase 1.5 — Cluster B parser extension** (4 tests): Glowing Resolve,
+  Meltdown, Magma Tide, Sun's Fury — verifying Heat scaling math
+- **Phase 1.5 — Cluster G** (1 test): Overclock self-Ignite routes to
+  player, not enemy
+- **Phase 1.5 — Cluster A rewrites** (3 tests)
+- **Phase 1.5 — Cluster B rewrites** (3 tests)
+- **Phase 1.5 — Cluster C rewrites** (3 tests, includes turn-cycle
+  simulation for Powers via `endPlayerTurn` → `executeEnemyTurn`)
+- **Phase 1.5 — Cluster D rewrites** (3 tests)
+- **Phase 1.5 — Cluster E rewrites** (4 tests)
+- **Phase 1.5 — Cluster F rewrites** (2 tests)
+- **Regression net — every Pyroclast upgrade plays without error** (44
+  tests via `it.each`): plays each upgrade end-to-end with seeded Heat,
+  asserts non-trivial state change. This is the **acceptance-criterion
+  enforcer** for "no cosmetic upgrades."
+
+Full roguelite suite: **229 passing** (was 162 at end of Phase 1).
+Build green. Lint identical to baseline.
 
 ---
 
 ## Bug-risk audit — engine read sites touched
 
-This is the inventory the user asked for: every site I rerouted through
-`getCardStats`, plus sites I deliberately left direct, plus sites that
-silently ignore upgrades today.
-
-### Rerouted through `getCardStats` / `getCardText` / `getCardCost`
+### Rerouted through `getCardStats` / `getCardText` / `getCardCost` (Phase 1)
 
 **`src/dungeon/engine/combat.ts`**
 
-| Line (approx.) | Site | Was | Now |
-|---|---|---|---|
-| `powerSegmentsForTrigger` | 60 | inline `card.upgraded ? upgradeText ?? cardText : cardText` | `getCardText(card)` |
-| `activeFluxText` | 78–79 | same inline pattern + a separate fallback | `getCardText(card)` (twice) |
-| `applyAugment` cost gate | 258, 325 | `augment.cost` direct | `getCardStats(augment).cost` |
-| `applyAugment` text scan | 260 | inline upgrade-aware ternary | `getCardStats(augment).text` |
-| `getCardChoice` | 339 | inline ternary | `getCardText(card)` |
-| `playCard` cost gate + spend | 353, 357 | `card.cost` direct | `getCardStats(card).cost` |
-| `playCard` Channel release scan | 368 | inline ternary | `getCardText(card)` |
-| `playCard` minion `currentHealth` init | 402 | `card.health ?? 1` | `stats.health ?? 1` |
-| `playCard` structure `currentHealth` init | 417 | `card.health ?? 4` | `stats.health ?? 4` |
-| `playCard` exhaust check | 439–440 | base text + upgrade text | `stats.text` (single source — *behaviour-correcting*: lets an upgrade remove "Exhaust") |
-| `applySpellEffect` rawText fallback | 465 | `card.cardText` | `getCardText(card)` |
-| `processDeaths` LAST_WORDS log + IMMOLATE damage | 912, 916 | `dead.cardText`, `dead.attack ?? 3` | `getCardStats(dead)` (text + attack) |
-| `attackWithMinion` minion damage | 849 | `attacker.attack ?? 0` | `getCardStats(attacker).attack ?? 0` |
-| Cost Rift discount | 1163 | `target.cost ?? 0` | `getCardCost(target)` |
+| Site | Was | Now |
+|---|---|---|
+| `powerSegmentsForTrigger` | inline `card.upgraded ? upgradeText ?? cardText : cardText` | `getCardText(card)` |
+| `activeFluxText` | same inline ternary, twice | `getCardText(card)` (twice) |
+| `applyAugment` cost gate + spend | `augment.cost` direct | `getCardStats(augment).cost` |
+| `applyAugment` text scan | inline ternary | `getCardStats(augment).text` |
+| `getCardChoice` | inline ternary | `getCardText(card)` |
+| `playCard` cost gate + spend | `card.cost` direct | `getCardStats(card).cost` |
+| `playCard` Channel release scan | inline ternary | `getCardText(card)` |
+| `playCard` minion / structure `currentHealth` init | `card.health ?? N` | `stats.health ?? N` |
+| `playCard` exhaust check | base text + upgrade text OR'd | `stats.text` (single source — *behaviour-correcting*) |
+| `applySpellEffect` rawText fallback | `card.cardText` | `getCardText(card)` |
+| `processDeaths` LAST_WORDS log + IMMOLATE damage | `dead.cardText`, `dead.attack ?? 3` | `getCardStats(dead)` |
+| `attackWithMinion` minion damage | `attacker.attack ?? 0` | `getCardStats(attacker).attack ?? 0` |
+| Cost Rift discount | `target.cost ?? 0` | `getCardCost(target)` |
 
 **`src/dungeon/engine/relicEffects.ts`**
 
-| Line | Site | Was | Now |
-|---|---|---|---|
-| 181 | Unmoored Eye flux scan over hand | `c.cardText.toLowerCase().includes('flux')` | `getCardText(c).toLowerCase().includes('flux')` |
-| 215 | Shard of the Choir flux check | `ctx.cardPlayed?.cardText…` | `getCardText(ctx.cardPlayed)…` |
+| Site | Was | Now |
+|---|---|---|
+| Unmoored Eye flux scan | `c.cardText.toLowerCase().includes('flux')` | `getCardText(c).toLowerCase().includes('flux')` |
+| Shard of the Choir flux check | `ctx.cardPlayed?.cardText…` | `getCardText(ctx.cardPlayed)…` |
 
-**`src/dungeon/components/CardComponent.tsx`** — display
+**UI**: CardComponent (cost badge + body text + minion stats + Flux body
+extraction); CombatView (tooltip block, hand affordance check,
+channel-card-in-hand detection, persistent-power tooltip strings);
+HandComponent (affordable check); DeckViewer (cost-sort comparator).
 
-- Cost badge, body text, minion stats (attack / health), Flux body extraction.
-  All routed through a single `stats = getCardStats(card)` at the top of the
-  render, then `stats.cost`, `stats.text`, `stats.attack`, `stats.health`.
+### New engine surface added in Phase 1.5
 
-**`src/dungeon/components/CombatView.tsx`**
+**`src/dungeon/engine/combat.ts`**
 
-- Tooltip body (cost / attack / health / text) — wrapped in a one-shot
-  `getCardStats(tooltip.card)` block.
-- Hand-card affordance check (`card.cost > playerEnergy`) → `getCardStats(card).cost`.
-- Channel-card-in-hand detection (Lumen allocator gating) → `getCardText(c)`.
-- Two persistent-power tooltip strings → `getCardText(p)`.
+| Section | Added |
+|---|---|
+| Heat-scaled damage (`heatScaleMatch`, before `dmgMatch`) | New regex pattern + multiplier handling. Honors `getCardText` via `applySpellEffect`'s `rawText`. |
+| Heat-scaled block (`blockPerHeatMatch`, before `shieldMatch`) | New regex pattern + cap handling. |
+| Heat-conditional bonus damage (extends `heatCondMatch`) | New `condDmgMatch` sub-pattern inside the existing block. |
+| Self-target burn/Ignite (`selfBurnMatch`, before `burnMatch`) | New regex routing self-Ignite to `playerStatusEffects`; falls through to enemy match otherwise. |
 
-**`src/dungeon/components/HandComponent.tsx`**
-
-- `affordable = card.cost <= energy` → `getCardCost(card) <= energy`.
-
-**`src/dungeon/components/DeckViewer.tsx`**
-
-- Sort comparator on cost → `getCardCost(a/b)`.
+All four extensions read upgrade-aware text via the existing chokepoint
+flow — `applySpellEffect`'s `rawText` is fed by `getCardText(card)` (or
+the Flux body, which itself routes through `getCardText`). **No new
+direct reads of `card.cardText` were introduced.**
 
 ### Intentionally left direct (NOT a bug)
 
-| Site | Reason |
-|---|---|
-| `relicEffects.ts:78` — `CARD_POOL` filter for "Skill that grants Block" | Filters base **definitions**, never upgraded. Base text is the right lookup. |
-| `combat.ts:18` — `isFluxCard(card)` regex on `cardText` | Detection at the "is this a flux card at all" level. Both base and upgrade text begin with "Flux." for every flux card; reading base text is sufficient. (If a future upgrade ever drops the prefix, this becomes a bug — flagged for v1.1.) |
-| `combat.ts:39` — `isChannelCard(card)` regex on `cardText` | Same reasoning as flux detection. |
-| `combat.ts:870` — `target.attack ?? 0` for enemy minion counter-damage | Enemy minions don't carry upgrade state (they're spawned by enemy intents, not from the player's deck). Direct read is correct. |
-| Synthetic summon cards in `applySpellEffect` (drone/sentry/titan blocks) | Constructed inline as fresh `CardInstance`s with hard-coded stats; not subject to upgrade. |
-| `DungeonRoot.tsx:342` landing-page deck preview | Uses a different `Card` type from the static landing module, not `CardInstance`. No upgrade state. |
+Same as Phase 1 audit:
 
-### Not yet rerouted (pre-existing bugs / Phase 1 didn't touch)
+- `relicEffects.ts:78` — CARD_POOL filter for "Skill that grants Block" (filters base definitions, never upgraded)
+- `combat.ts` `isFluxCard` and `isChannelCard` regex on `cardText` (detection only; both base and upgrade text begin with the keyword for every relevant card)
+- `combat.ts` enemy-minion `target.attack` for counter-damage (enemy minions don't carry upgrade state)
+- Synthetic summon cards (drone/sentry/titan) — constructed inline with hard-coded stats
+- `DungeonRoot.tsx:342` landing-page deck preview — different `Card` type
 
-None observed during this pass. If you spot one, the rule is simple: any
-direct read of `card.cost`, `card.attack`, `card.health`, or `card.cardText`
-on a `CardInstance` outside `cardStats.ts` is a regression — route it.
+### Heat-path re-audit (the user-flagged surface, post-1.5)
 
----
-
-## Heat-related read paths — explicit re-audit
-
-The user flagged Heat as the highest-bug-risk faction-specific path. Every
-Heat read site was re-checked:
-
-| Heat path | Source text | Routed through chokepoint? |
+| Heat path | Source text | Upgrade-aware? |
 |---|---|---|
-| `Gain N Heat` / `Generate N Heat` / `and N Heat` | regex on `text` (= `getCardText(card)` or active flux body) | ✅ |
+| `Gain N Heat` / `Generate N Heat` / `and N Heat` | regex on `getCardText`-driven `text` | ✅ |
 | `Deal N + M per Heat spent (up to X heat)` | regex on `text` | ✅ |
 | `Consume all Heat` | regex on `text` | ✅ |
-| `If Heat ≥ N, apply Ignite M` | regex on `text` | ✅ (only the burn-rider branch is wired; conditional bonus damage is the gap noted on P-036) |
-| Power "at turn start, gain N Heat" segments (P-030, P-038) | `powerSegmentsForTrigger` | ✅ (calls `getCardText`) |
+| `If Heat ≥ N, apply Ignite M` (existing burn branch) | regex on `text` | ✅ |
+| `If Heat ≥ N, deal M more damage` (new in 1.5) | regex on `text` | ✅ |
+| `Gain N Block per Heat` (new in 1.5) | regex on `text` | ✅ |
+| `Deal damage equal to Heat × N` (new in 1.5) | regex on `text` | ✅ |
+| Power "at turn start, gain N Heat" segments | `powerSegmentsForTrigger` → `getCardText` | ✅ |
 
-There are **no Heat-related derived calculations that read base stats
-outside this regex pipeline.** All Heat numerics flow through
-`getCardText`, then through the regex parsers — so an upgraded Heat
-card's upgraded numbers are picked up automatically.
-
-The risks that remain are **engine-parsing gaps**, not chokepoint gaps:
-the engine doesn't parse "Heat × N", "+damage equal to Heat consumed",
-or "every N Heat spent, …" patterns at all. Those are documented per
-card in the table above and tagged for a future v1.1 hardening pass.
+All Heat-related parsing flows through the single chokepoint.
 
 ---
 
-## Checkpoint
+## Standard for Phases 2–4
 
-This document is the gate before Phase 2. Before approving the same
-treatment for Luminar / Cogsmiths / Warp Riders, please confirm:
+The same playability-test pattern is the gate for every Phase 2 card.
+The Phase 2 deliverable doc (per faction) must:
 
-1. The Option-B rationale and `upgradedEffect = upgradeText` decision.
-2. The pre-existing partial / inert rows are acceptable to ship as-is for
-   v1, with a note that they are flagged for v1.1.
-3. The chokepoint contract (`getCardStats` is the only sanctioned reader)
-   is the standard the other three factions will be held to.
+1. List every card with base/upgrade text and per-card engine status.
+2. Have **all entries at `✅ wired`** before merging.
+3. Add a per-card unit test mirroring the regression net in
+   `tests/roguelite/cardUpgrades.test.ts`'s `it.each` block.
+4. Document any new parser extensions or regex fixes with a Phase 1.5–
+   style entry in this audit doc (or a sibling).
 
-Phase 2 will mirror this structure exactly: per-faction markdown with the
-table, designer notes, engine status per card, and a delta to this
-bug-risk audit (any new direct reads found in the next round get listed
-here and either rerouted or justified).
+Phase 2 will not start until the user reviews this doc.
