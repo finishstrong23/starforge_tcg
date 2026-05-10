@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CardDefinition, CardInstance, CombatState } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { playCard, attackWithMinion, endPlayerTurn, executeEnemyTurn, getCardChoice, applyAugment } from '../engine/combat';
+import { getCardStats, getCardText } from '../engine/cardStats';
 import { CARD_POOL } from '../data/cards';
 import { pickRandomBackground } from '../assets/backgrounds';
 import { EnemyComponent } from './EnemyComponent';
@@ -169,7 +170,7 @@ const StatusStrip: React.FC<StatusStripProps> = ({ effects, rifts = [], powers =
       {powers.map((p) => (
         <span
           key={`pwr-${p.instanceId}`}
-          title={`${p.name}: ${p.cardText}`}
+          title={`${p.name}: ${getCardText(p)}`}
           style={chipBase('#ffaa44')}
         >
           <span style={{ fontSize: 13, lineHeight: 1 }}>⚙</span>
@@ -344,20 +345,27 @@ const CombatLog: React.FC<{ log: string[]; cardPool: CardInstance[] }> = ({ log,
           pointerEvents: 'none',
           boxShadow: '0 4px 24px rgba(0,0,0,0.8)',
         }}>
-          <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 4, color: '#eee' }}>
-            {tooltip.card.name}
-            <span style={{ fontWeight: 400, fontSize: 10, opacity: 0.6, marginLeft: 8 }}>
-              {tooltip.card.cost}⚡ · {tooltip.card.type}
-            </span>
-          </div>
-          {(tooltip.card.attack !== undefined || tooltip.card.health !== undefined) && (
-            <div style={{ fontSize: 10, color: '#aaa', marginBottom: 4 }}>
-              ⚔ {tooltip.card.attack ?? 0} / ❤ {tooltip.card.health ?? 0}
-            </div>
-          )}
-          <div style={{ fontSize: 10, color: '#ccc', lineHeight: 1.5 }}>
-            {tooltip.card.cardText}
-          </div>
+          {(() => {
+            const ts = getCardStats(tooltip.card);
+            return (
+              <>
+                <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 4, color: '#eee' }}>
+                  {tooltip.card.name}
+                  <span style={{ fontWeight: 400, fontSize: 10, opacity: 0.6, marginLeft: 8 }}>
+                    {ts.cost}⚡ · {tooltip.card.type}
+                  </span>
+                </div>
+                {(ts.attack !== undefined || ts.health !== undefined) && (
+                  <div style={{ fontSize: 10, color: '#aaa', marginBottom: 4 }}>
+                    ⚔ {ts.attack ?? 0} / ❤ {ts.health ?? 0}
+                  </div>
+                )}
+                <div style={{ fontSize: 10, color: '#ccc', lineHeight: 1.5 }}>
+                  {ts.text}
+                </div>
+              </>
+            );
+          })()}
         </div>
       )}
     </div>
@@ -523,7 +531,7 @@ const PlayerHUD: React.FC<{
           {cs.playerPowers.map((p) => (
             <span
               key={`pwr-${p.instanceId}`}
-              title={`${p.name}: ${p.cardText}`}
+              title={`${p.name}: ${getCardText(p)}`}
               style={{
                 fontSize: 11,
                 padding: '1px 4px',
@@ -1011,7 +1019,7 @@ export const CombatView: React.FC = () => {
     if (cs.phase !== 'player_turn') return;
     const card = cs.hand.find((c) => c.instanceId === instanceId);
     if (!card) return;
-    if (card.cost > cs.playerEnergy) return;
+    if (getCardStats(card).cost > cs.playerEnergy) return;
 
     // Augment cards: show target-picker before playing.
     if (card.type === 'Augment') {
@@ -1159,7 +1167,7 @@ export const CombatView: React.FC = () => {
     if (def.targeting === 'lumen-allocation') {
       // If there are Channel cards in hand, show the allocator. If not, the
       // engine's fallback (12 Block) is fine — drink immediately.
-      const hasChannel = (cs?.hand ?? []).some((c) => c.keywords.includes('ILLUMINATE') && /(^|\s)channel\./i.test(c.cardText));
+      const hasChannel = (cs?.hand ?? []).some((c) => c.keywords.includes('ILLUMINATE') && /(^|\s)channel\./i.test(getCardText(c)));
       if (hasChannel) {
         setPendingLumenAllocation(slotIndex);
         return;

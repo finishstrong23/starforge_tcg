@@ -1,4 +1,5 @@
 import type { CardInstance, CombatPhase, CombatState, EnemyDefinition, RelicDefinition, Rift, StatusEffect, StatusEffectType } from '../types';
+import { getCardStats, getCardText, getCardCost } from './cardStats';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -57,7 +58,7 @@ function classifyPowerSegment(sentence: string): PowerTrigger {
 }
 
 function powerSegmentsForTrigger(card: CardInstance, trigger: PowerTrigger): string[] {
-  const text = card.upgraded ? (card.upgradeText ?? card.cardText) : card.cardText;
+  const text = getCardText(card);
   return text
     .split(/\.\s+/)
     .map((s) => s.trim())
@@ -75,8 +76,8 @@ function shiftFlux(s: 'A' | 'B' | 'C'): 'A' | 'B' | 'C' {
 
 /** Pull just the active state's body out of "Flux. A: ... B: ... C: ..." text. */
 export function activeFluxText(card: CardInstance): string {
-  if (!isFluxCard(card) || !card.fluxState) return card.cardText;
-  const text = card.upgraded ? (card.upgradeText ?? card.cardText) : card.cardText;
+  if (!isFluxCard(card) || !card.fluxState) return getCardText(card);
+  const text = getCardText(card);
   const re = new RegExp(`${card.fluxState}:\\s*([^A-C]*?)(?=\\s*[A-C]:|$)`, 'i');
   const m = text.match(re);
   return m ? m[1].trim() : text;
@@ -255,9 +256,10 @@ export function applyAugment(
   if (!augment || augment.type !== 'Augment') return state;
   const target = state.hand.find((c) => c.instanceId === targetInstanceId);
   if (!target || target.instanceId === augmentInstanceId) return state;
-  if (state.playerEnergy < augment.cost) return state;
+  const augStats = getCardStats(augment);
+  if (state.playerEnergy < augStats.cost) return state;
 
-  const augText = (augment.upgraded ? augment.upgradeText ?? augment.cardText : augment.cardText).toLowerCase();
+  const augText = augStats.text.toLowerCase();
   let buffed: CardInstance = {
     ...target,
     augments: [...(target.augments ?? []), augment.name],
@@ -322,7 +324,7 @@ export function applyAugment(
   // Spend energy, replace target in hand, exhaust augment.
   return {
     ...state,
-    playerEnergy: state.playerEnergy - augment.cost,
+    playerEnergy: state.playerEnergy - augStats.cost,
     hand: state.hand
       .filter((c) => c.instanceId !== augmentInstanceId)
       .map((c) => (c.instanceId === targetInstanceId ? buffed : c)),
@@ -336,7 +338,7 @@ export function applyAugment(
  * null otherwise. Used by the UI to present a choice modal.
  */
 export function getCardChoice(card: CardInstance): { optionA: string; optionB: string } | null {
-  const text = card.upgraded ? (card.upgradeText ?? card.cardText) : card.cardText;
+  const text = getCardText(card);
   const m = text.match(/choose(?:\s+one)?\s*:\s*(.+?)\s+or\s+(.+?)\.?$/i);
   if (!m) return null;
   return { optionA: m[1].trim(), optionB: m[2].trim() };
@@ -350,11 +352,12 @@ export function playCard(
 ): CombatState {
   const card = state.hand.find((c) => c.instanceId === cardInstanceId);
   if (!card) return state;
-  if (state.playerEnergy < card.cost) return state;
+  const stats = getCardStats(card);
+  if (state.playerEnergy < stats.cost) return state;
 
   let s = {
     ...state,
-    playerEnergy: state.playerEnergy - card.cost,
+    playerEnergy: state.playerEnergy - stats.cost,
     hand: state.hand.filter((c) => c.instanceId !== cardInstanceId),
   };
 
@@ -365,7 +368,7 @@ export function playCard(
   if (isChannelCard(card)) {
     const lumens = card.lumens ?? 0;
     if (lumens > 0) {
-      const text = (card.upgraded ? card.upgradeText ?? card.cardText : card.cardText);
+      const text = getCardText(card);
       const releaseDmg = text.match(/release:\s*\+?(\d+)\s*damage\s*per lumen/i);
       const releaseBlock = text.match(/release:\s*\+?(\d+)\s*block\s*per lumen/i);
       const releaseWeak = text.match(/release:\s*apply\s*weak\s*\d+\s*per lumen/i);
@@ -399,7 +402,7 @@ export function playCard(
     const minion: CardInstance = {
       ...card,
       instanceId: card.instanceId,
-      currentHealth: card.health ?? 1,
+      currentHealth: stats.health ?? 1,
       hasAttacked: !card.keywords.includes('SWIFT'),
       statusEffects: [],
     };
@@ -414,7 +417,7 @@ export function playCard(
     const structure: CardInstance = {
       ...card,
       instanceId: card.instanceId,
-      currentHealth: card.health ?? 4,
+      currentHealth: stats.health ?? 4,
       hasAttacked: true,
       statusEffects: [],
     };
@@ -436,8 +439,7 @@ export function playCard(
     // the exhaustPile and don't return on reshuffle. Everything else goes
     // to the discardPile and reshuffles into the draw pile when it empties.
     const isExhaust = card.type === 'Augment'
-      || /\bexhaust\.?\b/i.test(card.cardText)
-      || (card.upgraded && card.upgradeText !== undefined && /\bexhaust\.?\b/i.test(card.upgradeText));
+      || /\bexhaust\.?\b/i.test(stats.text);
     if (isExhaust) {
       s = { ...s, exhaustPile: [...s.exhaustPile, card] };
       s = log(s, `🚫 ${card.name} exhausted`);
@@ -462,7 +464,7 @@ function applySpellEffect(
   let s = { ...state };
   // Order of precedence: explicit choice override → active Flux body → card text.
   const rawText = textOverride
-    ?? (isFluxCard(card) && card.fluxState ? activeFluxText(card) : card.cardText);
+    ?? (isFluxCard(card) && card.fluxState ? activeFluxText(card) : getCardText(card));
   const text = rawText.toLowerCase();
 
   // Random-range damage (e.g. Anomaly: "Deal 4 to 12 damage")
@@ -846,7 +848,7 @@ export function attackWithMinion(state: CombatState, attackerId: string, targetI
     return log(s, '🛡 Must attack the GUARDIAN first!');
   }
 
-  const atk = calcDamage(attacker.attack ?? 0, attacker.statusEffects, []);
+  const atk = calcDamage(getCardStats(attacker).attack ?? 0, attacker.statusEffects, []);
   s = log(s, `⚔ ${attacker.name} attacks for ${atk}`);
 
   if (targetId === 'enemy') {
@@ -908,12 +910,13 @@ function processDeaths(state: CombatState): CombatState {
   const deadPlayerMinions = s.playerBoard.filter((m) => (m.currentHealth ?? 0) <= 0);
   for (const dead of deadPlayerMinions) {
     s = log(s, `💀 ${dead.name} dies`);
+    const deadStats = getCardStats(dead);
     if (dead.keywords.includes('LAST_WORDS')) {
-      s = log(s, `👻 LAST_WORDS triggers: ${dead.cardText}`);
+      s = log(s, `👻 LAST_WORDS triggers: ${deadStats.text}`);
       s = applySpellEffect(s, dead);
     }
     if (dead.keywords.includes('IMMOLATE')) {
-      const dmg = dead.attack ?? 3;
+      const dmg = deadStats.attack ?? 3;
       const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
       s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
       s = log(s, `🔥 IMMOLATE deals ${dmg} to enemy on death`);
@@ -1160,7 +1163,8 @@ function applyRiftStartOfTurn(state: CombatState): CombatState {
         if (s.hand.length > 0) {
           const idx = Math.floor(Math.random() * s.hand.length);
           const target = s.hand[idx];
-          const newCost = Math.max(0, (target.cost ?? 0) - 1);
+          const effectiveCost = getCardCost(target);
+          const newCost = Math.max(0, effectiveCost - 1);
           if (newCost !== target.cost) {
             const updated = { ...target, cost: newCost };
             s = { ...s, hand: s.hand.map((c, i) => (i === idx ? updated : c)) };
