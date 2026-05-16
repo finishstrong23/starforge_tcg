@@ -955,7 +955,6 @@ export const CombatView: React.FC = () => {
     prevEnemyHP.current     = enemyHP;
     prevPlayerShield.current = playerShield;
     prevEnemyShield.current  = enemyShield;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cs?.playerHealth, cs?.enemy.currentHealth, cs?.playerShield, cs?.enemy.currentShield]);
 
   // Initialise refs on first render so first-turn changes don't misfire
@@ -989,7 +988,6 @@ export const CombatView: React.FC = () => {
       }
     }
     prevPotionSlots.current = slots;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [runState?.potions[0]?.definitionId, runState?.potions[1]?.definitionId, runState?.potions[2]?.definitionId]);
 
   // Attack cards need to click an enemy target. Everything else plays immediately.

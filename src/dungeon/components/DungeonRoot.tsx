@@ -402,7 +402,6 @@ const RunEndScreen: React.FC<{ won: boolean; onBack: () => void }> = ({ won, onB
       const newLevel = recordAscensionWin(draftFaction, ascension);
       setNewlyUnlocked(newLevel);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

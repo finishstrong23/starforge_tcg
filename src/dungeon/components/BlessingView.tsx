@@ -29,7 +29,7 @@ export const BlessingView: React.FC = () => {
 
   const title = isOpener
     ? 'A Path Begins'
-    : `Act ${act} · A Moment to Breathe`;
+    : `Act ${act} - A Moment to Breathe`;
   const subtitle = isOpener
     ? 'Choose a blessing to carry through the run.'
     : `You are healed. Choose a blessing for the next leg.`;
