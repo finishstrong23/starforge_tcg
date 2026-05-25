@@ -3,6 +3,7 @@ node_modules/
 dist/
 coverage/
 _balance_test.cjs
+dev-server.log
 
 # Capacitor native build artifacts
 android/app/build/

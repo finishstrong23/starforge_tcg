@@ -8,12 +8,16 @@ const COGSMITHS_CARDS: CardDefinition[] = [
     keywords: [], rarity: 'Common', complexityTier: 1,
     cardText: 'Deal 7 damage.',
     upgradeText: 'Deal 10 damage.',
+    effects: [{ type: 'damage', amount: 7 }],
+    upgradeEffects: [{ type: 'damage', amount: 10 }],
   },
   {
     id: 'C-002', name: 'Plate Shield', faction: 'Cogsmiths', type: 'Skill', cost: 1,
     keywords: [], rarity: 'Common', complexityTier: 1,
     cardText: 'Gain 6 Block.',
     upgradeText: 'Gain 8 Block.',
+    effects: [{ type: 'block', amount: 6 }],
+    upgradeEffects: [{ type: 'block', amount: 8 }],
   },
   {
     id: 'C-003', name: 'Tinker', faction: 'Cogsmiths', type: 'Skill', cost: 0,
@@ -249,6 +253,8 @@ const COGSMITHS_CARDS: CardDefinition[] = [
     keywords: [], rarity: 'Common', complexityTier: 1,
     cardText: 'Deal 5 damage.',
     upgradeText: 'Deal 8 damage.',
+    effects: [{ type: 'damage', amount: 5 }],
+    upgradeEffects: [{ type: 'damage', amount: 8 }],
   },
   {
     id: 'C-042', name: 'Mallet', faction: 'Cogsmiths', type: 'Attack', cost: 1,
@@ -278,12 +284,19 @@ const PYROCLAST_CARDS: CardDefinition[] = [
     keywords: [], rarity: 'Common', complexityTier: 1,
     cardText: 'Deal 6 damage.',
     upgradeText: 'Deal 9 damage.',
+    effects: [{ type: 'damage', amount: 6 }],
+    upgradeEffects: [{ type: 'damage', amount: 9 }],
   },
   {
     id: 'P-002', name: 'Scale Guard', faction: 'Pyroclast', type: 'Skill', cost: 1,
     keywords: [], rarity: 'Common', complexityTier: 1,
     cardText: 'Gain 5 Block.',
     upgradeText: 'Gain 7 Block and 1 Heat.',
+    effects: [{ type: 'block', amount: 5 }],
+    upgradeEffects: [
+      { type: 'block', amount: 7 },
+      { type: 'heat', amount: 1 },
+    ],
   },
   {
     id: 'P-003', name: 'Kindle', faction: 'Pyroclast', type: 'Skill', cost: 0,
@@ -519,6 +532,14 @@ const PYROCLAST_CARDS: CardDefinition[] = [
     keywords: [], rarity: 'Common', complexityTier: 1,
     cardText: 'Deal 4 damage. Generate 1 Heat.',
     upgradeText: 'Deal 6 damage. Generate 2 Heat.',
+    effects: [
+      { type: 'damage', amount: 4 },
+      { type: 'heat', amount: 1 },
+    ],
+    upgradeEffects: [
+      { type: 'damage', amount: 6 },
+      { type: 'heat', amount: 2 },
+    ],
   },
   {
     id: 'P-042', name: 'Bash', faction: 'Pyroclast', type: 'Attack', cost: 1,
@@ -548,12 +569,19 @@ const LUMINAR_CARDS: CardDefinition[] = [
     keywords: [], rarity: 'Common', complexityTier: 1,
     cardText: 'Deal 6 damage.',
     upgradeText: 'Deal 9 damage.',
+    effects: [{ type: 'damage', amount: 6 }],
+    upgradeEffects: [{ type: 'damage', amount: 9 }],
   },
   {
     id: 'L-002', name: 'Glow Ward', faction: 'Luminar', type: 'Skill', cost: 1,
     keywords: [], rarity: 'Common', complexityTier: 1,
     cardText: 'Gain 5 Block.',
     upgradeText: 'Gain 7 Block. Gain 1 Lumen on a Channel card in hand.',
+    effects: [{ type: 'block', amount: 5 }],
+    upgradeEffects: [
+      { type: 'block', amount: 7 },
+      { type: 'lumen', amount: 1, mode: 'first' },
+    ],
   },
   {
     id: 'L-003', name: 'Meditate', faction: 'Luminar', type: 'Skill', cost: 1,
@@ -789,6 +817,8 @@ const LUMINAR_CARDS: CardDefinition[] = [
     keywords: ['ILLUMINATE'], rarity: 'Common', complexityTier: 1,
     cardText: 'Gain 4 Block. Channel.',
     upgradeText: 'Gain 6 Block. Channel.',
+    effects: [{ type: 'block', amount: 4 }],
+    upgradeEffects: [{ type: 'block', amount: 6 }],
   },
   {
     id: 'L-042', name: 'Slash', faction: 'Luminar', type: 'Attack', cost: 1,
@@ -1062,18 +1092,36 @@ const WARPRIDERS_CARDS: CardDefinition[] = [
     keywords: [], rarity: 'Common', complexityTier: 1,
     cardText: 'Deal 6 damage.',
     upgradeText: 'Deal 9 damage.',
+    effects: [{ type: 'damage', amount: 6 }],
+    upgradeEffects: [{ type: 'damage', amount: 9 }],
   },
   {
     id: 'W-042', name: 'Step', faction: 'WarpRiders', type: 'Skill', cost: 1,
     keywords: [], rarity: 'Common', complexityTier: 1,
     cardText: 'Gain 5 Block.',
     upgradeText: 'Gain 8 Block.',
+    effects: [{ type: 'block', amount: 5 }],
+    upgradeEffects: [{ type: 'block', amount: 8 }],
   },
   {
     id: 'W-043', name: 'Shimmer', faction: 'WarpRiders', type: 'Skill', cost: 1,
     keywords: [], rarity: 'Common', complexityTier: 1,
     cardText: 'Choose one: deal 4 damage OR gain 4 Block.',
     upgradeText: 'Choose one: deal 6 damage OR gain 6 Block.',
+    effects: [{
+      type: 'choice',
+      options: [
+        { id: 'damage', label: 'deal 4 damage', effects: [{ type: 'damage', amount: 4 }] },
+        { id: 'block', label: 'gain 4 Block', effects: [{ type: 'block', amount: 4 }] },
+      ],
+    }],
+    upgradeEffects: [{
+      type: 'choice',
+      options: [
+        { id: 'damage', label: 'deal 6 damage', effects: [{ type: 'damage', amount: 6 }] },
+        { id: 'block', label: 'gain 6 Block', effects: [{ type: 'block', amount: 6 }] },
+      ],
+    }],
   },
   {
     id: 'W-044', name: 'Drift', faction: 'WarpRiders', type: 'Skill', cost: 1,

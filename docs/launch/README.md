@@ -2,26 +2,20 @@
 
 Living checklist for the week-of-launch (Days 20–27 of the 30–45 day plan).
 
-## ⚠ Known asset issue (review before launch)
+Update: combat backgrounds now ship as compressed JPGs under 500 KB each.
+The original PNG files remain as source art, but production builds only bundle
+`.jpg`, `.jpeg`, and `.webp` backgrounds.
 
-Background PNGs in `src/dungeon/assets/backgrounds/` are unoptimised — each
-file is **2.2–2.6 MB**, total ~12 MB. Vite splits them, so a player only
-downloads the one their current encounter rolled, but **2.5 MB per combat
-scene is too much for mobile / slow connections**.
+## Asset issue resolved
 
-### Fix options (pick one before going wide)
+Background PNGs in `src/dungeon/assets/backgrounds/` are kept as source art.
+Production builds now bundle compressed JPG/WebP backgrounds only, keeping each
+combat scene background under 500 KB.
 
-1. **Quick & free**: drop each PNG into [Squoosh.app](https://squoosh.app),
-   re-export as **WebP, quality 75**. Expect ~200–400 KB per file.
-   Replace the `.png` with `.webp` in the same folder. Vite will pick
-   them up automatically (`index.ts`'s glob already accepts `webp`).
-2. **Slightly nicer quality**: TinyPNG.com on the originals — ~500 KB
-   each, still PNG. Drop-in replacement.
-3. **Acceptable but lazy**: ship as-is. First combat is a 2.5 MB
-   download, subsequent combats with the same encounter are cached.
-   Mobile players will hate this.
+### Maintenance
 
-Recommendation: do option 1 today. Five files, fifteen minutes.
+When adding new backgrounds, commit a compressed `.jpg` or `.webp` file for
+shipping. Keep source PNGs if useful, but do not import them in the loader.
 
 ## Code state — Week 4 Day 24
 
@@ -30,7 +24,7 @@ Recommendation: do option 1 today. Five files, fifteen minutes.
 - ✅ `vite build` succeeds
 - ✅ JS bundle: **450 KB raw, 114 KB gzip**. Healthy.
 - ✅ CSS bundle: **11 KB raw, 2.9 KB gzip**. Healthy.
-- ⚠ Backgrounds: 12 MB total, see above.
+- ✅ Backgrounds: compressed shipping assets under 500 KB each.
 - ✅ Error boundary logs crashes to telemetry buffer.
 - ✅ Save persistence verified (round-trip test).
 - ✅ Per-faction Ascension unlocks persisted in localStorage.
@@ -40,7 +34,7 @@ Recommendation: do option 1 today. Five files, fifteen minutes.
 
 Before the URL goes wide:
 
-- [ ] Optimise background assets (above).
+- [x] Optimise background assets (above).
 - [ ] In Vercel dashboard → Analytics tab → enable **Web Analytics**
       (free tier, auto-injects script tag).
 - [ ] Smoke-test the live URL in Chrome and on mobile Safari.

@@ -1,0 +1,41 @@
+{
+  "description": "Completed run saves must not hydrate back into the app.",
+  "expect": {
+    "valid": false
+  },
+  "snapshot": {
+    "schemaVersion": 2,
+    "buildVersion": "0.2.0",
+    "lastSavedAt": 1710000001000,
+    "run": {
+      "phase": "run_end_loss",
+      "seed": "fixture-ended-run",
+      "currentAct": 1,
+      "actMaps": [],
+      "deck": [],
+      "hand": [],
+      "relics": [],
+      "gold": 0,
+      "maxHealth": 72,
+      "currentHealth": 0,
+      "energy": 3,
+      "maxEnergy": 3,
+      "ascensionLevel": 0,
+      "combatState": null,
+      "potions": [null, null, null],
+      "runModifiers": [],
+      "runStats": {
+        "totalCombats": 1,
+        "elitesDefeated": 0,
+        "bossesDefeated": 0,
+        "cardsPlayed": 6,
+        "totalDamageDealt": 24
+      }
+    },
+    "draftFaction": "Pyroclast",
+    "draftRound": 3,
+    "draftOptions": [],
+    "draftPicks": [],
+    "seed": "fixture-ended-run"
+  }
+}

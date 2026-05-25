@@ -11,6 +11,7 @@ export interface HandComponentProps {
   disabled?: boolean;
   drawCount?: number;
   discardCount?: number;
+  previews?: Record<string, string[]>;
 }
 
 const PileBadge: React.FC<{ label: string; count: number; color: string; emoji: string }> = ({
@@ -48,6 +49,7 @@ export const HandComponent: React.FC<HandComponentProps> = ({
   disabled = false,
   drawCount,
   discardCount,
+  previews = {},
 }) => {
   const showPiles = drawCount !== undefined || discardCount !== undefined;
 
@@ -116,6 +118,7 @@ export const HandComponent: React.FC<HandComponentProps> = ({
                   selectable={!disabled && affordable}
                   selected={isSelected}
                   unaffordable={!affordable}
+                  previewLines={previews[card.instanceId]}
                   onClick={!disabled && affordable ? () => onCardSelect(card.instanceId) : undefined}
                 />
               );

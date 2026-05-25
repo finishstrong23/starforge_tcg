@@ -1,8 +1,8 @@
 // Dungeon-mode combat backgrounds.
 // ---------------------------------------------------------------------------
-// Drop .jpg / .png / .webp files into this directory and they're auto-bundled
-// by Vite's import.meta.glob and selected at random per combat. No code
-// changes needed when adding more art.
+// Drop .jpg / .webp files into this directory and they're auto-bundled by
+// Vite's import.meta.glob and selected at random per combat. Keep large PNGs as
+// source art only; shipping compressed backgrounds keeps mobile loads healthy.
 //
 // Recommended naming (helps future debugging — not enforced):
 //   bg-<theme>-<short>.<ext>
@@ -12,7 +12,7 @@
 //         bg-void-purple.jpg
 //         bg-temple-fire.jpg
 
-const modules = import.meta.glob<string>('./*.{jpg,jpeg,png,webp}', {
+const modules = import.meta.glob<string>('./*.{jpg,jpeg,webp}', {
   eager: true,
   query: '?url',
   import: 'default',

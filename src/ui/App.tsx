@@ -11,6 +11,7 @@ import React, { useEffect } from 'react';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { DungeonRoot } from '../dungeon';
 import { TelemetryDebugPanel } from '../dungeon/components/TelemetryDebugPanel';
+import { TelemetrySettingsPanel } from '../dungeon/components/TelemetrySettingsPanel';
 import { logEvent } from '../dungeon/engine/telemetry';
 import { clearDungeonSave } from '../dungeon/context/DungeonRunContext';
 
@@ -33,6 +34,7 @@ export const App: React.FC = () => {
         clearDungeonSave();
         if (typeof window !== 'undefined') window.location.reload();
       }} />
+      <TelemetrySettingsPanel />
       <TelemetryDebugPanel />
     </ErrorBoundary>
   );

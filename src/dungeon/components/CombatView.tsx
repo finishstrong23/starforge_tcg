@@ -14,6 +14,8 @@ import { PotionDrinkBurst } from './PotionDrinkBurst';
 import { TutorialOverlay, isTutorialDismissed } from './TutorialOverlay';
 import { getPotionDef } from '../data/potions';
 import { isChannelCard } from '../engine/combat';
+import { getCardPlayPreview } from '../engine/cardPreview';
+import { FactionResourcePanel } from './FactionResourcePanel';
 
 const ENEMY_TURN_DELAY_MS = 1200;
 const ENEMY_ACTION_LINGER_MS = 900;
@@ -648,7 +650,7 @@ const EnergyOrb: React.FC<{ current: number; max: number }> = ({ current, max })
 };
 
 /**
- * Bottom-right HUD: Heat (Pyroclast only), discard count, end turn button.
+ * Bottom-right HUD: discard count and end turn button.
  */
 const RightHUD: React.FC<{
   cs: CombatState;
@@ -667,29 +669,6 @@ const RightHUD: React.FC<{
         gap: 10,
       }}
     >
-      {cs.playerFaction === 'Pyroclast' && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-          <div style={{ fontSize: 8, opacity: 0.55, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#ff8866' }}>
-            Heat
-          </div>
-          <div
-            style={{
-              fontSize: 22,
-              fontWeight: 900,
-              color: '#ff6622',
-              textShadow: '0 0 12px #ff662299',
-              lineHeight: 1,
-              padding: '4px 8px',
-              background: 'rgba(8,8,20,0.7)',
-              border: '1px solid #ff662266',
-              borderRadius: 6,
-            }}
-          >
-            🔥 {cs.playerHeat}
-          </div>
-        </div>
-      )}
-
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
         <div style={{ fontSize: 8, opacity: 0.55, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#aaa' }}>
           Discard
@@ -1218,6 +1197,16 @@ export const CombatView: React.FC = () => {
     };
   }, [cs, setCombatState]);
 
+  const cardPreviews = useMemo(() => {
+    const previews: Record<string, string[]> = {};
+    if (!cs) return previews;
+    for (const card of cs.hand) {
+      const preview = getCardPlayPreview(cs, card);
+      if (preview) previews[card.instanceId] = preview.lines;
+    }
+    return previews;
+  }, [cs]);
+
   if (!cs) return null;
 
   const isEnemyTurn = cs.phase === 'enemy_turn';
@@ -1699,6 +1688,8 @@ export const CombatView: React.FC = () => {
         )}
       </div>
 
+      <FactionResourcePanel cs={cs} />
+
       {/* Full-screen red vignette on player damage */}
       {playerFlashKey > 0 && (
         <div
@@ -1745,6 +1736,7 @@ export const CombatView: React.FC = () => {
           selectedId={selectedCardId}
           onCardSelect={handleCardSelect}
           disabled={isEnemyTurn || isCombatOver}
+          previews={cardPreviews}
         />
       </div>
 

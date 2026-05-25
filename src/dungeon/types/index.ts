@@ -1,6 +1,6 @@
 // ─── CARD TYPES ────────────────────────────────────────────────────────────
 export type Faction = 'Cogsmiths' | 'Pyroclast' | 'Luminar' | 'WarpRiders';
-export type CardType = 'Minion' | 'Spell' | 'Structure' | 'Attack' | 'Skill' | 'Power' | 'Augment';
+export type CardType = 'Minion' | 'Spell' | 'Structure' | 'Attack' | 'Skill' | 'Power' | 'Augment' | 'Curse';
 export type Rarity = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary';
 /**
  * Complexity tier — orthogonal to rarity. Drives reward roller weighting so
@@ -50,6 +50,11 @@ export interface CardDefinition {
   upgradedAttack?: number;
   upgradedHealth?: number;
   upgraded?: boolean;
+  /** Structured executable effects. Phase 1 migration path: if present,
+   *  combat resolution uses these instead of parsing cardText. */
+  effects?: EffectDefinition[];
+  /** Structured executable effects after upgrade. Falls back to effects. */
+  upgradeEffects?: EffectDefinition[];
 }
 
 export interface CardInstance extends CardDefinition {
@@ -70,6 +75,147 @@ export interface CardInstance extends CardDefinition {
   /** Luminar Channel cards: number of Lumens accumulated on this card. */
   lumens?: number;
 }
+
+// ─── STRUCTURED EFFECTS ──────────────────────────────────────────────────────
+
+export type EffectTarget = 'enemy' | 'player';
+
+export type EffectTrigger =
+  | 'play'
+  | 'combat_start'
+  | 'turn_start'
+  | 'turn_end'
+  | 'combat_end'
+  | 'on_card_play'
+  | 'on_damage_taken'
+  | 'on_heal'
+  | 'on_kill'
+  | 'on_death'
+  | 'on_rest'
+  | 'on_shop';
+
+export type LumenGrantMode = 'each' | 'first' | 'distributed';
+
+export type ConditionDefinition =
+  | { type: 'heat_at_least'; amount: number }
+  | { type: 'has_status'; target: EffectTarget; status: StatusEffectType; stacksAtLeast?: number }
+  | { type: 'card_is_upgraded' };
+
+export interface DamageEffect {
+  type: 'damage';
+  amount: number;
+  target?: Extract<EffectTarget, 'enemy'>;
+}
+
+export interface BlockEffect {
+  type: 'block';
+  amount: number;
+}
+
+export interface DrawEffect {
+  type: 'draw';
+  amount: number;
+}
+
+export interface EnergyEffect {
+  type: 'energy';
+  amount: number;
+}
+
+export interface StatusEffectDefinition {
+  type: 'status';
+  target: EffectTarget;
+  status: StatusEffectType;
+  stacks: number;
+  duration?: number;
+}
+
+export interface ExhaustEffect {
+  type: 'exhaust';
+}
+
+export interface HeatEffect {
+  type: 'heat';
+  amount: number;
+}
+
+export interface HealEffect {
+  type: 'heal';
+  amount: number;
+}
+
+export interface SelfDamageEffect {
+  type: 'self_damage';
+  amount: number;
+}
+
+export interface LumenEffect {
+  type: 'lumen';
+  amount: number;
+  mode: LumenGrantMode;
+}
+
+export interface AugmentEffect {
+  type: 'augment';
+  damageBonus?: number;
+  blockBonus?: number;
+  costReduction?: number;
+  status?: StatusEffectDefinition;
+}
+
+export interface SummonEffect {
+  type: 'summon';
+  name: string;
+  health: number;
+  damage: number;
+  actionsPerTurn?: number;
+  turns?: number;
+}
+
+export interface RiftEffect {
+  type: 'rift';
+  rift: Rift['type'];
+  turns: number;
+}
+
+export interface ChoiceEffect {
+  type: 'choice';
+  options: Array<{
+    id: string;
+    label: string;
+    effects: EffectDefinition[];
+  }>;
+}
+
+export interface ConditionalEffect {
+  type: 'conditional';
+  condition: ConditionDefinition;
+  effects: EffectDefinition[];
+}
+
+export interface TriggeredEffect {
+  type: 'trigger';
+  trigger: EffectTrigger;
+  effects: EffectDefinition[];
+}
+
+export type EffectDefinition =
+  | DamageEffect
+  | BlockEffect
+  | DrawEffect
+  | EnergyEffect
+  | StatusEffectDefinition
+  | ExhaustEffect
+  | HeatEffect
+  | HealEffect
+  | SelfDamageEffect
+  | LumenEffect
+  | AugmentEffect
+  | SummonEffect
+  | RiftEffect
+  | ChoiceEffect
+  | ConditionalEffect
+  | TriggeredEffect;
 
 // ─── STATUS EFFECTS ─────────────────────────────────────────────────────────
 export type StatusEffectType =
@@ -148,7 +294,7 @@ export interface RelicDefinition {
 }
 
 // ─── MAP TYPES ───────────────────────────────────────────────────────────────
-export type NodeType = 'combat' | 'elite' | 'boss' | 'rest' | 'shop' | 'treasure';
+export type NodeType = 'combat' | 'elite' | 'boss' | 'rest' | 'shop' | 'treasure' | 'event';
 
 export interface MapNode {
   id: string;
@@ -266,6 +412,55 @@ export interface PotionInstance {
   definitionId: PotionId;
 }
 
+export type RunModifierDuration = 'next_combat' | 'act';
+
+export type RunModifierEffect =
+  | { type: 'player_status'; status: StatusEffectType; stacks: number; duration?: number }
+  | { type: 'enemy_status'; status: StatusEffectType; stacks: number; duration?: number }
+  | { type: 'heat'; amount: number }
+  | { type: 'block'; amount: number }
+  | { type: 'energy'; amount: number }
+  | { type: 'rift'; rift: Rift['type']; turns: number };
+
+export interface RunModifierDefinition {
+  id: string;
+  name: string;
+  description: string;
+  duration: RunModifierDuration;
+  effects: RunModifierEffect[];
+}
+
+export type DungeonEventEffect =
+  | { type: 'gold'; amount: number }
+  | { type: 'heal'; amount: number }
+  | { type: 'damage'; amount: number }
+  | { type: 'max_hp'; amount: number; heal?: boolean }
+  | { type: 'add_card'; cardId: string }
+  | { type: 'upgrade_card'; mode: 'first_unupgraded' }
+  | { type: 'remove_card'; mode: 'first_starter' | 'first_card' }
+  | { type: 'add_relic'; relicId: string }
+  | { type: 'add_potion'; potionId: string }
+  | { type: 'add_curse'; curseId: string }
+  | { type: 'map_modifier'; modifierId: string }
+  | { type: 'class_resource'; modifierId: string };
+
+export interface DungeonEventChoiceDefinition {
+  id: string;
+  label: string;
+  effectText: string;
+  effects: DungeonEventEffect[];
+  requiresFaction?: Faction;
+}
+
+export interface DungeonEventDefinition {
+  id: string;
+  name: string;
+  act: 1 | 2 | 3;
+  body: string;
+  tone: 'mystery' | 'forge' | 'light' | 'hazard' | 'trade';
+  choices: DungeonEventChoiceDefinition[];
+}
+
 // ─── RUN STATE ───────────────────────────────────────────────────────────────
 export type RunPhase =
   | 'draft'
@@ -274,6 +469,7 @@ export type RunPhase =
   | 'combat'
   | 'elite_combat'
   | 'boss_combat'
+  | 'event'
   | 'rest'
   | 'shop'
   | 'reward'
@@ -289,6 +485,8 @@ export type AscensionLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export interface RunState {
   phase: RunPhase;
+  /** Original run seed. Used for deterministic content selection. */
+  seed?: string;
   currentAct: 1 | 2 | 3;
   actMaps: ActMap[];
   deck: CardInstance[];
@@ -304,6 +502,8 @@ export interface RunState {
   combatState: CombatState | null;
   /** 3-slot potion inventory. Nulls are empty slots. Persists across combats. */
   potions: (PotionInstance | null)[];
+  /** Event/blessing consequences waiting to affect future combat or the current act. */
+  runModifiers?: RunModifierDefinition[];
   runStats: {
     totalCombats: number;
     elitesDefeated: number;

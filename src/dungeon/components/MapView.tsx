@@ -20,6 +20,7 @@ const NODE_COLOR: Record<NodeType, string> = {
   rest:     '#22c46e',
   shop:     '#c89b3c',
   treasure: '#a855f7',
+  event:    '#2dd4bf',
 };
 
 const NODE_EMOJI: Record<NodeType, string> = {
@@ -29,6 +30,7 @@ const NODE_EMOJI: Record<NodeType, string> = {
   rest:     '⛺',
   shop:     '🛒',
   treasure: '💎',
+  event:    '?',
 };
 
 const NODE_LABEL: Record<NodeType, string> = {
@@ -38,6 +40,7 @@ const NODE_LABEL: Record<NodeType, string> = {
   rest:     'Rest',
   shop:     'Shop',
   treasure: 'Chest',
+  event:    'Event',
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -207,6 +210,7 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
     { type: 'rest',     label: 'Rest'    },
     { type: 'shop',     label: 'Shop'    },
     { type: 'treasure', label: 'Chest'   },
+    { type: 'event',    label: 'Event'   },
     { type: 'boss',     label: 'Boss'    },
   ];
 

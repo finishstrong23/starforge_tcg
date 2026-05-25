@@ -13,7 +13,10 @@
     "lint": "eslint src --ext .ts,.tsx",
     "dev": "vite",
     "preview": "vite preview",
-    "telemetry:summary": "node scripts/aggregate-telemetry.mjs"
+    "telemetry:summary": "node scripts/aggregate-telemetry.mjs",
+    "balance:report": "node scripts/balance-report.mjs",
+    "performance:budget": "node scripts/performance-budget.mjs",
+    "release:beta:check": "node scripts/beta-readiness.mjs"
   },
   "keywords": [
     "roguelite",
