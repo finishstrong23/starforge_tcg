@@ -43,6 +43,10 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && inputs.environment == 'staging'
     runs-on: ubuntu-latest
     environment: staging
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -54,14 +58,16 @@ jobs:
       - run: npm ci
 
       - name: Deploy to Vercel preview
+        if: env.VERCEL_TOKEN != '' && env.VERCEL_ORG_ID != '' && env.VERCEL_PROJECT_ID != ''
         run: |
           npm i -g vercel
-          vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --yes --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel pull --yes --environment=preview --token="${VERCEL_TOKEN}"
+          vercel build --token="${VERCEL_TOKEN}"
+          vercel deploy --prebuilt --yes --token="${VERCEL_TOKEN}"
+
+      - name: Vercel preview deploy skipped
+        if: env.VERCEL_TOKEN == '' || env.VERCEL_ORG_ID == '' || env.VERCEL_PROJECT_ID == ''
+        run: echo "Vercel CLI secrets are not configured. Relying on Vercel Git integration for branch previews."
 
   deploy-web-production:
     name: Deploy Web (Production)
@@ -69,6 +75,10 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.environment == 'production')
     runs-on: ubuntu-latest
     environment: production
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -80,11 +90,13 @@ jobs:
       - run: npm ci
 
       - name: Deploy to Vercel production
+        if: env.VERCEL_TOKEN != '' && env.VERCEL_ORG_ID != '' && env.VERCEL_PROJECT_ID != ''
         run: |
           npm i -g vercel
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel pull --yes --environment=production --token="${VERCEL_TOKEN}"
+          vercel build --prod --token="${VERCEL_TOKEN}"
+          vercel deploy --prebuilt --prod --yes --token="${VERCEL_TOKEN}"
+
+      - name: Vercel production deploy skipped
+        if: env.VERCEL_TOKEN == '' || env.VERCEL_ORG_ID == '' || env.VERCEL_PROJECT_ID == ''
+        run: echo "Vercel CLI secrets are not configured. Main pushes are expected to deploy through Vercel Git integration."
