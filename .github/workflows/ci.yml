@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
+  beta-readiness:
+    name: Beta Readiness
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,81 +24,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run lint
-
-  test:
-    name: Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - run: npm ci
-
-      - run: npm run test -- --ci --coverage
-
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 14
-
-  e2e:
-    name: E2E Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Build UI for E2E
-        run: npm run build:ui
-
-      - name: Run Playwright tests
-        run: npx playwright test --project=desktop-chrome
-        env:
-          PLAYWRIGHT_BASE_URL: ''
-
-      - name: Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: reports/
-          retention-days: 14
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - run: npm ci
-
-      - name: Type-check & compile
-        run: npm run build
-
-      - name: Build UI
-        run: npm run build:ui
+      - run: npm run release:beta:check
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
 import type {
   AscensionLevel,
   CardDefinition,
@@ -8,6 +8,7 @@ import type {
   PotionContext,
   PotionInstance,
   RelicDefinition,
+  RunModifierDefinition,
   RunPhase,
   RunState,
 } from '../types';
@@ -19,7 +20,17 @@ import { applyPotion } from '../data/potions';
 import { BLESSING_POOL, applyBlessing as resolveBlessing, type BlessingId } from '../data/blessings';
 import { applyRelicsToCombat, applyRelicsToRun } from '../engine/relicEffects';
 import { logEvent } from '../engine/telemetry';
-import { getAscensionMods, recordWin as recordAscensionWin } from '../engine/ascension';
+import { getAscensionMods } from '../engine/ascension';
+import { pickEventForNode } from '../engine/eventSelection';
+import { applyRunModifiersToCombat, consumeNextCombatModifiers } from '../engine/runModifiers';
+import { recordDungeonRunEnd } from '../engine/metaProgression';
+import {
+  clearDungeonSaveSnapshot,
+  createDungeonSaveSnapshot,
+  getContextStateFromSave,
+  loadDungeonSaveSnapshot,
+  saveDungeonSaveSnapshot,
+} from '../engine/saveCompatibility';
 
 // ─── Context value ─────────────────────────────────────────────────────────────
 
@@ -42,9 +53,11 @@ export interface DungeonRunContextValue {
   spendGold: (amount: number) => void;
   healPlayer: (amount: number) => void;
   damagePlayer: (amount: number) => void;
+  increaseMaxHealth: (amount: number, heal?: boolean) => void;
   addCardToDeck: (card: CardInstance) => void;
   removeCardFromDeck: (instanceId: string) => void;
   upgradeCard: (instanceId: string) => void;
+  addRunModifier: (modifier: RunModifierDefinition) => void;
   setCombatState: (state: CombatState | null) => void;
   advanceAct: () => void;
   endRun: (won: boolean) => void;
@@ -87,9 +100,11 @@ type Action =
   | { type: 'SPEND_GOLD'; amount: number }
   | { type: 'HEAL_PLAYER'; amount: number }
   | { type: 'DAMAGE_PLAYER'; amount: number }
+  | { type: 'INCREASE_MAX_HEALTH'; amount: number; heal?: boolean }
   | { type: 'ADD_CARD'; card: CardInstance }
   | { type: 'REMOVE_CARD'; instanceId: string }
   | { type: 'UPGRADE_CARD'; instanceId: string }
+  | { type: 'ADD_RUN_MODIFIER'; modifier: RunModifierDefinition }
   | { type: 'SET_COMBAT'; state: CombatState | null }
   | { type: 'ADVANCE_ACT' }
   | { type: 'END_RUN'; won: boolean }
@@ -113,6 +128,7 @@ function makeRunState(faction: Faction, seed: string, ascensionLevel: AscensionL
   const baseHp = 72 - mods.startingHpPenalty;          // A5
   return {
     phase: 'draft',
+    seed,
     currentAct: 1,
     actMaps: [
       generateActMap(1, seed, mods.extraEliteNodes),    // A2
@@ -130,6 +146,7 @@ function makeRunState(faction: Faction, seed: string, ascensionLevel: AscensionL
     ascensionLevel,
     combatState: null,
     potions: [null, null, null],
+    runModifiers: [],
     runStats: {
       totalCombats: 0,
       elitesDefeated: 0,
@@ -198,6 +215,7 @@ function reducer(state: ContextState, action: Action): ContextState {
     // ── Travel to map node ────────────────────────────────────────────────────
     case 'TRAVEL_TO_NODE': {
       if (!state.run) return state;
+      let runForTransition = state.run;
       const actIdx = state.run.currentAct - 1;
       const currentMap = state.run.actMaps[actIdx];
       const node = currentMap.nodes.find((n) => n.id === action.nodeId);
@@ -213,6 +231,7 @@ function reducer(state: ContextState, action: Action): ContextState {
         rest: 'rest',
         shop: 'shop',
         treasure: 'reward',
+        event: 'event',
       };
       const phase: RunPhase = nodePhaseMap[node.type] ?? 'map';
 
@@ -244,6 +263,8 @@ function reducer(state: ContextState, action: Action): ContextState {
               drawPerTurn:    mods.drawPerTurn,
             },
           );
+          combatState = applyRunModifiersToCombat(combatState, runForTransition.runModifiers ?? []);
+          runForTransition = consumeNextCombatModifiers(runForTransition);
           combatState = applyRelicsToCombat('combat_start', state.run.relics, combatState, {
             combatIndex: state.run.runStats.totalCombats,
           });
@@ -262,11 +283,14 @@ function reducer(state: ContextState, action: Action): ContextState {
         logEvent('shop_visited', { faction: state.draftFaction, act: state.run.currentAct });
       } else if (node.type === 'rest') {
         logEvent('rest_used', { faction: state.draftFaction, act: state.run.currentAct });
+      } else if (node.type === 'event') {
+        const event = pickEventForNode(state.run.currentAct, state.run.seed ?? state.seed, node.id);
+        logEvent('event_visited', { faction: state.draftFaction, act: state.run.currentAct, eventId: event.id });
       }
 
       return {
         ...state,
-        run: { ...state.run, phase, actMaps, combatState },
+        run: { ...runForTransition, phase, actMaps, combatState },
       };
     }
 
@@ -309,6 +333,19 @@ function reducer(state: ContextState, action: Action): ContextState {
         },
       };
     }
+    case 'INCREASE_MAX_HEALTH': {
+      if (!state.run) return state;
+      const nextMax = Math.max(1, state.run.maxHealth + action.amount);
+      const healAmount = action.heal === false ? 0 : Math.max(0, action.amount);
+      return {
+        ...state,
+        run: {
+          ...state.run,
+          maxHealth: nextMax,
+          currentHealth: Math.min(nextMax, state.run.currentHealth + healAmount),
+        },
+      };
+    }
 
     // ── Deck mutations ────────────────────────────────────────────────────────
     case 'ADD_CARD': {
@@ -341,6 +378,21 @@ function reducer(state: ContextState, action: Action): ContextState {
           deck: state.run.deck.map((c) =>
             c.instanceId === action.instanceId ? { ...c, upgraded: true } : c,
           ),
+        },
+      };
+    }
+    case 'ADD_RUN_MODIFIER': {
+      if (!state.run) return state;
+      logEvent('event_choice', {
+        faction: state.draftFaction,
+        kind: 'run_modifier',
+        modifierId: action.modifier.id,
+      });
+      return {
+        ...state,
+        run: {
+          ...state.run,
+          runModifiers: [...(state.run.runModifiers ?? []), action.modifier],
         },
       };
     }
@@ -542,55 +594,48 @@ function reducer(state: ContextState, action: Action): ContextState {
 const DungeonRunContext = createContext<DungeonRunContextValue | null>(null);
 
 // ── Save / hydrate ────────────────────────────────────────────────────────
-// localStorage-based run persistence. Snapshots every state change. On
-// mount, if a saved run exists, hydrate from it so the player is returned
-// to the exact phase they left (combat / map / shop / reward / etc.).
-// Cleared by the run-end "Start New Run" flow so a finished run doesn't
-// resurrect.
-const SAVE_KEY = 'sf:dungeon:save:v1';
+// Versioned localStorage-based run persistence. Snapshots every state change
+// and migrates older beta saves before hydration.
 
 function hydrate(initial: ContextState): ContextState {
-  if (typeof localStorage === 'undefined') return initial;
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return initial;
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return initial;
-    // If the player abandoned at the run-end screen, treat as no save —
-    // they shouldn't be locked on a corpse.
-    const phase = parsed?.run?.phase;
-    if (phase === 'run_end_win' || phase === 'run_end_loss') return initial;
-    return parsed as ContextState;
-  } catch {
-    return initial;
-  }
+  const snapshot = loadDungeonSaveSnapshot();
+  return snapshot ? getContextStateFromSave(snapshot) : initial;
 }
 
 function persist(state: ContextState): void {
-  if (typeof localStorage === 'undefined') return;
-  try {
-    if (state.run) {
-      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-    } else {
-      // Pre-run lobby state is uninteresting; don't bloat localStorage.
-      localStorage.removeItem(SAVE_KEY);
-    }
-  } catch {
-    // localStorage may be quota-exceeded or disabled. Save is best-effort.
-  }
+  saveDungeonSaveSnapshot(createDungeonSaveSnapshot(state));
 }
 
 export function clearDungeonSave(): void {
-  if (typeof localStorage === 'undefined') return;
-  try { localStorage.removeItem(SAVE_KEY); } catch { /* swallow */ }
+  clearDungeonSaveSnapshot();
 }
 
 export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [s, dispatch] = useReducer(reducer, INITIAL, hydrate);
+  const recordedRunEndId = useRef<string | null>(null);
 
   // Persist on every state transition. cheap (~1KB per write); the buffer
   // of typical runs stays well under 50KB.
   useEffect(() => { persist(s); }, [s]);
+
+  useEffect(() => {
+    const run = s.run;
+    if (!run || (run.phase !== 'run_end_win' && run.phase !== 'run_end_loss')) return;
+    const won = run.phase === 'run_end_win';
+    const recordKey = [
+      run.seed ?? 'legacy',
+      s.draftFaction ?? 'Unknown',
+      run.ascensionLevel,
+      won ? 'W' : 'L',
+      run.currentAct,
+      run.runStats.totalCombats,
+      run.runStats.bossesDefeated,
+      run.runStats.elitesDefeated,
+    ].join(':');
+    if (recordedRunEndId.current === recordKey) return;
+    recordedRunEndId.current = recordKey;
+    recordDungeonRunEnd(run, s.draftFaction, won);
+  }, [s.run, s.draftFaction]);
 
   const startNewRun = useCallback((faction: Faction, seed?: string, ascensionLevel: AscensionLevel = 0) => {
     dispatch({
@@ -633,6 +678,10 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     dispatch({ type: 'DAMAGE_PLAYER', amount });
   }, []);
 
+  const increaseMaxHealth = useCallback((amount: number, heal = true) => {
+    dispatch({ type: 'INCREASE_MAX_HEALTH', amount, heal });
+  }, []);
+
   const addCardToDeck = useCallback((card: CardInstance) => {
     dispatch({ type: 'ADD_CARD', card });
   }, []);
@@ -643,6 +692,10 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const upgradeCard = useCallback((instanceId: string) => {
     dispatch({ type: 'UPGRADE_CARD', instanceId });
+  }, []);
+
+  const addRunModifier = useCallback((modifier: RunModifierDefinition) => {
+    dispatch({ type: 'ADD_RUN_MODIFIER', modifier });
   }, []);
 
   const setCombatState = useCallback((state: CombatState | null) => {
@@ -697,9 +750,11 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       spendGold,
       healPlayer,
       damagePlayer,
+      increaseMaxHealth,
       addCardToDeck,
       removeCardFromDeck,
       upgradeCard,
+      addRunModifier,
       setCombatState,
       advanceAct,
       endRun,
@@ -712,8 +767,8 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     [
       s,
       startNewRun, pickDraftCard, completeDraft, travelToNode,
-      addRelic, addGold, spendGold, healPlayer, damagePlayer,
-      addCardToDeck, removeCardFromDeck, upgradeCard, setCombatState,
+      addRelic, addGold, spendGold, healPlayer, damagePlayer, increaseMaxHealth,
+      addCardToDeck, removeCardFromDeck, upgradeCard, addRunModifier, setCombatState,
       advanceAct, endRun, returnToMap,
       addPotion, usePotion, discardPotion, applyBlessing,
     ],

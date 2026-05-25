@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { RelicDefinition } from '../types';
+import type { RelicDefinition, RunModifierDefinition } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
 
 interface RelicTooltipProps {
@@ -47,8 +47,9 @@ export const RelicBar: React.FC = () => {
   const [hoverX, setHoverX] = useState(0);
 
   const relics: RelicDefinition[] = runState?.relics ?? [];
+  const modifiers: RunModifierDefinition[] = runState?.runModifiers ?? [];
 
-  if (relics.length === 0) return null;
+  if (relics.length === 0 && modifiers.length === 0) return null;
 
   return (
     <div
@@ -96,6 +97,33 @@ export const RelicBar: React.FC = () => {
           title={relic.name}
         >
           {relic.art}
+        </div>
+      ))}
+
+      {modifiers.map((modifier) => (
+        <div
+          key={modifier.id}
+          style={{
+            height: 28,
+            minWidth: 34,
+            borderRadius: 6,
+            background: '#13201f',
+            border: '1px solid #2dd4bf66',
+            color: '#8ff8ec',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '0 9px',
+            fontSize: 10,
+            fontWeight: 800,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            cursor: 'default',
+            flexShrink: 0,
+          }}
+          title={`${modifier.name}: ${modifier.description}`}
+        >
+          {modifier.duration === 'next_combat' ? 'Next' : 'Act'}
         </div>
       ))}
 

@@ -39,9 +39,9 @@ const TOTAL_ROWS = 9;
 
 /** Per-act distributions for the 18 middle slots (rows 1–6 × 3 cols). */
 const ACT_DISTRIBUTIONS: Record<1 | 2 | 3, Record<Exclude<NodeType, 'boss'>, number>> = {
-  1: { combat: 10, elite: 2, rest: 2, shop: 2, treasure: 2 },
-  2: { combat: 9,  elite: 3, rest: 2, shop: 2, treasure: 2 },
-  3: { combat: 8,  elite: 4, rest: 2, shop: 2, treasure: 2 },
+  1: { combat: 8, elite: 2, rest: 2, shop: 2, treasure: 2, event: 2 },
+  2: { combat: 7, elite: 3, rest: 2, shop: 2, treasure: 2, event: 2 },
+  3: { combat: 6, elite: 4, rest: 2, shop: 2, treasure: 2, event: 2 },
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

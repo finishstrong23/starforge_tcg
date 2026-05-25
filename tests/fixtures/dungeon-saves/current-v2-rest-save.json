@@ -1,0 +1,47 @@
+{
+  "description": "Current schema save fixture for a rest-site run.",
+  "expect": {
+    "valid": true,
+    "seed": "fixture-v2-rest",
+    "faction": "Cogsmiths",
+    "phase": "rest",
+    "potions": [null, null, null],
+    "runModifiers": [],
+    "totalDamageDealt": 212
+  },
+  "snapshot": {
+    "schemaVersion": 2,
+    "buildVersion": "0.2.0",
+    "lastSavedAt": 1710000000000,
+    "run": {
+      "phase": "rest",
+      "seed": "fixture-v2-rest",
+      "currentAct": 1,
+      "actMaps": [],
+      "deck": [],
+      "hand": [],
+      "relics": [],
+      "gold": 45,
+      "maxHealth": 72,
+      "currentHealth": 55,
+      "energy": 3,
+      "maxEnergy": 3,
+      "ascensionLevel": 1,
+      "combatState": null,
+      "potions": [null, null, null],
+      "runModifiers": [],
+      "runStats": {
+        "totalCombats": 4,
+        "elitesDefeated": 1,
+        "bossesDefeated": 0,
+        "cardsPlayed": 34,
+        "totalDamageDealt": 212
+      }
+    },
+    "draftFaction": "Cogsmiths",
+    "draftRound": 3,
+    "draftOptions": [],
+    "draftPicks": [],
+    "seed": "fixture-v2-rest"
+  }
+}

@@ -1,0 +1,21 @@
+[
+  {
+    "id": "BUG-001",
+    "title": "",
+    "severity": "MEDIUM",
+    "status": "new",
+    "buildVersion": "",
+    "platform": "",
+    "browserOrDevice": "",
+    "faction": "",
+    "seed": "",
+    "ascension": 0,
+    "act": 1,
+    "phase": "",
+    "expected": "",
+    "actual": "",
+    "stepsToReproduce": [],
+    "feedbackJsonAttached": false,
+    "evidence": []
+  }
+]

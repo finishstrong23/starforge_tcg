@@ -26,6 +26,8 @@ export type TelemetryEventType =
   | 'relic_picked'
   | 'potion_picked'
   | 'shop_visited'
+  | 'event_visited'
+  | 'event_choice'
   | 'rest_used';
 
 export interface TelemetryEvent {
@@ -39,7 +41,16 @@ export interface TelemetryEvent {
 }
 
 const STORAGE_KEY = 'sf:telemetry:v1';
+const SETTINGS_KEY = 'sf:telemetry:settings:v1';
 const MAX_BUFFER  = 500;
+
+export interface TelemetrySettings {
+  remoteEnabled: boolean;
+}
+
+const DEFAULT_SETTINGS: TelemetrySettings = {
+  remoteEnabled: true,
+};
 
 let cachedSessionId: string | null = null;
 
@@ -71,6 +82,41 @@ function writeBuffer(buf: TelemetryEvent[]): void {
   }
 }
 
+export function getTelemetrySettings(): TelemetrySettings {
+  if (typeof localStorage === 'undefined') return DEFAULT_SETTINGS;
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return DEFAULT_SETTINGS;
+    const parsed = JSON.parse(raw) as Partial<TelemetrySettings>;
+    return {
+      remoteEnabled: typeof parsed.remoteEnabled === 'boolean'
+        ? parsed.remoteEnabled
+        : DEFAULT_SETTINGS.remoteEnabled,
+    };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+export function saveTelemetrySettings(settings: TelemetrySettings): void {
+  if (typeof localStorage === 'undefined') return;
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // Settings persistence is best-effort; local telemetry still works.
+  }
+}
+
+export function isRemoteTelemetryEnabled(): boolean {
+  return getTelemetrySettings().remoteEnabled;
+}
+
+export function setRemoteTelemetryEnabled(enabled: boolean): TelemetrySettings {
+  const next = { ...getTelemetrySettings(), remoteEnabled: enabled };
+  saveTelemetrySettings(next);
+  return next;
+}
+
 /** Optional remote endpoint for fire-and-forget POSTs. Set via setTelemetryEndpoint. */
 let remoteEndpoint: string | null = null;
 
@@ -97,7 +143,7 @@ export function logEvent(type: TelemetryEventType, payload: Record<string, unkno
   if (buf.length > MAX_BUFFER) buf.splice(0, buf.length - MAX_BUFFER);
   writeBuffer(buf);
 
-  if (remoteEndpoint && typeof fetch !== 'undefined') {
+  if (remoteEndpoint && isRemoteTelemetryEnabled() && typeof fetch !== 'undefined') {
     try {
       void fetch(remoteEndpoint, {
         method: 'POST',

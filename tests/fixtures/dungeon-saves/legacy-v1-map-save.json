@@ -1,0 +1,41 @@
+{
+  "description": "Legacy raw context save from before schemaVersion/buildVersion/lastSavedAt existed.",
+  "expect": {
+    "valid": true,
+    "seed": "fixture-v1-run",
+    "faction": "Luminar",
+    "phase": "map",
+    "potions": [null, null, null],
+    "runModifiers": [],
+    "totalDamageDealt": 0
+  },
+  "snapshot": {
+    "run": {
+      "phase": "map",
+      "seed": "fixture-v1-run",
+      "currentAct": 2,
+      "actMaps": [],
+      "deck": [],
+      "hand": [],
+      "relics": [],
+      "gold": 77,
+      "maxHealth": 72,
+      "currentHealth": 30,
+      "energy": 3,
+      "maxEnergy": 3,
+      "ascensionLevel": 4,
+      "combatState": null,
+      "runStats": {
+        "totalCombats": 5,
+        "elitesDefeated": 1,
+        "bossesDefeated": 1,
+        "cardsPlayed": 20
+      }
+    },
+    "draftFaction": "Luminar",
+    "draftRound": 3,
+    "draftOptions": [],
+    "draftPicks": [],
+    "seed": "fixture-v1-run"
+  }
+}

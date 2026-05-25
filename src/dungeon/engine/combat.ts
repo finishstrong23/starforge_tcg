@@ -1,5 +1,6 @@
 import type { CardInstance, CombatPhase, CombatState, EnemyDefinition, RelicDefinition, Rift, StatusEffect, StatusEffectType } from '../types';
 import { getCardStats, getCardText, getCardCost, setActiveCardText, setActiveCardCost } from './cardStats';
+import { applyStructuredCardEffects, hasStructuredEffects } from './structuredEffects';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -460,7 +461,10 @@ export function playCard(
     s = { ...s, playerPowers: [...s.playerPowers, card] };
   } else {
     // Spell / Attack / Skill / Augment
-    s = applySpellEffect(s, card, targetId, textOverride);
+    const canUseStructuredEffects = hasStructuredEffects(card) && (card.augments?.length ?? 0) === 0;
+    s = canUseStructuredEffects
+      ? applyStructuredCardEffects(s, card, textOverride)
+      : applySpellEffect(s, card, targetId, textOverride);
     // Exhaust if the card text says so OR the card is an Augment (augment
     // cards always exhaust on play per their text). Exhausted cards go to
     // the exhaustPile and don't return on reshuffle. Everything else goes

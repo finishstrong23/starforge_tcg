@@ -130,7 +130,7 @@ export const PotionInventory: React.FC<PotionInventoryProps> = ({
       }
       return changed ? next : cur;
     });
-  }, [padded[0]?.definitionId, padded[1]?.definitionId, padded[2]?.definitionId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [padded[0]?.definitionId, padded[1]?.definitionId, padded[2]?.definitionId]);
   const hoveredDef = hovered !== null
     ? (() => {
         const inst = padded[hovered.index];

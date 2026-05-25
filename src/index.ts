@@ -9,8 +9,10 @@
  *   import { DungeonRoot } from './dungeon';
  */
 
-export const VERSION = '0.1.0';
-export const GAME_NAME = 'STARFORGE Dungeon Run';
+import { DUNGEON_BUILD_NAME, DUNGEON_BUILD_VERSION } from './dungeon/engine/buildInfo';
+
+export const VERSION = DUNGEON_BUILD_VERSION;
+export const GAME_NAME = DUNGEON_BUILD_NAME;
 
 export { DungeonRoot } from './dungeon';
 

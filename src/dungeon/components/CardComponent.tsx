@@ -25,6 +25,7 @@ const TYPE_BG: Record<string, string> = {
   Power:   '#1a1a3b',
   Minion:  '#1a2e1a',
   Augment: '#2e2a1a',
+  Curse:   '#2b1728',
   Spell:   '#1a1a3b',
   Structure:'#1e1e2e',
 };
@@ -70,6 +71,8 @@ export interface CardComponentProps {
   targetable?: boolean;
   /** Compact mode for board (minions in play). */
   compact?: boolean;
+  /** Exact or best-known combat preview lines for in-hand cards. */
+  previewLines?: string[];
   onClick?: () => void;
 }
 
@@ -80,6 +83,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
   unaffordable = false,
   targetable = false,
   compact = false,
+  previewLines,
   onClick,
 }) => {
   const accent = FACTION_COLOR[card.faction] ?? '#aaaaaa';
@@ -177,11 +181,27 @@ export const CardComponent: React.FC<CardComponentProps> = ({
     text: {
       fontSize: compact ? 0 : 7,
       color: '#bbb',
-      lineHeight: 1.3,
+      lineHeight: 1.25,
       overflow: 'hidden',
       display: compact ? 'none' : '-webkit-box',
-      WebkitLineClamp: 3,
+      WebkitLineClamp: previewLines && previewLines.length > 0 ? 2 : 3,
       WebkitBoxOrient: 'vertical',
+    },
+    preview: {
+      display: compact || !previewLines || previewLines.length === 0 ? 'none' : 'flex',
+      flexWrap: 'wrap',
+      gap: 3,
+      marginTop: 3,
+    },
+    previewPill: {
+      fontSize: 6,
+      padding: '1px 4px',
+      border: '1px solid #67e8aa66',
+      borderRadius: 3,
+      color: '#9fffc8',
+      background: 'rgba(17, 80, 56, 0.4)',
+      lineHeight: 1.25,
+      whiteSpace: 'nowrap',
     },
     keywords: {
       display: compact ? 'none' : 'flex',
@@ -388,6 +408,14 @@ export const CardComponent: React.FC<CardComponentProps> = ({
             ) : (
               stats.text
             )}
+          </div>
+        )}
+
+        {!compact && previewLines && previewLines.length > 0 && (
+          <div style={styles.preview} title={previewLines.join(' / ')}>
+            {previewLines.map((line) => (
+              <span key={line} style={styles.previewPill}>{line}</span>
+            ))}
           </div>
         )}
 

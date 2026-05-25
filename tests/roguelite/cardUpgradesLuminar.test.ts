@@ -227,10 +227,10 @@ describe('Luminar — Cluster L-C rewrites (Retain mechanic removed)', () => {
   });
 
   it('L-027 Enduring Light+: turn-start grants Lumens + draws 1', () => {
-    const channel = makeInstance('L-004');
+    const channelCards = [...Array(8)].map((_, i) => ({ ...makeInstance('L-004'), instanceId: `ch-${i}` }));
     const reserve = [...Array(8)].map((_, i) => ({ ...makeInstance('L-001'), instanceId: `r-${i}` }));
     const power = makeInstance('L-027', true);
-    const state = initCombat([power, channel, ...reserve], 50, 50, [], dummyEnemy, 'Luminar');
+    const state = initCombat([power, ...channelCards, ...reserve], 50, 50, [], dummyEnemy, 'Luminar');
     const p = state.hand.find((c) => c.id === 'L-027');
     if (!p) { expect(true).toBe(true); return; }
     let s = playCard(state, p.instanceId);

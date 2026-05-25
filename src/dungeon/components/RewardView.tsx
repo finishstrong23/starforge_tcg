@@ -86,7 +86,6 @@ export const RewardView: React.FC = () => {
       if (!awarded && goldGained > 0) addGold(goldGained);
       return true;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [picked, setPicked] = useState(false);

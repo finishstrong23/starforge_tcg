@@ -2,6 +2,12 @@ import React, { useMemo, useState } from 'react';
 import { DungeonRunProvider, useDungeonRun } from '../context/DungeonRunContext';
 import type { AscensionLevel, Faction } from '../types';
 import { describeAscension, getMaxUnlockedAscension, recordWin as recordAscensionWin } from '../engine/ascension';
+import { deriveDungeonBadges, getBadgeDefinition } from '../engine/metaProgression';
+import {
+  DUNGEON_FEEDBACK_EXCLUDED_FIELDS,
+  DUNGEON_FEEDBACK_INCLUDED_FIELDS,
+  exportDungeonFeedbackJSON,
+} from '../engine/feedbackExport';
 import {
   STARTER_DECKS,
   CARD_BY_ID,
@@ -16,6 +22,7 @@ import { CombatView } from './CombatView';
 import { RewardView } from './RewardView';
 import { RestSiteView } from './RestSiteView';
 import { ShopView } from './ShopView';
+import { EventView } from './EventView';
 import { RelicBar } from './RelicBar';
 import { DeckViewer } from './DeckViewer';
 
@@ -393,6 +400,8 @@ const RunEndScreen: React.FC<{ won: boolean; onBack: () => void }> = ({ won, onB
   const stats = runState?.runStats;
   const act = runState?.currentAct ?? 1;
   const ascension = runState?.ascensionLevel ?? 0;
+  const badges = runState ? deriveDungeonBadges(runState, won).map(getBadgeDefinition) : [];
+  const [feedbackCopied, setFeedbackCopied] = React.useState(false);
 
   // On a winning run, persist the ascension unlock once and remember which
   // level (if any) was newly unlocked so we can show a banner.
@@ -402,8 +411,17 @@ const RunEndScreen: React.FC<{ won: boolean; onBack: () => void }> = ({ won, onB
       const newLevel = recordAscensionWin(draftFaction, ascension);
       setNewlyUnlocked(newLevel);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleCopyFeedback = async () => {
+    const json = exportDungeonFeedbackJSON(runState, draftFaction);
+    try {
+      await navigator.clipboard.writeText(json);
+      setFeedbackCopied(true);
+    } catch {
+      window.prompt('Copy this feedback JSON:', json);
+    }
+  };
 
   return (
     <div style={s.endRoot}>
@@ -446,8 +464,60 @@ const RunEndScreen: React.FC<{ won: boolean; onBack: () => void }> = ({ won, onB
         </div>
       )}
 
+      {badges.length > 0 && (
+        <div
+          style={{
+            marginTop: 14,
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: 8,
+            maxWidth: 620,
+          }}
+        >
+          {badges.map((badge) => (
+            <div
+              key={badge.id}
+              title={badge.description}
+              style={{
+                padding: '7px 10px',
+                borderRadius: 6,
+                border: '1px solid #2dd4bf66',
+                background: 'rgba(45,212,191,0.10)',
+                color: '#a9fff4',
+                fontSize: 10,
+                fontWeight: 800,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+              }}
+            >
+              {badge.name}
+            </div>
+          ))}
+        </div>
+      )}
+
       <button type="button" style={s.endBtn} onClick={onBack}>
         Start New Run
+      </button>
+      <div
+        style={{
+          maxWidth: 560,
+          marginTop: 16,
+          color: '#8aa0b8',
+          fontSize: 11,
+          lineHeight: 1.45,
+          textAlign: 'center',
+        }}
+      >
+        Feedback copy includes {DUNGEON_FEEDBACK_INCLUDED_FIELDS.join(', ')}. It does not include {DUNGEON_FEEDBACK_EXCLUDED_FIELDS.join(', ')}.
+      </div>
+      <button
+        type="button"
+        style={{ ...s.endBtn, marginTop: 10, background: '#101a24', color: '#8fd5ff', borderColor: '#2b6f99' }}
+        onClick={handleCopyFeedback}
+      >
+        {feedbackCopied ? 'Feedback Copied' : 'Copy Feedback'}
       </button>
     </div>
   );
@@ -639,6 +709,7 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     case 'combat':
     case 'elite_combat':
     case 'boss_combat': mainView = <CombatView />; break;
+    case 'event':      mainView = <EventView />; break;
     case 'reward':     mainView = <RewardView />; break;
     case 'rest':       mainView = <RestSiteView />; break;
     case 'shop':       mainView = <ShopView />; break;
