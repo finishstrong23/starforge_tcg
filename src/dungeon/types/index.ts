@@ -363,6 +363,8 @@ export interface CombatState {
   pendingTurnStartBlock?: number;
   /** Cards drawn at the start of every player turn. Default 5, lowered to 4 by Ascension A9. */
   drawPerTurn?: number;
+  /** Forgemaster's Sigil: next card played this combat gets +2 damage/block. */
+  forgemasterSigilPending?: boolean;
 }
 
 // ─── POTIONS ─────────────────────────────────────────────────────────────────

@@ -99,6 +99,7 @@ export function applyRelicsToCombat(
 
       // R-U01 Forgemaster's Sigil: first card played this combat gains +2 damage/block
       if (hasRelic(relics, 'R-U01')) {
+        s = { ...s, forgemasterSigilPending: true };
         s = addLog(s, '⚙️ Forgemaster\'s Sigil: first card played gains +2');
       }
 
