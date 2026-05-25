@@ -1,4 +1,4 @@
-import type { CardInstance, CombatPhase, CombatState, EnemyDefinition, RelicDefinition, Rift, StatusEffect, StatusEffectType } from '../types';
+import type { CardInstance, CombatPhase, CombatState, EffectDefinition, EnemyDefinition, RelicDefinition, Rift, StatusEffect, StatusEffectType } from '../types';
 import { getCardStats, getCardText, getCardCost, setActiveCardText, setActiveCardCost } from './cardStats';
 import { applyStructuredCardEffects, hasStructuredEffects } from './structuredEffects';
 
@@ -109,6 +109,63 @@ function ensureFluxState<T extends CardInstance>(card: T): T {
 function log(state: CombatState, msg: string): CombatState {
   const log = [...state.combatLog, msg].slice(-8);
   return { ...state, combatLog: log, lastAction: msg };
+}
+
+function applyForgemasterSigilToText(text: string): string {
+  return text
+    .replace(
+      /deal (\d+) to (\d+)( damage)/gi,
+      (_, lo, hi, rest) => `Deal ${parseInt(lo) + 2} to ${parseInt(hi) + 2}${rest}`,
+    )
+    .replace(
+      /deal (\d+)( damage)/gi,
+      (_, n, rest) => `Deal ${parseInt(n) + 2}${rest}`,
+    )
+    .replace(
+      /gain (\d+)( block)/gi,
+      (_, n, rest) => `Gain ${parseInt(n) + 2}${rest}`,
+    );
+}
+
+function applyForgemasterSigilToEffects(effects: EffectDefinition[] | undefined): EffectDefinition[] | undefined {
+  if (!effects) return undefined;
+
+  return effects.map((effect): EffectDefinition => {
+    switch (effect.type) {
+      case 'damage':
+      case 'block':
+        return { ...effect, amount: effect.amount + 2 };
+      case 'choice':
+        return {
+          ...effect,
+          options: effect.options.map((option) => ({
+            ...option,
+            effects: applyForgemasterSigilToEffects(option.effects) ?? option.effects,
+          })),
+        };
+      case 'conditional':
+        return {
+          ...effect,
+          effects: applyForgemasterSigilToEffects(effect.effects) ?? effect.effects,
+        };
+      case 'trigger':
+        return {
+          ...effect,
+          effects: applyForgemasterSigilToEffects(effect.effects) ?? effect.effects,
+        };
+      default:
+        return effect;
+    }
+  });
+}
+
+function applyForgemasterSigilToCard(card: CardInstance): CardInstance {
+  const patched = setActiveCardText(card, applyForgemasterSigilToText(getCardText(card)));
+  return {
+    ...patched,
+    effects: applyForgemasterSigilToEffects(patched.effects),
+    upgradeEffects: applyForgemasterSigilToEffects(patched.upgradeEffects),
+  };
 }
 
 // ─── Status effect helpers ───────────────────────────────────────────────────
@@ -380,23 +437,32 @@ export function playCard(
 ): CombatState {
   const card = state.hand.find((c) => c.instanceId === cardInstanceId);
   if (!card) return state;
-  const stats = getCardStats(card);
+  const sigilPending = state.forgemasterSigilPending === true;
+  const effectiveCard = sigilPending ? applyForgemasterSigilToCard(card) : card;
+  const effectiveTextOverride = sigilPending && textOverride
+    ? applyForgemasterSigilToText(textOverride)
+    : textOverride;
+  const stats = getCardStats(effectiveCard);
   if (state.playerEnergy < stats.cost) return state;
 
-  let s = {
+  let s: CombatState = {
     ...state,
     playerEnergy: state.playerEnergy - stats.cost,
     hand: state.hand.filter((c) => c.instanceId !== cardInstanceId),
+    forgemasterSigilPending: sigilPending ? false : state.forgemasterSigilPending,
   };
 
   s = log(s, `▶ ${card.name} played`);
+  if (sigilPending) {
+    s = log(s, `⚙️ Forgemaster's Sigil empowers ${card.name}`);
+  }
 
   // Luminar Channel: Release effect fires on play, scaled by accumulated Lumens.
   // (Cards: Prism Strike "Channel. Deal 6. Release: +2 damage per Lumen", etc.)
-  if (isChannelCard(card)) {
-    const lumens = card.lumens ?? 0;
+  if (isChannelCard(effectiveCard)) {
+    const lumens = effectiveCard.lumens ?? 0;
     if (lumens > 0) {
-      const text = getCardText(card);
+      const text = getCardText(effectiveCard);
       const releaseDmg = text.match(/release:\s*\+?(\d+)\s*damage\s*per lumen/i);
       const releaseBlock = text.match(/release:\s*\+?(\d+)\s*block\s*per lumen/i);
       const releaseWeak = text.match(/release:\s*apply\s*weak\s*\d+\s*per lumen/i);
@@ -438,7 +504,7 @@ export function playCard(
 
     // DEPLOY trigger
     if (card.keywords.includes('DEPLOY')) {
-      s = applySpellEffect(s, card, targetId);
+      s = applySpellEffect(s, effectiveCard, targetId);
       s = log(s, `⚙ DEPLOY — ${card.name} activates`);
     }
   } else if (card.type === 'Structure') {
@@ -454,17 +520,17 @@ export function playCard(
     // Powers persist for the rest of combat and trigger on phase events.
     // On play we ONLY run the segments tagged "at combat start" / non-conditional.
     s = log(s, `⚙ ${card.name} comes online`);
-    const playSegments = powerSegmentsForTrigger(card, 'play');
+    const playSegments = powerSegmentsForTrigger(effectiveCard, 'play');
     for (const seg of playSegments) {
-      s = applySpellEffect(s, card, targetId, seg);
+      s = applySpellEffect(s, effectiveCard, targetId, seg);
     }
     s = { ...s, playerPowers: [...s.playerPowers, card] };
   } else {
     // Spell / Attack / Skill / Augment
-    const canUseStructuredEffects = hasStructuredEffects(card) && (card.augments?.length ?? 0) === 0;
+    const canUseStructuredEffects = hasStructuredEffects(effectiveCard) && (card.augments?.length ?? 0) === 0;
     s = canUseStructuredEffects
-      ? applyStructuredCardEffects(s, card, textOverride)
-      : applySpellEffect(s, card, targetId, textOverride);
+      ? applyStructuredCardEffects(s, effectiveCard, effectiveTextOverride)
+      : applySpellEffect(s, effectiveCard, targetId, effectiveTextOverride);
     // Exhaust if the card text says so OR the card is an Augment (augment
     // cards always exhaust on play per their text). Exhausted cards go to
     // the exhaustPile and don't return on reshuffle. Everything else goes

@@ -17,7 +17,7 @@ const steps = [
   ['ESLint', 'npm run lint'],
   [
     'Phase 8 save and telemetry smoke',
-    'npm test -- --runInBand tests/roguelite/phase8ProductionReadiness.test.ts tests/roguelite/telemetrySettings.test.ts',
+    'npm test -- --runInBand tests/roguelite/phase8ProductionReadiness.test.ts tests/roguelite/telemetrySettings.test.ts tests/roguelite/relicEffects.test.ts',
   ],
   ['Vite production build', 'npm run build:ui'],
   ['Performance budget', 'npm run performance:budget'],
