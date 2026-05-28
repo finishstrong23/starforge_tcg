@@ -6,7 +6,6 @@
  */
 
 import { createSeededRandom } from './random';
-import type { SeededRandom } from './random';
 
 /**
  * Shuffle an array in place using Fisher-Yates algorithm

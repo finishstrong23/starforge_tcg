@@ -30,20 +30,6 @@ function addLog(state: CombatState, msg: string): CombatState {
   return { ...state, combatLog, lastAction: msg };
 }
 
-function addStatusToPlayer(
-  state: CombatState,
-  type: StatusEffectType,
-  stacks: number,
-): CombatState {
-  const existing = state.playerStatusEffects.find((e) => e.type === type);
-  const playerStatusEffects = existing
-    ? state.playerStatusEffects.map((e) =>
-        e.type === type ? { ...e, stacks: e.stacks + stacks } : e,
-      )
-    : [...state.playerStatusEffects, { type, stacks }];
-  return { ...state, playerStatusEffects };
-}
-
 function pickRandom<T>(arr: T[]): T | undefined {
   if (arr.length === 0) return undefined;
   return arr[Math.floor(Math.random() * arr.length)];
