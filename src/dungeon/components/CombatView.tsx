@@ -34,33 +34,6 @@ interface FloatNum {
 
 let _floatId = 0;
 
-// ─── HUD sub-component ────────────────────────────────────────────────────────
-
-const EnergyPips: React.FC<{ current: number; max: number }> = ({ current, max }) => (
-  <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-    {Array.from({ length: max }).map((_, i) => (
-      <div
-        key={i}
-        style={{
-          width: 14,
-          height: 14,
-          borderRadius: '50%',
-          background: i < current ? '#00aaff' : '#1a2a3a',
-          border: '1px solid #2a3a4a',
-          boxShadow: i < current ? '0 0 6px #00aaff88' : 'none',
-          transition: 'background 200ms',
-        }}
-      />
-    ))}
-  </div>
-);
-
-
-// ─── Status strip ─────────────────────────────────────────────────────────────
-// Horizontal bar that runs left-to-right above or below the combat log,
-// showing every active buff / debuff / rift on a side. Replaces the cramped
-// HUD-corner badges with a prominent, scannable row.
-
 const STATUS_META: Record<string, { emoji: string; color: string; label: string }> = {
   burn:       { emoji: '🔥', color: '#ff5a2e', label: 'Burn'        },
   poison:     { emoji: '☠',  color: '#44cc44', label: 'Poison'      },
@@ -78,109 +51,6 @@ const RIFT_META: Record<string, { emoji: string; color: string; label: string; t
   genesis: { emoji: '⚡', color: '#ff7acc', label: 'Genesis Rift', tip: (t) => `Genesis Rift: +2 Energy this turn (${t} left)`         },
   energy:  { emoji: '⚡', color: '#4adfff', label: 'Energy Rift',  tip: (t) => `Energy Rift: +1 Energy each turn (${t} left)`          },
   chaos:   { emoji: '⚡', color: '#ffd24a', label: 'Chaos Rift',   tip: (t) => `Chaos Rift: deals 3 to enemy each turn (${t} left)`    },
-};
-
-interface StatusStripProps {
-  effects: CombatState['playerStatusEffects'];
-  rifts?: CombatState['playerRifts'];
-  powers?: CombatState['playerPowers'];
-  side: 'enemy' | 'player';
-  label?: string;
-}
-
-const StatusStrip: React.FC<StatusStripProps> = ({ effects, rifts = [], powers = [], side, label }) => {
-  const empty = effects.length === 0 && rifts.length === 0 && powers.length === 0;
-
-  const wrapperStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    padding: '5px 14px',
-    minHeight: 28,
-    background: side === 'enemy'
-      ? 'linear-gradient(180deg, rgba(60,16,28,0.32) 0%, rgba(10,10,22,0) 100%)'
-      : 'linear-gradient(0deg,  rgba(20,32,60,0.32) 0%, rgba(10,10,22,0) 100%)',
-    borderTop: side === 'enemy' ? 'none' : '1px solid #1a1a2e',
-    borderBottom: side === 'enemy' ? '1px solid #1a1a2e' : 'none',
-    flexShrink: 0,
-    flexWrap: 'wrap',
-    overflowX: 'auto',
-  };
-
-  const labelStyle: React.CSSProperties = {
-    fontSize: 8,
-    letterSpacing: '0.25em',
-    textTransform: 'uppercase',
-    color: side === 'enemy' ? '#cc7788' : '#88aacc',
-    opacity: 0.55,
-    flexShrink: 0,
-    minWidth: 50,
-  };
-
-  const chipBase = (color: string): React.CSSProperties => ({
-    display: 'flex',
-    alignItems: 'center',
-    gap: 4,
-    fontSize: 11,
-    fontWeight: 700,
-    padding: '3px 8px',
-    background: `${color}22`,
-    border: `1px solid ${color}88`,
-    borderRadius: 4,
-    color,
-    letterSpacing: '0.04em',
-    boxShadow: `0 0 6px ${color}44`,
-    whiteSpace: 'nowrap',
-    lineHeight: 1.2,
-  });
-
-  return (
-    <div style={wrapperStyle}>
-      <span style={labelStyle}>{label ?? (side === 'enemy' ? 'Enemy' : 'You')}</span>
-      {empty && (
-        <span style={{ fontSize: 10, color: '#555', fontStyle: 'italic' }}>—</span>
-      )}
-      {effects.map((e) => {
-        const meta = STATUS_META[e.type] ?? { emoji: '?', color: '#888', label: e.type };
-        return (
-          <span
-            key={e.type}
-            title={`${meta.label} ×${e.stacks}`}
-            style={chipBase(meta.color)}
-          >
-            <span style={{ fontSize: 13, lineHeight: 1 }}>{meta.emoji}</span>
-            <span>{meta.label}</span>
-            <span style={{ opacity: 0.7 }}>×{e.stacks}</span>
-          </span>
-        );
-      })}
-      {rifts.map((r, i) => {
-        const meta = RIFT_META[r.type];
-        if (!meta) return null;
-        return (
-          <span
-            key={`rift-${i}`}
-            title={meta.tip(r.turnsRemaining)}
-            style={chipBase(meta.color)}
-          >
-            <span style={{ fontSize: 13, lineHeight: 1 }}>{meta.emoji}</span>
-            <span>{meta.label}</span>
-            <span style={{ opacity: 0.7 }}>{r.turnsRemaining}t</span>
-          </span>
-        );
-      })}
-      {powers.map((p) => (
-        <span
-          key={`pwr-${p.instanceId}`}
-          title={`${p.name}: ${getCardText(p)}`}
-          style={chipBase('#ffaa44')}
-        >
-          <span style={{ fontSize: 13, lineHeight: 1 }}>⚙</span>
-          <span>{p.name}</span>
-        </span>
-      ))}
-    </div>
-  );
 };
 
 // ─── Board row ────────────────────────────────────────────────────────────────
@@ -375,11 +245,6 @@ const CombatLog: React.FC<{ log: string[]; cardPool: CardInstance[] }> = ({ log,
 };
 
 // ─── HUD corner panels (mockup-style) ────────────────────────────────────────
-
-interface HUDProps {
-  cs: CombatState;
-  shakeKey: number;
-}
 
 /**
  * Top-left player card. Shows avatar circle, HP bar, gold count, and a small
@@ -1155,12 +1020,6 @@ export const CombatView: React.FC = () => {
 
     usePotion(slotIndex);
   }, [runState, cs, usePotion]);
-
-  const handlePotionTargetPick = useCallback((targetId: string) => {
-    if (pendingPotionTarget === null) return;
-    usePotion(pendingPotionTarget, { targetId });
-    setPendingPotionTarget(null);
-  }, [pendingPotionTarget, usePotion]);
 
   const handlePotionTargetCancel = useCallback(() => {
     setPendingPotionTarget(null);
