@@ -21,8 +21,8 @@ export const DraftView: React.FC = () => {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: 20,
-      padding: '2rem 1rem',
+      gap: 18,
+      padding: '3.25rem 0.5rem 6.5rem',
       minHeight: '100%',
       background: 'radial-gradient(ellipse at top, #10101e 0%, #060610 100%)',
       color: '#f0f0f8',
@@ -55,9 +55,10 @@ export const DraftView: React.FC = () => {
     },
     cardGrid: {
       display: 'flex',
-      gap: 14,
+      gap: 18,
       flexWrap: 'wrap',
       justifyContent: 'center',
+      maxWidth: 850,
     },
     cardWrapper: {
       display: 'flex',
@@ -67,8 +68,8 @@ export const DraftView: React.FC = () => {
       cursor: 'pointer',
     },
     faction: {
-      fontSize: '0.65rem',
-      opacity: 0.5,
+      fontSize: '0.72rem',
+      opacity: 0.65,
       letterSpacing: '0.15em',
     },
     picksRow: {
@@ -127,7 +128,7 @@ export const DraftView: React.FC = () => {
               tabIndex={0}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') pickDraftCard(def); }}
             >
-              <CardComponent card={instance} selectable />
+              <CardComponent card={instance} selectable size="draft" />
               <div style={s.faction}>{def.faction} · {def.rarity}</div>
             </div>
           );
