@@ -141,7 +141,7 @@ const s: Record<string, React.CSSProperties> = {
     background: 'radial-gradient(ellipse at top, #141424 0%, #0a0a16 55%, #060610 100%)',
     color: '#f2f2f6',
     fontFamily: 'var(--font-family, system-ui, sans-serif)',
-    padding: '2.5rem 2rem 3rem',
+    padding: '1.5rem 2rem 6.5rem',
     boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
@@ -249,12 +249,19 @@ const s: Record<string, React.CSSProperties> = {
     paddingLeft: '2.25rem',
   },
   startRow: {
-    width: '100%',
-    maxWidth: '1200px',
+    position: 'fixed',
+    right: 24,
+    bottom: 18,
+    zIndex: 130,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    marginTop: '1.5rem',
+    padding: '10px',
+    background: 'rgba(6, 6, 16, 0.72)',
+    border: '1px solid #24243a',
+    borderRadius: 8,
+    backdropFilter: 'blur(10px)',
+    boxShadow: '0 12px 36px rgba(0,0,0,0.45)',
   },
   // Run overlay elements
   runWrap: {
@@ -264,10 +271,6 @@ const s: Record<string, React.CSSProperties> = {
     fontFamily: 'var(--font-family, system-ui, sans-serif)',
   },
   deckBtn: {
-    position: 'fixed',
-    bottom: 72,
-    right: 12,
-    zIndex: 120,
     padding: '6px 14px',
     background: '#0e0e1e',
     border: '1px solid #2a2a3a',
@@ -292,6 +295,15 @@ const s: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     letterSpacing: '0.12em',
     textTransform: 'uppercase',
+  },
+  runOverlayStack: {
+    position: 'fixed',
+    right: 12,
+    bottom: 10,
+    zIndex: 120,
+    display: 'flex',
+    gap: 8,
+    alignItems: 'center',
   },
   // Run end screen
   endRoot: {
@@ -731,13 +743,15 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           abandon happens naturally between encounters. */}
       {phase !== 'combat' && phase !== 'elite_combat' && phase !== 'boss_combat' && (
         <>
-          <button
-            type="button"
-            style={s.deckBtn}
-            onClick={() => setDeckOpen((o) => !o)}
-          >
-            View Deck ({runState.deck.length})
-          </button>
+          <div style={s.runOverlayStack}>
+            <button
+              type="button"
+              style={s.deckBtn}
+              onClick={() => setDeckOpen((o) => !o)}
+            >
+              View Deck ({runState.deck.length})
+            </button>
+          </div>
 
           <button
             type="button"

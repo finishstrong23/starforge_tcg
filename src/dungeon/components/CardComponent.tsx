@@ -71,6 +71,8 @@ export interface CardComponentProps {
   targetable?: boolean;
   /** Compact mode for board (minions in play). */
   compact?: boolean;
+  /** Larger presentation for draft/reward choices where text readability matters. */
+  size?: 'normal' | 'draft';
   /** Exact or best-known combat preview lines for in-hand cards. */
   previewLines?: string[];
   onClick?: () => void;
@@ -83,6 +85,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
   unaffordable = false,
   targetable = false,
   compact = false,
+  size = 'normal',
   previewLines,
   onClick,
 }) => {
@@ -92,8 +95,9 @@ export const CardComponent: React.FC<CardComponentProps> = ({
   const isMinion = card.type === 'Minion';
   const stats = getCardStats(card);
 
-  const w = compact ? 64 : 108;
-  const h = compact ? 88 : 155;
+  const isDraftSize = !compact && size === 'draft';
+  const w = compact ? 64 : isDraftSize ? 176 : 108;
+  const h = compact ? 88 : isDraftSize ? 252 : 155;
 
   const styles: Record<string, React.CSSProperties> = {
     card: {
@@ -128,12 +132,12 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       position: 'absolute',
       top: compact ? 2 : 4,
       left: compact ? 2 : 4,
-      width: compact ? 16 : 22,
-      height: compact ? 16 : 22,
+      width: compact ? 16 : isDraftSize ? 28 : 22,
+      height: compact ? 16 : isDraftSize ? 28 : 22,
       borderRadius: '50%',
       background: unaffordable ? '#222' : accent,
       color: unaffordable ? '#555' : '#000',
-      fontSize: compact ? 9 : 12,
+      fontSize: compact ? 9 : isDraftSize ? 16 : 12,
       fontWeight: 700,
       display: 'flex',
       alignItems: 'center',
@@ -144,7 +148,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       position: 'absolute',
       top: compact ? 2 : 4,
       right: compact ? 2 : 4,
-      fontSize: compact ? 7 : 8,
+      fontSize: compact ? 7 : isDraftSize ? 10 : 8,
       letterSpacing: '0.06em',
       color: rarityColor,
       opacity: 0.85,
@@ -154,12 +158,12 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      padding: compact ? '18px 3px 3px' : '26px 5px 4px',
-      gap: compact ? 1 : 2,
+      padding: compact ? '18px 3px 3px' : isDraftSize ? '38px 11px 9px' : '26px 5px 4px',
+      gap: compact ? 1 : isDraftSize ? 5 : 2,
       overflow: 'hidden',
     },
     name: {
-      fontSize: compact ? 7 : 9,
+      fontSize: compact ? 7 : isDraftSize ? 14 : 9,
       fontWeight: 700,
       color: '#fff',
       letterSpacing: '0.04em',
@@ -169,22 +173,22 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       whiteSpace: 'nowrap',
     },
     artBox: {
-      flex: compact ? 0 : 1,
+      flex: compact ? 0 : isDraftSize ? '0 0 92px' : 1,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      fontSize: compact ? 18 : 28,
+      fontSize: compact ? 18 : isDraftSize ? 42 : 28,
       lineHeight: 1,
       overflow: 'hidden',
-      height: compact ? 22 : undefined,
+      height: compact ? 22 : isDraftSize ? 92 : undefined,
     },
     text: {
-      fontSize: compact ? 0 : 7,
-      color: '#bbb',
-      lineHeight: 1.25,
+      fontSize: compact ? 0 : isDraftSize ? 12 : 7,
+      color: '#d6d6df',
+      lineHeight: isDraftSize ? 1.38 : 1.25,
       overflow: 'hidden',
       display: compact ? 'none' : '-webkit-box',
-      WebkitLineClamp: previewLines && previewLines.length > 0 ? 2 : 3,
+      WebkitLineClamp: previewLines && previewLines.length > 0 ? 2 : isDraftSize ? 4 : 3,
       WebkitBoxOrient: 'vertical',
     },
     preview: {
@@ -194,7 +198,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       marginTop: 3,
     },
     previewPill: {
-      fontSize: 6,
+      fontSize: isDraftSize ? 9 : 6,
       padding: '1px 4px',
       border: '1px solid #67e8aa66',
       borderRadius: 3,
@@ -210,7 +214,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       marginTop: 2,
     },
     kwBadge: {
-      fontSize: 6,
+      fontSize: isDraftSize ? 9 : 6,
       padding: '1px 3px',
       border: `1px solid ${accent}55`,
       borderRadius: 2,
@@ -221,8 +225,8 @@ export const CardComponent: React.FC<CardComponentProps> = ({
     stats: {
       display: 'flex',
       justifyContent: 'space-between',
-      padding: compact ? '0 2px 2px' : '0 4px 4px',
-      fontSize: compact ? 8 : 9,
+      padding: compact ? '0 2px 2px' : isDraftSize ? '0 8px 8px' : '0 4px 4px',
+      fontSize: compact ? 8 : isDraftSize ? 13 : 9,
       fontWeight: 700,
     },
     statusRow: {
