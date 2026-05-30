@@ -182,10 +182,10 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
       width: '100%',
       overflowY: 'auto',
       overflowX: 'auto',
-      padding: '0.5rem 0 1rem',
+      padding: '0.25rem 0 1rem',
     },
     actLabel: {
-      fontSize: '0.65rem',
+          fontSize: '0.7rem',
       letterSpacing: '0.3em',
       opacity: 0.4,
       textTransform: 'uppercase',
@@ -225,7 +225,7 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
       <svg
         viewBox={`0 0 ${MAP_W} ${MAP_H}`}
         width="100%"
-        style={{ minWidth: 720, maxWidth: 920, display: 'block', margin: '0 auto' }}
+        style={{ width: 'min(96vw, 1500px)', minWidth: 980, maxWidth: 1500, display: 'block', margin: '0 auto' }}
         aria-label="Dungeon map"
       >
         <defs>

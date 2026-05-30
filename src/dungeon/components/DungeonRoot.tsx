@@ -743,15 +743,17 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           abandon happens naturally between encounters. */}
       {phase !== 'combat' && phase !== 'elite_combat' && phase !== 'boss_combat' && (
         <>
-          <div style={s.runOverlayStack}>
-            <button
-              type="button"
-              style={s.deckBtn}
-              onClick={() => setDeckOpen((o) => !o)}
-            >
-              View Deck ({runState.deck.length})
-            </button>
-          </div>
+          {phase !== 'draft' && (
+            <div style={s.runOverlayStack}>
+              <button
+                type="button"
+                style={s.deckBtn}
+                onClick={() => setDeckOpen((o) => !o)}
+              >
+                View Deck ({runState.deck.length})
+              </button>
+            </div>
+          )}
 
           <button
             type="button"
