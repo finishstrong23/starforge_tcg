@@ -5,10 +5,10 @@ import { getAvailableNodes } from '../engine/mapgen';
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
 
-const MAP_W = 340;
-const MAP_H = 580;
-const COL_X = [72, 170, 268];
-const ROW_Y = [38, 98, 160, 222, 284, 346, 408, 468, 538];
+const MAP_W = 820;
+const MAP_H = 300;
+const ROW_X = [58, 145, 232, 319, 406, 493, 580, 667, 762];
+const LANE_Y = [70, 150, 230];
 const R = 23;   // node radius
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
@@ -68,8 +68,8 @@ const MapNodeCircle: React.FC<NodeProps> = ({
   const fillAlpha = isVisited ? '18' : isFuture ? '0a' : isCurrent ? '44' : hovered ? '55' : '33';
   const strokeAlpha = isVisited ? '44' : isFuture ? '28' : '';
   const opacity = isFuture ? 0.35 : isVisited ? 0.5 : 1;
-  const strokeWidth = isCurrent ? 2.5 : hovered && isInteractive ? 2.5 : 1.5;
-  const scale = hovered && isInteractive ? 1.12 : isCurrent ? 1.05 : 1;
+  const strokeWidth = isCurrent ? 2.5 : hovered && isInteractive ? 3 : 1.5;
+  const nodeRadius = hovered && isInteractive ? R + 4 : isCurrent ? R + 2 : R;
   const glowFilter = isCurrent ? 'url(#glow-current)' : isInteractive && hovered ? 'url(#glow-available)' : undefined;
 
   const strokeColor = isVisited
@@ -82,12 +82,14 @@ const MapNodeCircle: React.FC<NodeProps> = ({
 
   return (
     <g
-      transform={`translate(${x},${y}) scale(${scale})`}
-      style={{ transformOrigin: `${x}px ${y}px`, cursor: isInteractive ? 'pointer' : 'default', transition: 'transform 100ms ease' }}
+      transform={`translate(${x},${y})`}
+      style={{ cursor: isInteractive ? 'pointer' : 'default' }}
       onClick={isInteractive ? onClick : undefined}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
     >
+      <circle r={R + 14} fill="transparent" />
+
       {/* Outer pulse ring for current node */}
       {isCurrent && (
         <circle r={R + 7} fill="none" stroke={color} strokeWidth="1" opacity="0.4">
@@ -98,12 +100,13 @@ const MapNodeCircle: React.FC<NodeProps> = ({
 
       {/* Node body */}
       <circle
-        r={R}
+        r={nodeRadius}
         fill={`${color}${fillAlpha}`}
         stroke={strokeColor}
         strokeWidth={strokeWidth}
         opacity={opacity}
         filter={glowFilter}
+        style={{ transition: 'r 120ms ease, stroke-width 120ms ease, fill 120ms ease' }}
       />
 
       {/* Emoji */}
@@ -136,7 +139,7 @@ const MapNodeCircle: React.FC<NodeProps> = ({
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function nodePos(row: number, col: number): { x: number; y: number } {
-  return { x: COL_X[col] ?? COL_X[1], y: ROW_Y[row] ?? ROW_Y[0] };
+  return { x: ROW_X[row] ?? ROW_X[0], y: LANE_Y[col] ?? LANE_Y[1] };
 }
 
 function nodeState(
@@ -175,10 +178,10 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
     wrapper: {
       display: 'flex',
       flexDirection: 'column',
-      alignItems: 'center',
+      alignItems: 'stretch',
       width: '100%',
       overflowY: 'auto',
-      overflowX: 'hidden',
+      overflowX: 'auto',
       padding: '0.5rem 0 1rem',
     },
     actLabel: {
@@ -187,6 +190,7 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
       opacity: 0.4,
       textTransform: 'uppercase',
       marginBottom: '0.5rem',
+      textAlign: 'center',
     },
     legendRow: {
       display: 'flex',
@@ -221,7 +225,7 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
       <svg
         viewBox={`0 0 ${MAP_W} ${MAP_H}`}
         width="100%"
-        style={{ maxWidth: 380, display: 'block' }}
+        style={{ minWidth: 720, maxWidth: 920, display: 'block', margin: '0 auto' }}
         aria-label="Dungeon map"
       >
         <defs>
@@ -245,15 +249,15 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
         {/* ── Background ──────────────────────────────────────────────────── */}
         <rect width={MAP_W} height={MAP_H} fill="#08081a" rx="8" />
 
-        {/* Subtle vertical guide lines */}
-        {COL_X.map((cx) => (
+        {/* Subtle lane guide lines */}
+        {LANE_Y.map((cy) => (
           <line
-            key={cx}
-            x1={cx} y1={ROW_Y[0]}
-            x2={cx} y2={ROW_Y[ROW_Y.length - 1]}
+            key={cy}
+            x1={ROW_X[0]} y1={cy}
+            x2={ROW_X[ROW_X.length - 1]} y2={cy}
             stroke="#ffffff08"
             strokeWidth="1"
-            strokeDasharray="3,8"
+            strokeDasharray="5,10"
           />
         ))}
 
@@ -269,8 +273,8 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
             return (
               <line
                 key={`${src.id}-${tgtId}`}
-                x1={sp.x} y1={sp.y + R + 1}
-                x2={tp.x} y2={tp.y - R - 1}
+                x1={sp.x + R + 1} y1={sp.y}
+                x2={tp.x - R - 1} y2={tp.y}
                 stroke={isOld ? '#ffffff18' : isActive ? '#ffffff50' : '#ffffff14'}
                 strokeWidth={isActive ? 1.5 : 1}
                 strokeDasharray={isActive ? undefined : '4,5'}
