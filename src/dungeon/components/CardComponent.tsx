@@ -96,8 +96,8 @@ export const CardComponent: React.FC<CardComponentProps> = ({
   const stats = getCardStats(card);
 
   const isDraftSize = !compact && size === 'draft';
-  const w = compact ? 64 : isDraftSize ? 176 : 108;
-  const h = compact ? 88 : isDraftSize ? 252 : 155;
+  const w = compact ? 64 : isDraftSize ? 158 : 108;
+  const h = compact ? 88 : isDraftSize ? 226 : 155;
 
   const styles: Record<string, React.CSSProperties> = {
     card: {
@@ -132,12 +132,12 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       position: 'absolute',
       top: compact ? 2 : 4,
       left: compact ? 2 : 4,
-      width: compact ? 16 : isDraftSize ? 28 : 22,
-      height: compact ? 16 : isDraftSize ? 28 : 22,
+      width: compact ? 16 : isDraftSize ? 24 : 22,
+      height: compact ? 16 : isDraftSize ? 24 : 22,
       borderRadius: '50%',
       background: unaffordable ? '#222' : accent,
       color: unaffordable ? '#555' : '#000',
-      fontSize: compact ? 9 : isDraftSize ? 16 : 12,
+      fontSize: compact ? 9 : isDraftSize ? 14 : 12,
       fontWeight: 700,
       display: 'flex',
       alignItems: 'center',
@@ -158,12 +158,12 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      padding: compact ? '18px 3px 3px' : isDraftSize ? '38px 11px 9px' : '26px 5px 4px',
+      padding: compact ? '18px 3px 3px' : isDraftSize ? '32px 10px 8px' : '26px 5px 4px',
       gap: compact ? 1 : isDraftSize ? 5 : 2,
       overflow: 'hidden',
     },
     name: {
-      fontSize: compact ? 7 : isDraftSize ? 14 : 9,
+      fontSize: compact ? 7 : isDraftSize ? 12 : 9,
       fontWeight: 700,
       color: '#fff',
       letterSpacing: '0.04em',
@@ -173,17 +173,17 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       whiteSpace: 'nowrap',
     },
     artBox: {
-      flex: compact ? 0 : isDraftSize ? '0 0 92px' : 1,
+      flex: compact ? 0 : isDraftSize ? '0 0 74px' : 1,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      fontSize: compact ? 18 : isDraftSize ? 42 : 28,
+      fontSize: compact ? 18 : isDraftSize ? 36 : 28,
       lineHeight: 1,
       overflow: 'hidden',
-      height: compact ? 22 : isDraftSize ? 92 : undefined,
+      height: compact ? 22 : isDraftSize ? 74 : undefined,
     },
     text: {
-      fontSize: compact ? 0 : isDraftSize ? 12 : 7,
+      fontSize: compact ? 0 : isDraftSize ? 11 : 7,
       color: '#d6d6df',
       lineHeight: isDraftSize ? 1.38 : 1.25,
       overflow: 'hidden',
@@ -198,7 +198,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       marginTop: 3,
     },
     previewPill: {
-      fontSize: isDraftSize ? 9 : 6,
+      fontSize: isDraftSize ? 8 : 6,
       padding: '1px 4px',
       border: '1px solid #67e8aa66',
       borderRadius: 3,
@@ -214,7 +214,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       marginTop: 2,
     },
     kwBadge: {
-      fontSize: isDraftSize ? 9 : 6,
+      fontSize: isDraftSize ? 8 : 6,
       padding: '1px 3px',
       border: `1px solid ${accent}55`,
       borderRadius: 2,
@@ -226,7 +226,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       display: 'flex',
       justifyContent: 'space-between',
       padding: compact ? '0 2px 2px' : isDraftSize ? '0 8px 8px' : '0 4px 4px',
-      fontSize: compact ? 8 : isDraftSize ? 13 : 9,
+      fontSize: compact ? 8 : isDraftSize ? 12 : 9,
       fontWeight: 700,
     },
     statusRow: {
