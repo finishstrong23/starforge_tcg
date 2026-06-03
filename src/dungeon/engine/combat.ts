@@ -12,6 +12,40 @@ function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n));
 }
 
+const NUMBER_WORD: Record<string, number> = {
+  one: 1,
+  two: 2,
+  twice: 2,
+  three: 3,
+  thrice: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+  nine: 9,
+  ten: 10,
+};
+
+function parseCount(raw: string | undefined): number | null {
+  if (!raw) return null;
+  return NUMBER_WORD[raw] ?? (Number.isFinite(Number(raw)) ? parseInt(raw, 10) : null);
+}
+
+function parseRepeatedEnemyAttack(description: string, fallbackDamage: number): { damage: number; hits: number } {
+  const text = description.toLowerCase();
+  const match = text.match(
+    /deal\s+(\d+)(?:\s+damage)?\s+(?:(\d+|one|two|three|four|five|six|seven|eight|nine|ten)\s+times?|(twice|thrice))/,
+  );
+  if (!match) return { damage: fallbackDamage, hits: 1 };
+
+  const hits = parseCount(match[2] ?? match[3]) ?? 1;
+  return {
+    damage: fallbackDamage,
+    hits: Math.max(1, hits),
+  };
+}
+
 // ─── Flux helpers ───────────────────────────────────────────────────────────
 
 const FLUX_STATES: Array<'A' | 'B' | 'C'> = ['A', 'B', 'C'];
@@ -613,7 +647,6 @@ function applySpellEffect(
   }
 
   // Multi-hit: "deal N damage X times" / "deal N damage twice" / "deal N damage 3 times"
-  const NUMBER_WORD: Record<string, number> = { twice: 2, thrice: 3 };
   const multiHitMatch = !rangeDmgMatch && !augBonus
     ? text.match(/deal (\d+) damage (\d+|twice|thrice) times?/)
         ?? text.match(/deal (\d+) damage (twice|thrice)/)
@@ -621,7 +654,7 @@ function applySpellEffect(
   if (multiHitMatch) {
     const per = parseInt(multiHitMatch[1]);
     const raw = multiHitMatch[2];
-    const hits = NUMBER_WORD[raw] ?? parseInt(raw);
+    const hits = parseCount(raw) ?? 1;
     let totalDealt = 0;
     for (let i = 0; i < hits; i++) {
       const dmg = calcDamage(per, s.playerStatusEffects, s.enemy.statusEffects);
@@ -1193,10 +1226,18 @@ export function executeEnemyTurn(state: CombatState): CombatState {
   switch (intent.type) {
     case 'attack': {
       const value = intent.value ?? enemy.attack;
-      const dmg = calcDamage(value, enemy.statusEffects, s.playerStatusEffects);
-      const result = applyShieldedDamage(s.playerShield, s.playerHealth, dmg);
-      s = { ...s, playerHealth: result.health, playerShield: result.shield };
-      s = log(s, `👾 ${enemy.name} attacks for ${dmg}`);
+      const repeated = parseRepeatedEnemyAttack(intent.description, value);
+      let totalDamage = 0;
+      for (let i = 0; i < repeated.hits; i++) {
+        const dmg = calcDamage(repeated.damage, enemy.statusEffects, s.playerStatusEffects);
+        const result = applyShieldedDamage(s.playerShield, s.playerHealth, dmg);
+        s = { ...s, playerHealth: result.health, playerShield: result.shield };
+        totalDamage += dmg;
+        if (s.playerHealth <= 0) break;
+      }
+      s = repeated.hits > 1
+        ? log(s, `👾 ${enemy.name} hits ${repeated.hits}× for ${totalDamage} total`)
+        : log(s, `👾 ${enemy.name} attacks for ${totalDamage}`);
       break;
     }
     case 'defend': {

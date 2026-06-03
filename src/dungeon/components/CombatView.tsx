@@ -522,6 +522,10 @@ const RightHUD: React.FC<{
   onEndTurn: () => void;
   isEnemyTurn: boolean;
 }> = ({ cs, onEndTurn, isEnemyTurn }) => {
+  const heat = cs.playerHeat ?? 0;
+  const heatLabel = heat >= 10 ? 'Critical' : heat >= 6 ? 'Primed' : heat >= 3 ? 'Warming' : 'Stored';
+  const heatColor = heat >= 10 ? '#ff3d1e' : heat >= 6 ? '#ff8a2a' : '#f0d060';
+
   return (
     <div
       style={{
@@ -534,6 +538,31 @@ const RightHUD: React.FC<{
         gap: 10,
       }}
     >
+      {cs.playerFaction === 'Pyroclast' && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          <div style={{ fontSize: 8, opacity: 0.65, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#ffb199' }}>
+            Heat
+          </div>
+          <div
+            style={{
+              minWidth: 54,
+              padding: '5px 10px',
+              background: 'linear-gradient(180deg, rgba(68,18,12,0.95), rgba(16,8,12,0.86))',
+              border: `1px solid ${heatColor}`,
+              borderRadius: 6,
+              boxShadow: `0 0 16px ${heatColor}55, inset 0 0 10px rgba(255,80,40,0.18)`,
+              color: '#fff4ec',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: 20, fontWeight: 900, lineHeight: 1 }}>{heat}</div>
+            <div style={{ fontSize: 7, fontWeight: 800, color: heatColor, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 2 }}>
+              {heatLabel}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
         <div style={{ fontSize: 8, opacity: 0.55, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#aaa' }}>
           Discard

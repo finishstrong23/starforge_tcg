@@ -72,6 +72,10 @@ export const ShopView: React.FC = () => {
   const [pendingPurchase, setPendingPurchase] = useState<{ potion: PotionInstance; shopIndex: number; price: number } | null>(null);
 
   const gold = runState?.gold ?? 0;
+  const currentHealth = runState?.currentHealth ?? 0;
+  const maxHealth = runState?.maxHealth ?? 0;
+  const healthPct = maxHealth > 0 ? currentHealth / maxHealth : 1;
+  const healthColor = healthPct <= 0.35 ? '#ff5c45' : healthPct <= 0.7 ? '#f0d060' : '#72e6a3';
   const deck = runState?.deck ?? [];
   const ascensionMods = getAscensionMods(runState?.ascensionLevel ?? 0);
   // A3 — shop price multiplier. Round up so the multiplier always actually bites.
@@ -198,6 +202,7 @@ export const ShopView: React.FC = () => {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
+      gap: 12,
     },
     title: {
       fontSize: '1.3rem',
@@ -215,6 +220,24 @@ export const ShopView: React.FC = () => {
       borderRadius: 4,
       padding: '4px 10px',
       letterSpacing: '0.08em',
+    },
+    headerStats: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      flexWrap: 'wrap',
+      justifyContent: 'flex-end',
+    },
+    healthBadge: {
+      fontSize: 14,
+      fontWeight: 800,
+      color: healthColor,
+      background: '#17151b',
+      border: `1px solid ${healthColor}77`,
+      borderRadius: 4,
+      padding: '4px 10px',
+      letterSpacing: '0.08em',
+      boxShadow: `0 0 12px ${healthColor}22`,
     },
     sectionLabel: {
       width: '100%',
@@ -296,7 +319,10 @@ export const ShopView: React.FC = () => {
     <div style={s.root}>
       <div style={s.header}>
         <h2 style={s.title}>🛒 Shop</h2>
-        <div style={s.goldBadge}>💰 {gold}g</div>
+        <div style={s.headerStats}>
+          <div style={s.healthBadge}>HP {currentHealth}/{maxHealth}</div>
+          <div style={s.goldBadge}>💰 {gold}g</div>
+        </div>
       </div>
 
       {/* Cards */}
