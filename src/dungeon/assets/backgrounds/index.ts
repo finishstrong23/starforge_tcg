@@ -18,7 +18,15 @@ const modules = import.meta.glob<string>('./*.{jpg,jpeg,webp}', {
   import: 'default',
 });
 
-export const BACKGROUNDS: string[] = Object.values(modules);
+const basicTokenBackgrounds = [
+  `${import.meta.env.BASE_URL}art/dungeon/backgrounds/combat.png`,
+  `${import.meta.env.BASE_URL}art/dungeon/backgrounds/boss.png`,
+];
+
+export const BACKGROUNDS: string[] = [
+  ...basicTokenBackgrounds,
+  ...Object.values(modules),
+];
 
 /** FNV-1a-ish string hash → unsigned 32-bit. Used to seed background picks. */
 function hashString(s: string): number {

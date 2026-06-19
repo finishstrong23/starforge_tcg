@@ -5,6 +5,7 @@ import { playCard, attackWithMinion, endPlayerTurn, executeEnemyTurn, getCardCho
 import { getCardStats, getCardText } from '../engine/cardStats';
 import { CARD_POOL } from '../data/cards';
 import { pickRandomBackground } from '../assets/backgrounds';
+import { getDungeonSceneArt } from '../assets/basicTokenArt';
 import { EnemyComponent } from './EnemyComponent';
 import { HandComponent } from './HandComponent';
 import { CardComponent } from './CardComponent';
@@ -758,8 +759,8 @@ export const CombatView: React.FC = () => {
   // Pick a stable random background per encounter, seeded by enemy ID so the
   // same fight always shows the same scene (and re-renders don't flicker).
   const bgUrl = useMemo(
-    () => pickRandomBackground(cs?.enemy.id ?? 'default'),
-    [cs?.enemy.id],
+    () => (runState?.phase === 'boss_combat' ? getDungeonSceneArt('boss') : pickRandomBackground(cs?.enemy.id ?? 'default')),
+    [cs?.enemy.id, runState?.phase],
   );
   const relics = runState?.relics ?? [];
 

@@ -25,6 +25,7 @@ import { ShopView } from './ShopView';
 import { EventView } from './EventView';
 import { RelicBar } from './RelicBar';
 import { DeckViewer } from './DeckViewer';
+import { getDungeonSceneArt, getFactionTokenArt } from '../assets/basicTokenArt';
 
 interface DungeonRootProps {
   onBack: () => void;
@@ -99,6 +100,17 @@ const selCardStyle = (accent: string, selected: boolean): React.CSSProperties =>
   gap: '0.6rem',
 });
 
+const factionArtFrameStyle = (accent: string): React.CSSProperties => ({
+  width: '100%',
+  aspectRatio: '16 / 10',
+  borderRadius: 6,
+  border: `1px solid ${accent}55`,
+  background: '#f4ecd8',
+  overflow: 'hidden',
+  marginBottom: '0.9rem',
+  boxShadow: `0 8px 20px ${accent}18`,
+});
+
 const cardGlyphStyle = (accent: string): React.CSSProperties => ({
   fontSize: '1.6rem',
   color: accent,
@@ -138,7 +150,13 @@ const s: Record<string, React.CSSProperties> = {
   root: {
     width: '100%',
     minHeight: '100vh',
-    background: 'radial-gradient(ellipse at top, #141424 0%, #0a0a16 55%, #060610 100%)',
+    backgroundImage: [
+      'linear-gradient(180deg, rgba(7,7,18,0.74), rgba(7,7,18,0.92))',
+      `url("${getDungeonSceneArt('combat')}")`,
+    ].join(', '),
+    backgroundSize: 'cover, cover',
+    backgroundPosition: 'center, center',
+    backgroundRepeat: 'no-repeat',
     color: '#f2f2f6',
     fontFamily: 'var(--font-family, system-ui, sans-serif)',
     padding: '1.5rem 2rem 6.5rem',
@@ -197,6 +215,12 @@ const s: Record<string, React.CSSProperties> = {
     marginBottom: '2rem',
   },
   cardHeader: { display: 'flex', alignItems: 'center', gap: '0.7rem' },
+  factionArt: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    display: 'block',
+  },
   cardName: { fontSize: '1.1rem', fontWeight: 600, letterSpacing: '0.05em' },
   cardTag: { fontSize: '0.8rem', opacity: 0.65 },
   cardMechanicBody: { fontSize: '0.82rem', opacity: 0.82, lineHeight: 1.4 },
@@ -220,6 +244,14 @@ const s: Record<string, React.CSSProperties> = {
     gap: '1.5rem',
   },
   detailCol: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
+  detailHeroArt: {
+    width: '100%',
+    maxHeight: 210,
+    objectFit: 'cover',
+    borderRadius: 6,
+    border: '1px solid #222236',
+    background: '#f4ecd8',
+  },
   characterName: { fontSize: '1.4rem', fontWeight: 600, margin: 0 },
   mechanicProse: {
     fontSize: '0.92rem',
@@ -380,6 +412,12 @@ const FactionDetail: React.FC<{
   return (
     <div style={s.detailPanel}>
       <div style={s.detailCol}>
+        <img
+          src={getFactionTokenArt(faction.id as Faction)}
+          alt=""
+          aria-hidden="true"
+          style={s.detailHeroArt}
+        />
         <div style={detailHeaderStyle(faction.accent)}>Character</div>
         <h2 style={s.characterName}>{deck.characterName}</h2>
         <p style={s.mechanicProse}>
@@ -669,6 +707,15 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 }}
                 style={selCardStyle(f.accent, isSelected)}
               >
+                <div style={factionArtFrameStyle(f.accent)}>
+                  <img
+                    src={getFactionTokenArt(f.id as Faction)}
+                    alt=""
+                    aria-hidden="true"
+                    style={s.factionArt}
+                    loading="lazy"
+                  />
+                </div>
                 <div style={s.cardHeader}>
                   <div style={cardGlyphStyle(f.accent)}>{f.glyph}</div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>

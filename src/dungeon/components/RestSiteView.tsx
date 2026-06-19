@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { CardComponent } from './CardComponent';
+import { getDungeonSceneArt } from '../assets/basicTokenArt';
 
 type RestChoice = 'none' | 'upgrading';
 
@@ -39,7 +40,13 @@ export const RestSiteView: React.FC = () => {
       gap: 24,
       padding: '2.5rem 1rem',
       minHeight: '100%',
-      background: 'radial-gradient(ellipse at 50% 80%, #0a1a10 0%, #060610 100%)',
+      backgroundImage: [
+        'linear-gradient(180deg, rgba(7,7,18,0.68), rgba(7,7,18,0.90))',
+        `url("${getDungeonSceneArt('rest')}")`,
+      ].join(', '),
+      backgroundSize: 'cover, cover',
+      backgroundPosition: 'center, center',
+      backgroundRepeat: 'no-repeat',
       color: '#f0f0f8',
     },
     title: {

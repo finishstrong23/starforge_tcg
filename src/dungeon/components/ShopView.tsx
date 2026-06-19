@@ -7,6 +7,7 @@ import { RELIC_POOL } from '../data/relics';
 import { createCardInstance } from '../engine/draft';
 import { getPotionDef, potionShopPrice, rollShopPotions } from '../data/potions';
 import { getAscensionMods } from '../engine/ascension';
+import { getDungeonSceneArt } from '../assets/basicTokenArt';
 import type { CardDefinition, PotionInstance, RelicDefinition } from '../types';
 
 const CARD_PRICE: Record<string, number> = {
@@ -192,7 +193,13 @@ export const ShopView: React.FC = () => {
       gap: 20,
       padding: '1.5rem 1rem 2rem',
       minHeight: '100%',
-      background: 'radial-gradient(ellipse at 50% 20%, #1a140a 0%, #060610 100%)',
+      backgroundImage: [
+        'linear-gradient(180deg, rgba(7,7,18,0.70), rgba(7,7,18,0.93))',
+        `url("${getDungeonSceneArt('shop')}")`,
+      ].join(', '),
+      backgroundSize: 'cover, cover',
+      backgroundPosition: 'center, center',
+      backgroundRepeat: 'no-repeat',
       color: '#f0f0f8',
       overflowY: 'auto',
     },
