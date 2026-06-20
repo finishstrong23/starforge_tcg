@@ -46,6 +46,7 @@ The previous generated faction/background packs were rejected because they were 
 | `relic:*` | `public/art/dungeon/relics/{relicId}.svg` | Installed Basic Token SVG pass | All twenty-six relic tokens are live through relic bar, rewards, and shop UI. |
 | `card:C/P/L/W pilot` | `public/cards/{cardId}.svg` | Installed Basic Token SVG pass | Sixteen pilot card arts are live through card rendering. |
 | `card:authored-batch-2` | `public/cards/{cardId}.svg` | Installed Basic Token SVG pass | Thirty-three starter and early reward cards now have authored tokens. |
+| `card:authored-batch-3` | `public/cards/{cardId}.svg` | Installed Basic Token SVG pass | Thirty uncommon reward cards now have authored tokens. |
 | `intent:*` | `public/art/dungeon/ui/intent_{intentType}.svg` | Installed Basic Token SVG pass | Six enemy intent tokens are live through combat enemy telegraphs. |
 | `status:*` | `public/art/dungeon/status/{statusId}.svg` | Installed Basic Token SVG pass | Nine status tokens are live through enemy, player, and card status chips. |
 | `ui:piles` | `public/art/dungeon/ui/{card_back,draw_pile,discard_pile}.svg` | Installed Basic Token SVG pass | Draw/discard pile tokens are live in hand/combat UI; card back asset is ready for future card-back surfaces. |
@@ -60,7 +61,7 @@ The next batch should generate the smallest asset set that changes every core sc
 | Asset id | Target path | Status |
 |---|---|---|
 | `card:remaining` | `public/cards/{cardId}.svg` | Procedural fallback live; next step is authored SVG batches |
-| `card:authored-batch-3` | `public/cards/{cardId}.svg` | Next uncommon/rare reward authored SVG batch |
+| `card:authored-batch-4` | `public/cards/{cardId}.svg` | Next rare/high-impact authored SVG batch |
 | `ui:remaining-polish` | `public/art/dungeon/ui/{assetId}.svg` | Later utility polish outside the shop |
 
 ## QA Checklist

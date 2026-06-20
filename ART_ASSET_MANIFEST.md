@@ -161,6 +161,15 @@ Batch 2 starter/reward authored SVGs:
 | `card:W-003`, `card:W-005` through `card:W-009` | Card art | Warp Riders | Done | `public/cards/{cardId}.svg` | Twist, shield, slash, echo, strike, crack tokens |
 | `card:W-041` through `card:W-043` | Card art | Warp Riders | Done | `public/cards/{cardId}.svg` | Starter strike, step, shimmer tokens |
 
+Batch 3 uncommon reward authored SVGs:
+
+| Asset id | Type | Faction | Priority | Target filename | Subject |
+|---|---|---|---|---|---|
+| `card:C-017` through `card:C-024` | Card art | Cogsmiths | Done | `public/cards/{cardId}.svg` | Heavy wrench, shock coil, sentry, plate, modular strike, automate, bore, blades tokens |
+| `card:P-017`, `card:P-019` through `card:P-024` | Card art | Pyroclast | Done | `public/cards/{cardId}.svg` | Dragonbreath, molten skin, overclock, pyroclasm, soot, meltdown, glass cannon tokens |
+| `card:L-017` through `card:L-023` | Card art | Luminar | Done | `public/cards/{cardId}.svg` | Sunbeam, aurora, mantra, focus, solar bolt, halo, flash tokens |
+| `card:W-017` through `card:W-024` | Card art | Warp Riders | Done | `public/cards/{cardId}.svg` | Probability, horizon, chaos, rift, paradox, time, tesseract, shield tokens |
+
 Full card queue after P0:
 
 | Faction | Current IDs | Priority | Notes |
@@ -268,8 +277,9 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 8. Supporting scene panels: draft, reward, blessing, event, victory, and defeat SVG backgrounds.
 9. Shop utility icons: gold and card-removal SVGs wired into shop pricing and services.
 10. Card art batch 2: 33 starter and early reward SVGs.
+11. Card art batch 3: 30 uncommon reward SVGs.
 
-The next remaining visual batch is replacing more procedural card fallbacks with authored Basic Token SVGs, moving into uncommon and rare reward cards.
+The next remaining visual batch is replacing more procedural card fallbacks with authored Basic Token SVGs, moving into rare and high-impact reward cards.
 
 ## Generation Notes
 
