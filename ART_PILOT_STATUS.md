@@ -17,6 +17,12 @@ The previous generated faction/background packs were rejected because they were 
 - `public/art/dungeon/backgrounds/shop.png`
 - `public/art/dungeon/backgrounds/rest.png`
 - `public/art/dungeon/backgrounds/boss.png`
+- `public/art/dungeon/backgrounds/draft.svg`
+- `public/art/dungeon/backgrounds/reward.svg`
+- `public/art/dungeon/backgrounds/blessing.svg`
+- `public/art/dungeon/backgrounds/event.svg`
+- `public/art/dungeon/backgrounds/victory.svg`
+- `public/art/dungeon/backgrounds/defeat.svg`
 
 ## P0 Replacement Status
 
@@ -31,6 +37,7 @@ The previous generated faction/background packs were rejected because they were 
 | `background:shop` | `public/art/dungeon/backgrounds/shop.png` | Installed Basic Token pass | Flat shop panel with relic silhouettes. |
 | `background:rest` | `public/art/dungeon/backgrounds/rest.png` | Installed Basic Token pass | Flat rest panel with cushions and healing flame. |
 | `background:boss` | `public/art/dungeon/backgrounds/boss.png` | Installed Basic Token pass | Flat boss-door panel with crystal seal. |
+| `background:supporting` | `public/art/dungeon/backgrounds/{draft,reward,blessing,event,victory,defeat}.svg` | Installed Basic Token SVG pass | Six supporting screens now use flat token scene panels behind UI overlays. |
 | `map:*` | `public/art/dungeon/map/{nodeType}.svg` | Installed Basic Token SVG pass | Seven map node tokens are live through the art registry. |
 | `enemy:BOSS-*` | `public/art/dungeon/bosses/{bossId}.svg` | Installed Basic Token SVG pass | Three boss tokens are live through the art registry. |
 | `enemy:EL-*` | `public/art/dungeon/enemies/{enemyId}.svg` | Installed Basic Token SVG pass | Four elite enemy tokens are live through the art registry. |
@@ -51,8 +58,8 @@ The next batch should generate the smallest asset set that changes every core sc
 | Asset id | Target path | Status |
 |---|---|---|
 | `card:remaining` | `public/cards/{cardId}.svg` | Procedural fallback live; next step is authored SVG batches |
-| `background:supporting` | `public/art/dungeon/backgrounds/{draft,reward,blessing,event,victory,defeat}.png` | Next supporting-screen batch |
 | `ui:shop_misc` | `public/art/dungeon/ui/{gold,card_removal}.svg` | Next shop utility icon batch |
+| `card:authored-batch-2` | `public/cards/{cardId}.svg` | Next starter/reward authored SVG batch |
 
 ## QA Checklist
 

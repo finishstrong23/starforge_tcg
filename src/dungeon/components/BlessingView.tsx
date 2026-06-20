@@ -12,6 +12,7 @@ import React, { useState } from 'react';
 import type { Blessing } from '../data/blessings';
 import { rollBlessings } from '../data/blessings';
 import { useDungeonRun } from '../context/DungeonRunContext';
+import { getDungeonSceneArt } from '../assets/basicTokenArt';
 
 export const BlessingView: React.FC = () => {
   const { runState, draftFaction, applyBlessing } = useDungeonRun();
@@ -50,7 +51,14 @@ export const BlessingView: React.FC = () => {
       minHeight: '100%',
       gap: 22,
       padding: '2.5rem 1rem',
-      background: 'radial-gradient(ellipse at top, #1a1830 0%, #060610 60%, #050510 100%)',
+      backgroundColor: '#060610',
+      backgroundImage: [
+        'linear-gradient(180deg, rgba(7,7,18,0.62), rgba(7,7,18,0.90))',
+        `url("${getDungeonSceneArt('blessing')}")`,
+      ].join(', '),
+      backgroundSize: 'cover, cover',
+      backgroundPosition: 'center, center',
+      backgroundRepeat: 'no-repeat',
       color: '#f0f0f8',
     },
     actBadge: {

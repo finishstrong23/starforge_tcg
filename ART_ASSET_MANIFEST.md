@@ -43,11 +43,11 @@ Status key:
 | Shop background | `src/dungeon/components/ShopView.tsx` | Done, but needs visual QA | P0 | `public/art/dungeon/backgrounds/shop.png` |
 | Rest background | `src/dungeon/components/RestSiteView.tsx` | Done, but needs visual QA | P0 | `public/art/dungeon/backgrounds/rest.png` |
 | Boss background | `src/dungeon/components/CombatView.tsx` | Done for boss combat | P0 | `public/art/dungeon/backgrounds/boss.png` |
-| Draft screen background | `src/dungeon/components/DraftView.tsx` | Placeholder gradient | P1 | `public/art/dungeon/backgrounds/draft.png` |
-| Reward screen background | `src/dungeon/components/RewardView.tsx` | Placeholder gradient and emoji headers | P1 | `public/art/dungeon/backgrounds/reward.png` |
-| Blessing screen background | `src/dungeon/components/BlessingView.tsx` | Placeholder gradient and blessing emojis | P1 | `public/art/dungeon/backgrounds/blessing.png` |
-| Event screen background | `src/dungeon/components/EventView.tsx` | Placeholder gradient/tone colors | P1 | `public/art/dungeon/backgrounds/event.png` |
-| Run end screen | `src/dungeon/components/DungeonRoot.tsx` | Emoji victory/defeat header | P2 | `public/art/dungeon/backgrounds/victory.png`, `defeat.png` |
+| Draft screen background | `src/dungeon/components/DraftView.tsx` | Done with Basic Token SVG scene panel | P1 | `public/art/dungeon/backgrounds/draft.svg` |
+| Reward screen background | `src/dungeon/components/RewardView.tsx` | Done with Basic Token SVG scene panel | P1 | `public/art/dungeon/backgrounds/reward.svg` |
+| Blessing screen background | `src/dungeon/components/BlessingView.tsx` | Done with Basic Token SVG scene panel | P1 | `public/art/dungeon/backgrounds/blessing.svg` |
+| Event screen background | `src/dungeon/components/EventView.tsx` | Done with Basic Token SVG scene panel | P1 | `public/art/dungeon/backgrounds/event.svg` |
+| Run end screen | `src/dungeon/components/DungeonRoot.tsx` | Done with victory/defeat Basic Token SVG scene panels | P2 | `public/art/dungeon/backgrounds/victory.svg`, `defeat.svg` |
 | Map node icons | `src/dungeon/components/MapView.tsx` | SVG Basic Token pass installed | P0 | `public/art/dungeon/map/{nodeType}.svg` |
 | Map connector/path art | `src/dungeon/components/MapView.tsx` | Dotted SVG lines only | P1 | Optional path/route motif in CSS/SVG |
 | Enemy art | `src/dungeon/data/enemies.ts`, `src/dungeon/components/EnemyComponent.tsx` | 24 normal/elite enemy SVGs installed | P0 | `public/art/dungeon/enemies/{enemyId}.svg` |
@@ -234,6 +234,12 @@ Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wi
 | `background:shop` | Scene panel | Neutral | P0 | `public/art/dungeon/backgrounds/shop.png` | Flat merchant stall panel with relic shapes |
 | `background:rest` | Scene panel | Neutral | P0 | `public/art/dungeon/backgrounds/rest.png` | Flat camp shrine panel with cushions and healing flame |
 | `background:boss` | Scene panel | Neutral | P0 | `public/art/dungeon/backgrounds/boss.png` | Flat boss door panel with crystal seal |
+| `background:draft` | Scene panel | Neutral | Done | `public/art/dungeon/backgrounds/draft.svg` | Flat draft-table panel with card-token shapes |
+| `background:reward` | Scene panel | Neutral | Done | `public/art/dungeon/backgrounds/reward.svg` | Flat reward shrine panel with token prizes |
+| `background:blessing` | Scene panel | Neutral | Done | `public/art/dungeon/backgrounds/blessing.svg` | Flat halo shrine panel with simple blessing geometry |
+| `background:event` | Scene panel | Neutral | Done | `public/art/dungeon/backgrounds/event.svg` | Flat mystery panel with portal/question motif |
+| `background:victory` | Scene panel | Neutral | Done | `public/art/dungeon/backgrounds/victory.svg` | Flat crown and cleared-path panel |
+| `background:defeat` | Scene panel | Neutral | Done | `public/art/dungeon/backgrounds/defeat.svg` | Flat broken-mask panel |
 
 ## Completed Visible Token Slice
 
@@ -246,6 +252,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 5. Relic icons: 26 assets.
 6. Card fallback coverage: every card without authored art now receives a procedural Basic Token SVG based on faction, type, and id.
 7. Combat UI icons: 6 intent SVGs, 9 status SVGs, and draw/discard/card-back SVGs.
+8. Supporting scene panels: draft, reward, blessing, event, victory, and defeat SVG backgrounds.
 
 The next remaining visual batch is replacing the procedural card fallbacks with authored Basic Token SVGs in small batches, starting with the most-played starter and reward cards.
 

@@ -14,12 +14,12 @@ export const sceneArt = {
   shop: assetUrl('art/dungeon/backgrounds/shop.png'),
   rest: assetUrl('art/dungeon/backgrounds/rest.png'),
   boss: assetUrl('art/dungeon/backgrounds/boss.png'),
-  draft: assetUrl('art/dungeon/backgrounds/draft.png'),
-  reward: assetUrl('art/dungeon/backgrounds/reward.png'),
-  blessing: assetUrl('art/dungeon/backgrounds/blessing.png'),
-  event: assetUrl('art/dungeon/backgrounds/event.png'),
-  victory: assetUrl('art/dungeon/backgrounds/victory.png'),
-  defeat: assetUrl('art/dungeon/backgrounds/defeat.png'),
+  draft: assetUrl('art/dungeon/backgrounds/draft.svg'),
+  reward: assetUrl('art/dungeon/backgrounds/reward.svg'),
+  blessing: assetUrl('art/dungeon/backgrounds/blessing.svg'),
+  event: assetUrl('art/dungeon/backgrounds/event.svg'),
+  victory: assetUrl('art/dungeon/backgrounds/victory.svg'),
+  defeat: assetUrl('art/dungeon/backgrounds/defeat.svg'),
 } as const;
 
 export type SceneArtId = keyof typeof sceneArt;

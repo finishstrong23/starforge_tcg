@@ -9,6 +9,7 @@ import { getAscensionMods } from '../engine/ascension';
 import { getPotionArt, getRelicArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
 import type { CardDefinition, PotionInstance, RelicDefinition } from '../types';
+import { getDungeonSceneArt } from '../assets/basicTokenArt';
 
 function pickRandom<T>(arr: T[]): T | undefined {
   return arr.length ? arr[Math.floor(Math.random() * arr.length)] : undefined;
@@ -147,7 +148,14 @@ export const RewardView: React.FC = () => {
       gap: 24,
       padding: '2rem 1rem',
       minHeight: '100%',
-      background: 'radial-gradient(ellipse at top, #10101e 0%, #060610 100%)',
+      backgroundColor: '#060610',
+      backgroundImage: [
+        'linear-gradient(180deg, rgba(7,7,18,0.66), rgba(7,7,18,0.92))',
+        `url("${getDungeonSceneArt('reward')}")`,
+      ].join(', '),
+      backgroundSize: 'cover, cover',
+      backgroundPosition: 'center, center',
+      backgroundRepeat: 'no-repeat',
       color: '#f0f0f8',
     },
     title: {

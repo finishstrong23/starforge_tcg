@@ -8,6 +8,12 @@ export const DUNGEON_SCENE_ART = {
   shop: sceneArt.shop,
   rest: sceneArt.rest,
   boss: sceneArt.boss,
+  draft: sceneArt.draft,
+  reward: sceneArt.reward,
+  blessing: sceneArt.blessing,
+  event: sceneArt.event,
+  victory: sceneArt.victory,
+  defeat: sceneArt.defeat,
 } as const;
 
 export type DungeonSceneArt = keyof typeof DUNGEON_SCENE_ART;

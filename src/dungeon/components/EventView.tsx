@@ -9,6 +9,7 @@ import { createCardInstance } from '../engine/draft';
 import { choicesForFaction, pickEventForNode } from '../engine/eventSelection';
 import { logEvent } from '../engine/telemetry';
 import type { DungeonEventChoiceDefinition } from '../types';
+import { getDungeonSceneArt } from '../assets/basicTokenArt';
 
 export const EventView: React.FC = () => {
   const {
@@ -102,8 +103,14 @@ export const EventView: React.FC = () => {
       padding: '2.5rem 1rem',
       gap: 18,
       color: '#f0f4ff',
-      background:
-        'radial-gradient(ellipse at 50% 15%, rgba(45,212,191,0.18) 0%, rgba(10,12,28,0.92) 42%, #050510 100%)',
+      backgroundColor: '#050510',
+      backgroundImage: [
+        'linear-gradient(180deg, rgba(7,7,18,0.62), rgba(7,7,18,0.90))',
+        `url("${getDungeonSceneArt('event')}")`,
+      ].join(', '),
+      backgroundSize: 'cover, cover',
+      backgroundPosition: 'center, center',
+      backgroundRepeat: 'no-repeat',
     },
     actBadge: {
       fontSize: 9,

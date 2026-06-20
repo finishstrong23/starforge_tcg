@@ -345,7 +345,7 @@ const s: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     gap: 24,
     minHeight: '100vh',
-    background: 'radial-gradient(ellipse at top, #10101e, #060610)',
+    backgroundColor: '#060610',
     color: '#f0f0f8',
     padding: '2rem 1rem',
     fontFamily: 'var(--font-family, system-ui, sans-serif)',
@@ -474,7 +474,18 @@ const RunEndScreen: React.FC<{ won: boolean; onBack: () => void }> = ({ won, onB
   };
 
   return (
-    <div style={s.endRoot}>
+    <div
+      style={{
+        ...s.endRoot,
+        backgroundImage: [
+          'linear-gradient(180deg, rgba(7,7,18,0.62), rgba(7,7,18,0.92))',
+          `url("${getDungeonSceneArt(won ? 'victory' : 'defeat')}")`,
+        ].join(', '),
+        backgroundSize: 'cover, cover',
+        backgroundPosition: 'center, center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
       <h1 style={{ ...s.endTitle, color: won ? '#22cc66' : '#cc3333' }}>
         {won ? '👑 Victory!' : '💀 Defeated'}
       </h1>

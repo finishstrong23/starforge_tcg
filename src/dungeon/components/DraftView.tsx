@@ -4,6 +4,7 @@ import { useDungeonRun } from '../context/DungeonRunContext';
 import { CardComponent } from './CardComponent';
 import { createCardInstance } from '../engine/draft';
 import { getCardText } from '../engine/cardStats';
+import { getDungeonSceneArt } from '../assets/basicTokenArt';
 
 const ROUND_LABEL = ['First pick', 'Second pick', 'Third pick'];
 
@@ -38,7 +39,14 @@ export const DraftView: React.FC = () => {
       padding: '3rem 1rem 4.75rem',
       minHeight: '100vh',
       boxSizing: 'border-box',
-      background: 'radial-gradient(ellipse at top, #10101e 0%, #060610 100%)',
+      backgroundColor: '#060610',
+      backgroundImage: [
+        'linear-gradient(180deg, rgba(7,7,18,0.66), rgba(7,7,18,0.92))',
+        `url("${getDungeonSceneArt('draft')}")`,
+      ].join(', '),
+      backgroundSize: 'cover, cover',
+      backgroundPosition: 'center, center',
+      backgroundRepeat: 'no-repeat',
       color: '#f0f0f8',
     },
     header: { textAlign: 'center' },
