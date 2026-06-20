@@ -59,8 +59,8 @@ export const uiArt = {
   cardBack: assetUrl('art/dungeon/ui/card_back.svg'),
   drawPile: assetUrl('art/dungeon/ui/draw_pile.svg'),
   discardPile: assetUrl('art/dungeon/ui/discard_pile.svg'),
-  gold: assetUrl('art/dungeon/ui/gold.png'),
-  cardRemoval: assetUrl('art/dungeon/ui/card_removal.png'),
+  gold: assetUrl('art/dungeon/ui/gold.svg'),
+  cardRemoval: assetUrl('art/dungeon/ui/card_removal.svg'),
 } as const;
 
 export function getFactionArt(faction: Faction): string {

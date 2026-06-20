@@ -218,8 +218,8 @@ Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wi
 | `ui:card_back` | UI art | Done | `public/art/dungeon/ui/card_back.svg` | Asset exists; reserved for card-back surfaces |
 | `ui:draw_pile` | UI art | Done | `public/art/dungeon/ui/draw_pile.svg` | `HandComponent`, `CombatView` |
 | `ui:discard_pile` | UI art | Done | `public/art/dungeon/ui/discard_pile.svg` | `HandComponent` |
-| `ui:gold` | UI icon | P1 | `public/art/dungeon/ui/gold.png` | `ShopView` |
-| `ui:card_removal` | UI icon | P2 | `public/art/dungeon/ui/card_removal.png` | `ShopView` |
+| `ui:gold` | UI icon | Done | `public/art/dungeon/ui/gold.svg` | `ShopView` prices and gold balance |
+| `ui:card_removal` | UI icon | Done | `public/art/dungeon/ui/card_removal.svg` | `ShopView` removal service |
 
 ## Pilot Assets Already Created
 
@@ -253,6 +253,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 6. Card fallback coverage: every card without authored art now receives a procedural Basic Token SVG based on faction, type, and id.
 7. Combat UI icons: 6 intent SVGs, 9 status SVGs, and draw/discard/card-back SVGs.
 8. Supporting scene panels: draft, reward, blessing, event, victory, and defeat SVG backgrounds.
+9. Shop utility icons: gold and card-removal SVGs wired into shop pricing and services.
 
 The next remaining visual batch is replacing the procedural card fallbacks with authored Basic Token SVGs in small batches, starting with the most-played starter and reward cards.
 

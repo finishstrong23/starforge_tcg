@@ -48,6 +48,7 @@ The previous generated faction/background packs were rejected because they were 
 | `intent:*` | `public/art/dungeon/ui/intent_{intentType}.svg` | Installed Basic Token SVG pass | Six enemy intent tokens are live through combat enemy telegraphs. |
 | `status:*` | `public/art/dungeon/status/{statusId}.svg` | Installed Basic Token SVG pass | Nine status tokens are live through enemy, player, and card status chips. |
 | `ui:piles` | `public/art/dungeon/ui/{card_back,draw_pile,discard_pile}.svg` | Installed Basic Token SVG pass | Draw/discard pile tokens are live in hand/combat UI; card back asset is ready for future card-back surfaces. |
+| `ui:shop_misc` | `public/art/dungeon/ui/{gold,card_removal}.svg` | Installed Basic Token SVG pass | Shop prices, gold balance, and card-removal service now use token icons. |
 
 ## Next Batch
 
@@ -58,8 +59,8 @@ The next batch should generate the smallest asset set that changes every core sc
 | Asset id | Target path | Status |
 |---|---|---|
 | `card:remaining` | `public/cards/{cardId}.svg` | Procedural fallback live; next step is authored SVG batches |
-| `ui:shop_misc` | `public/art/dungeon/ui/{gold,card_removal}.svg` | Next shop utility icon batch |
 | `card:authored-batch-2` | `public/cards/{cardId}.svg` | Next starter/reward authored SVG batch |
+| `ui:remaining-polish` | `public/art/dungeon/ui/{assetId}.svg` | Later utility polish outside the shop |
 
 ## QA Checklist
 

@@ -8,7 +8,7 @@ import { createCardInstance } from '../engine/draft';
 import { getPotionDef, potionShopPrice, rollShopPotions } from '../data/potions';
 import { getAscensionMods } from '../engine/ascension';
 import { getDungeonSceneArt } from '../assets/basicTokenArt';
-import { getPotionArt, getRelicArt } from '../assets/artRegistry';
+import { getMapNodeArt, getPotionArt, getRelicArt, uiArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
 import type { CardDefinition, PotionInstance, RelicDefinition } from '../types';
 
@@ -56,6 +56,19 @@ function randomRelics(count: number): RelicDefinition[] {
 function relicPrice(relic: RelicDefinition): number {
   return relic.rarity === 'Boss' ? 200 : relic.rarity === 'Rare' ? 150 : relic.rarity === 'Uncommon' ? 120 : 100;
 }
+
+const GoldValue: React.FC<{ amount: number; iconSize?: number }> = ({ amount, iconSize = 16 }) => (
+  <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4, lineHeight: 1 }}>
+    <TokenArt
+      src={uiArt.gold}
+      fallback="g"
+      alt=""
+      style={{ width: iconSize, height: iconSize, flexShrink: 0 }}
+      fallbackStyle={{ fontSize: Math.max(9, iconSize - 4), lineHeight: 1 }}
+    />
+    <span>{amount}g</span>
+  </span>
+);
 
 export const ShopView: React.FC = () => {
   const { runState, draftFaction, addCardToDeck, addRelic, addPotion, discardPotion, removeCardFromDeck, spendGold, returnToMap } = useDungeonRun();
@@ -327,10 +340,19 @@ export const ShopView: React.FC = () => {
   return (
     <div style={s.root}>
       <div style={s.header}>
-        <h2 style={s.title}>🛒 Shop</h2>
+        <h2 style={{ ...s.title, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <TokenArt
+            src={getMapNodeArt('shop')}
+            fallback="S"
+            alt=""
+            style={{ width: 30, height: 30, flexShrink: 0 }}
+            fallbackStyle={{ fontSize: 14, lineHeight: 1 }}
+          />
+          <span>Shop</span>
+        </h2>
         <div style={s.headerStats}>
           <div style={s.healthBadge}>HP {currentHealth}/{maxHealth}</div>
-          <div style={s.goldBadge}>💰 {gold}g</div>
+          <div style={s.goldBadge}><GoldValue amount={gold} iconSize={18} /></div>
         </div>
       </div>
 
@@ -352,7 +374,7 @@ export const ShopView: React.FC = () => {
             >
               <CardComponent card={createCardInstance(def)} unaffordable={!affordable || bought} />
               <div style={priceBadgeFn(price, bought)}>
-                {bought ? 'Sold' : `${price}g`}
+                {bought ? 'Sold' : <GoldValue amount={price} iconSize={14} />}
               </div>
             </div>
           );
@@ -387,7 +409,7 @@ export const ShopView: React.FC = () => {
                 <div style={s.relicDesc}>{relic.description}</div>
               </div>
               <div style={relicPriceStyle(affordable && !bought)}>
-                {bought ? '✓' : `${price}g`}
+                {bought ? '✓' : <GoldValue amount={price} iconSize={14} />}
               </div>
             </div>
           );
@@ -398,7 +420,16 @@ export const ShopView: React.FC = () => {
       <div style={s.sectionLabel}>Services</div>
       <div style={s.serviceBox}>
         <div style={s.serviceInfo}>
-          <div style={s.serviceTitle}>🗑 Card Removal</div>
+          <div style={{ ...s.serviceTitle, display: 'flex', alignItems: 'center', gap: 7 }}>
+            <TokenArt
+              src={uiArt.cardRemoval}
+              fallback="X"
+              alt=""
+              style={{ width: 24, height: 24, flexShrink: 0 }}
+              fallbackStyle={{ fontSize: 13, lineHeight: 1 }}
+            />
+            <span>Card Removal</span>
+          </div>
           <div style={s.serviceDesc}>Permanently remove a card from your deck</div>
         </div>
         <button
@@ -406,7 +437,7 @@ export const ShopView: React.FC = () => {
           style={serviceBtnStyle(gold >= REMOVAL_COST)}
           onClick={() => gold >= REMOVAL_COST && setRemovingCard(true)}
         >
-          {REMOVAL_COST}g
+          <GoldValue amount={REMOVAL_COST} iconSize={14} />
         </button>
       </div>
 
@@ -479,7 +510,7 @@ export const ShopView: React.FC = () => {
                     <div style={s.relicDesc}>{def.effect}</div>
                   </div>
                   <div style={relicPriceStyle(affordable && !bought)}>
-                    {bought ? '✓' : `${potionPrice}g`}
+                    {bought ? '✓' : <GoldValue amount={potionPrice} iconSize={14} />}
                   </div>
                 </div>
               );
