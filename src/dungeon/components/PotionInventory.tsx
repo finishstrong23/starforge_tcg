@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { PotionDefinition, PotionInstance, PotionRarity } from '../types';
 import { getPotionDef } from '../data/potions';
+import { getPotionArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 
 const RARITY_COLOR: Record<PotionRarity, string> = {
   common:   '#aaaaaa',
@@ -181,7 +183,17 @@ export const PotionInventory: React.FC<PotionInventoryProps> = ({
               animation: !filled && drainKey[i] > 0 ? 'dungeonPotionDrain 380ms ease-out' : undefined,
             }}
           >
-            {def ? (POTION_EMOJI[def.id] ?? '🧪') : '·'}
+            {def ? (
+              <TokenArt
+                src={getPotionArt(def.id)}
+                fallback={POTION_EMOJI[def.id] ?? '🧪'}
+                alt=""
+                style={{ width: compact ? 18 : 22, height: compact ? 22 : 26 }}
+                fallbackStyle={{ fontSize: compact ? 14 : 16, lineHeight: 1 }}
+              />
+            ) : (
+              '·'
+            )}
 
             {/* Bottle "neck" detail on filled slots — small notch at the top */}
             {filled && (

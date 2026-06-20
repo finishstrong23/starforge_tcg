@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { ActMap, MapNode, NodeType } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { getAvailableNodes } from '../engine/mapgen';
+import { getMapNodeArt } from '../assets/artRegistry';
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
 
@@ -59,6 +60,7 @@ interface NodeProps {
 const MapNodeCircle: React.FC<NodeProps> = ({
   node, x, y, state, hovered, onEnter, onLeave, onClick,
 }) => {
+  const [artFailed, setArtFailed] = React.useState(false);
   const color = NODE_COLOR[node.type];
   const isInteractive = state === 'available';
   const isCurrent = state === 'current';
@@ -79,6 +81,10 @@ const MapNodeCircle: React.FC<NodeProps> = ({
     : isInteractive && hovered
     ? color
     : `${color}${strokeAlpha || 'cc'}`;
+
+  React.useEffect(() => {
+    setArtFailed(false);
+  }, [node.type]);
 
   return (
     <g
@@ -109,16 +115,31 @@ const MapNodeCircle: React.FC<NodeProps> = ({
         style={{ transition: 'r 120ms ease, stroke-width 120ms ease, fill 120ms ease' }}
       />
 
-      {/* Emoji */}
-      <text
-        textAnchor="middle"
-        dominantBaseline="central"
-        fontSize={isCurrent ? 15 : 13}
-        opacity={isFuture ? 0.4 : isVisited ? 0.55 : 1}
-        style={{ pointerEvents: 'none', userSelect: 'none' }}
-      >
-        {NODE_EMOJI[node.type]}
-      </text>
+      {!artFailed && (
+        <image
+          href={getMapNodeArt(node.type)}
+          x={-15}
+          y={-15}
+          width={30}
+          height={30}
+          opacity={isFuture ? 0.4 : isVisited ? 0.55 : 1}
+          preserveAspectRatio="xMidYMid meet"
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
+          onError={() => setArtFailed(true)}
+        />
+      )}
+
+      {artFailed && (
+        <text
+          textAnchor="middle"
+          dominantBaseline="central"
+          fontSize={isCurrent ? 15 : 13}
+          opacity={isFuture ? 0.4 : isVisited ? 0.55 : 1}
+          style={{ pointerEvents: 'none', userSelect: 'none' }}
+        >
+          {NODE_EMOJI[node.type]}
+        </text>
+      )}
 
       {/* Label below node */}
       <text

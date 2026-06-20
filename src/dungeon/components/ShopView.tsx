@@ -8,6 +8,8 @@ import { createCardInstance } from '../engine/draft';
 import { getPotionDef, potionShopPrice, rollShopPotions } from '../data/potions';
 import { getAscensionMods } from '../engine/ascension';
 import { getDungeonSceneArt } from '../assets/basicTokenArt';
+import { getPotionArt, getRelicArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 import type { CardDefinition, PotionInstance, RelicDefinition } from '../types';
 
 const CARD_PRICE: Record<string, number> = {
@@ -373,7 +375,13 @@ export const ShopView: React.FC = () => {
               tabIndex={0}
               onKeyDown={(e) => { if (e.key === 'Enter' && !bought && affordable) buyRelic(relic); }}
             >
-              <span style={s.relicArt}>{relic.art}</span>
+              <TokenArt
+                src={getRelicArt(relic.id)}
+                fallback={relic.art}
+                alt=""
+                style={{ width: 28, height: 28, flexShrink: 0 }}
+                fallbackStyle={{ fontSize: 24, lineHeight: 1 }}
+              />
               <div style={s.relicInfo}>
                 <div style={s.relicName}>{relic.name}</div>
                 <div style={s.relicDesc}>{relic.description}</div>
@@ -459,7 +467,13 @@ export const ShopView: React.FC = () => {
                     minWidth: 180,
                   }}
                 >
-                  <span style={s.relicArt}>🧪</span>
+                  <TokenArt
+                    src={getPotionArt(def.id)}
+                    fallback="🧪"
+                    alt=""
+                    style={{ width: 28, height: 28, flexShrink: 0 }}
+                    fallbackStyle={{ fontSize: 24, lineHeight: 1 }}
+                  />
                   <div style={s.relicInfo}>
                     <div style={{ ...s.relicName, color: bought ? '#666' : rarityColor }}>{def.name}</div>
                     <div style={s.relicDesc}>{def.effect}</div>

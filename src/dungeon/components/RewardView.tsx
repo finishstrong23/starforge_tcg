@@ -6,6 +6,8 @@ import { RELIC_POOL } from '../data/relics';
 import { createCardInstance, generateRewardOptions } from '../engine/draft';
 import { getPotionDef, rollPotionDrop } from '../data/potions';
 import { getAscensionMods } from '../engine/ascension';
+import { getPotionArt, getRelicArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 import type { CardDefinition, PotionInstance, RelicDefinition } from '../types';
 
 function pickRandom<T>(arr: T[]): T | undefined {
@@ -288,7 +290,13 @@ export const RewardView: React.FC = () => {
             tabIndex={0}
             onKeyDown={(e) => { if (e.key === 'Enter') handleRelicTake(relicOffer); }}
           >
-            <span style={s.relicArt}>{relicOffer.art}</span>
+            <TokenArt
+              src={getRelicArt(relicOffer.id)}
+              fallback={relicOffer.art}
+              alt=""
+              style={{ width: 34, height: 34, flexShrink: 0 }}
+              fallbackStyle={{ fontSize: 28, lineHeight: 1 }}
+            />
             <div style={s.relicInfo}>
               <div style={s.relicName}>{relicOffer.name}</div>
               <div style={s.relicDesc}>{relicOffer.description}</div>
@@ -326,7 +334,13 @@ export const RewardView: React.FC = () => {
               tabIndex={0}
               onKeyDown={(e) => { if (e.key === 'Enter') handlePotionTake(potionOffer); }}
             >
-              <span style={{ fontSize: 28 }}>🧪</span>
+              <TokenArt
+                src={getPotionArt(def.id)}
+                fallback="🧪"
+                alt=""
+                style={{ width: 34, height: 38, flexShrink: 0 }}
+                fallbackStyle={{ fontSize: 28, lineHeight: 1 }}
+              />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: rarityColor }}>{def.name}</div>
                 <div style={{ fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.55 }}>

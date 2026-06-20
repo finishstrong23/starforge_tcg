@@ -1,5 +1,7 @@
 import React from 'react';
 import type { EnemyInstance, IntentType } from '../types';
+import { getEnemyArt, getIntentArt, getStatusArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 
 const INTENT_COLOR: Record<IntentType, string> = {
   attack:  '#ff4444',
@@ -83,8 +85,11 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
       textTransform: 'uppercase',
     },
     art: {
-      fontSize: 72,
-      lineHeight: 1,
+      width: 118,
+      height: 118,
+      borderRadius: 12,
+      background: 'rgba(244, 236, 216, 0.08)',
+      border: '1px solid rgba(255,255,255,0.08)',
       filter: isTargeted
         ? 'drop-shadow(0 0 12px #ff3366)'
         : intentResolving
@@ -150,8 +155,8 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
       transition: 'background 160ms, box-shadow 160ms',
     },
     intentEmoji: {
-      fontSize: 22,
-      lineHeight: 1,
+      width: 24,
+      height: 24,
       flexShrink: 0,
       filter: `drop-shadow(0 0 4px ${intentColor}aa)`,
     },
@@ -180,7 +185,13 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
   return (
     <div style={s.wrapper} onClick={onClick}>
       <div style={s.name}>{enemy.name}</div>
-      <div style={s.art}>{enemy.art}</div>
+      <TokenArt
+        src={getEnemyArt(enemy.id, enemy.isBoss)}
+        fallback={enemy.art}
+        alt=""
+        style={s.art}
+        fallbackStyle={{ fontSize: 72, lineHeight: 1 }}
+      />
 
       {/* HP bar */}
       <div style={s.hpRow}>
@@ -206,7 +217,14 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
             if (!d) return null;
             return (
               <span key={e.type} style={statusBadgeStyle(d.color)}>
-                {d.emoji} {e.stacks}
+                <TokenArt
+                  src={getStatusArt(e.type)}
+                  fallback={d.emoji}
+                  alt=""
+                  style={{ width: 12, height: 12, marginRight: 3, verticalAlign: 'middle' }}
+                  fallbackStyle={{ lineHeight: 1 }}
+                />
+                {e.stacks}
               </span>
             );
           })}
@@ -215,7 +233,13 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
 
       {/* Intent — enlarged and telegraphed */}
       <div style={s.intentBox}>
-        <span style={s.intentEmoji}>{INTENT_EMOJI[intent.type]}</span>
+        <TokenArt
+          src={getIntentArt(intent.type)}
+          fallback={INTENT_EMOJI[intent.type]}
+          alt=""
+          style={s.intentEmoji}
+          fallbackStyle={{ fontSize: 22, lineHeight: 1 }}
+        />
         <div style={s.intentBlock}>
           <span style={s.intentLabel}>
             {intentResolving ? 'Acting…' : intentPulsing ? 'Incoming' : 'Next Turn'}

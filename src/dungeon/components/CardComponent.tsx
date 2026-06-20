@@ -1,6 +1,8 @@
 import React from 'react';
 import type { CardInstance, Faction, Keyword, StatusEffect } from '../types';
 import { getCardStats } from '../engine/cardStats';
+import { getCardArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
@@ -181,6 +183,8 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       lineHeight: 1,
       overflow: 'hidden',
       height: compact ? 22 : isDraftSize ? 74 : undefined,
+      borderRadius: compact ? 3 : 5,
+      background: compact ? 'transparent' : 'rgba(244, 236, 216, 0.08)',
     },
     text: {
       fontSize: compact ? 0 : isDraftSize ? 11 : 7,
@@ -399,7 +403,16 @@ export const CardComponent: React.FC<CardComponentProps> = ({
         <div style={styles.name}>{card.name}</div>
 
         <div style={styles.artBox}>
-          {factionGlyph[card.faction]}
+          <TokenArt
+            src={getCardArt(card.id)}
+            fallback={factionGlyph[card.faction]}
+            alt=""
+            style={{
+              width: compact ? 24 : isDraftSize ? 74 : 46,
+              height: compact ? 22 : isDraftSize ? 74 : 46,
+            }}
+            fallbackStyle={{ fontSize: compact ? 18 : isDraftSize ? 36 : 28, lineHeight: 1 }}
+          />
         </div>
 
         {!compact && (

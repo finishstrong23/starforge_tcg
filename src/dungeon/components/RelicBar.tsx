@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import type { RelicDefinition, RunModifierDefinition } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
+import { getRelicArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 
 interface RelicTooltipProps {
   relic: RelicDefinition;
@@ -24,7 +26,13 @@ const RelicTooltip: React.FC<RelicTooltipProps> = ({ relic, x }) => (
     }}
   >
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-      <span style={{ fontSize: 18 }}>{relic.art}</span>
+      <TokenArt
+        src={getRelicArt(relic.id)}
+        fallback={relic.art}
+        alt=""
+        style={{ width: 22, height: 22, flexShrink: 0 }}
+        fallbackStyle={{ fontSize: 18, lineHeight: 1 }}
+      />
       <div>
         <div style={{ fontSize: 11, fontWeight: 700, color: '#eee' }}>{relic.name}</div>
         <div style={{ fontSize: 8, opacity: 0.5, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
@@ -96,7 +104,13 @@ export const RelicBar: React.FC = () => {
           onMouseLeave={() => setHoveredId(null)}
           title={relic.name}
         >
-          {relic.art}
+          <TokenArt
+            src={getRelicArt(relic.id)}
+            fallback={relic.art}
+            alt=""
+            style={{ width: 24, height: 24 }}
+            fallbackStyle={{ fontSize: 18, lineHeight: 1 }}
+          />
         </div>
       ))}
 

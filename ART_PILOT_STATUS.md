@@ -4,9 +4,9 @@
 
 **Basic Token Style**: flat, bright, symbolic, thick-lined, low-detail, and consistent.
 
-The previous generated faction/background packs are rejected because they were too dark, too sci-fi, too glossy, or too detailed.
+The previous generated faction/background packs were rejected because they were too dark, too sci-fi, too glossy, or too detailed. The paths below have since been overwritten with the Basic Token pass.
 
-## Rejected Paths To Replace
+## Replaced Paths
 
 - `public/art/dungeon/factions/pyroclast.png`
 - `public/art/dungeon/factions/cogsmiths.png`
@@ -31,19 +31,23 @@ The previous generated faction/background packs are rejected because they were t
 | `background:shop` | `public/art/dungeon/backgrounds/shop.png` | Installed Basic Token pass | Flat shop panel with relic silhouettes. |
 | `background:rest` | `public/art/dungeon/backgrounds/rest.png` | Installed Basic Token pass | Flat rest panel with cushions and healing flame. |
 | `background:boss` | `public/art/dungeon/backgrounds/boss.png` | Installed Basic Token pass | Flat boss-door panel with crystal seal. |
+| `map:*` | `public/art/dungeon/map/{nodeType}.svg` | Installed Basic Token SVG pass | Seven map node tokens are live through the art registry. |
+| `enemy:BOSS-*` | `public/art/dungeon/bosses/{bossId}.svg` | Installed Basic Token SVG pass | Three boss tokens are live through the art registry. |
+| `enemy:EL-*` | `public/art/dungeon/enemies/{enemyId}.svg` | Installed Basic Token SVG pass | Four elite enemy tokens are live through the art registry. |
+| `enemy:E1-*`, `E2-*`, `E3-*` | `public/art/dungeon/enemies/{enemyId}.svg` | Installed Basic Token SVG pass | Twenty normal enemy tokens are live through the art registry. |
+| `potion:*` | `public/art/dungeon/potions/{potionId}.svg` | Installed Basic Token SVG pass | Fourteen potion tokens are live through inventory, rewards, pickup, and shop UI. |
+| `relic:*` | `public/art/dungeon/relics/{relicId}.svg` | Installed Basic Token SVG pass | All twenty-six relic tokens are live through relic bar, rewards, and shop UI. |
+| `card:C/P/L/W pilot` | `public/cards/{cardId}.svg` | Installed Basic Token SVG pass | Sixteen pilot card arts are live through card rendering. |
 
 ## Next Batch
 
-Do not generate card art until the P0 replacement set is visually approved.
+Phase 2 registry foundation is implemented. The active dungeon UI now has fallback image slots for map nodes, cards, enemies, intents, status chips, relics, potions, shop offers, and reward offers. Missing images fall back to the current glyph/emoji so the game does not break while assets are generated.
+
+The next batch should generate the smallest asset set that changes every core screen.
 
 | Asset id | Target path | Status |
 |---|---|---|
-| `card:pyro_flame_imp` | `public/cards/pyro_flame_imp.png` | Blocked on style approval |
-| `card:pyro_emberblade` | `public/cards/pyro_emberblade.png` | Blocked on style approval |
-| `card:pyro_fire_bolt` | `public/cards/pyro_fire_bolt.png` | Blocked on style approval |
-| `card:cog_gear_grinder` | `public/cards/cog_gear_grinder.png` | Blocked on style approval |
-| `card:cog_iron_defender` | `public/cards/cog_iron_defender.png` | Blocked on style approval |
-| `card:cog_repair_bot` | `public/cards/cog_repair_bot.png` | Blocked on style approval |
+| `card:remaining` | `public/cards/{cardId}.svg` | Next full-card batch |
 
 ## QA Checklist
 

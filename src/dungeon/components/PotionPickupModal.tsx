@@ -1,6 +1,8 @@
 import React from 'react';
 import type { PotionDefinition, PotionInstance, PotionRarity } from '../types';
 import { getPotionDef } from '../data/potions';
+import { getPotionArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 
 const RARITY_COLOR: Record<PotionRarity, string> = {
   common:   '#aaaaaa',
@@ -82,9 +84,13 @@ const PotionBottle: React.FC<BottleProps> = ({ def, label, onClick, badge }) => 
           {badge}
         </div>
       )}
-      <div style={{ fontSize: 32, lineHeight: 1, marginTop: 2 }}>
-        {POTION_EMOJI[def.id] ?? '🧪'}
-      </div>
+      <TokenArt
+        src={getPotionArt(def.id)}
+        fallback={POTION_EMOJI[def.id] ?? '🧪'}
+        alt=""
+        style={{ width: 42, height: 48, marginTop: 2 }}
+        fallbackStyle={{ fontSize: 32, lineHeight: 1 }}
+      />
       <div style={{ fontSize: 12, fontWeight: 700, color, letterSpacing: '0.04em' }}>
         {def.name}
       </div>
