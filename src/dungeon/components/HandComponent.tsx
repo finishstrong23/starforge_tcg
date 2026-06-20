@@ -2,6 +2,8 @@ import React from 'react';
 import type { CardInstance } from '../types';
 import { CardComponent } from './CardComponent';
 import { getCardCost } from '../engine/cardStats';
+import { uiArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 
 export interface HandComponentProps {
   hand: CardInstance[];
@@ -14,8 +16,8 @@ export interface HandComponentProps {
   previews?: Record<string, string[]>;
 }
 
-const PileBadge: React.FC<{ label: string; count: number; color: string; emoji: string }> = ({
-  label, count, color, emoji,
+const PileBadge: React.FC<{ label: string; count: number; color: string; fallback: string; src: string }> = ({
+  label, count, color, fallback, src,
 }) => (
   <div
     title={`${label}: ${count}`}
@@ -33,7 +35,13 @@ const PileBadge: React.FC<{ label: string; count: number; color: string; emoji: 
       flexShrink: 0,
     }}
   >
-    <div style={{ fontSize: 14, lineHeight: 1, color }}>{emoji}</div>
+    <TokenArt
+      src={src}
+      fallback={fallback}
+      alt=""
+      style={{ width: 24, height: 24 }}
+      fallbackStyle={{ fontSize: 14, lineHeight: 1, color }}
+    />
     <div style={{ fontSize: 13, fontWeight: 800, color: '#eee', lineHeight: 1 }}>{count}</div>
     <div style={{ fontSize: 7, letterSpacing: '0.15em', opacity: 0.55, textTransform: 'uppercase' }}>
       {label}
@@ -96,7 +104,7 @@ export const HandComponent: React.FC<HandComponentProps> = ({
     <div style={s.wrapper}>
       {/* Draw pile (left) */}
       {showPiles && (
-        <PileBadge label="Draw" count={drawCount ?? 0} color="#3b8fff" emoji="🂠" />
+        <PileBadge label="Draw" count={drawCount ?? 0} color="#3b8fff" fallback="D" src={uiArt.drawPile} />
       )}
 
       {/* Hand (center) */}
@@ -129,7 +137,7 @@ export const HandComponent: React.FC<HandComponentProps> = ({
 
       {/* Discard pile (right) */}
       {showPiles && (
-        <PileBadge label="Discard" count={discardCount ?? 0} color="#c89b3c" emoji="🃏" />
+        <PileBadge label="Discard" count={discardCount ?? 0} color="#c89b3c" fallback="X" src={uiArt.discardPile} />
       )}
     </div>
   );

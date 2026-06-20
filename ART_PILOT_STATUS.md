@@ -38,16 +38,21 @@ The previous generated faction/background packs were rejected because they were 
 | `potion:*` | `public/art/dungeon/potions/{potionId}.svg` | Installed Basic Token SVG pass | Fourteen potion tokens are live through inventory, rewards, pickup, and shop UI. |
 | `relic:*` | `public/art/dungeon/relics/{relicId}.svg` | Installed Basic Token SVG pass | All twenty-six relic tokens are live through relic bar, rewards, and shop UI. |
 | `card:C/P/L/W pilot` | `public/cards/{cardId}.svg` | Installed Basic Token SVG pass | Sixteen pilot card arts are live through card rendering. |
+| `intent:*` | `public/art/dungeon/ui/intent_{intentType}.svg` | Installed Basic Token SVG pass | Six enemy intent tokens are live through combat enemy telegraphs. |
+| `status:*` | `public/art/dungeon/status/{statusId}.svg` | Installed Basic Token SVG pass | Nine status tokens are live through enemy, player, and card status chips. |
+| `ui:piles` | `public/art/dungeon/ui/{card_back,draw_pile,discard_pile}.svg` | Installed Basic Token SVG pass | Draw/discard pile tokens are live in hand/combat UI; card back asset is ready for future card-back surfaces. |
 
 ## Next Batch
 
-Phase 2 registry foundation is implemented. The active dungeon UI now has fallback image slots for map nodes, cards, enemies, intents, status chips, relics, potions, shop offers, and reward offers. Missing cards now use a procedural Basic Token SVG fallback instead of a tiny faction glyph, while other missing images still fall back safely to their current glyph/emoji.
+Phase 2 registry foundation is implemented. The active dungeon UI now has image slots for map nodes, cards, enemies, intents, status chips, relics, potions, shop offers, reward offers, and card pile UI. Missing cards use a procedural Basic Token SVG fallback instead of a tiny faction glyph, while other missing images still fall back safely to their current glyph/emoji.
 
 The next batch should generate the smallest asset set that changes every core screen.
 
 | Asset id | Target path | Status |
 |---|---|---|
 | `card:remaining` | `public/cards/{cardId}.svg` | Procedural fallback live; next step is authored SVG batches |
+| `background:supporting` | `public/art/dungeon/backgrounds/{draft,reward,blessing,event,victory,defeat}.png` | Next supporting-screen batch |
+| `ui:shop_misc` | `public/art/dungeon/ui/{gold,card_removal}.svg` | Next shop utility icon batch |
 
 ## QA Checklist
 

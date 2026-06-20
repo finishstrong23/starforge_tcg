@@ -35,30 +35,30 @@ export const mapNodeArt: Record<NodeType, string> = {
 };
 
 export const intentArt: Record<IntentType, string> = {
-  attack: assetUrl('art/dungeon/ui/intent_attack.png'),
-  defend: assetUrl('art/dungeon/ui/intent_defend.png'),
-  buff: assetUrl('art/dungeon/ui/intent_buff.png'),
-  debuff: assetUrl('art/dungeon/ui/intent_debuff.png'),
-  summon: assetUrl('art/dungeon/ui/intent_summon.png'),
-  special: assetUrl('art/dungeon/ui/intent_special.png'),
+  attack: assetUrl('art/dungeon/ui/intent_attack.svg'),
+  defend: assetUrl('art/dungeon/ui/intent_defend.svg'),
+  buff: assetUrl('art/dungeon/ui/intent_buff.svg'),
+  debuff: assetUrl('art/dungeon/ui/intent_debuff.svg'),
+  summon: assetUrl('art/dungeon/ui/intent_summon.svg'),
+  special: assetUrl('art/dungeon/ui/intent_special.svg'),
 };
 
 export const statusArt: Partial<Record<StatusEffectType, string>> = {
-  burn: assetUrl('art/dungeon/status/burn.png'),
-  poison: assetUrl('art/dungeon/status/poison.png'),
-  shield: assetUrl('art/dungeon/status/shield.png'),
-  strength: assetUrl('art/dungeon/status/strength.png'),
-  weak: assetUrl('art/dungeon/status/weak.png'),
-  vulnerable: assetUrl('art/dungeon/status/vulnerable.png'),
-  barrier: assetUrl('art/dungeon/status/barrier.png'),
-  stealth: assetUrl('art/dungeon/status/stealth.png'),
-  phase: assetUrl('art/dungeon/status/phase.png'),
+  burn: assetUrl('art/dungeon/status/burn.svg'),
+  poison: assetUrl('art/dungeon/status/poison.svg'),
+  shield: assetUrl('art/dungeon/status/shield.svg'),
+  strength: assetUrl('art/dungeon/status/strength.svg'),
+  weak: assetUrl('art/dungeon/status/weak.svg'),
+  vulnerable: assetUrl('art/dungeon/status/vulnerable.svg'),
+  barrier: assetUrl('art/dungeon/status/barrier.svg'),
+  stealth: assetUrl('art/dungeon/status/stealth.svg'),
+  phase: assetUrl('art/dungeon/status/phase.svg'),
 };
 
 export const uiArt = {
-  cardBack: assetUrl('art/dungeon/ui/card_back.png'),
-  drawPile: assetUrl('art/dungeon/ui/draw_pile.png'),
-  discardPile: assetUrl('art/dungeon/ui/discard_pile.png'),
+  cardBack: assetUrl('art/dungeon/ui/card_back.svg'),
+  drawPile: assetUrl('art/dungeon/ui/draw_pile.svg'),
+  discardPile: assetUrl('art/dungeon/ui/discard_pile.svg'),
   gold: assetUrl('art/dungeon/ui/gold.png'),
   cardRemoval: assetUrl('art/dungeon/ui/card_removal.png'),
 } as const;

@@ -52,10 +52,10 @@ Status key:
 | Map connector/path art | `src/dungeon/components/MapView.tsx` | Dotted SVG lines only | P1 | Optional path/route motif in CSS/SVG |
 | Enemy art | `src/dungeon/data/enemies.ts`, `src/dungeon/components/EnemyComponent.tsx` | 24 normal/elite enemy SVGs installed | P0 | `public/art/dungeon/enemies/{enemyId}.svg` |
 | Boss art | `src/dungeon/data/enemies.ts`, `src/dungeon/components/EnemyComponent.tsx` | 3 boss SVGs installed | P0 | `public/art/dungeon/bosses/{bossId}.svg` |
-| Enemy intent icons | `src/dungeon/components/EnemyComponent.tsx` | Emoji for defend/summon and text symbols for intents | P1 | `public/art/dungeon/ui/intent_{intentType}.png` |
-| Enemy/player status icons | `src/dungeon/components/EnemyComponent.tsx`, `CombatView.tsx`, `CardComponent.tsx` | Emoji status badges | P1 | `public/art/dungeon/status/{statusId}.png` |
+| Enemy intent icons | `src/dungeon/components/EnemyComponent.tsx` | Done with six Basic Token SVGs | P1 | `public/art/dungeon/ui/intent_{intentType}.svg` |
+| Enemy/player status icons | `src/dungeon/components/EnemyComponent.tsx`, `CombatView.tsx`, `CardComponent.tsx` | Done with nine Basic Token SVGs | P1 | `public/art/dungeon/status/{statusId}.svg` |
 | Card art | `src/dungeon/components/CardComponent.tsx` | 16-card SVG pilot installed; remaining cards use procedural Basic Token SVG fallback | P0 for first 16, P1 for all 176 | `public/cards/{cardId}.svg` |
-| Card backs / draw pile / discard pile | `src/dungeon/components/HandComponent.tsx` | Unicode playing-card glyphs | P1 | `public/art/dungeon/ui/card_back.png`, `draw_pile.png`, `discard_pile.png` |
+| Card backs / draw pile / discard pile | `src/dungeon/components/HandComponent.tsx`, `src/dungeon/components/CombatView.tsx` | Done for draw/discard/card-back SVGs; draw/discard wired into active UI | P1 | `public/art/dungeon/ui/card_back.svg`, `draw_pile.svg`, `discard_pile.svg` |
 | Relic icons | `src/dungeon/data/relics.ts`, `RelicBar.tsx`, rewards/shop | 26 SVG icons installed | P0 for visible relic bar/shop/rewards | `public/art/dungeon/relics/{relicId}.svg` |
 | Potion icons | `src/dungeon/components/PotionInventory.tsx`, `PotionPickupModal.tsx`, `ShopView.tsx` | 14 SVG icons installed | P0 | `public/art/dungeon/potions/{potionId}.svg` |
 | Potion drink burst | `src/dungeon/components/PotionDrinkBurst.tsx` | Emoji sigils in animation | P2 | `public/art/dungeon/potions/effects/{category}.png` or CSS token shapes |
@@ -200,24 +200,24 @@ Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wi
 
 | Asset id | Type | Priority | Target filename | Current source |
 |---|---|---|---|---|
-| `status:burn` | Status icon | P1 | `public/art/dungeon/status/burn.png` | `CombatView`, `EnemyComponent`, `CardComponent` |
-| `status:poison` | Status icon | P1 | `public/art/dungeon/status/poison.png` | `CombatView`, `EnemyComponent`, `CardComponent` |
-| `status:shield` | Status icon | P1 | `public/art/dungeon/status/shield.png` | Player/enemy shield badges |
-| `status:strength` | Status icon | P1 | `public/art/dungeon/status/strength.png` | Status badges |
-| `status:weak` | Status icon | P1 | `public/art/dungeon/status/weak.png` | Status badges |
-| `status:vulnerable` | Status icon | P1 | `public/art/dungeon/status/vulnerable.png` | Status badges |
-| `status:barrier` | Status icon | P1 | `public/art/dungeon/status/barrier.png` | Status badges |
-| `status:stealth` | Status icon | P2 | `public/art/dungeon/status/stealth.png` | Status badges |
-| `status:phase` | Status icon | P1 | `public/art/dungeon/status/phase.png` | Status badges |
-| `intent:attack` | Intent icon | P1 | `public/art/dungeon/ui/intent_attack.png` | `EnemyComponent` |
-| `intent:defend` | Intent icon | P1 | `public/art/dungeon/ui/intent_defend.png` | `EnemyComponent` |
-| `intent:buff` | Intent icon | P1 | `public/art/dungeon/ui/intent_buff.png` | `EnemyComponent` |
-| `intent:debuff` | Intent icon | P1 | `public/art/dungeon/ui/intent_debuff.png` | `EnemyComponent` |
-| `intent:summon` | Intent icon | P1 | `public/art/dungeon/ui/intent_summon.png` | `EnemyComponent` |
-| `intent:special` | Intent icon | P1 | `public/art/dungeon/ui/intent_special.png` | `EnemyComponent` |
-| `ui:card_back` | UI art | P1 | `public/art/dungeon/ui/card_back.png` | `HandComponent` |
-| `ui:draw_pile` | UI art | P1 | `public/art/dungeon/ui/draw_pile.png` | `HandComponent` |
-| `ui:discard_pile` | UI art | P1 | `public/art/dungeon/ui/discard_pile.png` | `HandComponent` |
+| `status:burn` | Status icon | Done | `public/art/dungeon/status/burn.svg` | `CombatView`, `EnemyComponent`, `CardComponent` |
+| `status:poison` | Status icon | Done | `public/art/dungeon/status/poison.svg` | `CombatView`, `EnemyComponent`, `CardComponent` |
+| `status:shield` | Status icon | Done | `public/art/dungeon/status/shield.svg` | Player/enemy shield badges |
+| `status:strength` | Status icon | Done | `public/art/dungeon/status/strength.svg` | Status badges |
+| `status:weak` | Status icon | Done | `public/art/dungeon/status/weak.svg` | Status badges |
+| `status:vulnerable` | Status icon | Done | `public/art/dungeon/status/vulnerable.svg` | Status badges |
+| `status:barrier` | Status icon | Done | `public/art/dungeon/status/barrier.svg` | Status badges |
+| `status:stealth` | Status icon | Done | `public/art/dungeon/status/stealth.svg` | Status badges |
+| `status:phase` | Status icon | Done | `public/art/dungeon/status/phase.svg` | Status badges |
+| `intent:attack` | Intent icon | Done | `public/art/dungeon/ui/intent_attack.svg` | `EnemyComponent` |
+| `intent:defend` | Intent icon | Done | `public/art/dungeon/ui/intent_defend.svg` | `EnemyComponent` |
+| `intent:buff` | Intent icon | Done | `public/art/dungeon/ui/intent_buff.svg` | `EnemyComponent` |
+| `intent:debuff` | Intent icon | Done | `public/art/dungeon/ui/intent_debuff.svg` | `EnemyComponent` |
+| `intent:summon` | Intent icon | Done | `public/art/dungeon/ui/intent_summon.svg` | `EnemyComponent` |
+| `intent:special` | Intent icon | Done | `public/art/dungeon/ui/intent_special.svg` | `EnemyComponent` |
+| `ui:card_back` | UI art | Done | `public/art/dungeon/ui/card_back.svg` | Asset exists; reserved for card-back surfaces |
+| `ui:draw_pile` | UI art | Done | `public/art/dungeon/ui/draw_pile.svg` | `HandComponent`, `CombatView` |
+| `ui:discard_pile` | UI art | Done | `public/art/dungeon/ui/discard_pile.svg` | `HandComponent` |
 | `ui:gold` | UI icon | P1 | `public/art/dungeon/ui/gold.png` | `ShopView` |
 | `ui:card_removal` | UI icon | P2 | `public/art/dungeon/ui/card_removal.png` | `ShopView` |
 
@@ -245,6 +245,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 4. Potion icons: 14 assets.
 5. Relic icons: 26 assets.
 6. Card fallback coverage: every card without authored art now receives a procedural Basic Token SVG based on faction, type, and id.
+7. Combat UI icons: 6 intent SVGs, 9 status SVGs, and draw/discard/card-back SVGs.
 
 The next remaining visual batch is replacing the procedural card fallbacks with authored Basic Token SVGs in small batches, starting with the most-played starter and reward cards.
 

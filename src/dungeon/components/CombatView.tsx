@@ -17,6 +17,8 @@ import { getPotionDef } from '../data/potions';
 import { isChannelCard } from '../engine/combat';
 import { getCardPlayPreview } from '../engine/cardPreview';
 import { FactionResourcePanel } from './FactionResourcePanel';
+import { getRelicArt, getStatusArt, uiArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 
 const ENEMY_TURN_DELAY_MS = 1200;
 const ENEMY_ACTION_LINGER_MS = 900;
@@ -369,7 +371,13 @@ const PlayerHUD: React.FC<{
                   gap: 2,
                 }}
               >
-                {meta.emoji}
+                <TokenArt
+                  src={getStatusArt(e.type)}
+                  fallback={meta.emoji}
+                  alt=""
+                  style={{ width: 14, height: 14 }}
+                  fallbackStyle={{ fontSize: 11, lineHeight: 1 }}
+                />
                 <span style={{ fontSize: 9 }}>{e.stacks}</span>
               </span>
             );
@@ -666,7 +674,13 @@ const VerticalRelicColumn: React.FC<{ relics: import('../types').RelicDefinition
           }}
           onMouseLeave={() => setHoveredId(null)}
         >
-          {relic.art}
+          <TokenArt
+            src={getRelicArt(relic.id)}
+            fallback={relic.art}
+            alt=""
+            style={{ width: 24, height: 24 }}
+            fallbackStyle={{ fontSize: 16, lineHeight: 1 }}
+          />
         </div>
       ))}
 
@@ -681,7 +695,13 @@ const VerticalRelicColumn: React.FC<{ relics: import('../types').RelicDefinition
           lineHeight: 1.1,
         }}
       >
-        🂠
+        <TokenArt
+          src={uiArt.drawPile}
+          fallback="D"
+          alt=""
+          style={{ width: 24, height: 24, margin: '0 auto 2px' }}
+          fallbackStyle={{ fontSize: 14, lineHeight: 1 }}
+        />
         <div style={{ fontSize: 10, color: '#aaa' }}>{drawCount}/{deckTotal}</div>
       </div>
 
@@ -704,7 +724,13 @@ const VerticalRelicColumn: React.FC<{ relics: import('../types').RelicDefinition
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-              <span style={{ fontSize: 18 }}>{r.art}</span>
+              <TokenArt
+                src={getRelicArt(r.id)}
+                fallback={r.art}
+                alt=""
+                style={{ width: 26, height: 26, flexShrink: 0 }}
+                fallbackStyle={{ fontSize: 18, lineHeight: 1 }}
+              />
               <div style={{ fontSize: 11, fontWeight: 700, color: '#eee' }}>{r.name}</div>
             </div>
             <div style={{ fontSize: 9, color: '#ccc', lineHeight: 1.4, marginBottom: 4 }}>{r.description}</div>

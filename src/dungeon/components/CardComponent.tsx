@@ -1,7 +1,7 @@
 import React from 'react';
 import type { CardInstance, CardType, Faction, Keyword, StatusEffect } from '../types';
 import { getCardStats } from '../engine/cardStats';
-import { getCardArt } from '../assets/artRegistry';
+import { getCardArt, getStatusArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
@@ -440,7 +440,14 @@ export const CardComponent: React.FC<CardComponentProps> = ({
   const renderStatuses = (effects: StatusEffect[]) =>
     effects.map((e) => (
       <span key={e.type} title={`${e.type} ×${e.stacks}`}>
-        {STATUS_EMOJI[e.type] ?? '?'}{e.stacks > 1 ? e.stacks : ''}
+        <TokenArt
+          src={getStatusArt(e.type)}
+          fallback={STATUS_EMOJI[e.type] ?? '?'}
+          alt=""
+          style={{ width: 10, height: 10, verticalAlign: 'middle' }}
+          fallbackStyle={{ fontSize: 7, lineHeight: 1 }}
+        />
+        {e.stacks > 1 ? e.stacks : ''}
       </span>
     ));
 
