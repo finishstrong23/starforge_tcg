@@ -1,5 +1,5 @@
 import React from 'react';
-import type { CardInstance, Faction, Keyword, StatusEffect } from '../types';
+import type { CardInstance, CardType, Faction, Keyword, StatusEffect } from '../types';
 import { getCardStats } from '../engine/cardStats';
 import { getCardArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
@@ -32,6 +32,45 @@ const TYPE_BG: Record<string, string> = {
   Structure:'#1e1e2e',
 };
 
+interface CardTokenPalette {
+  base: string;
+  accent: string;
+  shadow: string;
+  light: string;
+  dark: string;
+}
+
+const CARD_TOKEN_PALETTE: Record<Faction, CardTokenPalette> = {
+  Cogsmiths: {
+    base: '#f0b55a',
+    accent: '#39c5cf',
+    shadow: '#bd6c32',
+    light: '#fff0a6',
+    dark: '#20212a',
+  },
+  Pyroclast: {
+    base: '#ff7043',
+    accent: '#ffd15c',
+    shadow: '#b93b30',
+    light: '#ffe399',
+    dark: '#241713',
+  },
+  Luminar: {
+    base: '#f7df8a',
+    accent: '#ffffff',
+    shadow: '#d79a3d',
+    light: '#fff8c9',
+    dark: '#2d2415',
+  },
+  WarpRiders: {
+    base: '#9f7cff',
+    accent: '#41d9ff',
+    shadow: '#5b42b8',
+    light: '#f3e8ff',
+    dark: '#201934',
+  },
+};
+
 const KW_LABEL: Partial<Record<Keyword, string>> = {
   GUARDIAN:   'Guardian',
   BARRIER:    'Barrier',
@@ -60,6 +99,137 @@ const STATUS_EMOJI: Partial<Record<string, string>> = {
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
+
+const hashCardId = (id: string): number => {
+  let hash = 0;
+  for (let i = 0; i < id.length; i += 1) {
+    hash = (hash * 31 + id.charCodeAt(i)) % 997;
+  }
+  return hash;
+};
+
+const renderTokenMotif = (
+  type: CardType,
+  palette: CardTokenPalette,
+  variant: number,
+  strokeWidth: number
+): React.ReactNode => {
+  const commonStroke = {
+    stroke: palette.dark,
+    strokeWidth,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+  };
+
+  switch (type) {
+    case 'Attack':
+      return (
+        <g>
+          <polygon points="24,61 53,19 60,31 33,69" fill={palette.light} {...commonStroke} />
+          <polygon points="32,32 69,57 58,66 24,43" fill={palette.accent} {...commonStroke} />
+          <circle cx="45" cy="45" r={variant % 2 === 0 ? 7 : 5} fill={palette.shadow} {...commonStroke} />
+        </g>
+      );
+    case 'Skill':
+      return (
+        <g>
+          <path d="M45 18 L68 28 V45 C68 58 58 68 45 74 C32 68 22 58 22 45 V28 Z" fill={palette.light} {...commonStroke} />
+          <path d="M45 28 V61" fill="none" {...commonStroke} />
+          <path d="M32 43 H58" fill="none" {...commonStroke} />
+        </g>
+      );
+    case 'Power':
+      return (
+        <g>
+          <circle cx="45" cy="45" r="18" fill={palette.accent} {...commonStroke} />
+          <path d="M45 14 V23 M45 67 V76 M14 45 H23 M67 45 H76 M24 24 L31 31 M59 59 L66 66 M66 24 L59 31 M31 59 L24 66" fill="none" {...commonStroke} />
+          <circle cx="45" cy="45" r="7" fill={palette.light} stroke="none" />
+        </g>
+      );
+    case 'Augment':
+      return (
+        <g>
+          <rect x="28" y="28" width="34" height="34" rx="8" fill={palette.light} {...commonStroke} />
+          <circle cx="45" cy="45" r="11" fill={palette.accent} {...commonStroke} />
+          <path d="M45 16 V27 M45 63 V74 M16 45 H27 M63 45 H74" fill="none" {...commonStroke} />
+          <circle cx="45" cy="45" r="3" fill={palette.dark} />
+        </g>
+      );
+    case 'Minion':
+      return (
+        <g>
+          <path d="M24 37 C24 24 34 18 45 18 C56 18 66 24 66 37 V58 C66 67 57 72 45 72 C33 72 24 67 24 58 Z" fill={palette.light} {...commonStroke} />
+          <circle cx="35" cy="44" r="5" fill={palette.dark} />
+          <circle cx="55" cy="44" r="5" fill={palette.dark} />
+          <path d="M36 58 H54" fill="none" {...commonStroke} />
+          <path d={variant % 2 === 0 ? 'M26 31 L15 24 M64 31 L75 24' : 'M28 25 L21 14 M62 25 L69 14'} fill="none" {...commonStroke} />
+        </g>
+      );
+    case 'Curse':
+      return (
+        <g>
+          <polygon points="45,16 70,43 45,76 20,43" fill={palette.shadow} {...commonStroke} />
+          <path d="M47 23 L39 42 L50 42 L42 64" fill="none" stroke={palette.light} strokeWidth={strokeWidth + 1} strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="61" cy="29" r="4" fill={palette.accent} stroke="none" />
+        </g>
+      );
+    case 'Spell':
+      return (
+        <g>
+          <circle cx="45" cy="45" r="23" fill={palette.light} {...commonStroke} />
+          <path d="M48 21 L31 49 H44 L39 70 L61 38 H47 Z" fill={palette.accent} {...commonStroke} />
+        </g>
+      );
+    case 'Structure':
+      return (
+        <g>
+          <rect x="27" y="34" width="36" height="36" rx="4" fill={palette.light} {...commonStroke} />
+          <rect x="34" y="22" width="22" height="18" rx="4" fill={palette.accent} {...commonStroke} />
+          <path d="M34 52 H56 M45 34 V70" fill="none" {...commonStroke} />
+        </g>
+      );
+    default:
+      return (
+        <g>
+          <circle cx="45" cy="45" r="22" fill={palette.light} {...commonStroke} />
+          <circle cx="45" cy="45" r="9" fill={palette.accent} {...commonStroke} />
+        </g>
+      );
+  }
+};
+
+const CardFallbackToken: React.FC<{ card: CardInstance; size: number; compact: boolean }> = ({
+  card,
+  size,
+  compact,
+}) => {
+  const palette = CARD_TOKEN_PALETTE[card.faction] ?? CARD_TOKEN_PALETTE.Cogsmiths;
+  const hash = hashCardId(card.id);
+  const variant = hash % 4;
+  const strokeWidth = compact ? 6 : 5;
+  const rotation = [-8, 5, -4, 8][variant];
+  const accentX = 23 + ((hash * 7) % 44);
+  const accentY = 18 + ((hash * 11) % 46);
+
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      width={size}
+      height={size}
+      viewBox="0 0 90 90"
+      style={{ display: 'block' }}
+    >
+      <rect x="6" y="6" width="78" height="78" rx="16" fill={palette.base} stroke={palette.dark} strokeWidth="5" />
+      <path d="M15 68 C31 78 56 78 75 60 V78 H15 Z" fill={palette.shadow} opacity="0.38" />
+      <circle cx={accentX} cy={accentY} r={variant === 0 ? 4 : 3} fill={palette.accent} stroke={palette.dark} strokeWidth="3" />
+      <g transform={`rotate(${rotation} 45 45)`}>
+        {renderTokenMotif(card.type, palette, variant, strokeWidth)}
+      </g>
+      <circle cx="66" cy="23" r="4" fill={palette.light} opacity="0.9" />
+    </svg>
+  );
+};
 
 export interface CardComponentProps {
   card: CardInstance;
@@ -100,6 +270,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
   const isDraftSize = !compact && size === 'draft';
   const w = compact ? 64 : isDraftSize ? 158 : 108;
   const h = compact ? 88 : isDraftSize ? 226 : 155;
+  const artSize = compact ? 24 : isDraftSize ? 74 : 48;
 
   const styles: Record<string, React.CSSProperties> = {
     card: {
@@ -254,13 +425,6 @@ export const CardComponent: React.FC<CardComponentProps> = ({
     },
   };
 
-  const factionGlyph: Record<Faction, string> = {
-    Cogsmiths: '⚙',
-    Pyroclast: '🔥',
-    Luminar: '☀',
-    WarpRiders: '✦',
-  };
-
   // Flux: extract just the active body so the player sees their actual outcome inline
   const isFlux = /^\s*flux\./i.test(stats.text);
   const fluxBody = isFlux && card.fluxState
@@ -405,13 +569,13 @@ export const CardComponent: React.FC<CardComponentProps> = ({
         <div style={styles.artBox}>
           <TokenArt
             src={getCardArt(card.id)}
-            fallback={factionGlyph[card.faction]}
+            fallback={<CardFallbackToken card={card} size={artSize} compact={compact} />}
             alt=""
             style={{
-              width: compact ? 24 : isDraftSize ? 74 : 46,
-              height: compact ? 22 : isDraftSize ? 74 : 46,
+              width: artSize,
+              height: compact ? 22 : artSize,
             }}
-            fallbackStyle={{ fontSize: compact ? 18 : isDraftSize ? 36 : 28, lineHeight: 1 }}
+            fallbackStyle={{ lineHeight: 0 }}
           />
         </div>
 

@@ -54,7 +54,7 @@ Status key:
 | Boss art | `src/dungeon/data/enemies.ts`, `src/dungeon/components/EnemyComponent.tsx` | 3 boss SVGs installed | P0 | `public/art/dungeon/bosses/{bossId}.svg` |
 | Enemy intent icons | `src/dungeon/components/EnemyComponent.tsx` | Emoji for defend/summon and text symbols for intents | P1 | `public/art/dungeon/ui/intent_{intentType}.png` |
 | Enemy/player status icons | `src/dungeon/components/EnemyComponent.tsx`, `CombatView.tsx`, `CardComponent.tsx` | Emoji status badges | P1 | `public/art/dungeon/status/{statusId}.png` |
-| Card art | `src/dungeon/components/CardComponent.tsx` | 16-card SVG pilot installed; remaining cards use fallback faction glyphs | P0 for first 16, P1 for all 176 | `public/cards/{cardId}.svg` |
+| Card art | `src/dungeon/components/CardComponent.tsx` | 16-card SVG pilot installed; remaining cards use procedural Basic Token SVG fallback | P0 for first 16, P1 for all 176 | `public/cards/{cardId}.svg` |
 | Card backs / draw pile / discard pile | `src/dungeon/components/HandComponent.tsx` | Unicode playing-card glyphs | P1 | `public/art/dungeon/ui/card_back.png`, `draw_pile.png`, `discard_pile.png` |
 | Relic icons | `src/dungeon/data/relics.ts`, `RelicBar.tsx`, rewards/shop | 26 SVG icons installed | P0 for visible relic bar/shop/rewards | `public/art/dungeon/relics/{relicId}.svg` |
 | Potion icons | `src/dungeon/components/PotionInventory.tsx`, `PotionPickupModal.tsx`, `ShopView.tsx` | 14 SVG icons installed | P0 | `public/art/dungeon/potions/{potionId}.svg` |
@@ -244,8 +244,9 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 3. Boss art: 3 assets.
 4. Potion icons: 14 assets.
 5. Relic icons: 26 assets.
+6. Card fallback coverage: every card without authored art now receives a procedural Basic Token SVG based on faction, type, and id.
 
-The next remaining visual batch is the 16-card pilot from the P0 card-art table above.
+The next remaining visual batch is replacing the procedural card fallbacks with authored Basic Token SVGs in small batches, starting with the most-played starter and reward cards.
 
 ## Generation Notes
 

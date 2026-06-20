@@ -41,13 +41,13 @@ The previous generated faction/background packs were rejected because they were 
 
 ## Next Batch
 
-Phase 2 registry foundation is implemented. The active dungeon UI now has fallback image slots for map nodes, cards, enemies, intents, status chips, relics, potions, shop offers, and reward offers. Missing images fall back to the current glyph/emoji so the game does not break while assets are generated.
+Phase 2 registry foundation is implemented. The active dungeon UI now has fallback image slots for map nodes, cards, enemies, intents, status chips, relics, potions, shop offers, and reward offers. Missing cards now use a procedural Basic Token SVG fallback instead of a tiny faction glyph, while other missing images still fall back safely to their current glyph/emoji.
 
 The next batch should generate the smallest asset set that changes every core screen.
 
 | Asset id | Target path | Status |
 |---|---|---|
-| `card:remaining` | `public/cards/{cardId}.svg` | Next full-card batch |
+| `card:remaining` | `public/cards/{cardId}.svg` | Procedural fallback live; next step is authored SVG batches |
 
 ## QA Checklist
 
