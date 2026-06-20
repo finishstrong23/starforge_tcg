@@ -170,6 +170,15 @@ Batch 3 uncommon reward authored SVGs:
 | `card:L-017` through `card:L-023` | Card art | Luminar | Done | `public/cards/{cardId}.svg` | Sunbeam, aurora, mantra, focus, solar bolt, halo, flash tokens |
 | `card:W-017` through `card:W-024` | Card art | Warp Riders | Done | `public/cards/{cardId}.svg` | Probability, horizon, chaos, rift, paradox, time, tesseract, shield tokens |
 
+Batch 4 rare and high-impact authored SVGs:
+
+| Asset id | Type | Faction | Priority | Target filename | Subject |
+|---|---|---|---|---|---|
+| `card:C-031` through `card:C-040` | Card art | Cogsmiths | Done | `public/cards/{cardId}.svg` | Mecha form, warforge, colossus, titan, commandment, core, machine god, exotic core, inverter, reinforce tokens |
+| `card:P-031` through `card:P-040` | Card art | Pyroclast | Done | `public/cards/{cardId}.svg` | Sunfire blade, volcano, immolate, phoenix, ring, fury, forge master, everburn, magma tide, dragon roar tokens |
+| `card:L-031` through `card:L-040` | Card art | Luminar | Done | `public/cards/{cardId}.svg` | Supernova, everlight, transcendence, gravitas, stellar body, illumination, sun blessing, divine intervention, godlight, apex tokens |
+| `card:W-031` through `card:W-040` | Card art | Warp Riders | Done | `public/cards/{cardId}.svg` | Archer, choir, burning face, mistress, omniverse, rift master, Schrodinger, chrono break, reality anchor, genesis bolt tokens |
+
 Full card queue after P0:
 
 | Faction | Current IDs | Priority | Notes |
@@ -278,8 +287,9 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 9. Shop utility icons: gold and card-removal SVGs wired into shop pricing and services.
 10. Card art batch 2: 33 starter and early reward SVGs.
 11. Card art batch 3: 30 uncommon reward SVGs.
+12. Card art batch 4: 40 rare and high-impact reward SVGs.
 
-The next remaining visual batch is replacing more procedural card fallbacks with authored Basic Token SVGs, moving into rare and high-impact reward cards.
+The next remaining visual batch is replacing the remaining procedural card fallbacks with authored Basic Token SVGs, focusing on low-priority commons, uncommons, and final filler gaps.
 
 ## Generation Notes
 
