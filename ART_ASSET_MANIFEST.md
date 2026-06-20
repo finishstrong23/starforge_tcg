@@ -123,7 +123,7 @@ Enemy data source: `src/dungeon/data/enemies.ts`. All 27 enemy entries currently
 
 ### Cards
 
-Card data source: `src/dungeon/data/cards.ts`. There are 176 current dungeon cards: 44 Cogsmiths, 40 Pyroclast IDs present plus starter/reward cards through `P-044`, 43 Luminar IDs present through `L-044`, and 44 Warp Riders. The active card UI currently renders only a faction glyph in the art box, so every card needs an image slot and fallback.
+Card data source: `src/dungeon/data/cards.ts`. There are 176 current dungeon cards: 44 Cogsmiths, 40 Pyroclast IDs present plus starter/reward cards through `P-044`, 43 Luminar IDs present through `L-044`, and 44 Warp Riders. The active card UI loads authored SVGs first, then falls back to a procedural Basic Token SVG when an authored file is missing.
 
 Card art target: `public/cards/{cardId}.svg`.
 
@@ -147,6 +147,19 @@ P0 first card-art slice:
 | `card:W-002` | Card art | Warp Riders | Done | `public/cards/W-002.svg` | Warp step footprint portal |
 | `card:W-004` | Card art | Warp Riders | Done | `public/cards/W-004.svg` | Unstable bolt token |
 | `card:W-016` | Card art | Warp Riders | Done | `public/cards/W-016.svg` | Dimensional rift icon |
+
+Batch 2 starter/reward authored SVGs:
+
+| Asset id | Type | Faction | Priority | Target filename | Subject |
+|---|---|---|---|---|---|
+| `card:C-003` through `card:C-010` | Card art | Cogsmiths | Done | `public/cards/{cardId}.svg` | Tinker, wrench, hammer, bolt, shield, jab, wire, servo tokens |
+| `card:C-041` | Card art | Cogsmiths | Done | `public/cards/C-041.svg` | Starter wrench token |
+| `card:P-004` through `card:P-011` | Card art | Pyroclast | Done | `public/cards/{cardId}.svg` | Flame, volley, ash, oil, fist, heat, charge, cauterize tokens |
+| `card:P-041` | Card art | Pyroclast | Done | `public/cards/P-041.svg` | Starter spark token |
+| `card:L-003` through `card:L-007` | Card art | Luminar | Done | `public/cards/{cardId}.svg` | Meditation, prism, radiance, halo, beam tokens |
+| `card:L-041` | Card art | Luminar | Done | `public/cards/L-041.svg` | Starter glimmer token |
+| `card:W-003`, `card:W-005` through `card:W-009` | Card art | Warp Riders | Done | `public/cards/{cardId}.svg` | Twist, shield, slash, echo, strike, crack tokens |
+| `card:W-041` through `card:W-043` | Card art | Warp Riders | Done | `public/cards/{cardId}.svg` | Starter strike, step, shimmer tokens |
 
 Full card queue after P0:
 
@@ -254,8 +267,9 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 7. Combat UI icons: 6 intent SVGs, 9 status SVGs, and draw/discard/card-back SVGs.
 8. Supporting scene panels: draft, reward, blessing, event, victory, and defeat SVG backgrounds.
 9. Shop utility icons: gold and card-removal SVGs wired into shop pricing and services.
+10. Card art batch 2: 33 starter and early reward SVGs.
 
-The next remaining visual batch is replacing the procedural card fallbacks with authored Basic Token SVGs in small batches, starting with the most-played starter and reward cards.
+The next remaining visual batch is replacing more procedural card fallbacks with authored Basic Token SVGs, moving into uncommon and rare reward cards.
 
 ## Generation Notes
 
