@@ -50,7 +50,7 @@ Status key:
 | Event screen background | `src/dungeon/components/EventView.tsx` | Done with Basic Token SVG scene panel | P1 | `public/art/dungeon/backgrounds/event.svg` |
 | Run end screen | `src/dungeon/components/DungeonRoot.tsx` | Done with victory/defeat Basic Token SVG scene panels | P2 | `public/art/dungeon/backgrounds/victory.svg`, `defeat.svg` |
 | Map node icons | `src/dungeon/components/MapView.tsx` | SVG Basic Token pass installed | P0 | `public/art/dungeon/map/{nodeType}.svg` |
-| Map connector/path art | `src/dungeon/components/MapView.tsx` | Dotted SVG lines only | P1 | Optional path/route motif in CSS/SVG |
+| Map connector/path art | `src/dungeon/components/MapView.tsx` | Done with rounded route rails, active-path markers, and muted future paths | P1 | CSS/SVG route motif |
 | Enemy art | `src/dungeon/data/enemies.ts`, `src/dungeon/components/EnemyComponent.tsx` | 24 normal/elite enemy SVGs installed | P0 | `public/art/dungeon/enemies/{enemyId}.svg` |
 | Boss art | `src/dungeon/data/enemies.ts`, `src/dungeon/components/EnemyComponent.tsx` | 3 boss SVGs installed | P0 | `public/art/dungeon/bosses/{bossId}.svg` |
 | Enemy intent icons | `src/dungeon/components/EnemyComponent.tsx` | Done with six Basic Token SVGs | P1 | `public/art/dungeon/ui/intent_{intentType}.svg` |
@@ -312,8 +312,9 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 15. Potion drink burst sigils: 8 category SVGs plus Phoenix SVG wired into potion use animation.
 16. Faction resource panel icons: 4 Basic Token SVGs wired into the combat HUD resource panel.
 17. Combat log polish: raw glyph prefixes are stripped at render time and replaced by consistent text-token badges.
+18. Map route polish: dotted connector lines replaced with rounded board-route rails and active path markers.
 
-The next remaining visual batch is optional route/path motifs and remaining low-priority developer/tutorial polish.
+The next remaining visual batch is remaining low-priority developer/tutorial polish and final visual QA cleanup.
 
 ## Generation Notes
 

@@ -57,6 +57,7 @@ The previous generated faction/background packs were rejected because they were 
 | `potion:drink-burst` | `public/art/dungeon/potions/effects/{category}.svg` | Installed Basic Token SVG pass | Potion drink animation now uses category token sigils, including Phoenix. |
 | `ui:faction-resource-panel` | `public/art/dungeon/ui/resource_{faction}.svg` | Installed Basic Token SVG pass | Combat HUD resource panel now has faction-specific token header art. |
 | `combat-log:icon-strategy` | `src/dungeon/components/CombatView.tsx` | Installed text-token pass | Combat log now strips raw glyph prefixes and displays consistent category badges. |
+| `map:path-motifs` | `src/dungeon/components/MapView.tsx` | Installed SVG route pass | Map connectors now use rounded board-route rails with active path markers. |
 
 ## Next Batch
 
@@ -67,7 +68,6 @@ The next batch should generate the smallest asset set that changes every core sc
 | Asset id | Target path | Status |
 |---|---|---|
 | `card:remaining` | `public/cards/{cardId}.svg` | Complete for current dungeon card IDs; procedural fallback remains as a safe future-card fallback |
-| `map:path-motifs` | `src/dungeon/components/MapView.tsx` | Optional: make route connectors feel more like clean token board paths |
 | `ui:remaining-polish` | `public/art/dungeon/ui/{assetId}.svg` | Later utility polish outside the shop |
 
 ## QA Checklist

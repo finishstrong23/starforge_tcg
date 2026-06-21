@@ -24,13 +24,13 @@ const NODE_COLOR: Record<NodeType, string> = {
   event:    '#2dd4bf',
 };
 
-const NODE_EMOJI: Record<NodeType, string> = {
-  combat:   '⚔',
-  elite:    '💀',
-  boss:     '👑',
-  rest:     '⛺',
-  shop:     '🛒',
-  treasure: '💎',
+const NODE_FALLBACK_TEXT: Record<NodeType, string> = {
+  combat:   'C',
+  elite:    'E',
+  boss:     'B',
+  rest:     'R',
+  shop:     'S',
+  treasure: 'T',
   event:    '?',
 };
 
@@ -137,7 +137,7 @@ const MapNodeCircle: React.FC<NodeProps> = ({
           opacity={isFuture ? 0.4 : isVisited ? 0.55 : 1}
           style={{ pointerEvents: 'none', userSelect: 'none' }}
         >
-          {NODE_EMOJI[node.type]}
+          {NODE_FALLBACK_TEXT[node.type]}
         </text>
       )}
 
@@ -161,6 +161,22 @@ const MapNodeCircle: React.FC<NodeProps> = ({
 
 function nodePos(row: number, col: number): { x: number; y: number } {
   return { x: ROW_X[row] ?? ROW_X[0], y: LANE_Y[col] ?? LANE_Y[1] };
+}
+
+function routePath(from: { x: number; y: number }, to: { x: number; y: number }): string {
+  const startX = from.x + R + 7;
+  const endX = to.x - R - 7;
+  const midX = (startX + endX) / 2;
+  const dy = to.y - from.y;
+  const curve = dy === 0 ? 0 : Math.max(-18, Math.min(18, dy * 0.18));
+  return `M ${startX} ${from.y} Q ${midX} ${(from.y + to.y) / 2 + curve} ${endX} ${to.y}`;
+}
+
+function routeMidpoint(from: { x: number; y: number }, to: { x: number; y: number }): { x: number; y: number } {
+  const startX = from.x + R + 7;
+  const endX = to.x - R - 7;
+  const midX = (startX + endX) / 2;
+  return { x: midX, y: (from.y + to.y) / 2 };
 }
 
 function nodeState(
@@ -241,7 +257,7 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
 
   return (
     <div style={s.wrapper}>
-      <div style={s.actLabel}>Act {map.actNumber} — Choose your path</div>
+      <div style={s.actLabel}>Act {map.actNumber} - Choose your path</div>
 
       <svg
         viewBox={`0 0 ${MAP_W} ${MAP_H}`}
@@ -265,6 +281,9 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
+          <filter id="route-shadow" x="-20%" y="-80%" width="140%" height="260%">
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" floodColor="#000000" floodOpacity="0.55" />
+          </filter>
         </defs>
 
         {/* ── Background ──────────────────────────────────────────────────── */}
@@ -282,7 +301,7 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
           />
         ))}
 
-        {/* ── Edges ───────────────────────────────────────────────────────── */}
+        {/* Route connectors */}
         {map.nodes.map((src) => {
           const sp = nodePos(src.row, src.col);
           return src.connections.map((tgtId) => {
@@ -291,15 +310,51 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
             const tp = nodePos(tgt.row, tgt.col);
             const isActive = availableIds.has(tgtId) && src.id === map.currentNodeId;
             const isOld = src.visited && tgt.visited;
+            const isPreview = hoveredId === tgtId && isActive;
+            const path = routePath(sp, tp);
+            const marker = routeMidpoint(sp, tp);
+            const routeColor = isActive ? NODE_COLOR[tgt.type] : isOld ? '#d6c184' : '#60647a';
             return (
-              <line
-                key={`${src.id}-${tgtId}`}
-                x1={sp.x + R + 1} y1={sp.y}
-                x2={tp.x - R - 1} y2={tp.y}
-                stroke={isOld ? '#ffffff18' : isActive ? '#ffffff50' : '#ffffff14'}
-                strokeWidth={isActive ? 1.5 : 1}
-                strokeDasharray={isActive ? undefined : '4,5'}
-              />
+              <g key={`${src.id}-${tgtId}`} opacity={isOld ? 0.9 : isActive ? 1 : 0.45}>
+                <path
+                  d={path}
+                  fill="none"
+                  stroke="#070814"
+                  strokeWidth={isActive ? 9 : 7}
+                  strokeLinecap="round"
+                  opacity={isActive || isOld ? 0.72 : 0.42}
+                  filter="url(#route-shadow)"
+                />
+                <path
+                  d={path}
+                  fill="none"
+                  stroke={routeColor}
+                  strokeWidth={isActive ? 4 : isOld ? 3 : 2.5}
+                  strokeLinecap="round"
+                  strokeDasharray={isActive || isOld ? undefined : '2,10'}
+                  opacity={isActive ? 0.9 : isOld ? 0.45 : 0.35}
+                />
+                {isActive && (
+                  <>
+                    <circle
+                      cx={marker.x}
+                      cy={marker.y}
+                      r={isPreview ? 6 : 4.5}
+                      fill="#08081a"
+                      stroke={routeColor}
+                      strokeWidth="2"
+                      opacity={isPreview ? 1 : 0.85}
+                    />
+                    <circle
+                      cx={marker.x}
+                      cy={marker.y}
+                      r={2.2}
+                      fill="#ffffff"
+                      opacity={isPreview ? 0.95 : 0.7}
+                    />
+                  </>
+                )}
+              </g>
             );
           });
         })}
