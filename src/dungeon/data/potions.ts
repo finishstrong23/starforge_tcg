@@ -1,9 +1,9 @@
 // ─── Potion Pool ─────────────────────────────────────────────────────────────
 // All 14 single-use combat consumables for the roguelite mode.
 //
-// Each potion exposes a pure `onUse(state, ctx?) → state` function so the UI
+// Each potion exposes a pure `onUse(state, ctx?) -> state` function so the UI
 // can call it without going through the card-play pipeline. Potion drinks do
-// NOT trigger card-play relic hooks — they're a separate action type.
+// NOT trigger card-play relic hooks - they're a separate action type.
 //
 // Source of truth: docs/roguelite/potions-design.md (root-level potions-design.md).
 
@@ -71,7 +71,7 @@ function dealAoeDamage(state: CombatState, raw: number): CombatState {
 }
 
 /**
- * Damage scaling — replicates the calcDamage logic from combat.ts so potions
+ * Damage scaling - replicates the calcDamage logic from combat.ts so potions
  * benefit from Strength and pay the Vulnerable / Weak modifiers exactly like
  * cards do. Inlined here to avoid an export ping-pong with combat.ts.
  */
@@ -86,7 +86,7 @@ function scaledDamage(
   return Math.max(0, n);
 }
 
-/** Single-target damage — accepts ctx.targetId. 'enemy' = main enemy, otherwise a minion instanceId. */
+/** Single-target damage - accepts ctx.targetId. 'enemy' = main enemy, otherwise a minion instanceId. */
 function dealTargetedDamage(state: CombatState, raw: number, targetId: string): CombatState {
   let s = { ...state };
   if (targetId === 'enemy' || targetId === undefined) {
@@ -219,7 +219,7 @@ export const POTION_POOL: PotionDefinition[] = [
     flavorText: 'A bottle of captured sunrise.',
     onUse: (state, ctx) => {
       const channels = state.hand.filter(isChannelCard);
-      // Fallback: no Channel cards → 12 Block (so the potion is never dead).
+      // Fallback: no Channel cards -> 12 Block (so the potion is never dead).
       if (channels.length === 0) return gainBlock(state, 12);
 
       // If the UI provided an explicit allocation, use it.
@@ -317,7 +317,7 @@ export const POTION_POOL: PotionDefinition[] = [
     effect: 'Take another turn. Hand is replaced with a fresh draw.',
     flavorText: 'Liquid that seems to flow backward in the bottle.',
     onUse: (state) => {
-      // MVP: discard hand → draw 5 fresh → +1 Energy → enemy skips next turn.
+      // MVP: discard hand -> draw 5 fresh -> +1 Energy -> enemy skips next turn.
       // Functionally equivalent to a second turn without restructuring the
       // turn loop. The skip flag is consumed by executeEnemyTurn.
       let s: CombatState = { ...state };
@@ -373,9 +373,9 @@ export function rollPotion(rng: () => number = Math.random): PotionInstance {
 
 /**
  * Roll a potion drop after a combat win. Per spec:
- *   - Boss combats → always drop a potion
- *   - Elite combats → always drop a potion
- *   - Regular combats → 40% chance
+ *   - Boss combats -> always drop a potion
+ *   - Elite combats -> always drop a potion
+ *   - Regular combats -> 40% chance
  */
 export function rollPotionDrop(opts: {
   isElite: boolean;
@@ -412,9 +412,9 @@ export function potionShopPrice(act: 1 | 2 | 3): number {
 
 /**
  * Drink a potion. Returns the new state and whether the drink succeeded
- * (false if the potion id is unknown). Does NOT touch the inventory — the
+ * (false if the potion id is unknown). Does NOT touch the inventory - the
  * caller is responsible for clearing the slot. Also does NOT trigger any
- * card-play relic hook (which is correct — potions are a distinct action).
+ * card-play relic hook (which is correct - potions are a distinct action).
  */
 export function applyPotion(
   state: CombatState,
@@ -427,7 +427,7 @@ export function applyPotion(
   return {
     state: {
       ...next,
-      combatLog: [...next.combatLog, `🧪 Drank ${def.name}`].slice(-8),
+      combatLog: [...next.combatLog, `Drank ${def.name}`].slice(-8),
       lastAction: `Drank ${def.name}`,
     },
     ok: true,

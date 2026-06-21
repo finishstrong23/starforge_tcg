@@ -65,6 +65,7 @@ The previous generated faction/background packs were rejected because they were 
 | `combat:choice-modal-labels` | `CombatView` | Installed text fallback pass | Choice and augment modal headers now avoid decorative glyph prefixes. |
 | `data:relic-enemy-fallbacks` | `src/dungeon/data/relics.ts`, `src/dungeon/data/enemies.ts` | Installed text fallback pass | Relic and enemy fallback art strings now use readable ASCII chips if token SVGs fail to load. |
 | `data:enemy-intent-text` | `src/dungeon/data/enemies.ts`, `EnemyComponent` | Installed text polish pass | Enemy intent/death text now uses simple ASCII separators in combat-facing surfaces. |
+| `combat:relic-potion-log-source` | `src/dungeon/engine/relicEffects.ts`, `src/dungeon/data/potions.ts` | Installed text polish pass | Relic and potion source logs now emit clean text while preserving combat log category badges. |
 
 ## Next Batch
 

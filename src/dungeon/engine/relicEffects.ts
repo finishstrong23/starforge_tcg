@@ -50,13 +50,13 @@ export function applyRelicsToCombat(
     case 'combat_start': {
       // R-S01 Forgeheart Ember: gain 2 Heat (logged; Heat managed via combatLog)
       if (hasRelic(relics, 'R-S01')) {
-        s = addLog(s, '🔥 Forgeheart Ember: +2 Heat');
+        s = addLog(s, 'Forgeheart Ember: +2 Heat');
       }
 
       // R-C02 Fueled Boots: +1 Energy on first turn
       if (hasRelic(relics, 'R-C02')) {
         s = { ...s, playerEnergy: s.playerEnergy + 1 };
-        s = addLog(s, '🥾 Fueled Boots: +1 Energy');
+        s = addLog(s, 'Fueled Boots: +1 Energy');
       }
 
       // R-C03 Stasis Cube: add 1 random Block/Skill card to hand from pool
@@ -67,7 +67,7 @@ export function applyRelicsToCombat(
         const def = pickRandom(blockCards);
         if (def) {
           s = { ...s, hand: [...s.hand, createCardInstance(def)] };
-          s = addLog(s, `🧊 Stasis Cube: added ${def.name} to hand`);
+          s = addLog(s, `Stasis Cube: added ${def.name} to hand`);
         }
       }
 
@@ -75,30 +75,30 @@ export function applyRelicsToCombat(
       if (hasRelic(relics, 'R-C05') && s.drawPile.length > 0) {
         const [card, ...rest] = s.drawPile;
         s = { ...s, hand: [...s.hand, card], drawPile: rest };
-        s = addLog(s, `🔮 Archivist's Orb: drew ${card.name}`);
+        s = addLog(s, `Archivist's Orb: drew ${card.name}`);
       }
 
       // R-C08 Sparkthief's Glove: first Attack dealt +3 (handled at card play; flag here)
       if (hasRelic(relics, 'R-C08')) {
-        s = addLog(s, '🧤 Sparkthief\'s Glove: first Attack deals +3');
+        s = addLog(s, 'Sparkthief\'s Glove: first Attack deals +3');
       }
 
       // R-U01 Forgemaster's Sigil: first card played this combat gains +2 damage/block
       if (hasRelic(relics, 'R-U01')) {
         s = { ...s, forgemasterSigilPending: true };
-        s = addLog(s, '⚙️ Forgemaster\'s Sigil: first card played gains +2');
+        s = addLog(s, 'Forgemaster\'s Sigil: first card played gains +2');
       }
 
       // R-U03 Void Compass: preview enemy intent rotation
       if (hasRelic(relics, 'R-U03')) {
-        const intents = s.enemy.intents.slice(0, 3).map((i) => i.description).join(' → ');
-        s = addLog(s, `🧭 Void Compass: ${intents}`);
+        const intents = s.enemy.intents.slice(0, 3).map((i) => i.description).join(' -> ');
+        s = addLog(s, `Void Compass: ${intents}`);
       }
 
       // R-U04 Overclocked Core: +1 Energy (Max HP permanently reduced at run start)
       if (hasRelic(relics, 'R-U04')) {
         s = { ...s, playerEnergy: s.playerEnergy + 1 };
-        s = addLog(s, '🔋 Overclocked Core: +1 Energy');
+        s = addLog(s, 'Overclocked Core: +1 Energy');
       }
 
       // R-U05 Cursebreaker's Medallion: remove one random debuff from hand
@@ -119,7 +119,7 @@ export function applyRelicsToCombat(
                 : c,
             ),
           };
-          s = addLog(s, `🎗️ Cursebreaker's Medallion: removed ${toRemove?.type}`);
+          s = addLog(s, `Cursebreaker's Medallion: removed ${toRemove?.type}`);
         }
       }
 
@@ -129,7 +129,7 @@ export function applyRelicsToCombat(
         const def = pickRandom(rares);
         if (def) {
           s = { ...s, hand: [...s.hand, createCardInstance(def)] };
-          s = addLog(s, `📖 Runekeeper's Tome: added ${def.name}`);
+          s = addLog(s, `Runekeeper's Tome: added ${def.name}`);
         }
       }
 
@@ -142,7 +142,7 @@ export function applyRelicsToCombat(
           pile = pile.slice(1);
         }
         s = { ...s, hand: [...s.hand, ...drawn], drawPile: pile };
-        s = addLog(s, `🕯️ Hierophant's Censer: drew ${drawn.length} extra; all cards cost +1 this turn`);
+        s = addLog(s, `Hierophant's Censer: drew ${drawn.length} extra; all cards cost +1 this turn`);
       }
 
       // R-B03 Heartwake Echo: copy a random relic's combat_start effect
@@ -154,7 +154,7 @@ export function applyRelicsToCombat(
         const echo = pickRandom(eligible);
         if (echo) {
           s = applyRelicsToCombat('combat_start', [echo], s, ctx);
-          s = addLog(s, `💔 Heartwake Echo: copied ${echo.name}`);
+          s = addLog(s, `Heartwake Echo: copied ${echo.name}`);
         }
       }
 
@@ -170,7 +170,7 @@ export function applyRelicsToCombat(
         );
         const card = pickRandom(fluxCards);
         if (card) {
-          s = addLog(s, `👁️ Unmoored Eye: ${card.name} locked`);
+          s = addLog(s, `Unmoored Eye: ${card.name} locked`);
         }
       }
       break;
@@ -191,13 +191,13 @@ export function applyRelicsToCombat(
     case 'on_card_play': {
       // R-C06 Stasis Coil: 10% chance the played card costs 1 less this turn (log only)
       if (hasRelic(relics, 'R-C06') && Math.random() < 0.1) {
-        s = addLog(s, '🌀 Stasis Coil: card cost reduced by 1');
+        s = addLog(s, 'Stasis Coil: card cost reduced by 1');
       }
 
       // R-A01 Shard of the Choir: take 1 damage whenever any card is played
       if (hasRelic(relics, 'R-A01')) {
         s = { ...s, playerHealth: Math.max(0, s.playerHealth - 1) };
-        s = addLog(s, '🎵 Shard of the Choir: took 1 damage');
+        s = addLog(s, 'Shard of the Choir: took 1 damage');
 
         // If a Flux card shifted, deal 2 damage to enemy
         if (ctx.cardPlayed && getCardText(ctx.cardPlayed).toLowerCase().includes('flux')) {
@@ -208,7 +208,7 @@ export function applyRelicsToCombat(
               currentHealth: Math.max(0, s.enemy.currentHealth - 2),
             },
           };
-          s = addLog(s, '🎵 Shard of the Choir: Flux shift deals 2 damage');
+          s = addLog(s, 'Shard of the Choir: Flux shift deals 2 damage');
         }
       }
       break;
@@ -223,7 +223,7 @@ export function applyRelicsToCombat(
           playerMaxHealth: s.playerMaxHealth + 1,
           playerHealth: Math.min(s.playerHealth, s.playerMaxHealth + 1),
         };
-        s = addLog(s, '🔍 Spire-Glass Lens: +1 Max HP; cannot heal this combat');
+        s = addLog(s, 'Spire-Glass Lens: +1 Max HP; cannot heal this combat');
       }
       break;
     }
