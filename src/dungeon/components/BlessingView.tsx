@@ -13,6 +13,8 @@ import type { Blessing } from '../data/blessings';
 import { rollBlessings } from '../data/blessings';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { getDungeonSceneArt } from '../assets/basicTokenArt';
+import { getBlessingArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 
 export const BlessingView: React.FC = () => {
   const { runState, draftFaction, applyBlessing } = useDungeonRun();
@@ -94,7 +96,7 @@ export const BlessingView: React.FC = () => {
   return (
     <div style={s.root}>
       <div style={s.actBadge}>
-        Act {act} {isOpener ? '· Beginning' : '· Crossroads'}
+        Act {act} {isOpener ? '- Beginning' : '- Crossroads'}
       </div>
       <h1 style={s.title}>{title}</h1>
       <p style={s.subtitle}>{subtitle}</p>
@@ -130,8 +132,14 @@ export const BlessingView: React.FC = () => {
                 gap: 8,
               }}
             >
-              <div style={{ fontSize: 38, lineHeight: 1, marginBottom: 2 }}>
-                {b.emoji}
+              <div style={{ width: 58, height: 58, marginBottom: 2 }}>
+                <TokenArt
+                  src={getBlessingArt(b.id)}
+                  fallback={b.fallback}
+                  alt=""
+                  style={{ width: 58, height: 58 }}
+                  fallbackStyle={{ fontSize: 16, lineHeight: 1 }}
+                />
               </div>
               <div
                 style={{

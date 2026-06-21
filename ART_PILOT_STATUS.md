@@ -61,6 +61,8 @@ The previous generated faction/background packs were rejected because they were 
 | `ui:text-glyph-cleanup` | Dungeon UI components | Installed visible text pass | Major screen headers, modal labels, status fallbacks, and action chips now avoid emoji/mojibake. |
 | `card:surface-glyph-cleanup` | `src/dungeon/components/CardComponent.tsx` | Installed card text-chip pass | Card stats, Lumens, Flux, summons, augments, and status fallbacks now use readable text chips. |
 | `ui:potion-modal-fallbacks` | Potion inventory, pickup, shop, lumen modal, telemetry panel | Installed text fallback pass | Potion and small modal fallback labels now use readable ASCII chips instead of emoji/mojibake. |
+| `blessing:*` | `public/art/dungeon/blessings/{blessingId}.svg`, `BlessingView` | Installed Basic Token SVG pass | Six act-start blessing choices now render simple token icons with ASCII fallbacks. |
+| `combat:choice-modal-labels` | `CombatView` | Installed text fallback pass | Choice and augment modal headers now avoid decorative glyph prefixes. |
 
 ## Next Batch
 

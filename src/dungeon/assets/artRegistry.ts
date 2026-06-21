@@ -1,3 +1,4 @@
+import type { BlessingId } from '../data/blessings';
 import type { Faction, IntentType, NodeType, PotionCategory, StatusEffectType } from '../types';
 
 const assetUrl = (path: string): string => `${import.meta.env.BASE_URL}${path}`;
@@ -73,6 +74,15 @@ export const uiArt = {
   tutorialMap: assetUrl('art/dungeon/ui/tutorial_map.svg'),
 } as const;
 
+export const blessingArt: Record<BlessingId, string> = {
+  vigor: assetUrl('art/dungeon/blessings/vigor.svg'),
+  fortune: assetUrl('art/dungeon/blessings/fortune.svg'),
+  treasure: assetUrl('art/dungeon/blessings/treasure.svg'),
+  arsenal: assetUrl('art/dungeon/blessings/arsenal.svg'),
+  sanctuary: assetUrl('art/dungeon/blessings/sanctuary.svg'),
+  channel: assetUrl('art/dungeon/blessings/channel.svg'),
+};
+
 export const potionEffectArt: Record<PotionCategory | 'Phoenix', string> = {
   Defense: assetUrl('art/dungeon/potions/effects/defense.svg'),
   Tempo: assetUrl('art/dungeon/potions/effects/tempo.svg'),
@@ -111,6 +121,10 @@ export function getRelicArt(relicId: string): string {
 
 export function getPotionArt(potionId: string): string {
   return assetUrl(`art/dungeon/potions/${potionId}.svg`);
+}
+
+export function getBlessingArt(blessingId: BlessingId): string {
+  return blessingArt[blessingId];
 }
 
 export function getPotionEffectArt(category: PotionCategory | 'Phoenix'): string {

@@ -197,7 +197,7 @@ function classifyLogEntry(entry: string): { kind: CombatLogKind; text: string } 
 const CombatLog: React.FC<{ log: string[]; cardPool: CardInstance[] }> = ({ log, cardPool }) => {
   const visible = log.slice(-7);
 
-  // Build the name → card lookup. Runtime instances (with live lumens /
+  // Build the name to card lookup. Runtime instances (with live lumens /
   // augments / fluxState) take priority. Static CARD_POOL is the fallback so
   // exhausted / used-up cards (e.g. an augment that's been attached and
   // removed from hand) still get tooltips in the log.
@@ -432,7 +432,7 @@ const PlayerHUD: React.FC<{
         </div>
       )}
 
-      {/* Potion inventory — 3 slots, always visible. Drinking is disabled
+      {/* Potion inventory - 3 slots, always visible. Drinking is disabled
           during enemy turns / combat-end. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
         <span
@@ -455,7 +455,7 @@ const PlayerHUD: React.FC<{
         />
       </div>
 
-      {/* Inline status icons row — keeps player buffs/debuffs visible without
+      {/* Inline status icons row - keeps player buffs/debuffs visible without
           a full-width strip. */}
       {(cs.playerStatusEffects.length > 0 || cs.playerRifts.length > 0 || cs.playerPowers.length > 0) && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
@@ -464,7 +464,7 @@ const PlayerHUD: React.FC<{
             return (
               <span
                 key={e.type}
-                title={`${meta.label} ×${e.stacks}`}
+                title={`${meta.label} x${e.stacks}`}
                 style={{
                   fontSize: 11,
                   padding: '1px 4px',
@@ -877,7 +877,7 @@ export const CombatView: React.FC = () => {
   const prevEnemyShield  = useRef<number | null>(null);
 
   // Track per-slot potion definition ids so we can detect a "drink" event:
-  // a slot transitions from a known potion id → null. Re-keys the burst.
+  // a slot transitions from a known potion id to null. Re-keys the burst.
   const prevPotionSlots = useRef<(string | null)[]>([null, null, null]);
   const [potionBurst, setPotionBurst] = useState<{
     key: number;
@@ -972,7 +972,7 @@ export const CombatView: React.FC = () => {
     prevEnemyShield.current   = cs.enemy.currentShield;
   }, [cs]);
 
-  // Detect a drink event: a slot transitions from a known potion id → null.
+  // Detect a drink event: a slot transitions from a known potion id to null.
   // Look up the prior definition and trigger the burst overlay.
   useEffect(() => {
     const slots: (string | null)[] = (runState?.potions ?? [null, null, null]).map(
@@ -1170,7 +1170,7 @@ export const CombatView: React.FC = () => {
 
     if (def.targeting === 'lumen-allocation') {
       // If there are Channel cards in hand, show the allocator. If not, the
-      // engine's fallback (12 Block) is fine — drink immediately.
+      // engine's fallback (12 Block) is fine - drink immediately.
       const hasChannel = (cs?.hand ?? []).some((c) => c.keywords.includes('ILLUMINATE') && /(^|\s)channel\./i.test(getCardText(c)));
       if (hasChannel) {
         setPendingLumenAllocation(slotIndex);
@@ -1234,7 +1234,7 @@ export const CombatView: React.FC = () => {
   const isCombatOver = cs.phase === 'combat_end_win' || cs.phase === 'combat_end_loss';
 
   const enemyGuardians = cs.enemyBoard.filter((m) => m.keywords.includes('GUARDIAN'));
-  // Potion targeting bypasses GUARDIAN — Forgefire Flask can hit any enemy.
+  // Potion targeting bypasses GUARDIAN - Forgefire Flask can hit any enemy.
   const isPotionTargeting = pendingPotionTarget !== null;
   const targetableEnemyMinionIds = new Set<string>(
     isPotionTargeting
@@ -1454,7 +1454,7 @@ export const CombatView: React.FC = () => {
         </div>
       )}
 
-      {/* Choice modal — for "Choose one: A OR B" cards (e.g. Shimmer, Void Whisper) */}
+      {/* Choice modal - for "Choose one: A OR B" cards (e.g. Shimmer, Void Whisper) */}
       {pendingChoice && (
         <div
           style={{
@@ -1479,7 +1479,7 @@ export const CombatView: React.FC = () => {
               color: '#c89b3c',
             }}
           >
-            ▸ {pendingChoice.cardName}
+            {pendingChoice.cardName}
           </div>
           <div style={{ fontSize: 16, fontWeight: 700, color: '#eee' }}>Choose one:</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 320 }}>
@@ -1532,7 +1532,7 @@ export const CombatView: React.FC = () => {
         </div>
       )}
 
-      {/* Augment target picker — for Cogsmiths "Attach to a card in hand" */}
+      {/* Augment target picker - for Cogsmiths "Attach to a card in hand" */}
       {pendingAugment && (
         <div
           style={{
@@ -1557,7 +1557,7 @@ export const CombatView: React.FC = () => {
               color: '#4aa8e0',
             }}
           >
-            ▸ {pendingAugment.cardName}
+            {pendingAugment.cardName}
           </div>
           <div style={{ fontSize: 16, fontWeight: 700, color: '#eee' }}>
             Pick a card in hand to attach to:
@@ -1778,7 +1778,7 @@ export const CombatView: React.FC = () => {
           card-name tooltips. CombatLog already has its own border / scroll
           so we just need to position the panel. */}
 
-      {/* Potion targeting banner — appears while waiting for enemy click */}
+      {/* Potion targeting banner - appears while waiting for enemy click */}
       {pendingPotionTarget !== null && (() => {
         const slot = runState?.potions[pendingPotionTarget];
         const def = slot ? getPotionDef(slot.definitionId) : null;
@@ -1827,7 +1827,7 @@ export const CombatView: React.FC = () => {
         );
       })()}
 
-      {/* Lumen allocator — for Lumen Infusion when Channel cards are in hand */}
+      {/* Lumen allocator - for Lumen Infusion when Channel cards are in hand */}
       {pendingLumenAllocation !== null && cs && (
         <LumenAllocatorModal
           channelCards={cs.hand.filter(isChannelCard)}

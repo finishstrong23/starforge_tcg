@@ -28,7 +28,7 @@ export interface Blessing {
   flavor: string;
   /** Short, one-sentence description shown on the blessing card. */
   effect: string;
-  emoji: string;
+  fallback: string;
   /** Color theme on the card. */
   color: string;
 }
@@ -36,7 +36,7 @@ export interface Blessing {
 /**
  * Pool of available blessings. The act-start screen rolls 3 distinct
  * blessings from this list each time it shows. Can grow without
- * touching the engine — the apply step switches on `id`.
+ * touching the engine - the apply step switches on `id`.
  */
 export const BLESSING_POOL: Blessing[] = [
   {
@@ -44,7 +44,7 @@ export const BLESSING_POOL: Blessing[] = [
     name: 'Vigor of the Forge',
     flavor: 'A second wind, hammered hot.',
     effect: 'Increase max HP by 10. Heal to new max.',
-    emoji: '❤',
+    fallback: 'HP',
     color: '#ff5566',
   },
   {
@@ -52,7 +52,7 @@ export const BLESSING_POOL: Blessing[] = [
     name: 'Merchant\'s Favor',
     flavor: 'Gold finds you, for a while.',
     effect: 'Gain 100 gold.',
-    emoji: '💰',
+    fallback: 'GLD',
     color: '#ffcc44',
   },
   {
@@ -60,7 +60,7 @@ export const BLESSING_POOL: Blessing[] = [
     name: 'Forgotten Cache',
     flavor: 'Something useful, left behind.',
     effect: 'Gain a random Uncommon relic.',
-    emoji: '💎',
+    fallback: 'REL',
     color: '#4adfff',
   },
   {
@@ -68,7 +68,7 @@ export const BLESSING_POOL: Blessing[] = [
     name: 'Sharpened Steel',
     flavor: 'A weapon worthy of the climb.',
     effect: 'Add a random Rare card to your deck.',
-    emoji: '⚔',
+    fallback: 'ATK',
     color: '#ff8844',
   },
   {
@@ -76,7 +76,7 @@ export const BLESSING_POOL: Blessing[] = [
     name: 'Sanctuary',
     flavor: 'Rest, then rise stronger.',
     effect: 'Heal to full and gain 1 max Energy next combat.',
-    emoji: '✨',
+    fallback: 'RST',
     color: '#88ff88',
   },
   {
@@ -84,13 +84,13 @@ export const BLESSING_POOL: Blessing[] = [
     name: 'Resonant Echo',
     flavor: 'The deck remembers.',
     effect: 'Duplicate a random non-starter card from your deck.',
-    emoji: '🔁',
+    fallback: 'ECO',
     color: '#c27dff',
   },
 ];
 
 /**
- * Result of applying a blessing — the patch to merge into RunState plus
+ * Result of applying a blessing - the patch to merge into RunState plus
  * any side-data the UI may want to surface (e.g. which relic was rolled).
  */
 export interface BlessingResult {
@@ -108,7 +108,7 @@ function pickRandom<T>(arr: T[], rng: () => number): T | undefined {
 
 /**
  * Pick `count` distinct blessings from the pool. Faction parameter is
- * accepted but not currently used — placeholder for future
+ * accepted but not currently used - placeholder for future
  * faction-specific blessings (e.g. a Pyroclast-only "+5 starting Heat").
  */
 export function rollBlessings(

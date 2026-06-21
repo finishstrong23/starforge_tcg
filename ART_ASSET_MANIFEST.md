@@ -264,6 +264,7 @@ Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wi
 | `ui:tutorial_energy` | UI icon | Done | `public/art/dungeon/ui/tutorial_energy.svg` | `TutorialOverlay` |
 | `ui:tutorial_relics` | UI icon | Done | `public/art/dungeon/ui/tutorial_relics.svg` | `TutorialOverlay` |
 | `ui:tutorial_map` | UI icon | Done | `public/art/dungeon/ui/tutorial_map.svg` | `TutorialOverlay` |
+| `blessing:vigor` through `blessing:channel` | Blessing icons | Done | `public/art/dungeon/blessings/{blessingId}.svg` | `BlessingView` |
 | `ui:resource_pyroclast` | UI icon | Done | `public/art/dungeon/ui/resource_pyroclast.svg` | `FactionResourcePanel` |
 | `ui:resource_cogsmiths` | UI icon | Done | `public/art/dungeon/ui/resource_cogsmiths.svg` | `FactionResourcePanel` |
 | `ui:resource_luminar` | UI icon | Done | `public/art/dungeon/ui/resource_luminar.svg` | `FactionResourcePanel` |
@@ -316,6 +317,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 19. Visible text/glyph polish: major dungeon screen headers, modal labels, status fallbacks, and action chips now avoid emoji/mojibake.
 20. Card surface glyph polish: card stats, Lumens, Flux, summons, augments, and status fallbacks now use readable text chips.
 21. Potion/modal fallback polish: potion inventory, pickup, lumen allocation, shop potion prices, and telemetry fallback labels now use readable ASCII chips instead of emoji/mojibake.
+22. Blessing/token modal polish: act-start blessing choices now use six Basic Token SVG icons with ASCII fallbacks instead of raw emoji glyphs; combat choice and augment modal headers no longer use decorative glyph prefixes.
 
 The next remaining visual batch is remaining low-priority developer/debug polish and final visual QA cleanup.
 
