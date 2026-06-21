@@ -92,6 +92,15 @@ export const HandComponent: React.FC<HandComponentProps> = ({
       justifyContent: 'center',
       width: '100%',
     },
+    emptyState: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      color: '#aaa',
+      opacity: 0.72,
+      paddingTop: 2,
+    },
     pilesCol: {
       display: 'flex',
       gap: 6,
@@ -111,8 +120,17 @@ export const HandComponent: React.FC<HandComponentProps> = ({
       <div style={s.handCol}>
         <div style={s.label}>Hand ({hand.length})</div>
         {hand.length === 0 ? (
-          <div style={{ ...s.label, alignSelf: 'center', opacity: 0.4, paddingTop: 4 }}>
-            No cards in hand
+          <div style={s.emptyState}>
+            <TokenArt
+              src={uiArt.cardBack}
+              fallback="CB"
+              alt=""
+              style={{ width: 22, height: 22 }}
+              fallbackStyle={{ fontSize: 11, lineHeight: 1 }}
+            />
+            <span style={{ fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+              No cards in hand
+            </span>
           </div>
         ) : (
           <div style={s.row}>

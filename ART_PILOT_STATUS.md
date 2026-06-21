@@ -51,7 +51,7 @@ The previous generated faction/background packs were rejected because they were 
 | `card:authored-batch-5` | `public/cards/{cardId}.svg` | Installed Basic Token SVG pass | Fifty-seven final gap cards now have authored tokens, completing current card coverage. |
 | `intent:*` | `public/art/dungeon/ui/intent_{intentType}.svg` | Installed Basic Token SVG pass | Six enemy intent tokens are live through combat enemy telegraphs. |
 | `status:*` | `public/art/dungeon/status/{statusId}.svg` | Installed Basic Token SVG pass | Nine status tokens are live through enemy, player, and card status chips. |
-| `ui:piles` | `public/art/dungeon/ui/{card_back,draw_pile,discard_pile}.svg` | Installed Basic Token SVG pass | Draw/discard pile tokens are live in hand/combat UI; card back asset is ready for future card-back surfaces. |
+| `ui:piles` | `public/art/dungeon/ui/{card_back,draw_pile,discard_pile}.svg` | Installed Basic Token SVG pass | Draw/discard pile tokens are live in hand/combat UI; card back is live in the empty-hand state. |
 | `ui:shop_misc` | `public/art/dungeon/ui/{gold,card_removal}.svg` | Installed Basic Token SVG pass | Shop prices, gold balance, and card-removal service now use token icons. |
 | `ui:tutorial-icons` | `public/art/dungeon/ui/tutorial_{energy,relics,map}.svg` | Installed Basic Token SVG pass | First-run tutorial now uses token icons instead of emoji glyphs. |
 | `potion:drink-burst` | `public/art/dungeon/potions/effects/{category}.svg` | Installed Basic Token SVG pass | Potion drink animation now uses category token sigils, including Phoenix. |
@@ -72,6 +72,7 @@ The previous generated faction/background packs were rejected because they were 
 | `ui:token-naming-cleanup` | Card, combat, enemy, and dungeon type files | Installed naming polish pass | Status, rift, intent, enemy, and relic fallback internals now use token naming instead of emoji naming. |
 | `rift:*` | `public/art/dungeon/rifts/{cost,genesis,energy,chaos}.svg`, CombatView | Installed Basic Token SVG pass | Active rifts in the combat HUD now use compact rift icons with text fallbacks. |
 | `combat:power-hud-card-art` | CombatView, `public/cards/{cardId}.svg` | Installed token wiring pass | Active Power chips now use each card's token art with a PWR fallback. |
+| `ui:empty-hand-card-back` | HandComponent, `public/art/dungeon/ui/card_back.svg` | Installed token wiring pass | Empty combat hands now show the card-back token with a compact text label. |
 
 ## Next Batch
 

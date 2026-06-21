@@ -56,7 +56,7 @@ Status key:
 | Enemy intent icons | `src/dungeon/components/EnemyComponent.tsx` | Done with six Basic Token SVGs | P1 | `public/art/dungeon/ui/intent_{intentType}.svg` |
 | Enemy/player status icons | `src/dungeon/components/EnemyComponent.tsx`, `CombatView.tsx`, `CardComponent.tsx` | Done with nine Basic Token SVGs | P1 | `public/art/dungeon/status/{statusId}.svg` |
 | Card art | `src/dungeon/components/CardComponent.tsx` | Done for all 176 current dungeon cards; procedural fallback remains for future cards | P0 for first 16, P1 for all 176 | `public/cards/{cardId}.svg` |
-| Card backs / draw pile / discard pile | `src/dungeon/components/HandComponent.tsx`, `src/dungeon/components/CombatView.tsx` | Done for draw/discard/card-back SVGs; draw/discard wired into active UI | P1 | `public/art/dungeon/ui/card_back.svg`, `draw_pile.svg`, `discard_pile.svg` |
+| Card backs / draw pile / discard pile | `src/dungeon/components/HandComponent.tsx`, `src/dungeon/components/CombatView.tsx` | Done for draw/discard/card-back SVGs; draw/discard and empty-hand card back wired into active UI | P1 | `public/art/dungeon/ui/card_back.svg`, `draw_pile.svg`, `discard_pile.svg` |
 | Relic icons | `src/dungeon/data/relics.ts`, `RelicBar.tsx`, rewards/shop | 26 SVG icons installed | P0 for visible relic bar/shop/rewards | `public/art/dungeon/relics/{relicId}.svg` |
 | Potion icons | `src/dungeon/components/PotionInventory.tsx`, `PotionPickupModal.tsx`, `ShopView.tsx` | 14 SVG icons installed | P0 | `public/art/dungeon/potions/{potionId}.svg` |
 | Potion drink burst | `src/dungeon/components/PotionDrinkBurst.tsx` | Done with eight category SVGs plus Phoenix SVG | P2 | `public/art/dungeon/potions/effects/{category}.svg` |
@@ -257,7 +257,7 @@ Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wi
 | `intent:summon` | Intent icon | Done | `public/art/dungeon/ui/intent_summon.svg` | `EnemyComponent` |
 | `intent:special` | Intent icon | Done | `public/art/dungeon/ui/intent_special.svg` | `EnemyComponent` |
 | `rift:cost` through `rift:chaos` | Rift icon | Done | `public/art/dungeon/rifts/{riftType}.svg` | `CombatView` active rift chips |
-| `ui:card_back` | UI art | Done | `public/art/dungeon/ui/card_back.svg` | Asset exists; reserved for card-back surfaces |
+| `ui:card_back` | UI art | Done | `public/art/dungeon/ui/card_back.svg` | `HandComponent` empty-hand state |
 | `ui:draw_pile` | UI art | Done | `public/art/dungeon/ui/draw_pile.svg` | `HandComponent`, `CombatView` |
 | `ui:discard_pile` | UI art | Done | `public/art/dungeon/ui/discard_pile.svg` | `HandComponent` |
 | `ui:gold` | UI icon | Done | `public/art/dungeon/ui/gold.svg` | `ShopView` prices and gold balance |
@@ -328,6 +328,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 29. Token naming cleanup: status, rift, intent, enemy, and relic fallback internals now use token language instead of emoji language.
 30. Rift HUD token art: active rifts now use four Basic Token SVG icons in the combat status row instead of a bare text marker.
 31. Power HUD token art: active Power chips now use card token art with a PWR fallback instead of a plain text marker.
+32. Empty hand card-back art: the combat hand area now shows the Basic Token card-back asset when no cards are in hand.
 
 The next remaining visual batch is remaining low-priority developer/debug polish and final visual QA cleanup.
 
