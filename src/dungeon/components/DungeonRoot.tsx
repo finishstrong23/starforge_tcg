@@ -26,6 +26,8 @@ import { EventView } from './EventView';
 import { RelicBar } from './RelicBar';
 import { DeckViewer } from './DeckViewer';
 import { getDungeonSceneArt, getFactionTokenArt } from '../assets/basicTokenArt';
+import { uiArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 
 interface DungeonRootProps {
   onBack: () => void;
@@ -312,6 +314,9 @@ const s: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     letterSpacing: '0.12em',
     textTransform: 'uppercase',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
   },
   abandonBtn: {
     position: 'fixed',
@@ -808,6 +813,13 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 style={s.deckBtn}
                 onClick={() => setDeckOpen((o) => !o)}
               >
+                <TokenArt
+                  src={uiArt.cardBack}
+                  fallback="DK"
+                  alt=""
+                  style={{ width: 16, height: 16 }}
+                  fallbackStyle={{ fontSize: 9, lineHeight: 1 }}
+                />
                 View Deck ({runState.deck.length})
               </button>
             </div>

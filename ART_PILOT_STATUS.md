@@ -74,6 +74,7 @@ The previous generated faction/background packs were rejected because they were 
 | `rift:*` | `public/art/dungeon/rifts/{cost,genesis,energy,chaos}.svg`, CombatView | Installed Basic Token SVG pass | Active rifts in the combat HUD now use compact rift icons with text fallbacks. |
 | `combat:power-hud-card-art` | CombatView, `public/cards/{cardId}.svg` | Installed token wiring pass | Active Power chips now use each card's token art with a PWR fallback. |
 | `ui:empty-hand-card-back` | HandComponent, `public/art/dungeon/ui/card_back.svg` | Installed token wiring pass | Empty combat hands now show the card-back token with a compact text label. |
+| `ui:view-deck-button` | DungeonRoot, `public/art/dungeon/ui/card_back.svg` | Installed token wiring pass | Persistent View Deck button now uses the card-back token with a DK fallback. |
 
 ## Next Batch
 

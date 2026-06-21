@@ -331,6 +331,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 31. Power HUD token art: active Power chips now use card token art with a PWR fallback instead of a plain text marker.
 32. Empty hand card-back art: the combat hand area now shows the Basic Token card-back asset when no cards are in hand.
 33. Combat log button token art: the top-right combat-log toggle now uses a Basic Token SVG instead of a raw visible glyph.
+34. View deck button token art: the persistent run deck button now reuses the Basic Token card-back asset.
 
 The next remaining visual batch is remaining low-priority developer/debug polish and final visual QA cleanup.
 
