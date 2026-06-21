@@ -36,7 +36,7 @@ export interface EnemyComponentProps {
   isTargeted?: boolean;
   /** Pulse the intent box (enemy turn telegraphing). */
   intentPulsing?: boolean;
-  /** Enemy is mid-action — flash brighter. */
+  /** Enemy is mid-action - flash brighter. */
   intentResolving?: boolean;
   onClick?: () => void;
 }
@@ -231,7 +231,7 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
         </div>
       )}
 
-      {/* Intent — enlarged and telegraphed */}
+      {/* Intent - enlarged and telegraphed */}
       <div style={s.intentBox}>
         <TokenArt
           src={getIntentArt(intent.type)}

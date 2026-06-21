@@ -319,6 +319,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 21. Potion/modal fallback polish: potion inventory, pickup, lumen allocation, shop potion prices, and telemetry fallback labels now use readable ASCII chips instead of emoji/mojibake.
 22. Blessing/token modal polish: act-start blessing choices now use six Basic Token SVG icons with ASCII fallbacks instead of raw emoji glyphs; combat choice and augment modal headers no longer use decorative glyph prefixes.
 23. Relic/enemy fallback polish: relic and enemy data fallback art fields now use readable ASCII chips instead of raw emoji glyphs if SVG assets fail to load.
+24. Enemy intent text polish: enemy intent descriptions and death notes now use simple ASCII separators for cleaner combat tooltips.
 
 The next remaining visual batch is remaining low-priority developer/debug polish and final visual QA cleanup.
 
