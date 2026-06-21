@@ -10,21 +10,21 @@ const RARITY_COLOR: Record<PotionRarity, string> = {
   rare:     '#ffcc00',
 };
 
-const POTION_EMOJI: Record<string, string> = {
-  block_draught:       '🧪',
-  swift_brew:          '💨',
-  surge_vial:          '⚡',
-  kindling_flask:      '🔥',
-  focus_tincture:      '💪',
-  stoneblood_elixir:   '🛡',
-  cleansing_draft:     '✨',
-  forgefire_flask:     '🌋',
-  lumen_infusion:      '☀',
-  wyrmfire_breath:     '🐉',
-  aegis_mixture:       '🔰',
-  tacticians_brew:     '🃏',
-  phoenix_vial:        '🔆',
-  chronoshift_philter: '⏳',
+const POTION_FALLBACK: Record<string, string> = {
+  block_draught:       'BLK',
+  swift_brew:          'SPD',
+  surge_vial:          'NRG',
+  kindling_flask:      'FIR',
+  focus_tincture:      'STR',
+  stoneblood_elixir:   'STN',
+  cleansing_draft:     'CLR',
+  forgefire_flask:     'FRG',
+  lumen_infusion:      'LUM',
+  wyrmfire_breath:     'BRN',
+  aegis_mixture:       'AEG',
+  tacticians_brew:     'TAC',
+  phoenix_vial:        'PHX',
+  chronoshift_philter: 'TIM',
 };
 
 export interface PotionPickupModalProps {
@@ -36,7 +36,7 @@ export interface PotionPickupModalProps {
   onDiscardIncoming: () => void;
   /**
    * Player chose to discard one of the existing inventory slots and take the
-   * incoming potion in its place. Slot index 0–2.
+   * incoming potion in its place. Slot index 0-2.
    */
   onSwap: (slotIndex: number) => void;
 }
@@ -86,7 +86,7 @@ const PotionBottle: React.FC<BottleProps> = ({ def, label, onClick, badge }) => 
       )}
       <TokenArt
         src={getPotionArt(def.id)}
-        fallback={POTION_EMOJI[def.id] ?? '🧪'}
+        fallback={POTION_FALLBACK[def.id] ?? 'POT'}
         alt=""
         style={{ width: 42, height: 48, marginTop: 2 }}
         fallbackStyle={{ fontSize: 32, lineHeight: 1 }}
@@ -95,7 +95,7 @@ const PotionBottle: React.FC<BottleProps> = ({ def, label, onClick, badge }) => 
         {def.name}
       </div>
       <div style={{ fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.55 }}>
-        {def.rarity} · {def.category}
+        {def.rarity} - {def.category}
       </div>
       <div style={{ fontSize: 10, color: '#ddd', lineHeight: 1.35, minHeight: 28 }}>
         {def.effect}
@@ -158,7 +158,7 @@ export const PotionPickupModal: React.FC<PotionPickupModalProps> = ({
           opacity: 0.7,
         }}
       >
-        ▸ Potion Inventory Full
+        Potion Inventory Full
       </div>
       <div style={{ fontSize: 16, fontWeight: 700, color: '#eee', textAlign: 'center', maxWidth: 480 }}>
         Pick one to discard, or skip the new potion entirely.

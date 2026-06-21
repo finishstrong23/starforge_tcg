@@ -10,26 +10,26 @@ const RARITY_COLOR: Record<PotionRarity, string> = {
   rare:     '#ffcc00',
 };
 
-const POTION_EMOJI: Record<string, string> = {
-  block_draught:       '🧪',
-  swift_brew:          '💨',
-  surge_vial:          '⚡',
-  kindling_flask:      '🔥',
-  focus_tincture:      '💪',
-  stoneblood_elixir:   '🛡',
-  cleansing_draft:     '✨',
-  forgefire_flask:     '🌋',
-  lumen_infusion:      '☀',
-  wyrmfire_breath:     '🐉',
-  aegis_mixture:       '🔰',
-  tacticians_brew:     '🃏',
-  phoenix_vial:        '🔆',
-  chronoshift_philter: '⏳',
+const POTION_FALLBACK: Record<string, string> = {
+  block_draught:       'BLK',
+  swift_brew:          'SPD',
+  surge_vial:          'NRG',
+  kindling_flask:      'FIR',
+  focus_tincture:      'STR',
+  stoneblood_elixir:   'STN',
+  cleansing_draft:     'CLR',
+  forgefire_flask:     'FRG',
+  lumen_infusion:      'LUM',
+  wyrmfire_breath:     'BRN',
+  aegis_mixture:       'AEG',
+  tacticians_brew:     'TAC',
+  phoenix_vial:        'PHX',
+  chronoshift_philter: 'TIM',
 };
 
 export interface PotionInventoryProps {
   slots: (PotionInstance | null)[];
-  /** Click handler for a filled slot. Slot index 0–2. */
+  /** Click handler for a filled slot. Slot index 0-2. */
   onUse: (slotIndex: number) => void;
   /** Optional: hold-to-discard handler (not wired in Phase 2 minimum). */
   onDiscard?: (slotIndex: number) => void;
@@ -86,7 +86,7 @@ const PotionTooltip: React.FC<PotionTooltipProps> = ({ def, x, y }) => (
         marginBottom: 5,
       }}
     >
-      {def.rarity} · {def.category}
+      {def.rarity} - {def.category}
     </div>
     <div style={{ fontSize: 10, color: '#ddd', lineHeight: 1.4, marginBottom: 4 }}>
       {def.effect}
@@ -113,7 +113,7 @@ export const PotionInventory: React.FC<PotionInventoryProps> = ({
     slots[2] ?? null,
   ];
 
-  // Track slot transitions filled → null and play a one-shot "drain" key on
+  // Track slot transitions filled to null and play a one-shot "drain" key on
   // the affected slot. Re-keyed each transition so the CSS animation restarts.
   const prev = useRef<(string | null)[]>([null, null, null]);
   const [drainKey, setDrainKey] = useState<[number, number, number]>([0, 0, 0]);
@@ -186,16 +186,16 @@ export const PotionInventory: React.FC<PotionInventoryProps> = ({
             {def ? (
               <TokenArt
                 src={getPotionArt(def.id)}
-                fallback={POTION_EMOJI[def.id] ?? '🧪'}
+                fallback={POTION_FALLBACK[def.id] ?? 'POT'}
                 alt=""
                 style={{ width: compact ? 18 : 22, height: compact ? 22 : 26 }}
                 fallbackStyle={{ fontSize: compact ? 14 : 16, lineHeight: 1 }}
               />
             ) : (
-              '·'
+              '-'
             )}
 
-            {/* Bottle "neck" detail on filled slots — small notch at the top */}
+            {/* Bottle "neck" detail on filled slots - small notch at the top */}
             {filled && (
               <span
                 aria-hidden="true"

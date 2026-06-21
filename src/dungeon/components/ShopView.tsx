@@ -94,7 +94,7 @@ export const ShopView: React.FC = () => {
   const healthColor = healthPct <= 0.35 ? '#ff5c45' : healthPct <= 0.7 ? '#f0d060' : '#72e6a3';
   const deck = runState?.deck ?? [];
   const ascensionMods = getAscensionMods(runState?.ascensionLevel ?? 0);
-  // A3 — shop price multiplier. Round up so the multiplier always actually bites.
+  // A3 shop price multiplier. Round up so the multiplier always actually bites.
   const scalePrice = (n: number): number => Math.ceil(n * ascensionMods.shopPriceMul);
   const potionPrice = scalePrice(potionShopPrice(act));
 
@@ -172,7 +172,7 @@ export const ShopView: React.FC = () => {
     const slots = runState?.potions ?? [];
     const empty = slots.findIndex((p) => p === null);
     if (empty === -1) {
-      // Inventory full — defer the purchase, show the pickup modal so the
+      // Inventory full - defer the purchase, show the pickup modal so the
       // player picks a slot (or cancels). Gold is only spent if they accept.
       setPendingPurchase({ potion, shopIndex, price: potionPrice });
       return;
@@ -409,7 +409,7 @@ export const ShopView: React.FC = () => {
                 <div style={s.relicDesc}>{relic.description}</div>
               </div>
               <div style={relicPriceStyle(affordable && !bought)}>
-                {bought ? '✓' : <GoldValue amount={price} iconSize={14} />}
+                {bought ? 'Sold' : <GoldValue amount={price} iconSize={14} />}
               </div>
             </div>
           );
@@ -500,7 +500,7 @@ export const ShopView: React.FC = () => {
                 >
                   <TokenArt
                     src={getPotionArt(def.id)}
-                    fallback="🧪"
+                    fallback="POT"
                     alt=""
                     style={{ width: 28, height: 28, flexShrink: 0 }}
                     fallbackStyle={{ fontSize: 24, lineHeight: 1 }}
@@ -510,7 +510,7 @@ export const ShopView: React.FC = () => {
                     <div style={s.relicDesc}>{def.effect}</div>
                   </div>
                   <div style={relicPriceStyle(affordable && !bought)}>
-                    {bought ? '✓' : <GoldValue amount={potionPrice} iconSize={14} />}
+                    {bought ? 'Sold' : <GoldValue amount={potionPrice} iconSize={14} />}
                   </div>
                 </div>
               );
@@ -519,7 +519,7 @@ export const ShopView: React.FC = () => {
         </>
       )}
 
-      {/* Pickup picker — appears when buying a potion would overflow inventory */}
+      {/* Pickup picker - appears when buying a potion would overflow inventory */}
       {pendingPurchase && runState && (
         <PotionPickupModal
           incoming={pendingPurchase.potion}

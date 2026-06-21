@@ -60,6 +60,7 @@ The previous generated faction/background packs were rejected because they were 
 | `map:path-motifs` | `src/dungeon/components/MapView.tsx` | Installed SVG route pass | Map connectors now use rounded board-route rails with active path markers. |
 | `ui:text-glyph-cleanup` | Dungeon UI components | Installed visible text pass | Major screen headers, modal labels, status fallbacks, and action chips now avoid emoji/mojibake. |
 | `card:surface-glyph-cleanup` | `src/dungeon/components/CardComponent.tsx` | Installed card text-chip pass | Card stats, Lumens, Flux, summons, augments, and status fallbacks now use readable text chips. |
+| `ui:potion-modal-fallbacks` | Potion inventory, pickup, shop, lumen modal, telemetry panel | Installed text fallback pass | Potion and small modal fallback labels now use readable ASCII chips instead of emoji/mojibake. |
 
 ## Next Batch
 

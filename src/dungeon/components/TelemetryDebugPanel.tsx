@@ -67,7 +67,7 @@ export const TelemetryDebugPanel: React.FC = () => {
           boxShadow: '0 0 12px #c89b3c44',
         }}
       >
-        📊
+        LOG
       </button>
 
       {open && (
@@ -99,7 +99,7 @@ export const TelemetryDebugPanel: React.FC = () => {
               marginBottom: 8,
             }}
           >
-            Telemetry · {total} events
+            Telemetry - {total} events
           </div>
           {total === 0 && (
             <div style={{ color: '#666', fontStyle: 'italic', marginBottom: 8 }}>

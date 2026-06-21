@@ -7,9 +7,9 @@ export interface LumenAllocatorModalProps {
   channelCards: CardInstance[];
   /** Total Lumens available to distribute. */
   total: number;
-  /** Cancel — drink is aborted, slot stays filled. */
+  /** Cancel - drink is aborted, slot stays filled. */
   onCancel: () => void;
-  /** Confirm — distribute the lumens and drink the potion. */
+  /** Confirm - distribute the lumens and drink the potion. */
   onConfirm: (allocation: Record<string, number>) => void;
 }
 
@@ -69,7 +69,7 @@ export const LumenAllocatorModal: React.FC<LumenAllocatorModalProps> = ({
           opacity: 0.8,
         }}
       >
-        ▸ Lumen Infusion
+        Lumen Infusion
       </div>
       <div style={{ fontSize: 16, fontWeight: 700, color: '#eee', textAlign: 'center', maxWidth: 480 }}>
         Distribute {total} Lumens across your Channel cards.
@@ -82,7 +82,7 @@ export const LumenAllocatorModal: React.FC<LumenAllocatorModalProps> = ({
           textShadow: remaining === 0 ? '0 0 12px #22cc6688' : '0 0 12px #ffe87a88',
         }}
       >
-        ✨ {remaining} / {total}
+        LUM {remaining} / {total}
       </div>
 
       <div
@@ -112,7 +112,7 @@ export const LumenAllocatorModal: React.FC<LumenAllocatorModalProps> = ({
                   disabled={placedHere === 0}
                   style={pillBtnStyle(placedHere > 0, '#ff6688')}
                 >
-                  −
+                  -
                 </button>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#ffe87a', minWidth: 24, textAlign: 'center' }}>
                   +{placedHere}
