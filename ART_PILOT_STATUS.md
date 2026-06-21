@@ -48,6 +48,7 @@ The previous generated faction/background packs were rejected because they were 
 | `card:authored-batch-2` | `public/cards/{cardId}.svg` | Installed Basic Token SVG pass | Thirty-three starter and early reward cards now have authored tokens. |
 | `card:authored-batch-3` | `public/cards/{cardId}.svg` | Installed Basic Token SVG pass | Thirty uncommon reward cards now have authored tokens. |
 | `card:authored-batch-4` | `public/cards/{cardId}.svg` | Installed Basic Token SVG pass | Forty rare and high-impact reward cards now have authored tokens. |
+| `card:authored-batch-5` | `public/cards/{cardId}.svg` | Installed Basic Token SVG pass | Fifty-seven final gap cards now have authored tokens, completing current card coverage. |
 | `intent:*` | `public/art/dungeon/ui/intent_{intentType}.svg` | Installed Basic Token SVG pass | Six enemy intent tokens are live through combat enemy telegraphs. |
 | `status:*` | `public/art/dungeon/status/{statusId}.svg` | Installed Basic Token SVG pass | Nine status tokens are live through enemy, player, and card status chips. |
 | `ui:piles` | `public/art/dungeon/ui/{card_back,draw_pile,discard_pile}.svg` | Installed Basic Token SVG pass | Draw/discard pile tokens are live in hand/combat UI; card back asset is ready for future card-back surfaces. |
@@ -61,8 +62,9 @@ The next batch should generate the smallest asset set that changes every core sc
 
 | Asset id | Target path | Status |
 |---|---|---|
-| `card:remaining` | `public/cards/{cardId}.svg` | Procedural fallback live; next step is authored SVG batches |
-| `card:authored-batch-5` | `public/cards/{cardId}.svg` | Next remaining card-gap authored SVG batch |
+| `card:remaining` | `public/cards/{cardId}.svg` | Complete for current dungeon card IDs; procedural fallback remains as a safe future-card fallback |
+| `ui:tutorial-icons` | `public/art/dungeon/ui/tutorial_{step}.svg` | Next small utility polish batch |
+| `potion:drink-burst` | `public/art/dungeon/potions/effects/{category}.svg` | Replace remaining potion burst glyphs with token shapes |
 | `ui:remaining-polish` | `public/art/dungeon/ui/{assetId}.svg` | Later utility polish outside the shop |
 
 ## QA Checklist

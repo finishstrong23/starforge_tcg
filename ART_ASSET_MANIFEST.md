@@ -179,14 +179,23 @@ Batch 4 rare and high-impact authored SVGs:
 | `card:L-031` through `card:L-040` | Card art | Luminar | Done | `public/cards/{cardId}.svg` | Supernova, everlight, transcendence, gravitas, stellar body, illumination, sun blessing, divine intervention, godlight, apex tokens |
 | `card:W-031` through `card:W-040` | Card art | Warp Riders | Done | `public/cards/{cardId}.svg` | Archer, choir, burning face, mistress, omniverse, rift master, Schrodinger, chrono break, reality anchor, genesis bolt tokens |
 
+Batch 5 final card gap authored SVGs:
+
+| Asset id | Type | Faction | Priority | Target filename | Subject |
+|---|---|---|---|---|---|
+| `card:C-012`, `card:C-013`, `card:C-015`, `card:C-016`, `card:C-025` through `card:C-030`, `card:C-042` through `card:C-044` | Card art | Cogsmiths | Done | `public/cards/{cardId}.svg` | Toolkit, overdrive, augment, nanite, assembly, starter, and support tokens |
+| `card:P-012` through `card:P-016`, `card:P-025` through `card:P-030`, `card:P-042` through `card:P-044` | Card art | Pyroclast | Done | `public/cards/{cardId}.svg` | Ember, wind, lance, rekindle, resolve, combustion, dancer, starter, and support tokens |
+| `card:L-009` through `card:L-016`, `card:L-025` through `card:L-030`, `card:L-042` through `card:L-044` | Card art | Luminar | Done | `public/cards/{cardId}.svg` | Sunrise, hymn, gleam, ward, harmonize, ray, step, star, starter, and insight tokens |
+| `card:W-010` through `card:W-015`, `card:W-025` through `card:W-030`, `card:W-044` | Card art | Warp Riders | Done | `public/cards/{cardId}.svg` | Whisper, anomaly, step, blade, fold, guard, entropy, singularity, mirror, and drift tokens |
+
 Full card queue after P0:
 
 | Faction | Current IDs | Priority | Notes |
 |---|---|---|---|
-| Cogsmiths | `C-001` through `C-044` | P1 | Use gears, wrenches, drones, plates, rivets, simple robot tokens |
-| Pyroclast | `P-001` through `P-044`, with data gaps where IDs are unused | P1 | Use flame triangles, lava masks, hammers, fists, shields, molten hearts |
-| Luminar | `L-001` through `L-044`, with data gaps where IDs are unused | P1 | Use halos, stars, prisms, shields, beams, symmetric tokens |
-| Warp Riders | `W-001` through `W-044` | P1 | Use portals, crescent blades, split masks, glitch slashes, rift rings |
+| Cogsmiths | `C-001` through `C-044` | Done | All current Cogsmiths dungeon cards have authored SVG tokens |
+| Pyroclast | `P-001` through `P-044` | Done | All current Pyroclast dungeon cards have authored SVG tokens |
+| Luminar | `L-001` through `L-044` | Done | All current Luminar dungeon cards have authored SVG tokens |
+| Warp Riders | `W-001` through `W-044` | Done | All current Warp Riders dungeon cards have authored SVG tokens |
 
 ### Relics
 
@@ -288,8 +297,9 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 10. Card art batch 2: 33 starter and early reward SVGs.
 11. Card art batch 3: 30 uncommon reward SVGs.
 12. Card art batch 4: 40 rare and high-impact reward SVGs.
+13. Card art batch 5: 57 final gap SVGs, completing authored coverage for all current dungeon cards.
 
-The next remaining visual batch is replacing the remaining procedural card fallbacks with authored Basic Token SVGs, focusing on low-priority commons, uncommons, and final filler gaps.
+The next remaining visual batch is UI polish outside card art: tutorial icons, potion drink burst sigils, combat log icon strategy, and optional route/path motifs.
 
 ## Generation Notes
 
