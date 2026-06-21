@@ -182,7 +182,7 @@ export function applyRelicsToCombat(
       if (hasRelic(relics, 'R-U02') && (ctx.retainedCount ?? 0) > 0) {
         const block = ctx.retainedCount ?? 0;
         s = { ...s, playerShield: s.playerShield + block };
-        s = addLog(s, `⭐ Starseer's Pendant: +${block} Block from retained cards`);
+        s = addLog(s, `Starseer's Pendant: +${block} Block from retained cards`);
       }
       break;
     }

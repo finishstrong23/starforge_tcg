@@ -68,6 +68,7 @@ The previous generated faction/background packs were rejected because they were 
 | `combat:relic-potion-log-source` | `src/dungeon/engine/relicEffects.ts`, `src/dungeon/data/potions.ts` | Installed text polish pass | Relic and potion source logs now emit clean text while preserving combat log category badges. |
 | `combat:core-log-source` | `src/dungeon/engine/combat.ts` | Installed text polish pass | Core combat source logs now use clean ASCII text while preserving combat log category badges. |
 | `ui:ascension-summary-text` | `src/dungeon/engine/ascension.ts`, `DungeonRoot` | Installed text polish pass | Ascension modifier summaries now use readable ASCII separators in setup/summary UI. |
+| `combat:starseer-log-source` | `src/dungeon/engine/relicEffects.ts` | Installed text polish pass | Starseer's Pendant now emits clean text instead of a raw decorative star glyph in combat logs. |
 
 ## Next Batch
 

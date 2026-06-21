@@ -323,6 +323,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 25. Relic/potion log source polish: relic effect logs and potion drink logs now emit clean text so combat log badges do not depend on stripped emoji prefixes.
 26. Core combat log source polish: combat engine logs now emit clean text without emoji prefixes, arrows, or multiply glyphs.
 27. Ascension text polish: ascension modifier summaries now use simple ASCII separators in run setup and summary UI.
+28. Relic log emoji cleanup: Starseer's Pendant now emits clean text instead of a raw star glyph in combat logs.
 
 The next remaining visual batch is remaining low-priority developer/debug polish and final visual QA cleanup.
 
