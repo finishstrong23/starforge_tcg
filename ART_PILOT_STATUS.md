@@ -63,6 +63,7 @@ The previous generated faction/background packs were rejected because they were 
 | `ui:potion-modal-fallbacks` | Potion inventory, pickup, shop, lumen modal, telemetry panel | Installed text fallback pass | Potion and small modal fallback labels now use readable ASCII chips instead of emoji/mojibake. |
 | `blessing:*` | `public/art/dungeon/blessings/{blessingId}.svg`, `BlessingView` | Installed Basic Token SVG pass | Six act-start blessing choices now render simple token icons with ASCII fallbacks. |
 | `combat:choice-modal-labels` | `CombatView` | Installed text fallback pass | Choice and augment modal headers now avoid decorative glyph prefixes. |
+| `data:relic-enemy-fallbacks` | `src/dungeon/data/relics.ts`, `src/dungeon/data/enemies.ts` | Installed text fallback pass | Relic and enemy fallback art strings now use readable ASCII chips if token SVGs fail to load. |
 
 ## Next Batch
 
