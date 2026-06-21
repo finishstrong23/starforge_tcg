@@ -58,6 +58,7 @@ The previous generated faction/background packs were rejected because they were 
 | `ui:faction-resource-panel` | `public/art/dungeon/ui/resource_{faction}.svg` | Installed Basic Token SVG pass | Combat HUD resource panel now has faction-specific token header art. |
 | `combat-log:icon-strategy` | `src/dungeon/components/CombatView.tsx` | Installed text-token pass | Combat log now strips raw glyph prefixes and displays consistent category badges. |
 | `map:path-motifs` | `src/dungeon/components/MapView.tsx` | Installed SVG route pass | Map connectors now use rounded board-route rails with active path markers. |
+| `ui:text-glyph-cleanup` | Dungeon UI components | Installed visible text pass | Major screen headers, modal labels, status fallbacks, and action chips now avoid emoji/mojibake. |
 
 ## Next Batch
 

@@ -118,8 +118,8 @@ export const DeckViewer: React.FC<DeckViewerProps> = ({ onClose }) => {
     <div style={s.overlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div style={s.panel}>
         <div style={s.header}>
-          <h3 style={s.title}>Deck — {deck.length} cards</h3>
-          <button type="button" style={s.closeBtn} onClick={onClose}>✕ Close</button>
+          <h3 style={s.title}>Deck - {deck.length} cards</h3>
+          <button type="button" style={s.closeBtn} onClick={onClose}>Close</button>
         </div>
 
         <div style={s.sortRow}>
@@ -139,9 +139,9 @@ export const DeckViewer: React.FC<DeckViewerProps> = ({ onClose }) => {
         </div>
 
         <div style={s.meta}>
-          {deck.filter((c) => c.upgraded).length} upgraded ·{' '}
-          {deck.filter((c) => c.type === 'Attack').length} attacks ·{' '}
-          {deck.filter((c) => c.type === 'Skill').length} skills ·{' '}
+          {deck.filter((c) => c.upgraded).length} upgraded -{' '}
+          {deck.filter((c) => c.type === 'Attack').length} attacks -{' '}
+          {deck.filter((c) => c.type === 'Skill').length} skills -{' '}
           {deck.filter((c) => c.type === 'Power').length} powers
         </div>
 

@@ -38,22 +38,22 @@ interface FloatNum {
 let _floatId = 0;
 
 const STATUS_META: Record<string, { emoji: string; color: string; label: string }> = {
-  burn:       { emoji: '🔥', color: '#ff5a2e', label: 'Burn'        },
-  poison:     { emoji: '☠',  color: '#44cc44', label: 'Poison'      },
-  shield:     { emoji: '🛡', color: '#3b8fff', label: 'Shield'      },
-  strength:   { emoji: '💪', color: '#ffcc00', label: 'Strength'    },
-  weak:       { emoji: '⬇',  color: '#aaaaaa', label: 'Weak'        },
-  vulnerable: { emoji: '↓',  color: '#ff8c00', label: 'Vulnerable'  },
-  barrier:    { emoji: '🔷', color: '#00aaff', label: 'Barrier'     },
-  stealth:    { emoji: '👤', color: '#cccccc', label: 'Stealth'     },
-  phase:      { emoji: '✦',  color: '#c27dff', label: 'Phase'       },
+  burn:       { emoji: 'BRN', color: '#ff5a2e', label: 'Burn'        },
+  poison:     { emoji: 'PSN', color: '#44cc44', label: 'Poison'      },
+  shield:     { emoji: 'SHD', color: '#3b8fff', label: 'Shield'      },
+  strength:   { emoji: 'STR', color: '#ffcc00', label: 'Strength'    },
+  weak:       { emoji: 'WEK', color: '#aaaaaa', label: 'Weak'        },
+  vulnerable: { emoji: 'VUL', color: '#ff8c00', label: 'Vulnerable'  },
+  barrier:    { emoji: 'BAR', color: '#00aaff', label: 'Barrier'     },
+  stealth:    { emoji: 'STL', color: '#cccccc', label: 'Stealth'     },
+  phase:      { emoji: 'PHS', color: '#c27dff', label: 'Phase'       },
 };
 
 const RIFT_META: Record<string, { emoji: string; color: string; label: string; tip: (turns: number) => string }> = {
-  cost:    { emoji: '⚡', color: '#c27dff', label: 'Cost Rift',    tip: (t) => `Cost Rift: 1 random card costs −1 each turn (${t} left)` },
-  genesis: { emoji: '⚡', color: '#ff7acc', label: 'Genesis Rift', tip: (t) => `Genesis Rift: +2 Energy this turn (${t} left)`         },
-  energy:  { emoji: '⚡', color: '#4adfff', label: 'Energy Rift',  tip: (t) => `Energy Rift: +1 Energy each turn (${t} left)`          },
-  chaos:   { emoji: '⚡', color: '#ffd24a', label: 'Chaos Rift',   tip: (t) => `Chaos Rift: deals 3 to enemy each turn (${t} left)`    },
+  cost:    { emoji: 'RFT', color: '#c27dff', label: 'Cost Rift',    tip: (t) => `Cost Rift: 1 random card costs -1 each turn (${t} left)` },
+  genesis: { emoji: 'RFT', color: '#ff7acc', label: 'Genesis Rift', tip: (t) => `Genesis Rift: +2 Energy this turn (${t} left)`          },
+  energy:  { emoji: 'RFT', color: '#4adfff', label: 'Energy Rift',  tip: (t) => `Energy Rift: +1 Energy each turn (${t} left)`           },
+  chaos:   { emoji: 'RFT', color: '#ffd24a', label: 'Chaos Rift',   tip: (t) => `Chaos Rift: deals 3 to enemy each turn (${t} left)`     },
 };
 
 // ─── Board row ────────────────────────────────────────────────────────────────
@@ -333,12 +333,12 @@ const CombatLog: React.FC<{ log: string[]; cardPool: CardInstance[] }> = ({ log,
                 <div style={{ fontWeight: 700, fontSize: 12, marginBottom: 4, color: '#eee' }}>
                   {tooltip.card.name}
                   <span style={{ fontWeight: 400, fontSize: 10, opacity: 0.6, marginLeft: 8 }}>
-                    {ts.cost}⚡ · {tooltip.card.type}
+                    Cost {ts.cost} - {tooltip.card.type}
                   </span>
                 </div>
                 {(ts.attack !== undefined || ts.health !== undefined) && (
                   <div style={{ fontSize: 10, color: '#aaa', marginBottom: 4 }}>
-                    ⚔ {ts.attack ?? 0} / ❤ {ts.health ?? 0}
+                    ATK {ts.attack ?? 0} / HP {ts.health ?? 0}
                   </div>
                 )}
                 <div style={{ fontSize: 10, color: '#ccc', lineHeight: 1.5 }}>
@@ -405,7 +405,7 @@ const PlayerHUD: React.FC<{
             Player
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11 }}>
-            <span style={{ color: hpColor, fontWeight: 700 }}>♥ {cs.playerHealth}/{cs.playerMaxHealth}</span>
+            <span style={{ color: hpColor, fontWeight: 700 }}>HP {cs.playerHealth}/{cs.playerMaxHealth}</span>
             <span style={{ color: '#ffcc00', fontWeight: 700 }}>● {gold}</span>
           </div>
         </div>
@@ -428,7 +428,7 @@ const PlayerHUD: React.FC<{
 
       {cs.playerShield > 0 && (
         <div style={{ fontSize: 10, color: '#3b8fff', fontWeight: 700, textShadow: '0 0 6px #3b8fff66' }}>
-          🛡 {cs.playerShield} Block
+          Block {cs.playerShield}
         </div>
       )}
 
@@ -506,7 +506,7 @@ const PlayerHUD: React.FC<{
                   gap: 2,
                 }}
               >
-                ⚡<span style={{ fontSize: 9 }}>{r.turnsRemaining}</span>
+                R<span style={{ fontSize: 9 }}>{r.turnsRemaining}</span>
               </span>
             ) : null;
           })}
@@ -523,7 +523,7 @@ const PlayerHUD: React.FC<{
                 color: '#ffaa44',
               }}
             >
-              ⚙
+              POW
             </span>
           ))}
         </div>
@@ -926,14 +926,14 @@ export const CombatView: React.FC = () => {
       // If shield also dropped, show both numbers
       if (prevEnemyShield.current !== null && prevEnemyShield.current > enemyShield) {
         const blocked = prevEnemyShield.current - enemyShield;
-        spawnFloat(`🛡 ${blocked}`, '#3b8fff', '#001a4488', '16%');
+        spawnFloat(`Block ${blocked}`, '#3b8fff', '#001a4488', '16%');
       }
       spawnFloat(`-${rawDmg}`, '#ff4455', '#ff000044', '22%');
       setEnemyFlashKey((k) => k + 1);
     }
     // Enemy gains shield
     if (prevEnemyShield.current !== null && enemyShield > prevEnemyShield.current) {
-      spawnFloat(`+🛡 ${enemyShield - prevEnemyShield.current}`, '#3b8fff', '#001a8888', '18%');
+      spawnFloat(`+Block ${enemyShield - prevEnemyShield.current}`, '#3b8fff', '#001a8888', '18%');
     }
 
     // Player takes damage
@@ -941,7 +941,7 @@ export const CombatView: React.FC = () => {
       const rawDmg = prevPlayerHP.current - playerHP;
       if (prevPlayerShield.current !== null && prevPlayerShield.current > playerShield) {
         const blocked = prevPlayerShield.current - playerShield;
-        spawnFloat(`🛡 ${blocked}`, '#3b8fff', '#001a4488', '72%');
+        spawnFloat(`Block ${blocked}`, '#3b8fff', '#001a4488', '72%');
       }
       spawnFloat(`-${rawDmg}`, '#ff4455', '#ff000044', '78%');
       setPlayerFlashKey((k) => k + 1);
@@ -954,7 +954,7 @@ export const CombatView: React.FC = () => {
     }
     // Player gains shield
     if (prevPlayerShield.current !== null && playerShield > prevPlayerShield.current) {
-      spawnFloat(`+🛡 ${playerShield - prevPlayerShield.current}`, '#3b8fff', '#001a8888', '76%');
+      spawnFloat(`+Block ${playerShield - prevPlayerShield.current}`, '#3b8fff', '#001a8888', '76%');
     }
 
     prevPlayerHP.current    = playerHP;
@@ -1424,7 +1424,7 @@ export const CombatView: React.FC = () => {
       ))}
 
       <div style={s.turnBanner}>
-        {isEnemyTurn ? '⚠ Enemy Turn' : `Your Turn · ${cs.turn}`}
+        {isEnemyTurn ? 'Enemy Turn' : `Your Turn - ${cs.turn}`}
       </div>
 
       {/* First-run tutorial overlay (combat #1, #2, #3 of the player's
@@ -1442,12 +1442,12 @@ export const CombatView: React.FC = () => {
         <div style={s.overlay}>
           {cs.phase === 'combat_end_win' ? (
             <>
-              <span>⚔️ Victory!</span>
-              <span style={{ fontSize: 13, opacity: 0.6, fontWeight: 400 }}>Collecting rewards…</span>
+              <span>Victory</span>
+              <span style={{ fontSize: 13, opacity: 0.6, fontWeight: 400 }}>Collecting rewards...</span>
             </>
           ) : (
             <>
-              <span style={{ color: '#ff4444' }}>💀 Defeated</span>
+              <span style={{ color: '#ff4444' }}>Defeated</span>
               <span style={{ fontSize: 13, opacity: 0.6, fontWeight: 400 }}>The dungeon claims another soul.</span>
             </>
           )}
@@ -1806,7 +1806,7 @@ export const CombatView: React.FC = () => {
               gap: 12,
             }}
           >
-            🌋 {def.name} — pick a target
+            Target potion: {def.name}
             <button
               type="button"
               onClick={handlePotionTargetCancel}

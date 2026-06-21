@@ -13,22 +13,22 @@ const INTENT_COLOR: Record<IntentType, string> = {
 };
 
 const INTENT_EMOJI: Record<IntentType, string> = {
-  attack:  '⚔',
-  defend:  '🛡',
-  buff:    '✨',
-  debuff:  '☠',
-  summon:  '🔮',
-  special: '⭐',
+  attack:  'ATK',
+  defend:  'DEF',
+  buff:    'BUF',
+  debuff:  'HEX',
+  summon:  'SUM',
+  special: 'SPC',
 };
 
 const STATUS_DISPLAY: Record<string, { emoji: string; color: string }> = {
-  burn:       { emoji: '🔥', color: '#ff5a2e' },
-  poison:     { emoji: '☠',  color: '#44cc44' },
-  shield:     { emoji: '🛡',  color: '#3b8fff' },
-  strength:   { emoji: '💪',  color: '#ffcc00' },
-  weak:       { emoji: '⬇',  color: '#aaaaaa' },
-  vulnerable: { emoji: '↓',  color: '#ff8c00' },
-  barrier:    { emoji: '🔷', color: '#00aaff' },
+  burn:       { emoji: 'BRN', color: '#ff5a2e' },
+  poison:     { emoji: 'PSN', color: '#44cc44' },
+  shield:     { emoji: 'SHD', color: '#3b8fff' },
+  strength:   { emoji: 'STR', color: '#ffcc00' },
+  weak:       { emoji: 'WEK', color: '#aaaaaa' },
+  vulnerable: { emoji: 'VUL', color: '#ff8c00' },
+  barrier:    { emoji: 'BAR', color: '#00aaff' },
 };
 
 export interface EnemyComponentProps {
@@ -206,7 +206,7 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
 
       {/* Shield */}
       {enemy.currentShield > 0 && (
-        <div style={s.shieldBadge}>🛡 {enemy.currentShield}</div>
+        <div style={s.shieldBadge}>Block {enemy.currentShield}</div>
       )}
 
       {/* Status effects */}
@@ -242,8 +242,8 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
         />
         <div style={s.intentBlock}>
           <span style={s.intentLabel}>
-            {intentResolving ? 'Acting…' : intentPulsing ? 'Incoming' : 'Next Turn'}
-            {intent.value !== undefined && ` · ${intent.value}`}
+            {intentResolving ? 'Acting...' : intentPulsing ? 'Incoming' : 'Next Turn'}
+            {intent.value !== undefined && ` - ${intent.value}`}
           </span>
           <span style={s.intentText}>{intent.description}</span>
         </div>

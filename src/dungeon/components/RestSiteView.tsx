@@ -70,7 +70,20 @@ export const RestSiteView: React.FC = () => {
       flexWrap: 'wrap',
       justifyContent: 'center',
     },
-    optionIcon: { fontSize: 36 },
+    optionIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 12,
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: '#172816',
+      border: '1px solid #22cc6688',
+      color: '#7dffb2',
+      fontSize: 12,
+      fontWeight: 900,
+      letterSpacing: '0.08em',
+    },
     optionTitle: { fontSize: 13, fontWeight: 700, textAlign: 'center' },
     optionDesc: { fontSize: 10, opacity: 0.65, textAlign: 'center', lineHeight: 1.4 },
     cardGrid: {
@@ -103,7 +116,7 @@ export const RestSiteView: React.FC = () => {
   return (
     <div style={s.root}>
       <div>
-        <h2 style={s.title}>⛺ Rest Site</h2>
+        <h2 style={s.title}>Rest Site</h2>
         <div style={s.subtitle}>Recover before the next battle</div>
       </div>
 
@@ -116,7 +129,7 @@ export const RestSiteView: React.FC = () => {
             onClick={handleHeal}
             onKeyDown={(e) => { if (e.key === 'Enter') handleHeal(); }}
           >
-            <div style={s.optionIcon}>💚</div>
+            <div style={s.optionIcon}>HP</div>
             <div style={s.optionTitle}>Rest</div>
             <div style={s.optionDesc}>
               Heal {healAmt} HP<br />
@@ -131,7 +144,7 @@ export const RestSiteView: React.FC = () => {
             onClick={() => setMode(mode === 'upgrading' ? 'none' : 'upgrading')}
             onKeyDown={(e) => { if (e.key === 'Enter') setMode('upgrading'); }}
           >
-            <div style={s.optionIcon}>⚒</div>
+            <div style={{ ...s.optionIcon, background: '#2a2112', borderColor: '#f0b55a88', color: '#f0d28a' }}>UP</div>
             <div style={s.optionTitle}>Smith</div>
             <div style={s.optionDesc}>Upgrade one card in your deck permanently</div>
           </div>

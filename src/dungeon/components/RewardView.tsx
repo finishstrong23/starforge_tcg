@@ -240,7 +240,7 @@ export const RewardView: React.FC = () => {
   return (
     <div style={s.root}>
       <div style={{ textAlign: 'center' }}>
-        <h2 style={s.title}>{isBossReward ? '👑 Boss Reward' : '⚔ Victory!'}</h2>
+        <h2 style={s.title}>{isBossReward ? 'Boss Reward' : 'Victory'}</h2>
         <div style={s.subtitle}>
           {picked ? 'Card added to deck.' : 'Choose a card to add to your deck.'}
         </div>
@@ -344,7 +344,7 @@ export const RewardView: React.FC = () => {
             >
               <TokenArt
                 src={getPotionArt(def.id)}
-                fallback="🧪"
+                fallback="PT"
                 alt=""
                 style={{ width: 34, height: 38, flexShrink: 0 }}
                 fallbackStyle={{ fontSize: 28, lineHeight: 1 }}
@@ -352,7 +352,7 @@ export const RewardView: React.FC = () => {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 700, color: rarityColor }}>{def.name}</div>
                 <div style={{ fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.55 }}>
-                  {def.rarity} · {def.category}
+                  {def.rarity} - {def.category}
                 </div>
                 <div style={{ fontSize: 10, opacity: 0.85, lineHeight: 1.4 }}>{def.effect}</div>
               </div>

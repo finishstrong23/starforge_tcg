@@ -42,43 +42,43 @@ const FACTIONS: Array<{
 }> = [
   {
     id: 'Pyroclast',
-    glyph: '🔥',
+    glyph: 'PY',
     accent: '#ff5a2e',
     tagline: 'Volcanic-born war-creatures.',
     mechanic: 'Heat',
     mechanicSummary:
-      'Stockpile Heat (0–12) to unleash scaling finishers. Overheat at 10+ for risk/reward pressure.',
-    difficulty: 'Low floor · High ceiling',
+      'Stockpile Heat (0-12) to unleash scaling finishers. Overheat at 10+ for risk/reward pressure.',
+    difficulty: 'Low floor - High ceiling',
   },
   {
     id: 'Luminar',
-    glyph: '☀',
+    glyph: 'LU',
     accent: '#f5d67a',
     tagline: 'Star-priests, celestial channelers.',
     mechanic: 'Lumens / Channel',
     mechanicSummary:
-      'Channel cards gain Lumens while held. Release for scaling effect — patience is worship.',
-    difficulty: 'High ceiling · Deferred payoff',
+      'Channel cards gain Lumens while held. Release for scaling effect - patience is worship.',
+    difficulty: 'High ceiling - Deferred payoff',
   },
   {
     id: 'Cogsmiths',
-    glyph: '⚙',
+    glyph: 'CO',
     accent: '#4aa8e0',
     tagline: 'Artificer engineers. Modular warbands.',
     mechanic: 'Augments',
     mechanicSummary:
       'Attach Augments to cards permanently. Deck-level deckbuilding inside the deckbuilder.',
-    difficulty: 'Late-bloomer · Run-scaling',
+    difficulty: 'Late-bloomer - Run-scaling',
   },
   {
     id: 'WarpRiders',
-    glyph: '✦',
+    glyph: 'WR',
     accent: '#c27dff',
     tagline: 'Dimensional raiders. Riders of the rift.',
     mechanic: 'Flux',
     mechanicSummary:
       'Cards have A/B/C states that re-roll every turn. Lock, Reroll, and Rift the chaos into your weapon.',
-    difficulty: 'High variance · Skill-capped',
+    difficulty: 'High variance - Skill-capped',
   },
 ];
 
@@ -387,10 +387,10 @@ const s: Record<string, React.CSSProperties> = {
 const DeckRow: React.FC<{ count: number; card: Card }> = ({ count, card }) => (
   <div>
     <div style={s.deckRow}>
-      <span style={s.deckCount}>×{count}</span>
+      <span style={s.deckCount}>x{count}</span>
       <span style={s.deckName}>{card.name}</span>
       <span style={s.deckCost}>
-        {card.type} · Cost {card.cost}
+        {card.type} - Cost {card.cost}
       </span>
     </div>
     <div style={s.deckEffect}>{card.description}</div>
@@ -424,7 +424,7 @@ const FactionDetail: React.FC<{
           <strong style={{ color: faction.accent, letterSpacing: '0.1em' }}>
             {faction.mechanic.toUpperCase()}
           </strong>
-          {' — '}
+          {' - '}
           {faction.mechanicSummary}
         </p>
         <div style={{ ...s.cardFooter, marginTop: '0.5rem', borderTop: 'none', paddingTop: 0 }}>
@@ -432,7 +432,7 @@ const FactionDetail: React.FC<{
         </div>
       </div>
       <div style={s.detailCol}>
-        <div style={detailHeaderStyle(faction.accent)}>Starter Deck · 10 cards</div>
+        <div style={detailHeaderStyle(faction.accent)}>Starter Deck - 10 cards</div>
         <div style={s.deckList}>
           {rows.map((r) => (
             <DeckRow key={r.card.id} count={r.count} card={r.card} />
@@ -487,13 +487,13 @@ const RunEndScreen: React.FC<{ won: boolean; onBack: () => void }> = ({ won, onB
       }}
     >
       <h1 style={{ ...s.endTitle, color: won ? '#22cc66' : '#cc3333' }}>
-        {won ? '👑 Victory!' : '💀 Defeated'}
+        {won ? 'Victory' : 'Defeated'}
       </h1>
       <div style={{ ...s.endTitle, fontSize: '1rem', opacity: 0.5, letterSpacing: '0.2em' }}>
-        {won ? `${draftFaction ?? ''} · A${ascension} cleared` : `Fell in Act ${act}`}
+        {won ? `${draftFaction ?? ''} - A${ascension} cleared` : `Fell in Act ${act}`}
       </div>
       <div style={s.endStats}>
-        <div>Faction: <strong>{draftFaction ?? '—'}</strong></div>
+        <div>Faction: <strong>{draftFaction ?? '-'}</strong></div>
         <div>Ascension: <strong>A{ascension}</strong></div>
         <div>Combats won: {stats?.totalCombats ?? 0}</div>
         <div>Elites defeated: {stats?.elitesDefeated ?? 0}</div>
@@ -521,7 +521,7 @@ const RunEndScreen: React.FC<{ won: boolean; onBack: () => void }> = ({ won, onB
             boxShadow: '0 0 16px rgba(255,210,74,0.3)',
           }}
         >
-          ✨ Ascension {newlyUnlocked} unlocked for {draftFaction}
+          Ascension {newlyUnlocked} unlocked for {draftFaction}
         </div>
       )}
 
@@ -628,7 +628,7 @@ const AscensionPicker: React.FC<{
           marginBottom: 6,
         }}
       >
-        Ascension · {maxUnlocked === 0 ? 'no unlocks yet' : `unlocked through A${maxUnlocked}`}
+        Ascension - {maxUnlocked === 0 ? 'no unlocks yet' : `unlocked through A${maxUnlocked}`}
       </div>
 
       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 8 }}>
@@ -641,7 +641,7 @@ const AscensionPicker: React.FC<{
               disabled={locked}
               onClick={() => !locked && onChange(n)}
               aria-label={locked
-                ? `Ascension ${n} (locked — beat A${maxUnlocked} to unlock)`
+                ? `Ascension ${n} (locked - beat A${maxUnlocked} to unlock)`
                 : `Choose Ascension ${n}${n === level ? ' (selected)' : ''}`}
               aria-pressed={n === level}
               style={stepBtn(n, locked)}
@@ -654,7 +654,7 @@ const AscensionPicker: React.FC<{
 
       {lines.length === 0 ? (
         <div style={{ fontSize: 11, color: '#aaa', fontStyle: 'italic' }}>
-          Standard difficulty — no modifiers.
+          Standard difficulty - no modifiers.
         </div>
       ) : (
         <ul style={{ margin: 0, paddingLeft: 16, color: '#ddd' }}>
@@ -694,7 +694,7 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <div style={s.headerRow}>
           <div style={s.titleBlock}>
             <h1 style={s.title}>DUNGEON RUN</h1>
-            <p style={s.subtitle}>3 acts · 12 steps each · one survives</p>
+            <p style={s.subtitle}>3 acts - 12 steps each - one survives</p>
           </div>
           <button type="button" onClick={onBack} style={s.backBtn}>
             BACK
@@ -757,7 +757,7 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             style={beginBtnStyle(selected.accent, false)}
             onClick={() => startNewRun(selectedId as Faction, undefined, ascensionLevel)}
           >
-            Begin Run · A{ascensionLevel}
+            Begin Run - A{ascensionLevel}
           </button>
         </div>
       </div>
@@ -820,7 +820,7 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               if (window.confirm('Abandon this run?')) endRun(false);
             }}
           >
-            ✕ Abandon
+            Abandon
           </button>
         </>
       )}
