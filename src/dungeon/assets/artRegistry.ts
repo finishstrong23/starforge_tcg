@@ -9,6 +9,13 @@ export const factionArt: Record<Faction, string> = {
   WarpRiders: assetUrl('art/dungeon/factions/warpriders.png'),
 };
 
+export const factionResourceArt: Record<Faction, string> = {
+  Pyroclast: assetUrl('art/dungeon/ui/resource_pyroclast.svg'),
+  Cogsmiths: assetUrl('art/dungeon/ui/resource_cogsmiths.svg'),
+  Luminar: assetUrl('art/dungeon/ui/resource_luminar.svg'),
+  WarpRiders: assetUrl('art/dungeon/ui/resource_warpriders.svg'),
+};
+
 export const sceneArt = {
   combat: assetUrl('art/dungeon/backgrounds/combat.png'),
   shop: assetUrl('art/dungeon/backgrounds/shop.png'),
@@ -80,6 +87,10 @@ export const potionEffectArt: Record<PotionCategory | 'Phoenix', string> = {
 
 export function getFactionArt(faction: Faction): string {
   return factionArt[faction];
+}
+
+export function getFactionResourceArt(faction: Faction): string {
+  return factionResourceArt[faction];
 }
 
 export function getSceneArt(scene: SceneArtId): string {

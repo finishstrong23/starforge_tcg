@@ -60,7 +60,7 @@ Status key:
 | Relic icons | `src/dungeon/data/relics.ts`, `RelicBar.tsx`, rewards/shop | 26 SVG icons installed | P0 for visible relic bar/shop/rewards | `public/art/dungeon/relics/{relicId}.svg` |
 | Potion icons | `src/dungeon/components/PotionInventory.tsx`, `PotionPickupModal.tsx`, `ShopView.tsx` | 14 SVG icons installed | P0 | `public/art/dungeon/potions/{potionId}.svg` |
 | Potion drink burst | `src/dungeon/components/PotionDrinkBurst.tsx` | Done with eight category SVGs plus Phoenix SVG | P2 | `public/art/dungeon/potions/effects/{category}.svg` |
-| Faction resource panel | `src/dungeon/components/FactionResourcePanel.tsx` | Text/color meter only | P1 | `public/art/dungeon/ui/resource_{faction}.png` |
+| Faction resource panel | `src/dungeon/components/FactionResourcePanel.tsx` | Done with four Basic Token SVG header icons | P1 | `public/art/dungeon/ui/resource_{faction}.svg` |
 | Tutorial icons | `src/dungeon/components/TutorialOverlay.tsx` | Done with three Basic Token SVGs | P2 | `public/art/dungeon/ui/tutorial_{step}.svg` |
 | Telemetry/debug icon | `src/dungeon/components/TelemetryDebugPanel.tsx` | Emoji chart | P3 | Keep developer-only or replace with CSS icon |
 | Combat log emojis | `src/dungeon/engine/combat.ts`, `relicEffects.ts`, `potions.ts` | Emoji embedded in log strings | P2 | Text-only log tags or registry-backed small icons |
@@ -264,6 +264,10 @@ Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wi
 | `ui:tutorial_energy` | UI icon | Done | `public/art/dungeon/ui/tutorial_energy.svg` | `TutorialOverlay` |
 | `ui:tutorial_relics` | UI icon | Done | `public/art/dungeon/ui/tutorial_relics.svg` | `TutorialOverlay` |
 | `ui:tutorial_map` | UI icon | Done | `public/art/dungeon/ui/tutorial_map.svg` | `TutorialOverlay` |
+| `ui:resource_pyroclast` | UI icon | Done | `public/art/dungeon/ui/resource_pyroclast.svg` | `FactionResourcePanel` |
+| `ui:resource_cogsmiths` | UI icon | Done | `public/art/dungeon/ui/resource_cogsmiths.svg` | `FactionResourcePanel` |
+| `ui:resource_luminar` | UI icon | Done | `public/art/dungeon/ui/resource_luminar.svg` | `FactionResourcePanel` |
+| `ui:resource_warpriders` | UI icon | Done | `public/art/dungeon/ui/resource_warpriders.svg` | `FactionResourcePanel` |
 | `potion_effect:Defense` through `potion_effect:Extreme` | Potion effect icons | Done | `public/art/dungeon/potions/effects/{category}.svg` | `PotionDrinkBurst` |
 | `potion_effect:Phoenix` | Potion effect icon | Done | `public/art/dungeon/potions/effects/phoenix.svg` | `PotionDrinkBurst` |
 
@@ -306,8 +310,9 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 13. Card art batch 5: 57 final gap SVGs, completing authored coverage for all current dungeon cards.
 14. Tutorial icons: 3 Basic Token SVGs wired into first-run tutorial.
 15. Potion drink burst sigils: 8 category SVGs plus Phoenix SVG wired into potion use animation.
+16. Faction resource panel icons: 4 Basic Token SVGs wired into the combat HUD resource panel.
 
-The next remaining visual batch is UI polish outside card art: combat log icon strategy, faction resource panel tokens, and optional route/path motifs.
+The next remaining visual batch is UI polish outside card art: combat log icon strategy and optional route/path motifs.
 
 ## Generation Notes
 

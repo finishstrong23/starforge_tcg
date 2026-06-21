@@ -55,6 +55,7 @@ The previous generated faction/background packs were rejected because they were 
 | `ui:shop_misc` | `public/art/dungeon/ui/{gold,card_removal}.svg` | Installed Basic Token SVG pass | Shop prices, gold balance, and card-removal service now use token icons. |
 | `ui:tutorial-icons` | `public/art/dungeon/ui/tutorial_{energy,relics,map}.svg` | Installed Basic Token SVG pass | First-run tutorial now uses token icons instead of emoji glyphs. |
 | `potion:drink-burst` | `public/art/dungeon/potions/effects/{category}.svg` | Installed Basic Token SVG pass | Potion drink animation now uses category token sigils, including Phoenix. |
+| `ui:faction-resource-panel` | `public/art/dungeon/ui/resource_{faction}.svg` | Installed Basic Token SVG pass | Combat HUD resource panel now has faction-specific token header art. |
 
 ## Next Batch
 
@@ -66,7 +67,6 @@ The next batch should generate the smallest asset set that changes every core sc
 |---|---|---|
 | `card:remaining` | `public/cards/{cardId}.svg` | Complete for current dungeon card IDs; procedural fallback remains as a safe future-card fallback |
 | `combat-log:icon-strategy` | `src/dungeon/components/CombatView.tsx` and engine log producers | Next: replace embedded emoji prefixes with text tags or registry-backed small icons |
-| `ui:faction-resource-panel` | `public/art/dungeon/ui/resource_{faction}.svg` | Next small utility token batch |
 | `ui:remaining-polish` | `public/art/dungeon/ui/{assetId}.svg` | Later utility polish outside the shop |
 
 ## QA Checklist

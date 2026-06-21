@@ -1,6 +1,8 @@
 import React from 'react';
-import type { CombatState } from '../types';
+import type { CombatState, Faction } from '../types';
+import { getFactionResourceArt } from '../assets/artRegistry';
 import { getFactionResourceSummary, type FactionResourceTone } from '../engine/factionResources';
+import { TokenArt } from './TokenArt';
 
 const TONE_COLOR: Record<FactionResourceTone, string> = {
   neutral: '#b7c4d8',
@@ -21,6 +23,7 @@ export const FactionResourcePanel: React.FC<FactionResourcePanelProps> = ({ cs }
   const thresholdPercent = summary.meter?.threshold
     ? Math.max(0, Math.min(100, (summary.meter.threshold / summary.meter.max) * 100))
     : null;
+  const resourceArt = getFactionResourceArt(cs.playerFaction as Faction);
 
   return (
     <section
@@ -31,7 +34,7 @@ export const FactionResourcePanel: React.FC<FactionResourcePanelProps> = ({ cs }
         top: 88,
         right: 18,
         zIndex: 4,
-        width: 214,
+        width: 230,
         padding: '10px 11px',
         background: 'rgba(7, 8, 20, 0.82)',
         border: `1px solid ${summary.accent}77`,
@@ -41,19 +44,61 @@ export const FactionResourcePanel: React.FC<FactionResourcePanelProps> = ({ cs }
         pointerEvents: 'auto',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
-        <div
-          style={{
-            fontSize: 9,
-            fontWeight: 900,
-            letterSpacing: '0.16em',
-            textTransform: 'uppercase',
-            color: summary.accent,
-          }}
-        >
-          {summary.title}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 9 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+          <TokenArt
+            src={resourceArt}
+            fallback={summary.title.slice(0, 2).toUpperCase()}
+            alt=""
+            style={{
+              width: 34,
+              height: 34,
+              flex: '0 0 auto',
+              borderRadius: 8,
+              filter: `drop-shadow(0 0 8px ${summary.accent}66)`,
+            }}
+            fallbackStyle={{
+              width: 30,
+              height: 30,
+              borderRadius: 8,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: summary.accent,
+              color: '#070814',
+              fontSize: 9,
+              fontWeight: 900,
+            }}
+          />
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 9,
+                fontWeight: 900,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: summary.accent,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {summary.title}
+            </div>
+            <div style={{ marginTop: 2, fontSize: 9, fontWeight: 800, color: '#dce7ff' }}>{summary.faction}</div>
+          </div>
         </div>
-        <div style={{ fontSize: 10, fontWeight: 800, color: '#dce7ff' }}>{summary.faction}</div>
+        <div
+          aria-hidden="true"
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: summary.accent,
+            boxShadow: `0 0 10px ${summary.accent}`,
+            flex: '0 0 auto',
+          }}
+        />
       </div>
 
       {summary.meter && (
