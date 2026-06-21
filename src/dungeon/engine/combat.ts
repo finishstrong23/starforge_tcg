@@ -112,10 +112,10 @@ function shiftFlux(s: 'A' | 'B' | 'C'): 'A' | 'B' | 'C' {
 /**
  * Pull just the active state's body out of "Flux. A: ... B: ... C: ..." text.
  *
- * Splits on uppercase variant labels (A:/B:/C:) — anything between two
+ * Splits on uppercase variant labels (A:/B:/C:) - anything between two
  * labels is the prior label's body. Phase 4 fix: previous regex used
  * `[^A-C]*?` with case-insensitive flag, which silently excluded
- * lowercase a/b/c too — so any variant body starting with words like
+ * lowercase a/b/c too - so any variant body starting with words like
  * "Deal" / "Apply" / "Gain" got cut after the first non-vowel character
  * and the function fell back to returning the WHOLE text. The fall-back
  * caused the regex parser to read the FIRST variant's numbers instead
@@ -310,7 +310,7 @@ export function initCombat(
     },
     enemyBoard: [],
     lastAction: '',
-    combatLog: ['⚔️ Combat begins!'],
+    combatLog: ['Combat begins!'],
     playerRifts: [],
     playerPowers: [],
     exhaustPile: [],
@@ -369,7 +369,7 @@ export function applyAugment(
 
   const augText = augStats.text.toLowerCase();
   // Patch the ACTIVE text via `setActiveCardText` (Phase 4 chokepoint write
-  // helper). All text mutations route through this — direct cardText writes
+  // helper). All text mutations route through this - direct cardText writes
   // would silently no-op on upgraded cards (cf. Phase 3 applyAugment bug).
   // The augments-array mutation is stat-state, not text/cost-state, so it
   // doesn't need the chokepoint.
@@ -379,7 +379,7 @@ export function applyAugment(
     augments: [...(target.augments ?? []), augment.name],
   };
 
-  // +N damage  →  bump every "Deal X damage" / "Deal X to Y damage"
+  // +N damage  ->  bump every "Deal X damage" / "Deal X to Y damage"
   const dmgBonus = augText.match(/\+(\d+) damage/);
   if (dmgBonus) {
     const bonus = parseInt(dmgBonus[1]);
@@ -406,19 +406,19 @@ export function applyAugment(
     const reduction = parseInt(lessCostMatch[1]);
     buffed = setActiveCardCost(buffed, Math.max(0, getCardCost(buffed) - reduction));
   }
-  // 0 cost (Exotic Core) — matches "costs 0" anywhere (relaxed in Phase 3
+  // 0 cost (Exotic Core) - matches "costs 0" anywhere (relaxed in Phase 3
   // to support "card costs 0 and deals +N damage" rewrite).
   if (/costs? 0\b/.test(augText)) {
     buffed = setActiveCardCost(buffed, 0);
   }
-  // Apply Weak (Jolt) — captures stack count from "+N Weak". Falls back to
+  // Apply Weak (Jolt) - captures stack count from "+N Weak". Falls back to
   // 1 if a legacy "applies weak" form is encountered.
   const weakBonus = augText.match(/\+(\d+)\s*weak/) ?? augText.match(/applies\s*\+?(\d+)?\s*weak/);
   if (weakBonus && !/weak/i.test(activeText)) {
     const stacks = weakBonus[1] ? parseInt(weakBonus[1]) : 1;
     activeText = activeText.trim() + ` Apply Weak ${stacks}.`;
   }
-  // Draw cards (Core) — captures count from "+N draw" / "draws N cards" / "draws a card".
+  // Draw cards (Core) - captures count from "+N draw" / "draws N cards" / "draws a card".
   const drawBonus =
     augText.match(/draws?\s*\+(\d+)/)
     ?? augText.match(/draws?\s+(\d+)\s*cards?/)
@@ -427,7 +427,7 @@ export function applyAugment(
     const count = parseInt(drawBonus[1]);
     activeText = activeText.trim() + ` Draw ${count}.`;
   }
-  // Inverter (AoE) — fallback: bump damage by +5
+  // Inverter (AoE) - fallback: bump damage by +5
   if (/all enemies|all allies/.test(augText) && !dmgBonus && !blockBonus) {
     activeText = activeText.replace(
       /deal (\d+)( damage)/gi,
@@ -435,7 +435,7 @@ export function applyAugment(
     );
   }
 
-  // Single chokepoint write at the end — both cardText and upgradeText (if
+  // Single chokepoint write at the end - both cardText and upgradeText (if
   // upgraded) get the patched value. Future readers via getCardText see
   // the patched text regardless of upgrade state.
   buffed = setActiveCardText(buffed, activeText);
@@ -447,8 +447,8 @@ export function applyAugment(
     hand: state.hand
       .filter((c) => c.instanceId !== augmentInstanceId)
       .map((c) => (c.instanceId === targetInstanceId ? buffed : c)),
-    combatLog: [...state.combatLog, `🔧 ${augment.name} attached to ${target.name}`].slice(-8),
-    lastAction: `${augment.name} → ${target.name}`,
+    combatLog: [...state.combatLog, `${augment.name} attached to ${target.name}`].slice(-8),
+    lastAction: `${augment.name} -> ${target.name}`,
   };
 }
 
@@ -486,9 +486,9 @@ export function playCard(
     forgemasterSigilPending: sigilPending ? false : state.forgemasterSigilPending,
   };
 
-  s = log(s, `▶ ${card.name} played`);
+  s = log(s, `${card.name} played`);
   if (sigilPending) {
-    s = log(s, `⚙️ Forgemaster's Sigil empowers ${card.name}`);
+    s = log(s, `Forgemaster's Sigil empowers ${card.name}`);
   }
 
   // Luminar Channel: Release effect fires on play, scaled by accumulated Lumens.
@@ -507,21 +507,21 @@ export function playCard(
         const dmg = calcDamage(perLumen * lumens, s.playerStatusEffects, s.enemy.statusEffects);
         const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
         s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-        s = log(s, `✨ Release: +${dmg} dmg from ${lumens} Lumen${lumens === 1 ? '' : 's'}`);
+        s = log(s, `Release: +${dmg} dmg from ${lumens} Lumen${lumens === 1 ? '' : 's'}`);
       }
       if (releaseBlock) {
         const perLumen = parseInt(releaseBlock[1]);
         const bonus = perLumen * lumens;
         s = gainBlock(s, bonus);
-        s = log(s, `✨ Release: +${bonus} Block from ${lumens} Lumen${lumens === 1 ? '' : 's'}`);
+        s = log(s, `Release: +${bonus} Block from ${lumens} Lumen${lumens === 1 ? '' : 's'}`);
       }
       if (releaseWeak) {
         s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'weak', lumens, 2) } };
-        s = log(s, `✨ Release: +${lumens} Weak from Lumens`);
+        s = log(s, `Release: +${lumens} Weak from Lumens`);
       }
       if (releaseVuln) {
         s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'vulnerable', lumens, 2) } };
-        s = log(s, `✨ Release: +${lumens} Vulnerable from Lumens`);
+        s = log(s, `Release: +${lumens} Vulnerable from Lumens`);
       }
     }
   }
@@ -539,7 +539,7 @@ export function playCard(
     // DEPLOY trigger
     if (card.keywords.includes('DEPLOY')) {
       s = applySpellEffect(s, effectiveCard, targetId);
-      s = log(s, `⚙ DEPLOY — ${card.name} activates`);
+      s = log(s, `DEPLOY - ${card.name} activates`);
     }
   } else if (card.type === 'Structure') {
     const structure: CardInstance = {
@@ -553,7 +553,7 @@ export function playCard(
   } else if (card.type === 'Power') {
     // Powers persist for the rest of combat and trigger on phase events.
     // On play we ONLY run the segments tagged "at combat start" / non-conditional.
-    s = log(s, `⚙ ${card.name} comes online`);
+    s = log(s, `${card.name} comes online`);
     const playSegments = powerSegmentsForTrigger(effectiveCard, 'play');
     for (const seg of playSegments) {
       s = applySpellEffect(s, effectiveCard, targetId, seg);
@@ -573,7 +573,7 @@ export function playCard(
       || /\bexhaust\.?\b/i.test(stats.text);
     if (isExhaust) {
       s = { ...s, exhaustPile: [...s.exhaustPile, card] };
-      s = log(s, `🚫 ${card.name} exhausted`);
+      s = log(s, `${card.name} exhausted`);
     } else {
       s = { ...s, discardPile: [...s.discardPile, card] };
     }
@@ -593,7 +593,7 @@ function applySpellEffect(
   textOverride?: string,
 ): CombatState {
   let s = { ...state };
-  // Order of precedence: explicit choice override → active Flux body → card text.
+  // Order of precedence: explicit choice override -> active Flux body -> card text.
   const rawText = textOverride
     ?? (isFluxCard(card) && card.fluxState ? activeFluxText(card) : getCardText(card));
   const text = rawText.toLowerCase();
@@ -607,12 +607,12 @@ function applySpellEffect(
     const dmg = calcDamage(roll, s.playerStatusEffects, s.enemy.statusEffects);
     const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
     s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-    s = log(s, `🎲 ${card.name} rolls ${roll} → ${dmg} damage`);
+    s = log(s, `${card.name} rolls ${roll} -> ${dmg} damage`);
   }
 
   // ── Cogsmiths augment-scaled damage ───────────────────────────────────
-  // "Deal N damage + M damage per Augment on this card."   — Socket Wrench, Colossus Strike
-  // "Deal N damage + M damage per Augment on any card in your deck." — Modular Strike
+  // "Deal N damage + M damage per Augment on this card."   - Socket Wrench, Colossus Strike
+  // "Deal N damage + M damage per Augment on any card in your deck." - Modular Strike
   const augOnThis    = text.match(/deal (\d+) damage \+ (\d+) damage per augment on this card/);
   const augInDeck    = !augOnThis
     ? text.match(/deal (\d+) damage \+ (\d+) damage per augment on any card in your deck/)
@@ -643,7 +643,7 @@ function applySpellEffect(
     const dmg = calcDamage(raw, s.playerStatusEffects, s.enemy.statusEffects);
     const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
     s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-    s = log(s, `⚙ ${card.name} deals ${dmg} (${augBonus.count} augment${augBonus.count === 1 ? '' : 's'} counted)`);
+    s = log(s, `${card.name} deals ${dmg} (${augBonus.count} augment${augBonus.count === 1 ? '' : 's'} counted)`);
   }
 
   // Multi-hit: "deal N damage X times" / "deal N damage twice" / "deal N damage 3 times"
@@ -663,19 +663,19 @@ function applySpellEffect(
       totalDealt += dmg;
       if (s.enemy.currentHealth <= 0) break;
     }
-    s = log(s, `💥 ${card.name} hits ${hits}× for ${totalDealt} total`);
+    s = log(s, `${card.name} hits ${hits}x for ${totalDealt} total`);
     if (card.keywords.includes('DRAIN')) {
       const heal = Math.floor(totalDealt / 2);
       s = { ...s, playerHealth: Math.min(s.playerMaxHealth, s.playerHealth + heal) };
-      s = log(s, `💚 DRAIN heals ${heal} HP`);
+      s = log(s, `DRAIN heals ${heal} HP`);
     }
   }
 
-  // ── Heat-scaled damage: "deal damage equal to (your)(current) heat (× N)" ──
-  // Pyroclast: P-023 Meltdown ("Heat × 3"), P-039 Magma Tide ("equal to Heat").
-  // Does NOT consume Heat — purely scaling.
+  // ── Heat-scaled damage: "deal damage equal to (your)(current) heat (x N)" ──
+  // Pyroclast: P-023 Meltdown ("Heat x 3"), P-039 Magma Tide ("equal to Heat").
+  // Does NOT consume Heat - purely scaling.
   const heatScaleMatch = text.match(
-    /deal damage equal to (?:your\s+)?(?:current\s+)?heat(?:\s*[x×*]\s*(\d+))?/,
+    /deal damage equal to (?:your\s+)?(?:current\s+)?heat(?:\s*[x*]\s*(\d+))?/,
   );
   if (heatScaleMatch) {
     const mult = heatScaleMatch[1] ? parseInt(heatScaleMatch[1]) : 1;
@@ -683,7 +683,7 @@ function applySpellEffect(
     const dmg = calcDamage(raw, s.playerStatusEffects, s.enemy.statusEffects);
     const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
     s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-    s = log(s, `🔥 ${card.name} deals ${dmg} (Heat ${s.playerHeat}${mult > 1 ? `×${mult}` : ''})`);
+    s = log(s, `${card.name} deals ${dmg} (Heat ${s.playerHeat}${mult > 1 ? `x${mult}` : ''})`);
   }
 
   // Single-hit damage. Skip if a range, multi-hit, augment-scaled, or heat-scaled pattern already fired.
@@ -693,11 +693,11 @@ function applySpellEffect(
     const dmg = calcDamage(parseInt(dmgMatch[1]), s.playerStatusEffects, s.enemy.statusEffects);
     const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
     s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-    s = log(s, `💥 ${card.name} deals ${dmg} to ${s.enemy.name}`);
+    s = log(s, `${card.name} deals ${dmg} to ${s.enemy.name}`);
     if (card.keywords.includes('DRAIN')) {
       const heal = Math.floor(dmg / 2);
       s = { ...s, playerHealth: Math.min(s.playerMaxHealth, s.playerHealth + heal) };
-      s = log(s, `💚 DRAIN heals ${heal} HP`);
+      s = log(s, `DRAIN heals ${heal} HP`);
     }
   }
 
@@ -713,7 +713,7 @@ function applySpellEffect(
     const block = perHeat * heatCounted;
     if (block > 0) {
       s = gainBlock(s, block);
-      s = log(s, `🛡 ${card.name} gains ${block} Block (${heatCounted} Heat × ${perHeat})`);
+      s = log(s, `${card.name} gains ${block} Block (${heatCounted} Heat x ${perHeat})`);
     }
   }
 
@@ -723,7 +723,7 @@ function applySpellEffect(
     : null;
   if (shieldMatch) {
     s = gainBlock(s, parseInt(shieldMatch[1]));
-    s = log(s, `🛡 Gained ${shieldMatch[1]} Shield`);
+    s = log(s, `Gained ${shieldMatch[1]} Shield`);
   }
 
   // Draw cards
@@ -737,36 +737,36 @@ function applySpellEffect(
   if (healMatch) {
     const healed = parseInt(healMatch[1]);
     s = { ...s, playerHealth: Math.min(s.playerMaxHealth, s.playerHealth + healed) };
-    s = log(s, `💚 Healed ${healed} HP`);
+    s = log(s, `Healed ${healed} HP`);
   }
 
   // Self damage. Patterns:
-  //   "X% chance to take N (self) damage"  — Paradox Strike etc.
-  //   "take N (self) damage"               — Cauterize, Rally, Collapsing Star, Overdrive
-  //   "lose N HP"                           — Glass Cannon
+  //   "X% chance to take N (self) damage"  - Paradox Strike etc.
+  //   "take N (self) damage"               - Cauterize, Rally, Collapsing Star, Overdrive
+  //   "lose N HP"                           - Glass Cannon
   const chanceSelfDmg = text.match(/(\d+)% chance to take (\d+) (?:self )?damage/);
   if (chanceSelfDmg) {
     const chance = parseInt(chanceSelfDmg[1]);
     const dmg = parseInt(chanceSelfDmg[2]);
     if (Math.random() * 100 < chance) {
       s = { ...s, playerHealth: Math.max(0, s.playerHealth - dmg) };
-      s = log(s, `💥 ${card.name} backfires for ${dmg}`);
+      s = log(s, `${card.name} backfires for ${dmg}`);
     } else {
-      s = log(s, `🍀 ${card.name} backfire avoided`);
+      s = log(s, `${card.name} backfire avoided`);
     }
   } else {
     const flatSelfDmg = text.match(/take (\d+) (?:self )?damage/);
     if (flatSelfDmg) {
       const dmg = parseInt(flatSelfDmg[1]);
       s = { ...s, playerHealth: Math.max(0, s.playerHealth - dmg) };
-      s = log(s, `💥 ${card.name} self-damage: ${dmg}`);
+      s = log(s, `${card.name} self-damage: ${dmg}`);
     }
   }
   const loseHP = text.match(/lose (\d+) hp/);
   if (loseHP) {
     const dmg = parseInt(loseHP[1]);
     s = { ...s, playerHealth: Math.max(0, s.playerHealth - dmg) };
-    s = log(s, `💔 ${card.name} costs ${dmg} HP`);
+    s = log(s, `${card.name} costs ${dmg} HP`);
   }
 
   // ── Luminar Lumen generators ──────────────────────────────────────────────
@@ -788,7 +788,7 @@ function applySpellEffect(
         ...s,
         hand: s.hand.map((c) => isChannelCard(c) ? { ...c, lumens: (c.lumens ?? 0) + n } : c),
       };
-      s = log(s, `✨ +${n} Lumen on ${channels.length} Channel card${channels.length === 1 ? '' : 's'}`);
+      s = log(s, `+${n} Lumen on ${channels.length} Channel card${channels.length === 1 ? '' : 's'}`);
     } else if (mode === 'first') {
       const idx = s.hand.findIndex(isChannelCard);
       const target = s.hand[idx];
@@ -796,7 +796,7 @@ function applySpellEffect(
         ...s,
         hand: s.hand.map((c, i) => i === idx ? { ...c, lumens: (c.lumens ?? 0) + n } : c),
       };
-      s = log(s, `✨ +${n} Lumen on ${target.name}`);
+      s = log(s, `+${n} Lumen on ${target.name}`);
     } else {
       // distributed: spread evenly, remainder on the leftmost
       const per = Math.floor(n / channels.length);
@@ -811,7 +811,7 @@ function applySpellEffect(
           return { ...c, lumens: (c.lumens ?? 0) + per + extra };
         }),
       };
-      s = log(s, `✨ Distributed ${n} Lumens across ${channels.length} Channel card${channels.length === 1 ? '' : 's'}`);
+      s = log(s, `Distributed ${n} Lumens across ${channels.length} Channel card${channels.length === 1 ? '' : 's'}`);
     }
   };
 
@@ -851,7 +851,7 @@ function applySpellEffect(
       health: hp,
       currentHealth: hp,
       keywords: [],
-      cardText: `Summon. Auto-attacks for ${dmg} at turn end${actions > 1 ? ` (×${actions})` : ''}.`,
+      cardText: `Summon. Auto-attacks for ${dmg} at turn end${actions > 1 ? ` (x${actions})` : ''}.`,
       rarity: 'Common',
       complexityTier: 1,
       upgraded: false,
@@ -864,7 +864,7 @@ function applySpellEffect(
 
     s = { ...s, playerBoard: [...s.playerBoard, summon] };
     const turnsTxt = turns < 0 ? 'permanent' : `${turns} turn${turns === 1 ? '' : 's'}`;
-    s = log(s, `🤖 Summoned ${name} — ${hp} HP, ${dmg}${actions > 1 ? `×${actions}` : ''} dmg/turn, ${turnsTxt}`);
+    s = log(s, `Summoned ${name} - ${hp} HP, ${dmg}${actions > 1 ? `x${actions}` : ''} dmg/turn, ${turnsTxt}`);
   }
 
   // ── Rifts (Warp Riders) ──────────────────────────────────────────────────
@@ -878,7 +878,7 @@ function applySpellEffect(
     const type = namedRift[1] as Rift['type'];
     const turns = namedRift[2] ? parseInt(namedRift[2]) : (type === 'genesis' ? 1 : 2);
     s = { ...s, playerRifts: [...s.playerRifts, { type, turnsRemaining: turns }] };
-    s = log(s, `⚡ Opened a ${type[0].toUpperCase() + type.slice(1)} Rift for ${turns} turn${turns === 1 ? '' : 's'}`);
+    s = log(s, `Opened a ${type[0].toUpperCase() + type.slice(1)} Rift for ${turns} turn${turns === 1 ? '' : 's'}`);
   } else {
     const randomRift = text.match(/open (\d+|a) random rifts?(?: for (\d+) turns?)?/);
     if (randomRift) {
@@ -892,7 +892,7 @@ function applySpellEffect(
       }
       s = { ...s, playerRifts: [...s.playerRifts, ...newRifts] };
       const summary = newRifts.map((r) => r.type[0].toUpperCase() + r.type.slice(1)).join(', ');
-      s = log(s, `⚡ Opened ${count} random Rift${count === 1 ? '' : 's'}: ${summary}`);
+      s = log(s, `Opened ${count} random Rift${count === 1 ? '' : 's'}: ${summary}`);
     }
   }
 
@@ -901,7 +901,7 @@ function applySpellEffect(
   if (energyMatch) {
     const gained = parseInt(energyMatch[1]);
     s = { ...s, playerEnergy: Math.min(s.playerMaxEnergy + 3, s.playerEnergy + gained) };
-    s = log(s, `⚡ +${gained} Energy`);
+    s = log(s, `+${gained} Energy`);
   }
 
   // Status: burn / Ignite (Pyroclast term, same status). Match all spellings:
@@ -914,52 +914,52 @@ function applySpellEffect(
   if (selfBurnMatch) {
     const stacks = parseInt(selfBurnMatch[1] ?? selfBurnMatch[2]);
     s = { ...s, playerStatusEffects: addEffect(s.playerStatusEffects, 'burn', stacks) };
-    s = log(s, `🔥 ${card.name}: ${stacks} Burn applied to you`);
+    s = log(s, `${card.name}: ${stacks} Burn applied to you`);
   } else {
     const burnMatch = text.match(/apply (?:(\d+) (?:burn|ignite)|ignite (\d+))/);
     if (burnMatch) {
       const stacks = parseInt(burnMatch[1] ?? burnMatch[2]);
       s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'burn', stacks) } };
-      s = log(s, `🔥 Applied ${stacks} Burn`);
+      s = log(s, `Applied ${stacks} Burn`);
     }
   }
   const poisonMatch = text.match(/apply (\d+) poison/);
   if (poisonMatch) {
     s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'poison', parseInt(poisonMatch[1])) } };
-    s = log(s, `☠ Applied ${poisonMatch[1]} Poison`);
+    s = log(s, `Applied ${poisonMatch[1]} Poison`);
   }
   // Vulnerable. Accept stacks: "apply vulnerable 3", "apply 3 vulnerable", or no number (default 2).
   const vulnMatch = text.match(/apply vulnerable (\d+)|apply (\d+) vulnerable|apply vulnerable/);
   if (vulnMatch) {
     const stacks = parseInt(vulnMatch[1] ?? vulnMatch[2] ?? '2');
     s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'vulnerable', stacks, 2) } };
-    s = log(s, `⬇ Applied Vulnerable ${stacks}`);
+    s = log(s, `Applied Vulnerable ${stacks}`);
   }
   // Weak. Same shape as Vulnerable.
   const weakMatch = text.match(/apply weak (\d+)|apply (\d+) weak|apply weak/);
   if (weakMatch) {
     const stacks = parseInt(weakMatch[1] ?? weakMatch[2] ?? '2');
     s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'weak', stacks, 2) } };
-    s = log(s, `⬇ Applied Weak ${stacks}`);
+    s = log(s, `Applied Weak ${stacks}`);
   }
 
   // Strength
   const strMatch = text.match(/gain (\d+) strength/);
   if (strMatch) {
     s = { ...s, playerStatusEffects: addEffect(s.playerStatusEffects, 'strength', parseInt(strMatch[1])) };
-    s = log(s, `💪 Gained ${strMatch[1]} Strength`);
+    s = log(s, `Gained ${strMatch[1]} Strength`);
   }
 
   // Gain Heat. Match three phrasings:
-  //   "Gain N Heat"        — Kindle, Ember Tap, Hot Wind, Spirit of Fire, etc.
-  //   "Generate N Heat"    — Spark (new starter)
-  //   "...and N Heat"      — Scale Guard upgrade ("Gain 7 Block and 1 Heat"),
+  //   "Gain N Heat"        - Kindle, Ember Tap, Hot Wind, Spirit of Fire, etc.
+  //   "Generate N Heat"    - Spark (new starter)
+  //   "...and N Heat"      - Scale Guard upgrade ("Gain 7 Block and 1 Heat"),
   //                          Heat Shimmer ("Gain 4 Block and 1 Heat"), etc.
   const heatGainMatch = text.match(/(?:gain|generate) (\d+) heat|and (\d+) (?:more |extra )?heat/);
   if (heatGainMatch) {
     const gained = parseInt(heatGainMatch[1] ?? heatGainMatch[2]);
     s = { ...s, playerHeat: s.playerHeat + gained };
-    s = log(s, `🔥 Gained ${gained} Heat (total: ${s.playerHeat})`);
+    s = log(s, `Gained ${gained} Heat (total: ${s.playerHeat})`);
   }
 
   // Heat-scaled damage: "deal N damage + M per heat spent (up to X heat)"
@@ -972,7 +972,7 @@ function applySpellEffect(
     const dmg = calcDamage(base + perHeat * heatSpent, s.playerStatusEffects, s.enemy.statusEffects);
     const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
     s = { ...s, playerHeat: s.playerHeat - heatSpent, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-    s = log(s, `💥 ${card.name} deals ${dmg} (spent ${heatSpent} Heat)`);
+    s = log(s, `${card.name} deals ${dmg} (spent ${heatSpent} Heat)`);
   }
 
   // Consume all heat: "deal N damage. consume all heat"
@@ -984,7 +984,7 @@ function applySpellEffect(
       const bonusDmg = calcDamage(heatBonus, s.playerStatusEffects, s.enemy.statusEffects);
       const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, bonusDmg);
       s = { ...s, playerHeat: 0, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-      s = log(s, `🔥 Consumed ${heatBonus} Heat for ${bonusDmg} bonus damage`);
+      s = log(s, `Consumed ${heatBonus} Heat for ${bonusDmg} bonus damage`);
     } else {
       s = { ...s, playerHeat: 0 };
     }
@@ -993,12 +993,12 @@ function applySpellEffect(
   // Conditional: "if heat >= N, ..."
   const heatCondMatch = text.match(/if heat >=? (\d+)/);
   if (heatCondMatch && s.playerHeat >= parseInt(heatCondMatch[1])) {
-    // Apply burn as conditional bonus (cards like "If Heat >= 3, apply Ignite 2" — treat Ignite as Burn)
+    // Apply burn as conditional bonus (cards like "If Heat >= 3, apply Ignite 2" - treat Ignite as Burn)
     const condBurnMatch = text.match(/if heat >=? \d+,\s*apply (?:ignite|burn) (\d+)/);
     if (condBurnMatch) {
       const stacks = parseInt(condBurnMatch[1]);
       s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'burn', stacks) } };
-      s = log(s, `🔥 Heat condition met — applied ${stacks} Burn`);
+      s = log(s, `Heat condition met - applied ${stacks} Burn`);
     }
     // Conditional bonus damage: "If Heat >= N, deal M more damage." (Pyroclast P-036 Sun's Fury)
     const condDmgMatch = text.match(/if heat >=? \d+,\s*deal (\d+) more damage/);
@@ -1006,11 +1006,11 @@ function applySpellEffect(
       const bonus = calcDamage(parseInt(condDmgMatch[1]), s.playerStatusEffects, s.enemy.statusEffects);
       const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, bonus);
       s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-      s = log(s, `🔥 Heat condition met — +${bonus} bonus damage`);
+      s = log(s, `Heat condition met - +${bonus} bonus damage`);
     }
   }
 
-  // IMMOLATE: deal damage to all enemies on death — handled in death processing
+  // IMMOLATE: deal damage to all enemies on death - handled in death processing
   // LAST_WORDS: handled in death processing
   // BARRIER: handled in damage application
 
@@ -1024,14 +1024,14 @@ export function attackWithMinion(state: CombatState, attackerId: string, targetI
   const attacker = s.playerBoard.find((m) => m.instanceId === attackerId);
   if (!attacker || attacker.hasAttacked) return s;
 
-  // Check GUARDIAN on enemy board — must target guardian first
+  // Check GUARDIAN on enemy board - must target guardian first
   const guardians = s.enemyBoard.filter((m) => m.keywords.includes('GUARDIAN') && (m.currentHealth ?? 0) > 0);
   if (guardians.length > 0 && !guardians.find((g) => g.instanceId === targetId) && targetId !== 'enemy-direct-not-allowed') {
-    return log(s, '🛡 Must attack the GUARDIAN first!');
+    return log(s, 'Must attack the GUARDIAN first!');
   }
 
   const atk = calcDamage(getCardStats(attacker).attack ?? 0, attacker.statusEffects, []);
-  s = log(s, `⚔ ${attacker.name} attacks for ${atk}`);
+  s = log(s, `${attacker.name} attacks for ${atk}`);
 
   if (targetId === 'enemy') {
     // Attack enemy hero
@@ -1043,7 +1043,7 @@ export function attackWithMinion(state: CombatState, attackerId: string, targetI
     if (attacker.keywords.includes('DRAIN')) {
       const heal = Math.floor(dmg / 2);
       s = { ...s, playerHealth: Math.min(s.playerMaxHealth, s.playerHealth + heal) };
-      s = log(s, `💚 DRAIN heals ${heal}`);
+      s = log(s, `DRAIN heals ${heal}`);
     }
   } else {
     // Attack enemy minion
@@ -1091,17 +1091,17 @@ function processDeaths(state: CombatState): CombatState {
   // Player minion deaths
   const deadPlayerMinions = s.playerBoard.filter((m) => (m.currentHealth ?? 0) <= 0);
   for (const dead of deadPlayerMinions) {
-    s = log(s, `💀 ${dead.name} dies`);
+    s = log(s, `${dead.name} dies`);
     const deadStats = getCardStats(dead);
     if (dead.keywords.includes('LAST_WORDS')) {
-      s = log(s, `👻 LAST_WORDS triggers: ${deadStats.text}`);
+      s = log(s, `LAST_WORDS triggers: ${deadStats.text}`);
       s = applySpellEffect(s, dead);
     }
     if (dead.keywords.includes('IMMOLATE')) {
       const dmg = deadStats.attack ?? 3;
       const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
       s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-      s = log(s, `🔥 IMMOLATE deals ${dmg} to enemy on death`);
+      s = log(s, `IMMOLATE deals ${dmg} to enemy on death`);
     }
     s = { ...s, discardPile: [...s.discardPile, dead] };
   }
@@ -1110,7 +1110,7 @@ function processDeaths(state: CombatState): CombatState {
   // Enemy minion deaths
   const deadEnemyMinions = s.enemyBoard.filter((m) => (m.currentHealth ?? 0) <= 0);
   for (const dead of deadEnemyMinions) {
-    s = log(s, `💀 Enemy ${dead.name} dies`);
+    s = log(s, `Enemy ${dead.name} dies`);
   }
   s = { ...s, enemyBoard: s.enemyBoard.filter((m) => (m.currentHealth ?? 0) > 0) };
 
@@ -1132,13 +1132,13 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
   if (burnDmg > 0) {
     s = { ...s, playerHealth: Math.max(0, s.playerHealth - burnDmg) };
     s = { ...s, playerStatusEffects: s.playerStatusEffects.map((e) => e.type === 'burn' ? { ...e, stacks: e.stacks - 1 } : e).filter((e) => e.stacks > 0) };
-    s = log(s, `🔥 Burn deals ${burnDmg} damage to you`);
+    s = log(s, `Burn deals ${burnDmg} damage to you`);
   }
   const poisonDmg = getStack(s.playerStatusEffects, 'poison');
   if (poisonDmg > 0) {
     s = { ...s, playerHealth: Math.max(0, s.playerHealth - poisonDmg) };
     s = { ...s, playerStatusEffects: addEffect(removeEffect(s.playerStatusEffects, 'poison'), 'poison', poisonDmg + 1) };
-    s = log(s, `☠ Poison deals ${poisonDmg} damage`);
+    s = log(s, `Poison deals ${poisonDmg} damage`);
   }
 
   // Active Powers fire their "at end of turn" segments.
@@ -1157,7 +1157,7 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
       const dmg = calcDamage(m.summonAutoDamage, m.statusEffects, s.enemy.statusEffects);
       const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
       s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-      s = log(s, `🤖 ${m.name} hits ${s.enemy.name} for ${dmg}`);
+      s = log(s, `${m.name} hits ${s.enemy.name} for ${dmg}`);
       if (s.enemy.currentHealth <= 0) break;
     }
   }
@@ -1172,7 +1172,7 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
     .filter((m) => {
       if (m.summonTurnsLeft === undefined || m.summonTurnsLeft < 0) return true;
       if (m.summonTurnsLeft <= 0) {
-        s = log(s, `🤖 ${m.name} expires`);
+        s = log(s, `${m.name} expires`);
         return false;
       }
       return true;
@@ -1204,7 +1204,7 @@ export function executeEnemyTurn(state: CombatState): CombatState {
   // Chronoshift Philter: short-circuit. Enemy doesn't act this turn; their
   // intent stays the same so the player still sees what's coming next.
   if (s.skipNextEnemyTurn) {
-    s = log(s, `⏳ Time freezes — ${s.enemy.name} loses a turn`);
+    s = log(s, `Time freezes - ${s.enemy.name} loses a turn`);
     s = { ...s, skipNextEnemyTurn: false, phase: 'player_turn' };
     s = { ...s, playerShield: 0, discardPile: [...s.discardPile, ...s.hand], hand: [] };
     s = drawCards(s, s.drawPerTurn ?? 5);
@@ -1212,7 +1212,7 @@ export function executeEnemyTurn(state: CombatState): CombatState {
     if ((s.pendingTurnStartBlock ?? 0) > 0) {
       const queued = s.pendingTurnStartBlock!;
       s = gainBlock(s, queued);
-      s = log(s, `🛡 Aegis residue grants ${queued} Block`);
+      s = log(s, `Aegis residue grants ${queued} Block`);
       s = { ...s, pendingTurnStartBlock: 0 };
     }
     return s;
@@ -1221,7 +1221,7 @@ export function executeEnemyTurn(state: CombatState): CombatState {
   const { enemy } = s;
   const intent = enemy.intents[enemy.intentIndex % enemy.intents.length];
 
-  s = log(s, `👾 ${enemy.name}: ${intent.description}`);
+  s = log(s, `${enemy.name}: ${intent.description}`);
 
   switch (intent.type) {
     case 'attack': {
@@ -1236,32 +1236,32 @@ export function executeEnemyTurn(state: CombatState): CombatState {
         if (s.playerHealth <= 0) break;
       }
       s = repeated.hits > 1
-        ? log(s, `👾 ${enemy.name} hits ${repeated.hits}× for ${totalDamage} total`)
-        : log(s, `👾 ${enemy.name} attacks for ${totalDamage}`);
+        ? log(s, `${enemy.name} hits ${repeated.hits}x for ${totalDamage} total`)
+        : log(s, `${enemy.name} attacks for ${totalDamage}`);
       break;
     }
     case 'defend': {
       const shield = intent.value ?? 8;
       s = { ...s, enemy: { ...s.enemy, currentShield: (s.enemy.currentShield ?? 0) + shield } };
-      s = log(s, `🛡 ${enemy.name} gains ${shield} Shield`);
+      s = log(s, `${enemy.name} gains ${shield} Shield`);
       break;
     }
     case 'buff': {
       s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'strength', intent.value ?? 2) } };
-      s = log(s, `💪 ${enemy.name} gains Strength`);
+      s = log(s, `${enemy.name} gains Strength`);
       break;
     }
     case 'debuff': {
       s = { ...s, playerStatusEffects: addEffect(s.playerStatusEffects, 'weak', intent.value ?? 2, 2) };
-      s = log(s, `⬇ ${enemy.name} applies Weak`);
+      s = log(s, `${enemy.name} applies Weak`);
       break;
     }
     case 'summon': {
-      s = log(s, `📤 ${enemy.name} summons a minion`);
+      s = log(s, `${enemy.name} summons a minion`);
       break;
     }
     case 'special': {
-      s = log(s, `✨ ${enemy.name} uses a special ability`);
+      s = log(s, `${enemy.name} uses a special ability`);
       // Apply 5 damage as a generic special
       if (intent.value) {
         const dmg = intent.value;
@@ -1277,12 +1277,12 @@ export function executeEnemyTurn(state: CombatState): CombatState {
   if (enemyBurnDmg > 0) {
     s = { ...s, enemy: { ...s.enemy, currentHealth: Math.max(0, s.enemy.currentHealth - enemyBurnDmg) } };
     s = { ...s, enemy: { ...s.enemy, statusEffects: s.enemy.statusEffects.map((e) => e.type === 'burn' ? { ...e, stacks: e.stacks - 1 } : e).filter((e) => e.stacks > 0) } };
-    s = log(s, `🔥 Burn deals ${enemyBurnDmg} to ${enemy.name}`);
+    s = log(s, `Burn deals ${enemyBurnDmg} to ${enemy.name}`);
   }
   const enemyPoisonDmg = getStack(s.enemy.statusEffects, 'poison');
   if (enemyPoisonDmg > 0) {
     s = { ...s, enemy: { ...s.enemy, currentHealth: Math.max(0, s.enemy.currentHealth - enemyPoisonDmg) } };
-    s = log(s, `☠ Poison deals ${enemyPoisonDmg} to ${enemy.name}`);
+    s = log(s, `Poison deals ${enemyPoisonDmg} to ${enemy.name}`);
   }
 
   // Advance intent
@@ -1313,7 +1313,7 @@ export function executeEnemyTurn(state: CombatState): CombatState {
     if ((s.pendingTurnStartBlock ?? 0) > 0) {
       const queued = s.pendingTurnStartBlock!;
       s = gainBlock(s, queued);
-      s = log(s, `🛡 Aegis residue grants ${queued} Block`);
+      s = log(s, `Aegis residue grants ${queued} Block`);
       s = { ...s, pendingTurnStartBlock: 0 };
     }
 
@@ -1341,12 +1341,12 @@ function applyRiftStartOfTurn(state: CombatState): CombatState {
     switch (rift.type) {
       case 'energy':
         s = { ...s, playerEnergy: s.playerEnergy + 1 };
-        s = log(s, `⚡ Energy Rift grants +1 Energy`);
+        s = log(s, `Energy Rift grants +1 Energy`);
         break;
       case 'genesis':
         // 1-turn burst: +2 energy this turn (proxy for "all cards cost -1")
         s = { ...s, playerEnergy: s.playerEnergy + 2 };
-        s = log(s, `⚡ Genesis Rift grants +2 Energy`);
+        s = log(s, `Genesis Rift grants +2 Energy`);
         break;
       case 'cost': {
         // Discount one random card in hand by 1 (min 0) for this turn only.
@@ -1358,7 +1358,7 @@ function applyRiftStartOfTurn(state: CombatState): CombatState {
           if (newCost !== effectiveCost) {
             const updated = setActiveCardCost(target, newCost);
             s = { ...s, hand: s.hand.map((c, i) => (i === idx ? updated : c)) };
-            s = log(s, `⚡ Cost Rift: ${target.name} costs ${newCost} this turn`);
+            s = log(s, `Cost Rift: ${target.name} costs ${newCost} this turn`);
           }
         }
         break;
@@ -1368,7 +1368,7 @@ function applyRiftStartOfTurn(state: CombatState): CombatState {
         const dmg = 3;
         const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
         s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-        s = log(s, `⚡ Chaos Rift deals ${dmg} to ${s.enemy.name}`);
+        s = log(s, `Chaos Rift deals ${dmg} to ${s.enemy.name}`);
         break;
       }
     }
@@ -1380,7 +1380,7 @@ function applyRiftStartOfTurn(state: CombatState): CombatState {
     .filter((r) => r.turnsRemaining > 0);
   const expired = s.playerRifts.length - ticked.length;
   if (expired > 0) {
-    s = log(s, `⚡ ${expired} Rift${expired === 1 ? '' : 's'} expired`);
+    s = log(s, `${expired} Rift${expired === 1 ? '' : 's'} expired`);
   }
   s = { ...s, playerRifts: ticked };
 
@@ -1391,7 +1391,7 @@ function applyRiftStartOfTurn(state: CombatState): CombatState {
 
 export function applyDamage(state: CombatState, targetId: string, amount: number, source: string): CombatState {
   let s = { ...state };
-  s = log(s, `💥 ${source} deals ${amount} damage to ${targetId}`);
+  s = log(s, `${source} deals ${amount} damage to ${targetId}`);
 
   if (targetId === 'player') {
     const result = applyShieldedDamage(s.playerShield, s.playerHealth, amount);
@@ -1440,7 +1440,7 @@ export function checkCombatEnd(state: CombatState): CombatState {
       enemyHpRemaining: state.enemy.currentHealth,
       turn: state.turn,
     });
-    return log({ ...state, phase: 'combat_end_loss' }, '💀 You have been defeated!');
+    return log({ ...state, phase: 'combat_end_loss' }, 'You have been defeated!');
   }
   if (state.enemy.currentHealth <= 0 && state.phase !== 'combat_end_win') {
     logEvent('combat_end', {
@@ -1451,7 +1451,7 @@ export function checkCombatEnd(state: CombatState): CombatState {
       playerHpRemaining: state.playerHealth,
       turn: state.turn,
     });
-    return log({ ...state, phase: 'combat_end_win' }, `🏆 ${state.enemy.name} defeated!`);
+    return log({ ...state, phase: 'combat_end_win' }, `${state.enemy.name} defeated!`);
   }
   return state;
 }

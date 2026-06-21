@@ -321,6 +321,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 23. Relic/enemy fallback polish: relic and enemy data fallback art fields now use readable ASCII chips instead of raw emoji glyphs if SVG assets fail to load.
 24. Enemy intent text polish: enemy intent descriptions and death notes now use simple ASCII separators for cleaner combat tooltips.
 25. Relic/potion log source polish: relic effect logs and potion drink logs now emit clean text so combat log badges do not depend on stripped emoji prefixes.
+26. Core combat log source polish: combat engine logs now emit clean text without emoji prefixes, arrows, or multiply glyphs.
 
 The next remaining visual batch is remaining low-priority developer/debug polish and final visual QA cleanup.
 
