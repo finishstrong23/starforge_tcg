@@ -56,6 +56,7 @@ The previous generated faction/background packs were rejected because they were 
 | `ui:tutorial-icons` | `public/art/dungeon/ui/tutorial_{energy,relics,map}.svg` | Installed Basic Token SVG pass | First-run tutorial now uses token icons instead of emoji glyphs. |
 | `potion:drink-burst` | `public/art/dungeon/potions/effects/{category}.svg` | Installed Basic Token SVG pass | Potion drink animation now uses category token sigils, including Phoenix. |
 | `ui:faction-resource-panel` | `public/art/dungeon/ui/resource_{faction}.svg` | Installed Basic Token SVG pass | Combat HUD resource panel now has faction-specific token header art. |
+| `combat-log:icon-strategy` | `src/dungeon/components/CombatView.tsx` | Installed text-token pass | Combat log now strips raw glyph prefixes and displays consistent category badges. |
 
 ## Next Batch
 
@@ -66,7 +67,7 @@ The next batch should generate the smallest asset set that changes every core sc
 | Asset id | Target path | Status |
 |---|---|---|
 | `card:remaining` | `public/cards/{cardId}.svg` | Complete for current dungeon card IDs; procedural fallback remains as a safe future-card fallback |
-| `combat-log:icon-strategy` | `src/dungeon/components/CombatView.tsx` and engine log producers | Next: replace embedded emoji prefixes with text tags or registry-backed small icons |
+| `map:path-motifs` | `src/dungeon/components/MapView.tsx` | Optional: make route connectors feel more like clean token board paths |
 | `ui:remaining-polish` | `public/art/dungeon/ui/{assetId}.svg` | Later utility polish outside the shop |
 
 ## QA Checklist

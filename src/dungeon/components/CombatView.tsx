@@ -113,6 +113,87 @@ const BoardRow: React.FC<{
 
 // ─── Combat log ───────────────────────────────────────────────────────────────
 
+type CombatLogKind =
+  | 'play'
+  | 'damage'
+  | 'block'
+  | 'heal'
+  | 'heat'
+  | 'lumen'
+  | 'rift'
+  | 'relic'
+  | 'debuff'
+  | 'summon'
+  | 'enemy'
+  | 'ko'
+  | 'info';
+
+const COMBAT_LOG_TAGS: Record<CombatLogKind, { label: string; color: string; bg: string }> = {
+  play:   { label: 'PLAY',  color: '#ffcc88', bg: '#3a2510' },
+  damage: { label: 'DMG',   color: '#ff8a64', bg: '#3a1410' },
+  block:  { label: 'BLOCK', color: '#7db7ff', bg: '#10213a' },
+  heal:   { label: 'HEAL',  color: '#7dffb2', bg: '#10301d' },
+  heat:   { label: 'HEAT',  color: '#ffb15c', bg: '#3a1a0b' },
+  lumen:  { label: 'LUMEN', color: '#ffe680', bg: '#332b0b' },
+  rift:   { label: 'RIFT',  color: '#d6a2ff', bg: '#25143a' },
+  relic:  { label: 'RELIC', color: '#f0d28a', bg: '#33280e' },
+  debuff: { label: 'HEX',   color: '#c7a2ff', bg: '#25143a' },
+  summon: { label: 'UNIT',  color: '#7bdff2', bg: '#10313a' },
+  enemy:  { label: 'ENEMY', color: '#ff9aa0', bg: '#351018' },
+  ko:     { label: 'KO',    color: '#ff7a7a', bg: '#301015' },
+  info:   { label: 'LOG',   color: '#b7c4d8', bg: '#171b2b' },
+};
+
+function stripLogGlyphPrefix(entry: string): string {
+  const trimmed = entry.trim();
+  const firstSpace = trimmed.indexOf(' ');
+  if (firstSpace < 0) return trimmed;
+
+  const prefix = trimmed.slice(0, firstSpace);
+  const rest = trimmed.slice(firstSpace + 1).trimStart();
+  const looksLikeGlyph =
+    prefix.length <= 8 &&
+    (/[^\x20-\x7e]/.test(prefix) || /^[^A-Za-z0-9]+$/.test(prefix));
+
+  return looksLikeGlyph ? rest : trimmed;
+}
+
+function classifyLogEntry(entry: string): { kind: CombatLogKind; text: string } {
+  const text = stripLogGlyphPrefix(entry);
+  const lower = text.toLowerCase();
+  const knownRelic =
+    lower.includes('forgeheart ember') ||
+    lower.includes('fueled boots') ||
+    lower.includes('stasis cube') ||
+    lower.includes("archivist's orb") ||
+    lower.includes("sparkthief's glove") ||
+    lower.includes("forgemaster's sigil") ||
+    lower.includes('void compass') ||
+    lower.includes('overclocked core') ||
+    lower.includes("cursebreaker's medallion") ||
+    lower.includes("runekeeper's tome") ||
+    lower.includes("hierophant's censer") ||
+    lower.includes('heartwake echo') ||
+    lower.includes('unmoored eye') ||
+    lower.includes('stasis coil') ||
+    lower.includes('shard of the choir') ||
+    lower.includes('spire-glass lens');
+
+  if (knownRelic) return { kind: 'relic', text };
+  if (lower.includes('rift') || lower.includes('flux') || lower.includes('time freezes')) return { kind: 'rift', text };
+  if (lower.includes('lumen') || lower.includes('release:') || lower.includes('channel')) return { kind: 'lumen', text };
+  if (lower.includes('heat') || lower.includes('burn') || lower.includes('immolate')) return { kind: 'heat', text };
+  if (lower.includes('shield') || lower.includes('block') || lower.includes('guardian') || lower.includes('aegis')) return { kind: 'block', text };
+  if (lower.includes('heal') || lower.includes('drain') || lower.includes('mend')) return { kind: 'heal', text };
+  if (lower.includes('poison') || lower.includes('weak') || lower.includes('vulnerable') || lower.includes('hex')) return { kind: 'debuff', text };
+  if (lower.includes('summon') || lower.includes('comes online') || lower.includes('deploy')) return { kind: 'summon', text };
+  if (lower.includes('dies') || lower.includes('defeated')) return { kind: 'ko', text };
+  if (lower.includes('enemy turn') || lower.includes('uses a special ability') || lower.includes('summons a minion')) return { kind: 'enemy', text };
+  if (lower.includes('damage') || lower.includes('deals') || lower.includes('hits') || lower.includes('backfire') || lower.includes('self-damage')) return { kind: 'damage', text };
+  if (lower.includes('played') || lower.includes('attached') || lower.includes('exhausted') || lower.includes('rolls')) return { kind: 'play', text };
+  return { kind: 'info', text };
+}
+
 const CombatLog: React.FC<{ log: string[]; cardPool: CardInstance[] }> = ({ log, cardPool }) => {
   const visible = log.slice(-7);
 
@@ -163,15 +244,21 @@ const CombatLog: React.FC<{ log: string[]; cardPool: CardInstance[] }> = ({ log,
           marginBottom: 6,
         }}
       >
-        ▸ Combat Log
+        Combat Log
       </div>
       {visible.map((entry, i) => {
         const isLatest = i === visible.length - 1;
-        const parts = splitLogEntry(entry);
+        const parsed = classifyLogEntry(entry);
+        const tag = COMBAT_LOG_TAGS[parsed.kind];
+        const parts = splitLogEntry(parsed.text);
         return (
           <div
             key={`${log.length - visible.length + i}-${entry}`}
             style={{
+              display: 'grid',
+              gridTemplateColumns: '42px 1fr',
+              alignItems: 'baseline',
+              gap: 7,
               fontSize: 11,
               color: isLatest ? '#e8e8ff' : '#666',
               lineHeight: 1.5,
@@ -181,24 +268,43 @@ const CombatLog: React.FC<{ log: string[]; cardPool: CardInstance[] }> = ({ log,
               animation: isLatest ? 'dungeonLogSlide 300ms ease-out' : undefined,
             }}
           >
-            <span style={{ color: '#c89b3c88', marginRight: 6 }}>›</span>
-            {parts.map((part, pi) =>
-              part.card ? (
-                <span
-                  key={pi}
-                  style={{ color: '#ffcc88', textDecoration: 'underline dotted', cursor: 'help' }}
-                  onMouseEnter={(e) => {
-                    const rect = (e.target as HTMLElement).getBoundingClientRect();
-                    setTooltip({ card: part.card!, x: rect.left, y: rect.top });
-                  }}
-                  onMouseLeave={() => setTooltip(null)}
-                >
-                  {part.text}
-                </span>
-              ) : (
-                <span key={pi}>{part.text}</span>
-              )
-            )}
+            <span
+              style={{
+                display: 'inline-flex',
+                justifyContent: 'center',
+                minWidth: 36,
+                padding: '1px 4px',
+                borderRadius: 4,
+                border: `1px solid ${tag.color}66`,
+                background: tag.bg,
+                color: tag.color,
+                fontSize: 8,
+                fontWeight: 900,
+                letterSpacing: '0.06em',
+                lineHeight: 1.4,
+              }}
+            >
+              {tag.label}
+            </span>
+            <span>
+              {parts.map((part, pi) =>
+                part.card ? (
+                  <span
+                    key={pi}
+                    style={{ color: '#ffcc88', textDecoration: 'underline dotted', cursor: 'help' }}
+                    onMouseEnter={(e) => {
+                      const rect = (e.target as HTMLElement).getBoundingClientRect();
+                      setTooltip({ card: part.card!, x: rect.left, y: rect.top });
+                    }}
+                    onMouseLeave={() => setTooltip(null)}
+                  >
+                    {part.text}
+                  </span>
+                ) : (
+                  <span key={pi}>{part.text}</span>
+                )
+              )}
+            </span>
           </div>
         );
       })}

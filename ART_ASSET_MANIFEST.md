@@ -63,7 +63,7 @@ Status key:
 | Faction resource panel | `src/dungeon/components/FactionResourcePanel.tsx` | Done with four Basic Token SVG header icons | P1 | `public/art/dungeon/ui/resource_{faction}.svg` |
 | Tutorial icons | `src/dungeon/components/TutorialOverlay.tsx` | Done with three Basic Token SVGs | P2 | `public/art/dungeon/ui/tutorial_{step}.svg` |
 | Telemetry/debug icon | `src/dungeon/components/TelemetryDebugPanel.tsx` | Emoji chart | P3 | Keep developer-only or replace with CSS icon |
-| Combat log emojis | `src/dungeon/engine/combat.ts`, `relicEffects.ts`, `potions.ts` | Emoji embedded in log strings | P2 | Text-only log tags or registry-backed small icons |
+| Combat log prefixes | `src/dungeon/components/CombatView.tsx`, engine log producers | Done with renderer-level text-token badges; engine strings remain compatible | P2 | Text-only log tags |
 
 ## Phase 1 Priority Rollout
 
@@ -311,8 +311,9 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 14. Tutorial icons: 3 Basic Token SVGs wired into first-run tutorial.
 15. Potion drink burst sigils: 8 category SVGs plus Phoenix SVG wired into potion use animation.
 16. Faction resource panel icons: 4 Basic Token SVGs wired into the combat HUD resource panel.
+17. Combat log polish: raw glyph prefixes are stripped at render time and replaced by consistent text-token badges.
 
-The next remaining visual batch is UI polish outside card art: combat log icon strategy and optional route/path motifs.
+The next remaining visual batch is optional route/path motifs and remaining low-priority developer/tutorial polish.
 
 ## Generation Notes
 
