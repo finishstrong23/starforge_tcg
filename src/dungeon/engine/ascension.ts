@@ -1,10 +1,10 @@
 /**
- * Ascension — STS-style difficulty tiers (0–10).
+ * Ascension - STS-style difficulty tiers (0-10).
  *
  * Each Ascension level layers one modifier on top of the previous ones.
  * The full ladder, per the launch plan:
  *
- *    A0  Baseline — no modifiers.
+ *    A0  Baseline - no modifiers.
  *    A1  Enemies have +10 % HP.
  *    A2  Each act gets +1 elite node.
  *    A3  Shop prices +25 %.
@@ -18,7 +18,7 @@
  *        (combine + amplify).
  *
  * This module exposes:
- *   - getAscensionMods(level) → flags + numeric multipliers.
+ *   - getAscensionMods(level) -> flags + numeric multipliers.
  *   - getUnlockedAscension(faction) / unlockAscension(faction, level) for
  *     persistent per-faction high-water marks in localStorage.
  */
@@ -59,7 +59,7 @@ const BASE_MODS: AscensionMods = {
 };
 
 export function getAscensionMods(level: AscensionLevel): AscensionMods {
-  // Each level is additive on the prior ones — the ladder accumulates.
+  // Each level is additive on the prior ones - the ladder accumulates.
   const m: AscensionMods = { ...BASE_MODS };
   if (level >= 1)  m.enemyHpMul       = 1.1;
   if (level >= 2)  m.extraEliteNodes  = 1;
@@ -82,16 +82,16 @@ export function getAscensionMods(level: AscensionLevel): AscensionMods {
 /** Human-readable summary, one line per active modifier. Used in the UI. */
 export function describeAscension(level: AscensionLevel): string[] {
   const lines: string[] = [];
-  if (level >= 1)  lines.push('A1 · Enemies have +10 % HP');
-  if (level >= 2)  lines.push('A2 · Each act has one extra elite node');
-  if (level >= 3)  lines.push('A3 · Shop prices +25 %');
-  if (level >= 4)  lines.push('A4 · Bosses start with +2 Strength');
-  if (level >= 5)  lines.push('A5 · You start with -10 max HP');
-  if (level >= 6)  lines.push('A6 · Enemies deal +10 % damage');
-  if (level >= 7)  lines.push('A7 · Combat gold rewards -25 %');
-  if (level >= 8)  lines.push('A8 · Rare relic drop rate halved');
-  if (level >= 9)  lines.push('A9 · You draw 4 cards per turn (was 5)');
-  if (level >= 10) lines.push('A10 · Bosses +4 Str (was +2), enemies deal +20 % damage (was +10 %)');
+  if (level >= 1)  lines.push('A1 - Enemies have +10 % HP');
+  if (level >= 2)  lines.push('A2 - Each act has one extra elite node');
+  if (level >= 3)  lines.push('A3 - Shop prices +25 %');
+  if (level >= 4)  lines.push('A4 - Bosses start with +2 Strength');
+  if (level >= 5)  lines.push('A5 - You start with -10 max HP');
+  if (level >= 6)  lines.push('A6 - Enemies deal +10 % damage');
+  if (level >= 7)  lines.push('A7 - Combat gold rewards -25 %');
+  if (level >= 8)  lines.push('A8 - Rare relic drop rate halved');
+  if (level >= 9)  lines.push('A9 - You draw 4 cards per turn (was 5)');
+  if (level >= 10) lines.push('A10 - Bosses +4 Str (was +2), enemies deal +20 % damage (was +10 %)');
   return lines;
 }
 
