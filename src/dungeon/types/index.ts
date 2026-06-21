@@ -251,7 +251,7 @@ export interface EnemyDefinition {
   lore: string;                   // one-line flavor text
   maxHealth: number;
   attack: number;
-  art: string;                    // emoji or color code for placeholder art
+  art: string;                    // token fallback used when authored art is unavailable
   acts: (1 | 2 | 3)[];            // which acts this enemy appears in
   isElite: boolean;
   isBoss: boolean;
@@ -290,7 +290,7 @@ export interface RelicDefinition {
   flavor: string;                 // lore text
   trigger: RelicTrigger;
   rarity: 'Common' | 'Uncommon' | 'Rare' | 'Boss';
-  art: string;                    // emoji placeholder
+  art: string;                    // token fallback used when authored art is unavailable
 }
 
 // ─── MAP TYPES ───────────────────────────────────────────────────────────────

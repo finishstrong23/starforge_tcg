@@ -37,23 +37,23 @@ interface FloatNum {
 
 let _floatId = 0;
 
-const STATUS_META: Record<string, { emoji: string; color: string; label: string }> = {
-  burn:       { emoji: 'BRN', color: '#ff5a2e', label: 'Burn'        },
-  poison:     { emoji: 'PSN', color: '#44cc44', label: 'Poison'      },
-  shield:     { emoji: 'SHD', color: '#3b8fff', label: 'Shield'      },
-  strength:   { emoji: 'STR', color: '#ffcc00', label: 'Strength'    },
-  weak:       { emoji: 'WEK', color: '#aaaaaa', label: 'Weak'        },
-  vulnerable: { emoji: 'VUL', color: '#ff8c00', label: 'Vulnerable'  },
-  barrier:    { emoji: 'BAR', color: '#00aaff', label: 'Barrier'     },
-  stealth:    { emoji: 'STL', color: '#cccccc', label: 'Stealth'     },
-  phase:      { emoji: 'PHS', color: '#c27dff', label: 'Phase'       },
+const STATUS_META: Record<string, { token: string; color: string; label: string }> = {
+  burn:       { token: 'BRN', color: '#ff5a2e', label: 'Burn'        },
+  poison:     { token: 'PSN', color: '#44cc44', label: 'Poison'      },
+  shield:     { token: 'SHD', color: '#3b8fff', label: 'Shield'      },
+  strength:   { token: 'STR', color: '#ffcc00', label: 'Strength'    },
+  weak:       { token: 'WEK', color: '#aaaaaa', label: 'Weak'        },
+  vulnerable: { token: 'VUL', color: '#ff8c00', label: 'Vulnerable'  },
+  barrier:    { token: 'BAR', color: '#00aaff', label: 'Barrier'     },
+  stealth:    { token: 'STL', color: '#cccccc', label: 'Stealth'     },
+  phase:      { token: 'PHS', color: '#c27dff', label: 'Phase'       },
 };
 
-const RIFT_META: Record<string, { emoji: string; color: string; label: string; tip: (turns: number) => string }> = {
-  cost:    { emoji: 'RFT', color: '#c27dff', label: 'Cost Rift',    tip: (t) => `Cost Rift: 1 random card costs -1 each turn (${t} left)` },
-  genesis: { emoji: 'RFT', color: '#ff7acc', label: 'Genesis Rift', tip: (t) => `Genesis Rift: +2 Energy this turn (${t} left)`          },
-  energy:  { emoji: 'RFT', color: '#4adfff', label: 'Energy Rift',  tip: (t) => `Energy Rift: +1 Energy each turn (${t} left)`           },
-  chaos:   { emoji: 'RFT', color: '#ffd24a', label: 'Chaos Rift',   tip: (t) => `Chaos Rift: deals 3 to enemy each turn (${t} left)`     },
+const RIFT_META: Record<string, { token: string; color: string; label: string; tip: (turns: number) => string }> = {
+  cost:    { token: 'RFT', color: '#c27dff', label: 'Cost Rift',    tip: (t) => `Cost Rift: 1 random card costs -1 each turn (${t} left)` },
+  genesis: { token: 'RFT', color: '#ff7acc', label: 'Genesis Rift', tip: (t) => `Genesis Rift: +2 Energy this turn (${t} left)`          },
+  energy:  { token: 'RFT', color: '#4adfff', label: 'Energy Rift',  tip: (t) => `Energy Rift: +1 Energy each turn (${t} left)`           },
+  chaos:   { token: 'RFT', color: '#ffd24a', label: 'Chaos Rift',   tip: (t) => `Chaos Rift: deals 3 to enemy each turn (${t} left)`     },
 };
 
 // ─── Board row ────────────────────────────────────────────────────────────────
@@ -460,7 +460,7 @@ const PlayerHUD: React.FC<{
       {(cs.playerStatusEffects.length > 0 || cs.playerRifts.length > 0 || cs.playerPowers.length > 0) && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
           {cs.playerStatusEffects.map((e) => {
-            const meta = STATUS_META[e.type] ?? { emoji: '?', color: '#888', label: e.type };
+            const meta = STATUS_META[e.type] ?? { token: '?', color: '#888', label: e.type };
             return (
               <span
                 key={e.type}
@@ -479,7 +479,7 @@ const PlayerHUD: React.FC<{
               >
                 <TokenArt
                   src={getStatusArt(e.type)}
-                  fallback={meta.emoji}
+                  fallback={meta.token}
                   alt=""
                   style={{ width: 14, height: 14 }}
                   fallbackStyle={{ fontSize: 11, lineHeight: 1 }}

@@ -12,7 +12,7 @@ const INTENT_COLOR: Record<IntentType, string> = {
   special: '#ff88cc',
 };
 
-const INTENT_EMOJI: Record<IntentType, string> = {
+const INTENT_TOKEN: Record<IntentType, string> = {
   attack:  'ATK',
   defend:  'DEF',
   buff:    'BUF',
@@ -21,14 +21,14 @@ const INTENT_EMOJI: Record<IntentType, string> = {
   special: 'SPC',
 };
 
-const STATUS_DISPLAY: Record<string, { emoji: string; color: string }> = {
-  burn:       { emoji: 'BRN', color: '#ff5a2e' },
-  poison:     { emoji: 'PSN', color: '#44cc44' },
-  shield:     { emoji: 'SHD', color: '#3b8fff' },
-  strength:   { emoji: 'STR', color: '#ffcc00' },
-  weak:       { emoji: 'WEK', color: '#aaaaaa' },
-  vulnerable: { emoji: 'VUL', color: '#ff8c00' },
-  barrier:    { emoji: 'BAR', color: '#00aaff' },
+const STATUS_DISPLAY: Record<string, { token: string; color: string }> = {
+  burn:       { token: 'BRN', color: '#ff5a2e' },
+  poison:     { token: 'PSN', color: '#44cc44' },
+  shield:     { token: 'SHD', color: '#3b8fff' },
+  strength:   { token: 'STR', color: '#ffcc00' },
+  weak:       { token: 'WEK', color: '#aaaaaa' },
+  vulnerable: { token: 'VUL', color: '#ff8c00' },
+  barrier:    { token: 'BAR', color: '#00aaff' },
 };
 
 export interface EnemyComponentProps {
@@ -219,7 +219,7 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
               <span key={e.type} style={statusBadgeStyle(d.color)}>
                 <TokenArt
                   src={getStatusArt(e.type)}
-                  fallback={d.emoji}
+                  fallback={d.token}
                   alt=""
                   style={{ width: 12, height: 12, marginRight: 3, verticalAlign: 'middle' }}
                   fallbackStyle={{ lineHeight: 1 }}
@@ -235,7 +235,7 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
       <div style={s.intentBox}>
         <TokenArt
           src={getIntentArt(intent.type)}
-          fallback={INTENT_EMOJI[intent.type]}
+          fallback={INTENT_TOKEN[intent.type]}
           alt=""
           style={s.intentEmoji}
           fallbackStyle={{ fontSize: 22, lineHeight: 1 }}

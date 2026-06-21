@@ -86,7 +86,7 @@ const KW_LABEL: Partial<Record<Keyword, string>> = {
   UPGRADE:    'Upgrade',
 };
 
-const STATUS_EMOJI: Partial<Record<string, string>> = {
+const STATUS_TOKEN: Partial<Record<string, string>> = {
   burn:       'BRN',
   poison:     'PSN',
   shield:     'SHD',
@@ -442,7 +442,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       <span key={e.type} title={`${e.type} x${e.stacks}`}>
         <TokenArt
           src={getStatusArt(e.type)}
-          fallback={STATUS_EMOJI[e.type] ?? '?'}
+          fallback={STATUS_TOKEN[e.type] ?? '?'}
           alt=""
           style={{ width: 10, height: 10, verticalAlign: 'middle' }}
           fallbackStyle={{ fontSize: 7, lineHeight: 1 }}

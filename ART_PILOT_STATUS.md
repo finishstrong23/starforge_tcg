@@ -69,6 +69,7 @@ The previous generated faction/background packs were rejected because they were 
 | `combat:core-log-source` | `src/dungeon/engine/combat.ts` | Installed text polish pass | Core combat source logs now use clean ASCII text while preserving combat log category badges. |
 | `ui:ascension-summary-text` | `src/dungeon/engine/ascension.ts`, `DungeonRoot` | Installed text polish pass | Ascension modifier summaries now use readable ASCII separators in setup/summary UI. |
 | `combat:starseer-log-source` | `src/dungeon/engine/relicEffects.ts` | Installed text polish pass | Starseer's Pendant now emits clean text instead of a raw decorative star glyph in combat logs. |
+| `ui:token-naming-cleanup` | Card, combat, enemy, and dungeon type files | Installed naming polish pass | Status, rift, intent, enemy, and relic fallback internals now use token naming instead of emoji naming. |
 
 ## Next Batch
 
