@@ -327,6 +327,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 28. Relic log emoji cleanup: Starseer's Pendant now emits clean text instead of a raw star glyph in combat logs.
 29. Token naming cleanup: status, rift, intent, enemy, and relic fallback internals now use token language instead of emoji language.
 30. Rift HUD token art: active rifts now use four Basic Token SVG icons in the combat status row instead of a bare text marker.
+31. Power HUD token art: active Power chips now use card token art with a PWR fallback instead of a plain text marker.
 
 The next remaining visual batch is remaining low-priority developer/debug polish and final visual QA cleanup.
 
