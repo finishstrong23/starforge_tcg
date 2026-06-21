@@ -53,6 +53,7 @@ The previous generated faction/background packs were rejected because they were 
 | `status:*` | `public/art/dungeon/status/{statusId}.svg` | Installed Basic Token SVG pass | Nine status tokens are live through enemy, player, and card status chips. |
 | `ui:piles` | `public/art/dungeon/ui/{card_back,draw_pile,discard_pile}.svg` | Installed Basic Token SVG pass | Draw/discard pile tokens are live in hand/combat UI; card back is live in the empty-hand state. |
 | `ui:shop_misc` | `public/art/dungeon/ui/{gold,card_removal}.svg` | Installed Basic Token SVG pass | Shop prices, gold balance, and card-removal service now use token icons. |
+| `ui:combat-log-toggle` | `public/art/dungeon/ui/combat_log.svg`, CombatView | Installed Basic Token SVG pass | Combat log toggle now uses a token icon instead of a raw glyph. |
 | `ui:tutorial-icons` | `public/art/dungeon/ui/tutorial_{energy,relics,map}.svg` | Installed Basic Token SVG pass | First-run tutorial now uses token icons instead of emoji glyphs. |
 | `potion:drink-burst` | `public/art/dungeon/potions/effects/{category}.svg` | Installed Basic Token SVG pass | Potion drink animation now uses category token sigils, including Phoenix. |
 | `ui:faction-resource-panel` | `public/art/dungeon/ui/resource_{faction}.svg` | Installed Basic Token SVG pass | Combat HUD resource panel now has faction-specific token header art. |
@@ -76,7 +77,7 @@ The previous generated faction/background packs were rejected because they were 
 
 ## Next Batch
 
-Phase 2 registry foundation is implemented. The active dungeon UI now has image slots for map nodes, cards, enemies, intents, status chips, relics, potions, shop offers, reward offers, and card pile UI. Missing cards use a procedural Basic Token SVG fallback instead of a tiny faction glyph, while other missing images still fall back safely to their current glyph/emoji.
+Phase 2 registry foundation is implemented. The active dungeon UI now has image slots for map nodes, cards, enemies, intents, status chips, relics, potions, shop offers, reward offers, card pile UI, and combat utility UI. Missing cards use a procedural Basic Token SVG fallback, while other missing images fall back to readable short text tokens.
 
 The next batch should generate the smallest asset set that changes every core screen.
 

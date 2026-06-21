@@ -33,7 +33,7 @@ The first Basic Token implementation pass uses SVG for simple symbolic icons bec
 Status key:
 
 - `Done`: Basic Token image exists and is wired into the active dungeon UI.
-- `Placeholder`: emoji, plain glyph, gradient, text-only visual, or shape-only UI still carries the visual meaning.
+- `Placeholder`: plain glyph, gradient, text-only visual, or shape-only UI still carries the visual meaning.
 - `Missing asset`: UI has a slot or data concept but no production image path yet.
 
 | Surface | Active source | Current state | Priority | Replacement target |
@@ -76,7 +76,7 @@ Status key:
 
 ### Map Nodes
 
-All map icons are P0 because the map is the route-selection screen and currently uses emoji symbols.
+All map icons were P0 because the map is the route-selection screen. The current map icon set is installed as Basic Token SVGs.
 
 | Asset id | Type | Priority | Target filename | Notes |
 |---|---|---|---|---|
@@ -90,7 +90,7 @@ All map icons are P0 because the map is the route-selection screen and currently
 
 ### Enemies And Bosses
 
-Enemy data source: `src/dungeon/data/enemies.ts`. All 27 enemy entries currently use emoji `art` fields. Bosses should get larger square token art first, then the 24 normal/elite enemies.
+Enemy data source: `src/dungeon/data/enemies.ts`. All 27 enemy entries now have Basic Token SVG art paths through the art registry, with short text-token fallbacks in data if an image fails to load.
 
 | Asset id | Type | Priority | Target filename | Subject |
 |---|---|---|---|---|
@@ -262,6 +262,7 @@ Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wi
 | `ui:discard_pile` | UI art | Done | `public/art/dungeon/ui/discard_pile.svg` | `HandComponent` |
 | `ui:gold` | UI icon | Done | `public/art/dungeon/ui/gold.svg` | `ShopView` prices and gold balance |
 | `ui:card_removal` | UI icon | Done | `public/art/dungeon/ui/card_removal.svg` | `ShopView` removal service |
+| `ui:combat_log` | UI icon | Done | `public/art/dungeon/ui/combat_log.svg` | `CombatView` log toggle button |
 | `ui:tutorial_energy` | UI icon | Done | `public/art/dungeon/ui/tutorial_energy.svg` | `TutorialOverlay` |
 | `ui:tutorial_relics` | UI icon | Done | `public/art/dungeon/ui/tutorial_relics.svg` | `TutorialOverlay` |
 | `ui:tutorial_map` | UI icon | Done | `public/art/dungeon/ui/tutorial_map.svg` | `TutorialOverlay` |
@@ -329,6 +330,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 30. Rift HUD token art: active rifts now use four Basic Token SVG icons in the combat status row instead of a bare text marker.
 31. Power HUD token art: active Power chips now use card token art with a PWR fallback instead of a plain text marker.
 32. Empty hand card-back art: the combat hand area now shows the Basic Token card-back asset when no cards are in hand.
+33. Combat log button token art: the top-right combat-log toggle now uses a Basic Token SVG instead of a raw visible glyph.
 
 The next remaining visual batch is remaining low-priority developer/debug polish and final visual QA cleanup.
 

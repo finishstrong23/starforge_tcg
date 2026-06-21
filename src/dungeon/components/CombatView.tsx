@@ -549,7 +549,7 @@ const PlayerHUD: React.FC<{
 };
 
 /**
- * Top-right utility button row: combat log toggle and (placeholder) settings.
+ * Top-right utility button row: combat log toggle.
  */
 const UtilityButtons: React.FC<{ logOpen: boolean; onToggleLog: () => void }> = ({ logOpen, onToggleLog }) => {
   const baseStyle: React.CSSProperties = {
@@ -586,9 +586,16 @@ const UtilityButtons: React.FC<{ logOpen: boolean; onToggleLog: () => void }> = 
           ...baseStyle,
           borderColor: logOpen ? '#c89b3c' : '#2a2a4a',
           color: logOpen ? '#c89b3c' : '#ccc',
+          fontSize: 0,
         }}
       >
-        ▤
+        <TokenArt
+          src={uiArt.combatLog}
+          fallback="LOG"
+          alt=""
+          style={{ width: 20, height: 20 }}
+          fallbackStyle={{ fontSize: 10, lineHeight: 1 }}
+        />
       </button>
     </div>
   );

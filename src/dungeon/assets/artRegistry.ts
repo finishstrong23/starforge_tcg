@@ -76,6 +76,7 @@ export const uiArt = {
   discardPile: assetUrl('art/dungeon/ui/discard_pile.svg'),
   gold: assetUrl('art/dungeon/ui/gold.svg'),
   cardRemoval: assetUrl('art/dungeon/ui/card_removal.svg'),
+  combatLog: assetUrl('art/dungeon/ui/combat_log.svg'),
   tutorialEnergy: assetUrl('art/dungeon/ui/tutorial_energy.svg'),
   tutorialRelics: assetUrl('art/dungeon/ui/tutorial_relics.svg'),
   tutorialMap: assetUrl('art/dungeon/ui/tutorial_map.svg'),
