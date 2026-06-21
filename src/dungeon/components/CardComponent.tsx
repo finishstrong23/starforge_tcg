@@ -87,15 +87,15 @@ const KW_LABEL: Partial<Record<Keyword, string>> = {
 };
 
 const STATUS_EMOJI: Partial<Record<string, string>> = {
-  burn:       '🔥',
-  poison:     '☠',
-  shield:     '🛡',
-  strength:   '💪',
-  weak:       '⬇',
-  vulnerable: '↓',
-  barrier:    '🔷',
-  stealth:    '👤',
-  phase:      '✦',
+  burn:       'BRN',
+  poison:     'PSN',
+  shield:     'SHD',
+  strength:   'STR',
+  weak:       'WEK',
+  vulnerable: 'VUL',
+  barrier:    'BAR',
+  stealth:    'STL',
+  phase:      'PHS',
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -439,7 +439,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
 
   const renderStatuses = (effects: StatusEffect[]) =>
     effects.map((e) => (
-      <span key={e.type} title={`${e.type} ×${e.stacks}`}>
+      <span key={e.type} title={`${e.type} x${e.stacks}`}>
         <TokenArt
           src={getStatusArt(e.type)}
           fallback={STATUS_EMOJI[e.type] ?? '?'}
@@ -458,10 +458,10 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       {/* Type / rarity */}
       <div style={styles.typeTag}>{card.rarity[0]}</div>
 
-      {/* Flux state badge — shows the WarpRiders A/B/C step */}
+      {/* Flux state badge - shows the WarpRiders A/B/C step */}
       {isFlux && card.fluxState && (
         <div
-          title={`Flux state ${card.fluxState} — shifts at end of turn`}
+          title={`Flux state ${card.fluxState} - shifts at end of turn`}
           style={{
             position: 'absolute',
             top: compact ? 2 : 4,
@@ -479,14 +479,14 @@ export const CardComponent: React.FC<CardComponentProps> = ({
             lineHeight: 1.2,
           }}
         >
-          ✦{card.fluxState}
+          F{card.fluxState}
         </div>
       )}
 
-      {/* Lumens — Luminar Channel cards */}
+      {/* Lumens - Luminar Channel cards */}
       {card.lumens !== undefined && card.lumens > 0 && (
         <div
-          title={`${card.lumens} Lumen${card.lumens === 1 ? '' : 's'} — released when this card is played`}
+          title={`${card.lumens} Lumen${card.lumens === 1 ? '' : 's'} - released when this card is played`}
           style={{
             position: 'absolute',
             top: compact ? 2 : 4,
@@ -504,17 +504,17 @@ export const CardComponent: React.FC<CardComponentProps> = ({
             lineHeight: 1.2,
           }}
         >
-          ✨ {card.lumens}
+          LUM {card.lumens}
         </div>
       )}
 
-      {/* Summon badge — Cogsmiths drones/sentries/titans */}
+      {/* Summon badge - Cogsmiths drones/sentries/titans */}
       {card.summonAutoDamage !== undefined && (
         <div
           title={
             card.summonTurnsLeft === undefined || card.summonTurnsLeft < 0
-              ? `Auto-attacks for ${card.summonAutoDamage}${(card.summonActionsPerTurn ?? 1) > 1 ? `×${card.summonActionsPerTurn}` : ''} per turn — permanent`
-              : `Auto-attacks for ${card.summonAutoDamage}${(card.summonActionsPerTurn ?? 1) > 1 ? `×${card.summonActionsPerTurn}` : ''} per turn — ${card.summonTurnsLeft} turn${card.summonTurnsLeft === 1 ? '' : 's'} left`
+              ? `Auto-attacks for ${card.summonAutoDamage}${(card.summonActionsPerTurn ?? 1) > 1 ? `x${card.summonActionsPerTurn}` : ''} per turn - permanent`
+              : `Auto-attacks for ${card.summonAutoDamage}${(card.summonActionsPerTurn ?? 1) > 1 ? `x${card.summonActionsPerTurn}` : ''} per turn - ${card.summonTurnsLeft} turn${card.summonTurnsLeft === 1 ? '' : 's'} left`
           }
           style={{
             position: 'absolute',
@@ -534,11 +534,11 @@ export const CardComponent: React.FC<CardComponentProps> = ({
             whiteSpace: 'nowrap',
           }}
         >
-          🤖 {card.summonTurnsLeft === undefined || card.summonTurnsLeft < 0 ? '∞' : card.summonTurnsLeft}
+          BOT {card.summonTurnsLeft === undefined || card.summonTurnsLeft < 0 ? '*' : card.summonTurnsLeft}
         </div>
       )}
 
-      {/* Augment markers — Cogsmiths attached augments */}
+      {/* Augment markers - Cogsmiths attached augments */}
       {card.augments && card.augments.length > 0 && (
         <div
           title={`Augments: ${card.augments.join(', ')}`}
@@ -564,7 +564,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
                 lineHeight: 1.2,
               }}
             >
-              ⚙
+              AUG
             </span>
           ))}
         </div>
@@ -619,8 +619,8 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       {/* Minion stats */}
       {isMinion && (
         <div style={styles.stats}>
-          <span style={{ color: '#ffcc00' }}>⚔{stats.attack ?? 0}</span>
-          <span style={{ color: '#22cc44' }}>♥{card.currentHealth ?? stats.health ?? 0}</span>
+          <span style={{ color: '#ffcc00' }}>ATK {stats.attack ?? 0}</span>
+          <span style={{ color: '#22cc44' }}>HP {card.currentHealth ?? stats.health ?? 0}</span>
         </div>
       )}
 

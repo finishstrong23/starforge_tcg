@@ -314,6 +314,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 17. Combat log polish: raw glyph prefixes are stripped at render time and replaced by consistent text-token badges.
 18. Map route polish: dotted connector lines replaced with rounded board-route rails and active path markers.
 19. Visible text/glyph polish: major dungeon screen headers, modal labels, status fallbacks, and action chips now avoid emoji/mojibake.
+20. Card surface glyph polish: card stats, Lumens, Flux, summons, augments, and status fallbacks now use readable text chips.
 
 The next remaining visual batch is remaining low-priority developer/debug polish and final visual QA cleanup.
 
