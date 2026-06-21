@@ -17,7 +17,7 @@ import { getPotionDef } from '../data/potions';
 import { isChannelCard } from '../engine/combat';
 import { getCardPlayPreview } from '../engine/cardPreview';
 import { FactionResourcePanel } from './FactionResourcePanel';
-import { getRelicArt, getStatusArt, uiArt } from '../assets/artRegistry';
+import { getRelicArt, getRiftArt, getStatusArt, uiArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
 
 const ENEMY_TURN_DELAY_MS = 1200;
@@ -506,7 +506,14 @@ const PlayerHUD: React.FC<{
                   gap: 2,
                 }}
               >
-                R<span style={{ fontSize: 9 }}>{r.turnsRemaining}</span>
+                <TokenArt
+                  src={getRiftArt(r.type)}
+                  fallback={m.token}
+                  alt=""
+                  style={{ width: 14, height: 14 }}
+                  fallbackStyle={{ fontSize: 10, lineHeight: 1 }}
+                />
+                <span style={{ fontSize: 9 }}>{r.turnsRemaining}</span>
               </span>
             ) : null;
           })}

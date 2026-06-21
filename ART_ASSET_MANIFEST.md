@@ -256,6 +256,7 @@ Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wi
 | `intent:debuff` | Intent icon | Done | `public/art/dungeon/ui/intent_debuff.svg` | `EnemyComponent` |
 | `intent:summon` | Intent icon | Done | `public/art/dungeon/ui/intent_summon.svg` | `EnemyComponent` |
 | `intent:special` | Intent icon | Done | `public/art/dungeon/ui/intent_special.svg` | `EnemyComponent` |
+| `rift:cost` through `rift:chaos` | Rift icon | Done | `public/art/dungeon/rifts/{riftType}.svg` | `CombatView` active rift chips |
 | `ui:card_back` | UI art | Done | `public/art/dungeon/ui/card_back.svg` | Asset exists; reserved for card-back surfaces |
 | `ui:draw_pile` | UI art | Done | `public/art/dungeon/ui/draw_pile.svg` | `HandComponent`, `CombatView` |
 | `ui:discard_pile` | UI art | Done | `public/art/dungeon/ui/discard_pile.svg` | `HandComponent` |
@@ -325,6 +326,7 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 27. Ascension text polish: ascension modifier summaries now use simple ASCII separators in run setup and summary UI.
 28. Relic log emoji cleanup: Starseer's Pendant now emits clean text instead of a raw star glyph in combat logs.
 29. Token naming cleanup: status, rift, intent, enemy, and relic fallback internals now use token language instead of emoji language.
+30. Rift HUD token art: active rifts now use four Basic Token SVG icons in the combat status row instead of a bare text marker.
 
 The next remaining visual batch is remaining low-priority developer/debug polish and final visual QA cleanup.
 

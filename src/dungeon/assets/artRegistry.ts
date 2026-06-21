@@ -1,5 +1,5 @@
 import type { BlessingId } from '../data/blessings';
-import type { Faction, IntentType, NodeType, PotionCategory, StatusEffectType } from '../types';
+import type { Faction, IntentType, NodeType, PotionCategory, Rift, StatusEffectType } from '../types';
 
 const assetUrl = (path: string): string => `${import.meta.env.BASE_URL}${path}`;
 
@@ -61,6 +61,13 @@ export const statusArt: Partial<Record<StatusEffectType, string>> = {
   barrier: assetUrl('art/dungeon/status/barrier.svg'),
   stealth: assetUrl('art/dungeon/status/stealth.svg'),
   phase: assetUrl('art/dungeon/status/phase.svg'),
+};
+
+export const riftArt: Record<Rift['type'], string> = {
+  cost: assetUrl('art/dungeon/rifts/cost.svg'),
+  genesis: assetUrl('art/dungeon/rifts/genesis.svg'),
+  energy: assetUrl('art/dungeon/rifts/energy.svg'),
+  chaos: assetUrl('art/dungeon/rifts/chaos.svg'),
 };
 
 export const uiArt = {
@@ -141,4 +148,8 @@ export function getIntentArt(intent: IntentType): string {
 
 export function getStatusArt(status: StatusEffectType | string): string | undefined {
   return statusArt[status as StatusEffectType];
+}
+
+export function getRiftArt(rift: Rift['type']): string {
+  return riftArt[rift];
 }
