@@ -10,24 +10,29 @@
  */
 
 import React, { useState } from 'react';
+import { uiArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 
 const DISMISSED_KEY = 'sf:tutorial:dismissed:v1';
 
-const STEPS: Array<{ title: string; body: string; emoji: string }> = [
+const STEPS: Array<{ title: string; body: string; icon: string; fallback: string }> = [
   {
-    emoji: '⚡',
+    icon: uiArt.tutorialEnergy,
+    fallback: 'EN',
     title: 'Cards & Energy',
     body: 'Click a card to play it. You have 3 Energy per turn that refills at the start of every turn. End your turn when you\'re ready.',
   },
   {
-    emoji: '💎',
+    icon: uiArt.tutorialRelics,
+    fallback: 'RL',
     title: 'Relics',
     body: 'Hover any relic in the left column to read what it does. Relics are passive effects that stack with each other for the rest of the run.',
   },
   {
-    emoji: '🗺',
+    icon: uiArt.tutorialMap,
+    fallback: 'MP',
     title: 'Map paths',
-    body: 'Pick your route on the map. Elites (💀) hit harder but always drop a potion. Bosses (👑) end each act with a guaranteed Boss Relic.',
+    body: 'Pick your route on the map. Elites hit harder but always drop a potion. Bosses end each act with a guaranteed Boss Relic.',
   },
 ];
 
@@ -93,10 +98,27 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ step }) => {
             marginBottom: 4,
           }}
         >
-          Tutorial · {step + 1} of 3
+          Tutorial - {step + 1} of 3
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-          <span style={{ fontSize: 28 }}>{s.emoji}</span>
+          <TokenArt
+            src={s.icon}
+            fallback={s.fallback}
+            alt=""
+            style={{ width: 34, height: 34, flex: '0 0 auto' }}
+            fallbackStyle={{
+              width: 30,
+              height: 30,
+              borderRadius: 8,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#ffd24a',
+              color: '#10101e',
+              fontSize: 10,
+              fontWeight: 900,
+            }}
+          />
           <span style={{ fontSize: 16, fontWeight: 700 }}>{s.title}</span>
         </div>
         <div style={{ fontSize: 13, lineHeight: 1.55, color: '#ddd', marginBottom: 14 }}>

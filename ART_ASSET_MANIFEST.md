@@ -22,10 +22,11 @@ The first Basic Token implementation pass uses SVG for simple symbolic icons bec
 | Faction token | `public/art/dungeon/factions/{raceLowercase}.png` |
 | Card bundle art | `public/art/dungeon/bundles/{bundleId}.png` |
 | Potion icon | `public/art/dungeon/potions/{potionId}.svg` |
+| Potion effect icon | `public/art/dungeon/potions/effects/{category}.svg` |
 | Scene background | `public/art/dungeon/backgrounds/{sceneId}.png` |
 | Map icon | `public/art/dungeon/map/{nodeType}.svg` |
-| Status icon | `public/art/dungeon/status/{statusId}.png` |
-| UI art | `public/art/dungeon/ui/{assetId}.png` |
+| Status icon | `public/art/dungeon/status/{statusId}.svg` |
+| UI art | `public/art/dungeon/ui/{assetId}.svg` |
 
 ## Phase 1 Full In-Game Visual Audit
 
@@ -54,13 +55,13 @@ Status key:
 | Boss art | `src/dungeon/data/enemies.ts`, `src/dungeon/components/EnemyComponent.tsx` | 3 boss SVGs installed | P0 | `public/art/dungeon/bosses/{bossId}.svg` |
 | Enemy intent icons | `src/dungeon/components/EnemyComponent.tsx` | Done with six Basic Token SVGs | P1 | `public/art/dungeon/ui/intent_{intentType}.svg` |
 | Enemy/player status icons | `src/dungeon/components/EnemyComponent.tsx`, `CombatView.tsx`, `CardComponent.tsx` | Done with nine Basic Token SVGs | P1 | `public/art/dungeon/status/{statusId}.svg` |
-| Card art | `src/dungeon/components/CardComponent.tsx` | 16-card SVG pilot installed; remaining cards use procedural Basic Token SVG fallback | P0 for first 16, P1 for all 176 | `public/cards/{cardId}.svg` |
+| Card art | `src/dungeon/components/CardComponent.tsx` | Done for all 176 current dungeon cards; procedural fallback remains for future cards | P0 for first 16, P1 for all 176 | `public/cards/{cardId}.svg` |
 | Card backs / draw pile / discard pile | `src/dungeon/components/HandComponent.tsx`, `src/dungeon/components/CombatView.tsx` | Done for draw/discard/card-back SVGs; draw/discard wired into active UI | P1 | `public/art/dungeon/ui/card_back.svg`, `draw_pile.svg`, `discard_pile.svg` |
 | Relic icons | `src/dungeon/data/relics.ts`, `RelicBar.tsx`, rewards/shop | 26 SVG icons installed | P0 for visible relic bar/shop/rewards | `public/art/dungeon/relics/{relicId}.svg` |
 | Potion icons | `src/dungeon/components/PotionInventory.tsx`, `PotionPickupModal.tsx`, `ShopView.tsx` | 14 SVG icons installed | P0 | `public/art/dungeon/potions/{potionId}.svg` |
-| Potion drink burst | `src/dungeon/components/PotionDrinkBurst.tsx` | Emoji sigils in animation | P2 | `public/art/dungeon/potions/effects/{category}.png` or CSS token shapes |
+| Potion drink burst | `src/dungeon/components/PotionDrinkBurst.tsx` | Done with eight category SVGs plus Phoenix SVG | P2 | `public/art/dungeon/potions/effects/{category}.svg` |
 | Faction resource panel | `src/dungeon/components/FactionResourcePanel.tsx` | Text/color meter only | P1 | `public/art/dungeon/ui/resource_{faction}.png` |
-| Tutorial icons | `src/dungeon/components/TutorialOverlay.tsx` | Emoji step icons | P2 | `public/art/dungeon/ui/tutorial_{step}.png` |
+| Tutorial icons | `src/dungeon/components/TutorialOverlay.tsx` | Done with three Basic Token SVGs | P2 | `public/art/dungeon/ui/tutorial_{step}.svg` |
 | Telemetry/debug icon | `src/dungeon/components/TelemetryDebugPanel.tsx` | Emoji chart | P3 | Keep developer-only or replace with CSS icon |
 | Combat log emojis | `src/dungeon/engine/combat.ts`, `relicEffects.ts`, `potions.ts` | Emoji embedded in log strings | P2 | Text-only log tags or registry-backed small icons |
 
@@ -260,6 +261,11 @@ Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wi
 | `ui:discard_pile` | UI art | Done | `public/art/dungeon/ui/discard_pile.svg` | `HandComponent` |
 | `ui:gold` | UI icon | Done | `public/art/dungeon/ui/gold.svg` | `ShopView` prices and gold balance |
 | `ui:card_removal` | UI icon | Done | `public/art/dungeon/ui/card_removal.svg` | `ShopView` removal service |
+| `ui:tutorial_energy` | UI icon | Done | `public/art/dungeon/ui/tutorial_energy.svg` | `TutorialOverlay` |
+| `ui:tutorial_relics` | UI icon | Done | `public/art/dungeon/ui/tutorial_relics.svg` | `TutorialOverlay` |
+| `ui:tutorial_map` | UI icon | Done | `public/art/dungeon/ui/tutorial_map.svg` | `TutorialOverlay` |
+| `potion_effect:Defense` through `potion_effect:Extreme` | Potion effect icons | Done | `public/art/dungeon/potions/effects/{category}.svg` | `PotionDrinkBurst` |
+| `potion_effect:Phoenix` | Potion effect icon | Done | `public/art/dungeon/potions/effects/phoenix.svg` | `PotionDrinkBurst` |
 
 ## Pilot Assets Already Created
 
@@ -298,8 +304,10 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 11. Card art batch 3: 30 uncommon reward SVGs.
 12. Card art batch 4: 40 rare and high-impact reward SVGs.
 13. Card art batch 5: 57 final gap SVGs, completing authored coverage for all current dungeon cards.
+14. Tutorial icons: 3 Basic Token SVGs wired into first-run tutorial.
+15. Potion drink burst sigils: 8 category SVGs plus Phoenix SVG wired into potion use animation.
 
-The next remaining visual batch is UI polish outside card art: tutorial icons, potion drink burst sigils, combat log icon strategy, and optional route/path motifs.
+The next remaining visual batch is UI polish outside card art: combat log icon strategy, faction resource panel tokens, and optional route/path motifs.
 
 ## Generation Notes
 

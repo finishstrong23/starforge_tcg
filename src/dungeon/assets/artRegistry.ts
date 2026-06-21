@@ -1,4 +1,4 @@
-import type { Faction, IntentType, NodeType, StatusEffectType } from '../types';
+import type { Faction, IntentType, NodeType, PotionCategory, StatusEffectType } from '../types';
 
 const assetUrl = (path: string): string => `${import.meta.env.BASE_URL}${path}`;
 
@@ -61,7 +61,22 @@ export const uiArt = {
   discardPile: assetUrl('art/dungeon/ui/discard_pile.svg'),
   gold: assetUrl('art/dungeon/ui/gold.svg'),
   cardRemoval: assetUrl('art/dungeon/ui/card_removal.svg'),
+  tutorialEnergy: assetUrl('art/dungeon/ui/tutorial_energy.svg'),
+  tutorialRelics: assetUrl('art/dungeon/ui/tutorial_relics.svg'),
+  tutorialMap: assetUrl('art/dungeon/ui/tutorial_map.svg'),
 } as const;
+
+export const potionEffectArt: Record<PotionCategory | 'Phoenix', string> = {
+  Defense: assetUrl('art/dungeon/potions/effects/defense.svg'),
+  Tempo: assetUrl('art/dungeon/potions/effects/tempo.svg'),
+  Damage: assetUrl('art/dungeon/potions/effects/damage.svg'),
+  Buff: assetUrl('art/dungeon/potions/effects/buff.svg'),
+  Debuff: assetUrl('art/dungeon/potions/effects/debuff.svg'),
+  Utility: assetUrl('art/dungeon/potions/effects/utility.svg'),
+  Recovery: assetUrl('art/dungeon/potions/effects/recovery.svg'),
+  Extreme: assetUrl('art/dungeon/potions/effects/extreme.svg'),
+  Phoenix: assetUrl('art/dungeon/potions/effects/phoenix.svg'),
+};
 
 export function getFactionArt(faction: Faction): string {
   return factionArt[faction];
@@ -85,6 +100,10 @@ export function getRelicArt(relicId: string): string {
 
 export function getPotionArt(potionId: string): string {
   return assetUrl(`art/dungeon/potions/${potionId}.svg`);
+}
+
+export function getPotionEffectArt(category: PotionCategory | 'Phoenix'): string {
+  return potionEffectArt[category];
 }
 
 export function getCardArt(cardId: string): string {

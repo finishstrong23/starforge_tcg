@@ -53,6 +53,8 @@ The previous generated faction/background packs were rejected because they were 
 | `status:*` | `public/art/dungeon/status/{statusId}.svg` | Installed Basic Token SVG pass | Nine status tokens are live through enemy, player, and card status chips. |
 | `ui:piles` | `public/art/dungeon/ui/{card_back,draw_pile,discard_pile}.svg` | Installed Basic Token SVG pass | Draw/discard pile tokens are live in hand/combat UI; card back asset is ready for future card-back surfaces. |
 | `ui:shop_misc` | `public/art/dungeon/ui/{gold,card_removal}.svg` | Installed Basic Token SVG pass | Shop prices, gold balance, and card-removal service now use token icons. |
+| `ui:tutorial-icons` | `public/art/dungeon/ui/tutorial_{energy,relics,map}.svg` | Installed Basic Token SVG pass | First-run tutorial now uses token icons instead of emoji glyphs. |
+| `potion:drink-burst` | `public/art/dungeon/potions/effects/{category}.svg` | Installed Basic Token SVG pass | Potion drink animation now uses category token sigils, including Phoenix. |
 
 ## Next Batch
 
@@ -63,8 +65,8 @@ The next batch should generate the smallest asset set that changes every core sc
 | Asset id | Target path | Status |
 |---|---|---|
 | `card:remaining` | `public/cards/{cardId}.svg` | Complete for current dungeon card IDs; procedural fallback remains as a safe future-card fallback |
-| `ui:tutorial-icons` | `public/art/dungeon/ui/tutorial_{step}.svg` | Next small utility polish batch |
-| `potion:drink-burst` | `public/art/dungeon/potions/effects/{category}.svg` | Replace remaining potion burst glyphs with token shapes |
+| `combat-log:icon-strategy` | `src/dungeon/components/CombatView.tsx` and engine log producers | Next: replace embedded emoji prefixes with text tags or registry-backed small icons |
+| `ui:faction-resource-panel` | `public/art/dungeon/ui/resource_{faction}.svg` | Next small utility token batch |
 | `ui:remaining-polish` | `public/art/dungeon/ui/{assetId}.svg` | Later utility polish outside the shop |
 
 ## QA Checklist

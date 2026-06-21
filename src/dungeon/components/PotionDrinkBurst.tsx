@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import type { PotionCategory } from '../types';
+import { getPotionEffectArt } from '../assets/artRegistry';
+import { TokenArt } from './TokenArt';
 
 /**
  * Per-category visual signature for the drink-burst overlay. Each potion
  * triggers a category-coloured radial burst centred on the screen, with
- * a sigil emoji that matches the kind of effect.
+ * a Basic Token sigil that matches the kind of effect.
  */
-const CATEGORY_VISUALS: Record<PotionCategory, { color: string; sigil: string; label: string }> = {
-  Defense:  { color: '#3b8fff', sigil: '🛡', label: 'Aegis'    },
-  Tempo:    { color: '#4adfff', sigil: '⚡', label: 'Surge'    },
-  Damage:   { color: '#ff5a2e', sigil: '💥', label: 'Strike'   },
-  Buff:     { color: '#ffd24a', sigil: '✨', label: 'Empower'  },
-  Debuff:   { color: '#a855f7', sigil: '☠',  label: 'Hex'      },
-  Utility:  { color: '#88ccff', sigil: '✦',  label: 'Utility'  },
-  Recovery: { color: '#22cc66', sigil: '💚', label: 'Mend'     },
-  Extreme:  { color: '#ff7acc', sigil: '⏳', label: 'Warp'     },
+const CATEGORY_VISUALS: Record<PotionCategory, { color: string; fallback: string; label: string }> = {
+  Defense:  { color: '#3b8fff', fallback: 'DF', label: 'Aegis'    },
+  Tempo:    { color: '#4adfff', fallback: 'TP', label: 'Surge'    },
+  Damage:   { color: '#ff5a2e', fallback: 'DM', label: 'Strike'   },
+  Buff:     { color: '#ffd24a', fallback: 'BF', label: 'Empower'  },
+  Debuff:   { color: '#a855f7', fallback: 'HX', label: 'Hex'      },
+  Utility:  { color: '#88ccff', fallback: 'UT', label: 'Utility'  },
+  Recovery: { color: '#22cc66', fallback: 'MD', label: 'Mend'     },
+  Extreme:  { color: '#ff7acc', fallback: 'WP', label: 'Warp'     },
 };
 
 export interface PotionDrinkBurstProps {
@@ -50,8 +52,9 @@ export const PotionDrinkBurst: React.FC<PotionDrinkBurstProps> = ({
   const isPhoenix = potionId === 'phoenix_vial';
   const visual = CATEGORY_VISUALS[category];
   const color = isPhoenix ? '#ff8800' : visual.color;
-  const sigil = isPhoenix ? '🔆' : visual.sigil;
-  const label = isPhoenix ? 'Phoenix Rebirth' : `${visual.label} · ${potionName}`;
+  const sigilSrc = getPotionEffectArt(isPhoenix ? 'Phoenix' : category);
+  const sigilFallback = isPhoenix ? 'PX' : visual.fallback;
+  const label = isPhoenix ? 'Phoenix Rebirth' : `${visual.label} - ${potionName}`;
 
   return (
     <>
@@ -119,22 +122,39 @@ export const PotionDrinkBurst: React.FC<PotionDrinkBurstProps> = ({
         }}
       />
 
-      {/* Central sigil emoji */}
+      {/* Central sigil token */}
       <div
         key={`sigil-${activeKey}`}
         style={{
           position: 'absolute',
           top: '50%',
           left: '50%',
-          fontSize: 92,
-          lineHeight: 1,
+          width: 112,
+          height: 112,
           pointerEvents: 'none',
           zIndex: 52,
-          textShadow: `0 0 24px ${color}, 0 0 48px ${color}aa`,
+          filter: `drop-shadow(0 0 18px ${color}) drop-shadow(0 0 34px ${color}aa)`,
           animation: `dungeonBurstSigil ${BURST_MS}ms cubic-bezier(0.22,1,0.36,1) forwards`,
         }}
       >
-        {sigil}
+        <TokenArt
+          src={sigilSrc}
+          fallback={sigilFallback}
+          alt=""
+          style={{ width: '100%', height: '100%' }}
+          fallbackStyle={{
+            width: '100%',
+            height: '100%',
+            borderRadius: 24,
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: color,
+            color: '#080814',
+            fontSize: 26,
+            fontWeight: 900,
+          }}
+        />
       </div>
 
       {/* Label below */}
