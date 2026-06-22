@@ -6,15 +6,15 @@
 
 Pyroclast are volcanic-born war-creatures, forged in magma flues and tempered at the edge of eruption. Their culture is combustion as virtue — restraint is weakness, and the only real sin is letting your forge go cold. They fight the way a volcano erupts: building pressure until it cannot be contained, then releasing it in a single annihilating moment.
 
-Mechanically, this means Pyroclast rewards players who can ride the edge of overheating without falling off. The faction's skill ceiling is in managing when to stockpile Heat and when to spend it. Their skill floor is low — even badly-played Pyroclast decks deal damage.
+Mechanically, this means Pyroclast rewards players who keep Heat moving. The faction's skill ceiling is in building Heat, Venting it for immediate value, and rebuilding before future Heat gains are wasted. Their skill floor is low — even badly-played Pyroclast decks deal damage — but the best runs should feel like a furnace engine, not a poison deck with fire names.
 
 ## Core mechanic: Heat
 
-Heat is a combat-scoped resource that starts at 0 and caps at 12. Playing Pyroclast cards generates Heat; certain cards consume Heat to deal massive scaling damage. Heat does not carry between combats.
+Heat is a combat-scoped resource that starts at 0 and caps at 10. Playing Pyroclast cards generates Heat; Vent cards spend Heat for damage, Block, draw, healing, or Ignite payoffs. Heat does not carry between combats.
 
-**Overheat penalty:** At Heat 10+, you take 2 unblockable damage at the start of each turn. This is survivable and intentional — it's the cost of running near the red line, not a hard punishment. Many builds want to sit at 10+ briefly before dumping Heat in one explosive turn.
+**No overheat penalty:** Heat never damages the player by itself. Sitting at the cap only wastes future Heat gains, which creates positive pressure to spend it often.
 
-**Design intent:** Heat creates a tempo decision every turn. Spend it now for reliable damage? Bank it for a finisher? Let it push past 10 and accept the penalty for one more turn? Every Pyroclast card is tuned against this question.
+**Design intent:** Heat creates a tempo decision every turn. Build now? Vent now? Hold at Blazing because a payoff is in hand? Every Pyroclast card should be tuned against this question.
 
 ## Archetypes
 
@@ -28,27 +28,27 @@ Payoff cards: Meltdown, Sun's Fury, Pyre Lance, Pyroclasm, Magma Tide
 
 This is the obvious Pyroclast playstyle and the easiest to pilot. Turn 1-6 is setup; turn 7-8 is a single attack for 40+ damage. Excellent against high-HP bosses, weaker against swarms.
 
-### Ignite Stack
-**Win condition:** Apply massive Ignite stacks, then detonate for multi-turn DoT damage.
+### Ignite Detonation
+**Win condition:** Apply Ignite, then cash it in through Heat/Vent payoffs instead of letting it behave like renamed poison.
 
 Enabler cards: Oil Flask, Flame Lash, Sunfire Blade, Dragonbreath
 Payoff cards: Combustion, Immolate, Volcano
 
-Ignite deals 3 turns of damage at its stack value. Four Ignite means 12 damage guaranteed over 3 turns — and Combustion triggers Ignite immediately for its full value, letting you front-load what would otherwise be slow DoT. This archetype melts bosses who have threatening turn-2 attacks, because you apply the kill before their swing lands.
+The current implementation is a simple decay status: Ignite X deals X damage during that character's turn, then decreases by 1. That is readable, but too close to poison-style decay to be a headline mechanic. The preferred MVP direction is to make Vent cards detonate or amplify Ignite so the player actively chooses when to cash it in.
 
-### Self-Burn / Phoenix
-**Win condition:** Take damage deliberately to fuel payoff cards; survive with Phoenix Form.
+### Phoenix Recovery
+**Win condition:** Use healing, Cauterize, and recovery payoffs to stay aggressive while Venting Heat.
 
 Engine cards: Glass Cannon, Overclock, Cauterize, Immolate
 Payoff cards: Phoenix Form, Ring of Fire, Forge Master (indirectly)
 
-Highest skill ceiling. You're deliberately running at low HP to enable burst turns, relying on Phoenix Form as a safety net. Plays well against fights you've scouted — knowing enemy damage patterns means knowing how low you can go.
+Highest skill ceiling. You are not punished by Heat itself, but you may choose cards that trade HP, Ignite, or recovery timing for tempo. Plays well against fights you've scouted — knowing enemy damage patterns means knowing when recovery can buy another aggressive turn.
 
 ## Combo chains
 
 Five combos the deck wants to enable. Each combines 2-4 cards for compounding effect.
 
-1. **Detonation chain** — Oil Flask → Flame Lash (Ignite 4) → Combustion (triggers Ignite = 12 immediate + Ignite again over 3 turns = 24 total from two cards)
+1. **Detonation chain** — Oil Flask -> Flame Lash -> Vent payoff. Apply Ignite, then use a Heat spender to detonate or amplify the mark.
 
 2. **Heat dump finisher** — Kindle → Kindle → Spirit of Fire active → Pyre Lance. Turn 4: Heat at ~10, Pyre Lance hits for 24+ while consuming all Heat.
 
@@ -56,13 +56,13 @@ Five combos the deck wants to enable. Each combines 2-4 cards for compounding ef
 
 4. **Overheat tank** — Molten Skin + Heat Shimmer + Glowing Resolve. Turn loop: play block, gain Heat from Molten Skin at turn end, block scales with Heat next turn. Heat 8 = 24 Block from Glowing Resolve alone.
 
-5. **Revival burst** — Phoenix Form + Immolate + Glass Cannon. Drop to 0, revive at 15 HP with 3 Heat, immediately Immolate for 22 + Burn self-damage triggers Ring of Fire returns, end combat.
+5. **Phoenix tempo** — Phoenix Form + Cauterize effects + Vent payoff. Heal or stabilize, then spend Heat before the enemy's next pressure turn.
 
 ## Boss fight scaling
 
 The rares in this pool are designed to feel like win conditions in the elite/boss fights specifically. Designed scaling by turn count:
 
-| Turn | Heat Snowball output | Ignite Stack output | Self-Burn output |
+| Turn | Heat Snowball output | Ignite Detonation output | Phoenix Recovery output |
 |------|---------------------|---------------------|------------------|
 | 3 | ~18 dmg | ~20 dmg (Ignite chain) | ~25 dmg (Glass Cannon'd) |
 | 5 | ~45 dmg | ~50 dmg (Volcano + Combustion) | ~35 dmg (if revived) |
@@ -83,9 +83,8 @@ Molten Core is the character-identity card — every Pyroclast run starts with i
 
 ## Status effects unique to Pyroclast
 
-- **Heat** — Resource, 0 at combat start, cap 12, self-damage at 10+
-- **Burn** — Burn cards (non-playable) that deal 2 damage when drawn and then exhaust themselves
-- **Ignite** — Deals X damage at turn start for 3 turns; stack value does not decay with duration
+- **Heat** — Resource, 0 at combat start, cap 10, never damages the player by itself.
+- **Ignite** — Current: deals X damage during that character's turn, then decreases by 1. Target: fire mark that can be detonated or amplified by Vent effects.
 
 ## Card list
 
@@ -99,7 +98,7 @@ When this pool gets built, three things must be enforced:
 
 2. **Evolution counters are visible** — every card in hand shows its progress toward evolution ("5/10 plays to Blazing Strike"). Hidden evolution destroys the sculpture feel.
 
-3. **Ignite is distinct from Burn status** — they share fire imagery but function differently. UI should color-code them (Ignite = orange ring around enemy, Burn = the card-in-deck icon). Conflating them is the most likely bug.
+3. **Ignite must become distinct from poison-style decay** — if the rule remains simple decay, it is a support status only. If it is meant to carry class identity, it must interact with Heat/Vent.
 
 ## Next steps
 

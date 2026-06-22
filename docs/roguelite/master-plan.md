@@ -1,6 +1,6 @@
 # Dungeon Run Master Plan
 
-Last updated: May 17, 2026
+Last updated: June 22, 2026
 
 ## Target
 
@@ -8,10 +8,12 @@ Build a roguelite dungeon-run deckbuilder that can stand next to Slay the Spire 
 
 Official reference: https://store.steampowered.com/app/2868840/Slay_the_Spire_2/
 
+Internal benchmark/originality guardrail: [STS2 Benchmark And STARFORGE Originality Guardrails](sts2-benchmark-and-originality.md)
+
 ## Product Pillars
 
 1. Every class has a fantasy that changes how the player reads a turn.
-   - Pyroclast: controlled overheating, self-risk, delayed burn payoffs.
+   - Pyroclast: positive Heat momentum, frequent Vent turns, Ignite as a Heat-linked fire mark rather than renamed poison.
    - Luminar: storing light, choosing when to release it, defensive inevitability.
    - Cogsmiths: modifying cards, machine companions, long-run construction.
    - Warp Riders: unstable modes, rifts, probability, turn manipulation.
@@ -55,10 +57,12 @@ Phase 0 docs:
 - [Product Bible](phase-0-product-bible.md)
 - [Vertical Slice Spec](phase-0-vertical-slice.md)
 - [Backlog](phase-0-backlog.md)
+- [STS2 Benchmark And Originality Guardrails](sts2-benchmark-and-originality.md)
 
 Codex deliverables:
 
 - Create a product bible covering pillars, player promise, class fantasies, run structure, combat language, art direction, and non-goals.
+- Create and maintain a competitive benchmark that separates genre conventions from mechanics STARFORGE must own.
 - Define the vertical slice: 1 act, 4 classes, 1 boss, 3 elites, 8 normal encounters, 10 relics, 8 potions, 2 event chains, polished combat UI.
 - Write acceptance criteria for "fun enough to replay 10 times."
 - Create a phase backlog in docs with labels: engine, UI, content, balance, QA, art, launch.

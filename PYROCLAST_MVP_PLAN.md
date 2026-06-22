@@ -6,6 +6,8 @@ The MVP should stop trying to prove that STARFORGE can support many factions at 
 
 For the first public MVP, STARFORGE Dungeon Run is a Pyroclast-only roguelite deckbuilder about building Heat, spending it often, and keeping combat momentum high.
 
+This MVP must be benchmarked against Slay the Spire 2-style player expectations without copying its exact mechanics, presentation, card identities, or class loops. Genre fundamentals are allowed; renamed one-for-one mechanics are not a competitive advantage.
+
 The player fantasy:
 
 > I am carrying a furnace. Every turn I decide how to feed it, where to spend it, and how to keep the pressure rolling.
@@ -16,7 +18,7 @@ Pyroclast is the cleanest faction for an MVP because the fantasy is immediate:
 
 - Fire is easy to understand.
 - Heat can become a visible, exciting meter.
-- Damage, Burn, Block, and Heat spending are readable effects.
+- Damage, Ignite, Block, and Heat spending are readable effects.
 - The faction can feel aggressive without needing many subsystems.
 - It creates emotional decisions: build Heat, spend Heat, or convert Heat into survival before the enemy takes over.
 
@@ -35,9 +37,22 @@ The current implementation has the pieces of a resource system, but not the feel
 
 The result: Heat is present, but not engaging.
 
+## STS2 Benchmark Warning
+
+The current Ignite implementation is too close to a poison-style decay status:
+
+1. Ignite X deals X damage during the affected character's turn.
+2. Ignite then decreases by 1.
+
+That is clear, but it is not enough to be Pyroclast's identity. It can remain as a familiar supporting status, but the MVP should make Ignite interact with Heat or Vent so it becomes a STARFORGE decision instead of a renamed genre staple.
+
+Design rule:
+
+> Heat is the class identity. Ignite supports Heat. Ignite does not replace Heat as the main Pyroclast hook unless it gains a distinct Heat-linked rule.
+
 ## New Heat Design
 
-Heat should be a positive momentum resource. It never hurts the player by itself. The only downside to sitting at high Heat is opportunity cost: if you stay capped, future Heat gains are wasted, and you missed chances to turn Heat into damage, Block, draw, Burn, or other tempo.
+Heat should be a positive momentum resource. It never hurts the player by itself. The only downside to sitting at high Heat is opportunity cost: if you stay capped, future Heat gains are wasted, and you missed chances to turn Heat into damage, Block, draw, Ignite, or other tempo.
 
 Heat should become a resource with three rewarding states:
 
@@ -78,8 +93,8 @@ All Pyroclast cards should use one of these verbs:
 - **Vent**: Spend Heat for damage, Block, draw, or healing.
 - **Flare**: Do something extra if Heat is 4+.
 - **Blazing**: Do something extra if Heat is 8+.
-- **Burn**: Apply enemy damage over time.
-- **Cauterize**: Convert Heat or Burn into survival.
+- **Ignite**: Mark enemies with fire damage that can be detonated or amplified by Vent effects.
+- **Cauterize**: Convert Heat or Ignite into survival.
 
 Avoid synonyms like "consume all Heat" unless the card also says what the player gets. Prefer "Vent X Heat" or "Vent all Heat." Vent should mean "spend Heat for value," not "avoid punishment."
 
@@ -87,7 +102,7 @@ Avoid synonyms like "consume all Heat" unless the card also says what the player
 
 Heat tooltip:
 
-> Heat powers Pyroclast cards. Build it with fire cards, then Vent it for damage, Block, draw, or Burn. Heat caps at 10; extra Heat is wasted, so spend it often.
+> Heat powers Pyroclast cards. Build it with fire cards, then Vent it for damage, Block, draw, or Ignite. Heat caps at 10; extra Heat is wasted, so spend it often.
 
 Short HUD labels:
 
@@ -99,9 +114,17 @@ Card text should use consistent templates:
 
 - `Gain 2 Heat.`
 - `Flare 4: Deal 5 more damage.`
-- `Blazing 8: Apply 4 Burn.`
+- `Blazing 8: Apply 4 Ignite.`
 - `Vent up to 4 Heat. Deal 4 damage per Heat vented.`
 - `Vent all Heat. Gain 2 Block per Heat vented.`
+
+Ignite tooltip, current implementation:
+
+> Ignite deals damage during that character's turn, then decreases by 1.
+
+Ignite tooltip, preferred MVP prototype:
+
+> Ignite burns over time. Venting Heat into an Ignited enemy can consume Ignite for bonus damage.
 
 ## Pyroclast Archetypes
 
@@ -117,7 +140,7 @@ Key cards:
 
 - Cheap attacks that gain 1-2 Heat.
 - Attacks that Vent 2-4 Heat for bonus damage.
-- Low-cost Burn setup.
+- Low-cost Ignite setup.
 
 ### 2. Blazing Tempo
 
@@ -133,22 +156,22 @@ Key cards:
 - Defensive tools that spend Heat.
 - Cards that replace wasted Heat with value when already Blazing.
 
-### 3. Burn Control
+### 3. Ignite Detonation
 
-Apply Burn, survive, and let enemies melt.
+Apply Ignite, survive, and choose when to detonate it with Heat.
 
-Player fantasy: "I set the room on fire and endure."
+Player fantasy: "I mark the enemy with fire, then cash it in at the perfect moment."
 
 Key cards:
 
-- Burn application.
+- Ignite application.
 - Weak/Vulnerable support.
 - Block from Heat.
-- Cards that spread or amplify Burn.
+- Cards that spread, amplify, or detonate Ignite.
 
 ### 4. Phoenix Recovery
 
-Recovery and resilience for players who want to spend HP or Burn as a secondary resource.
+Recovery and resilience for players who want to spend HP or Ignite as a secondary resource.
 
 Player fantasy: "I recover through the fire and keep fighting."
 
@@ -157,7 +180,7 @@ Key cards:
 - HP cost cards.
 - Healing.
 - Cauterize effects.
-- Relics that reward healing, Burn conversion, or Heat spending.
+- Relics that reward healing, Ignite conversion, or Heat spending.
 
 ## Card Role Targets
 
@@ -172,7 +195,7 @@ Target mix:
 | Heat builders | 8-10 | Make the resource move |
 | Vent spenders | 8-10 | Let players cash out |
 | Flare/Blazing payoffs | 8-10 | Reward reaching Heat thresholds |
-| Burn cards | 6-8 | Enable Burn Control |
+| Ignite cards | 6-8 | Enable Ignite Detonation |
 | Recovery cards | 4-6 | Enable Phoenix lane |
 | Powers | 5-7 | Define run identity |
 
@@ -212,7 +235,7 @@ The opening draft should always offer one card from each role:
 
 1. A Heat builder.
 2. A Vent spender.
-3. A defensive or Burn option.
+3. A defensive or Ignite option.
 
 This guarantees the player sees how Heat connects to choices before the first fight.
 
@@ -246,7 +269,7 @@ Target relic types:
 - Gain 1 Heat at combat start.
 - First Vent each combat deals +4 damage.
 - At Blazing Heat, gain 3 Block each turn.
-- Burn deals +1 damage.
+- Ignite deals +1 damage.
 - When you Vent 5+ Heat, draw 1 card once per turn.
 - Rest sites heal less, but upgrade an extra Pyro card.
 - Venting 6+ Heat heals 2 HP.
@@ -259,7 +282,7 @@ Pyro-compatible potion targets:
 
 - Gain 4 Heat.
 - Vent all Heat for Block.
-- Apply Burn to all enemies.
+- Apply Ignite to all enemies.
 - Double next Vent payoff.
 - Fill Heat to 10.
 - Double next Vent payoff.
@@ -288,7 +311,7 @@ Enemy categories:
 
 - Low-HP enemies that reward aggression.
 - Shielding enemies that reward spending Heat before defenses stack too high.
-- Burn-resistant enemy once per act, used sparingly.
+- Ignite-resistant enemy once per act, used sparingly.
 - Multi-hit enemies that pressure Block choices.
 - Elite that pressures players to keep Heat moving instead of hoarding it.
 - Boss that has phases:
@@ -345,10 +368,11 @@ Acceptance:
 
 ### Phase 2 - Pyro Card Rework
 
-Status: **started**. The Pyroclast starter deck now teaches Build -> Vent in combat one, and the first draft is pinned to show Build, Vent, defense, and Burn choices.
+Status: **started**. The Pyroclast starter deck now teaches Build -> Vent in combat one, and the first draft is pinned to show Build, Vent, defense, and Ignite choices.
 
 - Audit P-001 through P-044.
-- Assign every card to Build, Vent, Flare, Blazing, Burn, or Cauterize.
+- Assign every card to Build, Vent, Flare, Blazing, Ignite, or Cauterize.
+- Redesign Ignite cards that are only poison-style delayed damage.
 - Rewrite unclear cards.
 - Remove or replace cards that do not support the Pyro loop.
 - Ensure starter deck and opening draft teach Heat.
@@ -356,7 +380,8 @@ Status: **started**. The Pyroclast starter deck now teaches Build -> Vent in com
 Acceptance:
 
 - Every Pyro card has a clear role.
-- First draft offers Build, Vent, and defensive/Burn choices.
+- First draft offers Build, Vent, and defensive/Ignite choices.
+- Ignite either supports the Heat/Vent loop or is treated as a simple secondary status, not the headline mechanic.
 
 ### Phase 3 - Pyro Content Gate
 

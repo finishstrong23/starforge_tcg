@@ -1,12 +1,12 @@
 # Phase 0 Product Bible
 
-Last updated: May 17, 2026
+Last updated: June 22, 2026
 
 Working title: STARFORGE: Dungeon Run
 
 ## Player Promise
 
-Build a sci-fantasy roguelite deckbuilder where every run asks the player to master a faction's dangerous power source, not just draft efficient cards. The game should feel familiar enough that a Slay the Spire player understands the first click, then distinct enough that they cannot solve it with old habits.
+Build a sci-fantasy roguelite deckbuilder where every run asks the player to master a faction's distinct resource loop, not just draft efficient cards. The game should feel familiar enough that a Slay the Spire player understands the first click, then distinct enough that they cannot solve it with old habits.
 
 The core promise:
 
@@ -21,6 +21,7 @@ The comparison target is Slay the Spire 2, but the design target is not cloning 
 - Stronger faction fantasy per turn.
 - A dungeon that reacts to the player's build.
 - A content pipeline that lets Codex add and verify content safely.
+- A strict originality filter that catches mechanics that are only renamed genre staples.
 
 ## Design Pillars
 
@@ -28,7 +29,7 @@ The comparison target is Slay the Spire 2, but the design target is not cloning 
 
 Each class should change how the player evaluates a hand.
 
-- Pyroclast asks: "How hot can I run before the fight burns me back?"
+- Pyroclast asks: "How do I build Heat, Vent it for tempo, and keep the furnace moving?"
 - Luminar asks: "Do I release stored light now, or survive long enough for a larger payoff?"
 - Cogsmiths asks: "Which card is becoming my machine for the rest of the run?"
 - Warp Riders asks: "Can I steer this unstable turn into the line I need?"
@@ -39,7 +40,7 @@ If two factions reward the same sequencing pattern, one of them needs redesign.
 
 The dungeon should read the player's threat vector and respond. This does not mean hard-countering the player. It means the dungeon's enemies, events, and rewards should create different problems for different builds.
 
-- Pyroclast routes can attract cleansing, armor, burn-punish, and burst-race encounters.
+- Pyroclast routes can attract cleansing, armor, Ignite-resistant, and burst-race encounters.
 - Luminar routes can attract disruption, delayed-pressure, and release-timing checks.
 - Cogsmith routes can attract artifact disruption, board pressure, and long-fight punishers.
 - Warp Rider routes can attract consistency checks, state locks, and risk-amplifying events.
@@ -115,7 +116,7 @@ Use a consistent vocabulary.
 - Damage: reduces enemy HP after block/shield.
 - Block: temporary player protection that usually clears each enemy turn.
 - Shield: enemy or special protection when the existing engine uses it, but avoid mixing with Block in player-facing text unless mechanically different.
-- Status: Burn, Weak, Vulnerable, Strength, Dexterity, Barrier, Phase, Stealth.
+- Status: Ignite, Poison, Weak, Vulnerable, Strength, Dexterity, Barrier, Phase, Stealth.
 - Exhaust: removed from the combat.
 - Power: persistent combat modifier after play.
 - Trigger: combat-start, turn-start, card-play, turn-end, combat-end, rest, shop, death.
@@ -137,23 +138,23 @@ Every card should use one of these templates:
 
 ### Pyroclast
 
-Fantasy: wildfire discipline. The class wins by converting danger into tempo.
+Fantasy: wildfire discipline. The class wins by converting built Heat into immediate tempo.
 
 Primary resources:
 
 - Heat as a buildup/spend resource.
-- Burn/Ignite as delayed enemy damage.
-- Self-damage as optional acceleration.
+- Ignite as a fire mark that should interact with Heat/Vent, not merely copy poison-style damage.
+- Self-damage only as optional advanced card texture, not the core resource drawback.
 
 Archetypes:
 
-- Heat burst: build Heat, cash it in for lethal turns.
-- Burn control: stack delayed damage while defending.
-- Pain engine: take damage for Energy, draw, or scaling.
+- Furnace tempo: build Heat, Vent it repeatedly, and stay ahead.
+- Ignite detonation: mark enemies with fire, then cash those marks in through Vent effects.
+- Phoenix recovery: use healing and Cauterize effects to stay aggressive.
 
 Class risk:
 
-- Runs can overcommit to offense and die to elites.
+- Runs can hoard Heat or Ignite too long and miss the tempo window.
 
 ### Luminar
 
