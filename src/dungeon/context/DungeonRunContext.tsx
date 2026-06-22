@@ -62,6 +62,8 @@ export interface DungeonRunContextValue {
   setCombatState: (state: CombatState | null) => void;
   advanceAct: () => void;
   endRun: (won: boolean) => void;
+  /** Immediately abandon the current run and return to faction select. */
+  resetRun: () => void;
   /** Return to the map from a non-combat node (rest/shop/reward/treasure). */
   returnToMap: () => void;
 
@@ -109,6 +111,7 @@ type Action =
   | { type: 'SET_COMBAT'; state: CombatState | null }
   | { type: 'ADVANCE_ACT' }
   | { type: 'END_RUN'; won: boolean }
+  | { type: 'RESET_RUN' }
   | { type: 'RETURN_TO_MAP' }
   | { type: 'ADD_POTION'; potion: PotionInstance; slotIndex?: number }
   | { type: 'DISCARD_POTION'; slotIndex: number }
@@ -179,6 +182,23 @@ function reducer(state: ContextState, action: Action): ContextState {
         draftPicks: [],
         seed: action.seed,
       };
+    }
+
+    case 'RESET_RUN': {
+      if (state.run) {
+        logEvent('run_abandoned', {
+          faction: state.draftFaction,
+          currentAct: state.run.currentAct,
+          phase: state.run.phase,
+          totalCombats: state.run.runStats.totalCombats,
+          deckSize: state.run.deck.length,
+          relicCount: state.run.relics.length,
+          currentHP: state.run.currentHealth,
+          gold: state.run.gold,
+        });
+      }
+      clearDungeonSaveSnapshot();
+      return INITIAL;
     }
 
     // ── Pick a draft card ─────────────────────────────────────────────────────
@@ -711,6 +731,10 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     dispatch({ type: 'END_RUN', won });
   }, []);
 
+  const resetRun = useCallback(() => {
+    dispatch({ type: 'RESET_RUN' });
+  }, []);
+
   const returnToMap = useCallback(() => {
     dispatch({ type: 'RETURN_TO_MAP' });
   }, []);
@@ -759,6 +783,7 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setCombatState,
       advanceAct,
       endRun,
+      resetRun,
       returnToMap,
       addPotion,
       usePotion,
@@ -770,7 +795,7 @@ export const DungeonRunProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       startNewRun, pickDraftCard, completeDraft, travelToNode,
       addRelic, addGold, spendGold, healPlayer, damagePlayer, increaseMaxHealth,
       addCardToDeck, removeCardFromDeck, upgradeCard, addRunModifier, setCombatState,
-      advanceAct, endRun, returnToMap,
+      advanceAct, endRun, resetRun, returnToMap,
       addPotion, usePotion, discardPotion, applyBlessing,
     ],
   );

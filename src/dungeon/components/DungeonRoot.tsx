@@ -321,20 +321,86 @@ const s: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 6,
   },
-  abandonBtn: {
+  menuBtn: {
     position: 'fixed',
     top: 12,
-    left: 12,
-    zIndex: 120,
-    padding: '5px 12px',
-    background: 'transparent',
-    border: '1px solid #3a1a1a',
-    color: '#aa5555',
-    borderRadius: 4,
-    fontSize: 9,
+    right: 58,
+    zIndex: 121,
+    padding: '9px 13px',
+    background: 'linear-gradient(180deg, rgba(10,10,22,0.9), rgba(10,10,22,0.68))',
+    border: '1px solid #2a2a4a',
+    color: '#d8d8e8',
+    borderRadius: 8,
+    fontSize: 10,
+    fontWeight: 800,
     cursor: 'pointer',
     letterSpacing: '0.12em',
     textTransform: 'uppercase',
+    backdropFilter: 'blur(6px)',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.28)',
+  },
+  menuScrim: {
+    position: 'fixed',
+    inset: 0,
+    zIndex: 200,
+    background: 'rgba(0,0,0,0.62)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+  },
+  menuPanel: {
+    width: 'min(360px, 100%)',
+    background: 'linear-gradient(180deg, #111124 0%, #080812 100%)',
+    border: '1px solid #343452',
+    borderRadius: 8,
+    padding: 18,
+    boxShadow: '0 20px 70px rgba(0,0,0,0.72)',
+    color: '#f1f3ff',
+    display: 'grid',
+    gap: 10,
+  },
+  menuTitle: {
+    margin: 0,
+    color: '#f1f3ff',
+    fontSize: 16,
+    fontWeight: 900,
+    letterSpacing: '0.16em',
+    textTransform: 'uppercase',
+  },
+  menuText: {
+    margin: '0 0 4px',
+    color: '#aeb6cc',
+    fontSize: 12,
+    lineHeight: 1.45,
+  },
+  menuAction: {
+    width: '100%',
+    padding: '11px 13px',
+    borderRadius: 5,
+    background: '#14172a',
+    border: '1px solid #303652',
+    color: '#e4e8ff',
+    cursor: 'pointer',
+    fontSize: 11,
+    fontWeight: 800,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    textAlign: 'left',
+  },
+  menuDanger: {
+    width: '100%',
+    padding: '11px 13px',
+    borderRadius: 5,
+    background: 'rgba(255, 90, 46, 0.12)',
+    border: '1px solid #ff5a2e88',
+    color: '#ff8a68',
+    cursor: 'pointer',
+    fontSize: 11,
+    fontWeight: 900,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    textAlign: 'left',
   },
   runOverlayStack: {
     position: 'fixed',
@@ -680,7 +746,7 @@ const AscensionPicker: React.FC<{
 // ─── Inner component (reads context, routes by phase) ────────────────────────
 
 const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const { runState, startNewRun, endRun } = useDungeonRun();
+  const { runState, startNewRun, resetRun } = useDungeonRun();
   const [selectedId, setSelectedId] = useState<FactionId>(MVP_FACTION as FactionId);
   // Ascension selection. Default to the highest level the player has unlocked
   // for the chosen faction. Reset whenever the faction picker changes.
@@ -691,6 +757,15 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     setAscensionLevel(getMaxUnlockedAscension(selectedId as Faction));
   }, [selectedId]);
   const [deckOpen, setDeckOpen] = useState(false);
+  const [runMenuOpen, setRunMenuOpen] = useState(false);
+  React.useEffect(() => {
+    if (!runMenuOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setRunMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [runMenuOpen]);
 
   // ── Faction selection (pre-run) ──
   if (!runState) {
@@ -800,6 +875,12 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     default:           mainView = <MapView />;
   }
 
+  const restartRun = () => {
+    setDeckOpen(false);
+    setRunMenuOpen(false);
+    resetRun();
+  };
+
   return (
     <div style={s.runWrap}>
       {mainView}
@@ -809,10 +890,61 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           to avoid double-display. */}
       {phase !== 'combat' && phase !== 'elite_combat' && phase !== 'boss_combat' && <RelicBar />}
 
-      {/* View Deck and Abandon overlays clash with the new combat-view corner
-          panels (player card top-left, right HUD bottom-right). Hide them
-          during combat — the relic column already shows draw count, and
-          abandon happens naturally between encounters. */}
+      <button
+        type="button"
+        style={s.menuBtn}
+        onClick={() => setRunMenuOpen(true)}
+        aria-haspopup="dialog"
+        aria-expanded={runMenuOpen}
+      >
+        Menu
+      </button>
+
+      {runMenuOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="dungeon-run-menu-title"
+          style={s.menuScrim}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setRunMenuOpen(false);
+          }}
+        >
+          <div style={s.menuPanel}>
+            <h2 id="dungeon-run-menu-title" style={s.menuTitle}>Run Menu</h2>
+            <p style={s.menuText}>
+              Quit this run instantly, inspect your deck, or return to the fight.
+            </p>
+            <button
+              type="button"
+              style={s.menuAction}
+              onClick={() => setRunMenuOpen(false)}
+            >
+              Continue Run
+            </button>
+            <button
+              type="button"
+              style={s.menuAction}
+              onClick={() => {
+                setRunMenuOpen(false);
+                setDeckOpen(true);
+              }}
+            >
+              View Deck ({runState.deck.length})
+            </button>
+            <button
+              type="button"
+              style={s.menuDanger}
+              onClick={restartRun}
+            >
+              Quit Run & Start Over
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Hide the bottom deck shortcut during combat. The persistent Run Menu
+          stays available for deck inspection and instant restart. */}
       {phase !== 'combat' && phase !== 'elite_combat' && phase !== 'boss_combat' && (
         <>
           {phase !== 'draft' && (
@@ -833,16 +965,6 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               </button>
             </div>
           )}
-
-          <button
-            type="button"
-            style={s.abandonBtn}
-            onClick={() => {
-              if (window.confirm('Abandon this run?')) endRun(false);
-            }}
-          >
-            Abandon
-          </button>
         </>
       )}
 

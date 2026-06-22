@@ -55,6 +55,16 @@ describe('Phase 8 telemetry settings', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it('records run_abandoned as a first-class event', () => {
+    logEvent('run_abandoned', { faction: 'Pyroclast', phase: 'combat' });
+
+    expect(getEvents()).toHaveLength(1);
+    expect(getEvents()[0]).toEqual(expect.objectContaining({
+      type: 'run_abandoned',
+      payload: expect.objectContaining({ faction: 'Pyroclast', phase: 'combat' }),
+    }));
+  });
+
   it('sends remote telemetry when endpoint and settings allow it', () => {
     setTelemetryEndpoint('/api/event');
     setRemoteTelemetryEnabled(true);

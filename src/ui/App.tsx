@@ -2,9 +2,8 @@
  * STARFORGE — App entry.
  *
  * Dungeon-run mode only. No menu screen — the app opens straight into the
- * dungeon's faction-select / draft / map / combat flow. The "Abandon Run"
- * button inside the dungeon takes the player back to a fresh faction
- * selection (handled inside DungeonRoot itself).
+ * dungeon's faction-select / draft / map / combat flow. The in-run Menu
+ * can quit the active run and return to fresh faction selection.
  */
 
 import React, { useEffect } from 'react';

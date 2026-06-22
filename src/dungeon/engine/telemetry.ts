@@ -20,6 +20,7 @@ export type TelemetryEventType =
   | 'faction_picked'
   | 'run_start'
   | 'run_end'
+  | 'run_abandoned'
   | 'combat_start'
   | 'combat_end'
   | 'card_picked'
