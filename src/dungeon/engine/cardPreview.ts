@@ -74,6 +74,13 @@ function summarizeEffects(state: CombatState, card: CardInstance, effects: Effec
       case 'heat':
         addUnique(lines, `Heat +${effect.amount}`);
         break;
+      case 'vent_damage': {
+        const heatSpent = Math.min(state.playerHeat, effect.maxHeat);
+        const dmg = calcDamage(effect.base + effect.perHeat * heatSpent, state.playerStatusEffects, state.enemy.statusEffects);
+        addUnique(lines, `Deal ${dmg}`);
+        addUnique(lines, `Vent ${heatSpent} Heat`);
+        break;
+      }
       case 'heal':
         addUnique(lines, `Heal ${effect.amount}`);
         break;

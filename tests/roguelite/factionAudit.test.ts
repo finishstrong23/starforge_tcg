@@ -138,10 +138,15 @@ describe('faction audit — crash resistance', () => {
         expect(deck).toHaveLength(10);
       });
 
-      it('every starter card has a complexityTier of 1 (foundational)', () => {
+      it('starter complexity matches the faction teaching plan', () => {
         const deck = getStarterCards(faction);
         for (const c of deck) {
-          expect(c.complexityTier).toBe(1);
+          if (faction === 'Pyroclast') {
+            expect(c.complexityTier).toBeGreaterThanOrEqual(1);
+            expect(c.complexityTier).toBeLessThanOrEqual(3);
+          } else {
+            expect(c.complexityTier).toBe(1);
+          }
         }
       });
 

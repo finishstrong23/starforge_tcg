@@ -10,11 +10,12 @@ export const STARTER_DECKS: Record<FactionId, StarterDeck> = {
     factionId: 'Pyroclast',
     characterName: 'Pyroclast Ignitor',
     cards: [
-      { cardId: 'P-001', count: 5 },      // Cinder Strike
-      { cardId: 'P-002', count: 4 },      // Scale Guard
-      { cardId: 'SIG-PY-001', count: 1 }, // Molten Core
+      { cardId: 'P-001', count: 4 },      // Cinder Strike
+      { cardId: 'P-002', count: 3 },      // Scale Guard
+      { cardId: 'P-003', count: 2 },      // Kindle
+      { cardId: 'P-010', count: 1 },      // Blazing Charge
     ],
-    signatureCardId: 'SIG-PY-001',
+    signatureCardId: 'P-010',
   },
   Luminar: {
     factionId: 'Luminar',

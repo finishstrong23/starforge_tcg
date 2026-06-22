@@ -7,7 +7,7 @@ import type { CardDefinition, CardInstance, EnemyDefinition, Faction } from '../
 
 const STARTER_IDS = new Set([
   'C-001', 'C-002', 'C-041',
-  'P-001', 'P-002', 'P-041',
+  'P-001', 'P-002', 'P-003', 'P-010', 'P-041',
   'L-001', 'L-002', 'L-041',
   'W-041', 'W-042', 'W-043',
 ]);
@@ -103,6 +103,26 @@ describe('Phase 1 structured effects - starter behavior', () => {
 
     expect(after.enemy.currentHealth).toBe(94);
     expect(after.playerHeat).toBe(2);
+  });
+
+  it('Pyroclast starter Kindle builds capped Heat through structured effects', () => {
+    const kindle = createCardInstance(defById('P-003'));
+    const state = { ...handState([kindle], 'Pyroclast'), playerHeat: 9 };
+
+    const after = playCard(state, kindle.instanceId);
+
+    expect(after.playerHeat).toBe(10);
+    expect(after.combatLog.join('\n')).toContain('wasted at cap');
+  });
+
+  it('Pyroclast starter Blazing Charge vents Heat for damage', () => {
+    const charge = createCardInstance(defById('P-010'));
+    const state = { ...handState([charge], 'Pyroclast'), playerHeat: 4 };
+
+    const after = playCard(state, charge.instanceId, 'enemy');
+
+    expect(after.enemy.currentHealth).toBe(80);
+    expect(after.playerHeat).toBe(0);
   });
 
   it('Luminar upgraded starter block can grant a Lumen to a Channel card in hand', () => {

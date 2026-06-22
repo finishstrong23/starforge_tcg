@@ -329,6 +329,8 @@ Acceptance:
 
 ### Phase 1 - Heat Rules Rework
 
+Status: **implemented foundation**. Heat is capped at 10 in shared engine helpers, visible HUD labels now use Building/Hot/Blazing, and starter Vent behavior uses structured engine effects instead of card-text parsing.
+
 - Add Heat cap 10.
 - Add clear Heat tooltip/rule text.
 - Add cap-state UI: extra Heat is wasted at 10.
@@ -342,6 +344,8 @@ Acceptance:
 - Heat never damages the player by itself.
 
 ### Phase 2 - Pyro Card Rework
+
+Status: **started**. The Pyroclast starter deck now teaches Build -> Vent in combat one, and the first draft is pinned to show Build, Vent, defense, and Burn choices.
 
 - Audit P-001 through P-044.
 - Assign every card to Build, Vent, Flare, Blazing, Burn, or Cauterize.

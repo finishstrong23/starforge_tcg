@@ -139,6 +139,13 @@ export interface HeatEffect {
   amount: number;
 }
 
+export interface VentDamageEffect {
+  type: 'vent_damage';
+  base: number;
+  perHeat: number;
+  maxHeat: number;
+}
+
 export interface HealEffect {
   type: 'heal';
   amount: number;
@@ -207,6 +214,7 @@ export type EffectDefinition =
   | StatusEffectDefinition
   | ExhaustEffect
   | HeatEffect
+  | VentDamageEffect
   | HealEffect
   | SelfDamageEffect
   | LumenEffect

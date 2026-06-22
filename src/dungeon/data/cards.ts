@@ -303,6 +303,11 @@ const PYROCLAST_CARDS: CardDefinition[] = [
     keywords: [], rarity: 'Common', complexityTier: 2,
     cardText: 'Gain 3 Heat.',
     upgradeText: 'Gain 4 Heat. Draw 1 card.',
+    effects: [{ type: 'heat', amount: 3 }],
+    upgradeEffects: [
+      { type: 'heat', amount: 4 },
+      { type: 'draw', amount: 1 },
+    ],
   },
   {
     id: 'P-004', name: 'Flame Lash', faction: 'Pyroclast', type: 'Attack', cost: 1,
@@ -345,6 +350,8 @@ const PYROCLAST_CARDS: CardDefinition[] = [
     keywords: [], rarity: 'Common', complexityTier: 3,
     cardText: 'Deal 4 damage + 4 per Heat spent (up to 5 Heat).',
     upgradeText: 'Deal 4 damage + 6 per Heat spent (up to 5 Heat).',
+    effects: [{ type: 'vent_damage', base: 4, perHeat: 4, maxHeat: 5 }],
+    upgradeEffects: [{ type: 'vent_damage', base: 4, perHeat: 6, maxHeat: 5 }],
   },
   {
     id: 'P-011', name: 'Cauterize', faction: 'Pyroclast', type: 'Skill', cost: 1,

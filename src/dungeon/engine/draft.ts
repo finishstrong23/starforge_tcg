@@ -19,10 +19,10 @@ export function createCardInstance(def: CardDefinition): CardInstance {
 
 // ─── Starter decks ────────────────────────────────────────────────────────────
 
-// 10-card starting decks: 5 basic attack + 4 basic block + 1 utility per faction.
+// 10-card starting decks. Pyroclast MVP teaches Build -> Vent immediately.
 const STARTER_IDS: Record<Faction, string[]> = {
   Cogsmiths:  ['C-001','C-001','C-001','C-001','C-001','C-002','C-002','C-002','C-002','C-041'],
-  Pyroclast:  ['P-001','P-001','P-001','P-001','P-001','P-002','P-002','P-002','P-002','P-041'],
+  Pyroclast:  ['P-001','P-001','P-001','P-001','P-002','P-002','P-002','P-003','P-003','P-010'],
   Luminar:    ['L-001','L-001','L-001','L-001','L-001','L-002','L-002','L-002','L-002','L-041'],
   WarpRiders: ['W-041','W-041','W-041','W-041','W-041','W-042','W-042','W-042','W-042','W-043'],
 };
@@ -49,6 +49,8 @@ const RARITY_WEIGHTS: Record<number, Record<string, number>> = {
   3: { Common: 10, Uncommon: 45, Rare: 45 },
 };
 
+const PYRO_OPENING_DRAFT_IDS = ['P-003', 'P-010', 'P-016', 'P-007'];
+
 function weightedRarityPick(round: number): 'Common' | 'Uncommon' | 'Rare' {
   const weights = RARITY_WEIGHTS[Math.min(round, 3)];
   const roll = Math.random() * 100;
@@ -73,6 +75,13 @@ export function generateDraftOptions(
   existingDeck: CardInstance[],
   faction?: Faction,
 ): CardDefinition[] {
+  if (faction === 'Pyroclast' && round === 1) {
+    return PYRO_OPENING_DRAFT_IDS
+      .map((id) => DEF_BY_ID.get(id))
+      .filter((def): def is CardDefinition => Boolean(def))
+      .filter((def) => countCopies(existingDeck, def.id) < 3);
+  }
+
   const chosen: CardDefinition[] = [];
   const usedIds = new Set<string>();
 

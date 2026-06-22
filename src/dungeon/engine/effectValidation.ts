@@ -15,6 +15,7 @@ const KNOWN_EFFECT_TYPES = new Set([
   'status',
   'exhaust',
   'heat',
+  'vent_damage',
   'heal',
   'self_damage',
   'lumen',
@@ -46,6 +47,11 @@ function validateEffect(cardId: string, effect: EffectDefinition, path: string):
     case 'heal':
     case 'self_damage':
       if (!positiveInteger(effect.amount)) failures.push({ cardId, path, message: `${effect.type}.amount must be a positive integer` });
+      break;
+    case 'vent_damage':
+      if (!positiveInteger(effect.base)) failures.push({ cardId, path, message: 'vent_damage.base must be a positive integer' });
+      if (!positiveInteger(effect.perHeat)) failures.push({ cardId, path, message: 'vent_damage.perHeat must be a positive integer' });
+      if (!positiveInteger(effect.maxHeat)) failures.push({ cardId, path, message: 'vent_damage.maxHeat must be a positive integer' });
       break;
     case 'status':
       if (!positiveInteger(effect.stacks)) failures.push({ cardId, path, message: 'status.stacks must be a positive integer' });

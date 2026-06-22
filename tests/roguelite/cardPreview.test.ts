@@ -73,8 +73,15 @@ describe('Phase 2 card previews', () => {
     expect(getCardPlayPreview(state, card)?.lines).toEqual(['Choose: Deal 4 or Block +4']);
   });
 
+  it('previews structured Vent payoffs from current Heat', () => {
+    const card = createCardInstance(defById('P-010'));
+    const state = { ...stateWithHand([card]), playerHeat: 4 };
+
+    expect(getCardPlayPreview(state, card)?.lines).toEqual(['Deal 20', 'Vent 4 Heat']);
+  });
+
   it('does not claim exact preview for legacy parser cards yet', () => {
-    const card = createCardInstance(defById('P-003'));
+    const card = createCardInstance(defById('P-004'));
     const state = stateWithHand([card]);
 
     expect(getCardPlayPreview(state, card)).toBeNull();

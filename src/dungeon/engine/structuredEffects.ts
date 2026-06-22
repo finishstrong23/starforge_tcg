@@ -187,6 +187,16 @@ function applyOneEffect(
           : `${card.name} gains ${heat.gained} Heat`,
       );
     }
+    case 'vent_damage': {
+      const heatSpent = Math.min(state.playerHeat, effect.maxHeat);
+      const dmg = calcDamage(effect.base + effect.perHeat * heatSpent, state.playerStatusEffects, state.enemy.statusEffects);
+      const result = applyShieldedDamage(state.enemy.currentShield, state.enemy.currentHealth, dmg);
+      return log({
+        ...state,
+        playerHeat: state.playerHeat - heatSpent,
+        enemy: { ...state.enemy, currentHealth: result.health, currentShield: result.shield },
+      }, `${card.name} deals ${dmg} damage (Vented ${heatSpent} Heat)`);
+    }
     case 'heal':
       return log({
         ...state,

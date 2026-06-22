@@ -1,4 +1,5 @@
 import {
+  generateDraftOptions,
   generateRewardOptions,
   getRewardWeights,
   getStarterCards,
@@ -69,6 +70,14 @@ describe('generateRewardOptions', () => {
   });
 });
 
+describe('generateDraftOptions', () => {
+  it('gives Pyroclast a first-pick lesson: build, vent, defend, burn', () => {
+    const opts = generateDraftOptions(1, getStarterCards('Pyroclast'), 'Pyroclast');
+
+    expect(opts.map((card) => card.id)).toEqual(['P-003', 'P-010', 'P-016', 'P-007']);
+  });
+});
+
 // ─── 1000-run simulation: mechanic-engagement curve by room depth ────────────
 //
 // Per spec: across 1000 simulated runs, the average mechanic-engagement card
@@ -93,8 +102,8 @@ function simulateRun(faction: Faction, totalRooms: number): {
   atRoom7: number;
   atRoom13: number;
 } {
-  // Starter is always all-Tier-1 by design.
   const deck: CardInstance[] = [...getStarterCards(faction)];
+  const starterMechanicCount = mechanicCount(deck);
   let atRoom3 = 0;
   let atRoom7 = 0;
   let atRoom13 = 0;
@@ -112,9 +121,9 @@ function simulateRun(faction: Faction, totalRooms: number): {
       statusEffects: [],
     });
 
-    if (room === 3) atRoom3 = mechanicCount(deck);
-    if (room === 7) atRoom7 = mechanicCount(deck);
-    if (room === 13) atRoom13 = mechanicCount(deck);
+    if (room === 3) atRoom3 = mechanicCount(deck) - starterMechanicCount;
+    if (room === 7) atRoom7 = mechanicCount(deck) - starterMechanicCount;
+    if (room === 13) atRoom13 = mechanicCount(deck) - starterMechanicCount;
   }
   return { atRoom3, atRoom7, atRoom13 };
 }
