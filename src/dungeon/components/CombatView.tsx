@@ -19,10 +19,12 @@ import { getCardPlayPreview } from '../engine/cardPreview';
 import { FactionResourcePanel } from './FactionResourcePanel';
 import { getCardArt, getRelicArt, getRiftArt, getStatusArt, uiArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
+import { getStatusDisplayMeta, getStatusTooltip } from '../utils/statusDisplay';
 
 const ENEMY_TURN_DELAY_MS = 1200;
 const ENEMY_ACTION_LINGER_MS = 900;
 const FLOAT_DURATION_MS = 1300;
+const HEAT_TOOLTIP = 'Heat powers Pyroclast cards. Build it with fire cards, then Vent it often for damage, Block, draw, or Ignite. Heat caps at 10; extra Heat is wasted.';
 
 // ─── Floating combat numbers ──────────────────────────────────────────────────
 
@@ -36,18 +38,6 @@ interface FloatNum {
 }
 
 let _floatId = 0;
-
-const STATUS_META: Record<string, { token: string; color: string; label: string }> = {
-  burn:       { token: 'BRN', color: '#ff5a2e', label: 'Burn'        },
-  poison:     { token: 'PSN', color: '#44cc44', label: 'Poison'      },
-  shield:     { token: 'SHD', color: '#3b8fff', label: 'Shield'      },
-  strength:   { token: 'STR', color: '#ffcc00', label: 'Strength'    },
-  weak:       { token: 'WEK', color: '#aaaaaa', label: 'Weak'        },
-  vulnerable: { token: 'VUL', color: '#ff8c00', label: 'Vulnerable'  },
-  barrier:    { token: 'BAR', color: '#00aaff', label: 'Barrier'     },
-  stealth:    { token: 'STL', color: '#cccccc', label: 'Stealth'     },
-  phase:      { token: 'PHS', color: '#c27dff', label: 'Phase'       },
-};
 
 const RIFT_META: Record<string, { token: string; color: string; label: string; tip: (turns: number) => string }> = {
   cost:    { token: 'RFT', color: '#c27dff', label: 'Cost Rift',    tip: (t) => `Cost Rift: 1 random card costs -1 each turn (${t} left)` },
@@ -460,11 +450,13 @@ const PlayerHUD: React.FC<{
       {(cs.playerStatusEffects.length > 0 || cs.playerRifts.length > 0 || cs.playerPowers.length > 0) && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 2 }}>
           {cs.playerStatusEffects.map((e) => {
-            const meta = STATUS_META[e.type] ?? { token: '?', color: '#888', label: e.type };
+            const meta = getStatusDisplayMeta(e.type);
             return (
               <span
                 key={e.type}
-                title={`${meta.label} x${e.stacks}`}
+                title={getStatusTooltip(e.type, e.stacks, 'player')}
+                aria-label={getStatusTooltip(e.type, e.stacks, 'player')}
+                tabIndex={0}
                 style={{
                   fontSize: 11,
                   padding: '1px 4px',
@@ -484,7 +476,7 @@ const PlayerHUD: React.FC<{
                   style={{ width: 14, height: 14 }}
                   fallbackStyle={{ fontSize: 11, lineHeight: 1 }}
                 />
-                <span style={{ fontSize: 9 }}>{e.stacks}</span>
+                <span style={{ fontSize: 9 }}>{meta.label} {e.stacks}</span>
               </span>
             );
           })}
@@ -683,6 +675,9 @@ const RightHUD: React.FC<{
             Heat
           </div>
           <div
+            title={HEAT_TOOLTIP}
+            aria-label={HEAT_TOOLTIP}
+            tabIndex={0}
             style={{
               minWidth: 54,
               padding: '5px 10px',

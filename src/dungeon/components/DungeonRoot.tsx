@@ -50,7 +50,7 @@ const FACTIONS: Array<{
     tagline: 'Volcanic-born war-creatures.',
     mechanic: 'Heat',
     mechanicSummary:
-      'Build Heat, then Vent it often for damage, Block, Burn, and tempo. Heat caps at 10; extra Heat is wasted.',
+      'Build Heat, then Vent it often for damage, Block, Ignite, and tempo. Heat caps at 10; extra Heat is wasted.',
     difficulty: 'Low floor - High ceiling',
   },
   {

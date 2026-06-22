@@ -4,6 +4,8 @@ import { getFactionResourceArt } from '../assets/artRegistry';
 import { getFactionResourceSummary, type FactionResourceTone } from '../engine/factionResources';
 import { TokenArt } from './TokenArt';
 
+const HEAT_TOOLTIP = 'Heat powers Pyroclast cards. Build it with fire cards, then Vent it often for damage, Block, draw, or Ignite. Heat caps at 10; extra Heat is wasted.';
+
 const TONE_COLOR: Record<FactionResourceTone, string> = {
   neutral: '#b7c4d8',
   good: '#7dffb2',
@@ -17,6 +19,9 @@ interface FactionResourcePanelProps {
 
 export const FactionResourcePanel: React.FC<FactionResourcePanelProps> = ({ cs }) => {
   const summary = getFactionResourceSummary(cs);
+  const panelTooltip = summary.faction === 'Pyroclast'
+    ? HEAT_TOOLTIP
+    : `${summary.faction}: ${summary.title}`;
   const meterPercent = summary.meter
     ? Math.max(0, Math.min(100, (summary.meter.value / summary.meter.max) * 100))
     : 0;
@@ -28,7 +33,7 @@ export const FactionResourcePanel: React.FC<FactionResourcePanelProps> = ({ cs }
   return (
     <section
       aria-label={`${summary.faction} resources`}
-      title={`${summary.faction}: ${summary.title}`}
+      title={panelTooltip}
       style={{
         position: 'absolute',
         top: 88,
@@ -102,7 +107,10 @@ export const FactionResourcePanel: React.FC<FactionResourcePanelProps> = ({ cs }
       </div>
 
       {summary.meter && (
-        <div style={{ marginTop: 8 }} title={`${summary.meter.label}: ${summary.meter.value}/${summary.meter.max}`}>
+        <div
+          style={{ marginTop: 8 }}
+          title={summary.faction === 'Pyroclast' ? HEAT_TOOLTIP : `${summary.meter.label}: ${summary.meter.value}/${summary.meter.max}`}
+        >
           <div
             style={{
               position: 'relative',

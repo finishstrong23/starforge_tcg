@@ -3,6 +3,7 @@ import type { CardInstance, CardType, Faction, Keyword, StatusEffect } from '../
 import { getCardStats } from '../engine/cardStats';
 import { getCardArt, getStatusArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
+import { getStatusDisplayMeta, getStatusTooltip } from '../utils/statusDisplay';
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
@@ -84,18 +85,6 @@ const KW_LABEL: Partial<Record<Keyword, string>> = {
   CLOAK:      'Cloak',
   PHASE:      'Flux',
   UPGRADE:    'Upgrade',
-};
-
-const STATUS_TOKEN: Partial<Record<string, string>> = {
-  burn:       'BRN',
-  poison:     'PSN',
-  shield:     'SHD',
-  strength:   'STR',
-  weak:       'WEK',
-  vulnerable: 'VUL',
-  barrier:    'BAR',
-  stealth:    'STL',
-  phase:      'PHS',
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -438,18 +427,26 @@ export const CardComponent: React.FC<CardComponentProps> = ({
   const fluxColor = card.fluxState === 'A' ? '#4adfff' : card.fluxState === 'B' ? '#ff7acc' : '#ffd24a';
 
   const renderStatuses = (effects: StatusEffect[]) =>
-    effects.map((e) => (
-      <span key={e.type} title={`${e.type} x${e.stacks}`}>
-        <TokenArt
-          src={getStatusArt(e.type)}
-          fallback={STATUS_TOKEN[e.type] ?? '?'}
-          alt=""
-          style={{ width: 10, height: 10, verticalAlign: 'middle' }}
-          fallbackStyle={{ fontSize: 7, lineHeight: 1 }}
-        />
-        {e.stacks > 1 ? e.stacks : ''}
-      </span>
-    ));
+    effects.map((e) => {
+      const meta = getStatusDisplayMeta(e.type);
+      return (
+        <span
+          key={e.type}
+          title={getStatusTooltip(e.type, e.stacks, 'unit')}
+          aria-label={getStatusTooltip(e.type, e.stacks, 'unit')}
+          tabIndex={0}
+        >
+          <TokenArt
+            src={getStatusArt(e.type)}
+            fallback={meta.token}
+            alt=""
+            style={{ width: 10, height: 10, verticalAlign: 'middle' }}
+            fallbackStyle={{ fontSize: 7, lineHeight: 1 }}
+          />
+          {e.stacks > 1 ? e.stacks : ''}
+        </span>
+      );
+    });
 
   return (
     <div style={styles.card} onClick={onClick} role={onClick ? 'button' : undefined}>

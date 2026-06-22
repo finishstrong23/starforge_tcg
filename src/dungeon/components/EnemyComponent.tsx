@@ -2,6 +2,7 @@ import React from 'react';
 import type { EnemyInstance, IntentType } from '../types';
 import { getEnemyArt, getIntentArt, getStatusArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
+import { getStatusDisplayMeta, getStatusTooltip } from '../utils/statusDisplay';
 
 const INTENT_COLOR: Record<IntentType, string> = {
   attack:  '#ff4444',
@@ -19,16 +20,6 @@ const INTENT_TOKEN: Record<IntentType, string> = {
   debuff:  'HEX',
   summon:  'SUM',
   special: 'SPC',
-};
-
-const STATUS_DISPLAY: Record<string, { token: string; color: string }> = {
-  burn:       { token: 'BRN', color: '#ff5a2e' },
-  poison:     { token: 'PSN', color: '#44cc44' },
-  shield:     { token: 'SHD', color: '#3b8fff' },
-  strength:   { token: 'STR', color: '#ffcc00' },
-  weak:       { token: 'WEK', color: '#aaaaaa' },
-  vulnerable: { token: 'VUL', color: '#ff8c00' },
-  barrier:    { token: 'BAR', color: '#00aaff' },
 };
 
 export interface EnemyComponentProps {
@@ -55,11 +46,16 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
 
   const statusBadgeStyle = (color: string): React.CSSProperties => ({
     fontSize: 9,
-    padding: '2px 4px',
+    padding: '2px 5px',
     background: `${color}22`,
     border: `1px solid ${color}66`,
     borderRadius: 3,
     color,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 3,
+    fontWeight: 800,
+    letterSpacing: '0.03em',
   });
 
   const s: Record<string, React.CSSProperties> = {
@@ -213,10 +209,15 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
       {enemy.statusEffects.length > 0 && (
         <div style={s.statusRow}>
           {enemy.statusEffects.map((e) => {
-            const d = STATUS_DISPLAY[e.type];
-            if (!d) return null;
+            const d = getStatusDisplayMeta(e.type);
             return (
-              <span key={e.type} style={statusBadgeStyle(d.color)}>
+              <span
+                key={e.type}
+                style={statusBadgeStyle(d.color)}
+                title={getStatusTooltip(e.type, e.stacks, 'enemy')}
+                aria-label={getStatusTooltip(e.type, e.stacks, 'enemy')}
+                tabIndex={0}
+              >
                 <TokenArt
                   src={getStatusArt(e.type)}
                   fallback={d.token}
@@ -224,7 +225,7 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
                   style={{ width: 12, height: 12, marginRight: 3, verticalAlign: 'middle' }}
                   fallbackStyle={{ lineHeight: 1 }}
                 />
-                {e.stacks}
+                {d.label} {e.stacks}
               </span>
             );
           })}
