@@ -22,6 +22,7 @@ import {
   getStack,
   isChannelCard,
 } from '../engine/combat';
+import { addHeat } from '../engine/heat';
 
 // ─── Helpers shared across multiple potions ──────────────────────────────────
 
@@ -205,7 +206,7 @@ export const POTION_POOL: PotionDefinition[] = [
     onUse: (state, ctx) => {
       const targetId = ctx?.targetId ?? 'enemy';
       let s = dealTargetedDamage(state, 20, targetId);
-      s = { ...s, playerHeat: s.playerHeat + 3 };
+      s = { ...s, playerHeat: addHeat(s.playerHeat, 3).next };
       return s;
     },
   },

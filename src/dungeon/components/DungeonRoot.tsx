@@ -28,6 +28,7 @@ import { DeckViewer } from './DeckViewer';
 import { getDungeonSceneArt, getFactionTokenArt } from '../assets/basicTokenArt';
 import { uiArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
+import { MVP_FACTION, MVP_MODE, isMvpFaction } from '../config/mvp';
 
 interface DungeonRootProps {
   onBack: () => void;
@@ -49,7 +50,7 @@ const FACTIONS: Array<{
     tagline: 'Volcanic-born war-creatures.',
     mechanic: 'Heat',
     mechanicSummary:
-      'Stockpile Heat (0-12) to unleash scaling finishers. Overheat at 10+ for risk/reward pressure.',
+      'Build Heat, then Vent it often for damage, Block, Burn, and tempo. Heat caps at 10; extra Heat is wasted.',
     difficulty: 'Low floor - High ceiling',
   },
   {
@@ -83,6 +84,8 @@ const FACTIONS: Array<{
     difficulty: 'High variance - Skill-capped',
   },
 ];
+
+const VISIBLE_FACTIONS = FACTIONS.filter((f) => isMvpFaction(f.id as Faction));
 
 // ─── Style helpers (functions extracted so they aren't inside Record<string, CSSProperties>) ──
 
@@ -678,7 +681,7 @@ const AscensionPicker: React.FC<{
 
 const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const { runState, startNewRun, endRun } = useDungeonRun();
-  const [selectedId, setSelectedId] = useState<FactionId>('Pyroclast');
+  const [selectedId, setSelectedId] = useState<FactionId>(MVP_FACTION as FactionId);
   // Ascension selection. Default to the highest level the player has unlocked
   // for the chosen faction. Reset whenever the faction picker changes.
   const maxUnlocked = getMaxUnlockedAscension(selectedId as Faction);
@@ -691,25 +694,31 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   // ── Faction selection (pre-run) ──
   if (!runState) {
-    const selected = FACTIONS.find((f) => f.id === selectedId)!;
-    const selectedDeck = STARTER_DECKS[selectedId];
+    const selected = VISIBLE_FACTIONS.find((f) => f.id === selectedId) ?? VISIBLE_FACTIONS[0];
+    const selectedDeck = STARTER_DECKS[selected.id];
 
     return (
       <div style={s.root}>
         <div style={s.headerRow}>
           <div style={s.titleBlock}>
             <h1 style={s.title}>DUNGEON RUN</h1>
-            <p style={s.subtitle}>3 acts - 12 steps each - one survives</p>
+            <p style={s.subtitle}>{MVP_MODE.setupSubtitle}</p>
           </div>
           <button type="button" onClick={onBack} style={s.backBtn}>
             BACK
           </button>
         </div>
 
-        <div style={s.sectionLabel}>Choose your class</div>
+        <div style={s.sectionLabel}>{MVP_MODE.title}</div>
 
-        <div style={s.grid}>
-          {FACTIONS.map((f) => {
+        <div
+          style={
+            VISIBLE_FACTIONS.length === 1
+              ? { ...s.grid, gridTemplateColumns: 'minmax(280px, 420px)', justifyContent: 'flex-start' }
+              : s.grid
+          }
+        >
+          {VISIBLE_FACTIONS.map((f) => {
             const deck = STARTER_DECKS[f.id];
             const isSelected = f.id === selectedId;
             return (
@@ -760,7 +769,7 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           <button
             type="button"
             style={beginBtnStyle(selected.accent, false)}
-            onClick={() => startNewRun(selectedId as Faction, undefined, ascensionLevel)}
+            onClick={() => startNewRun(selected.id as Faction, undefined, ascensionLevel)}
           >
             Begin Run - A{ascensionLevel}
           </button>

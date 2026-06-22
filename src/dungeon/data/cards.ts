@@ -367,8 +367,8 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   {
     id: 'P-014', name: 'Pyre Lance', faction: 'Pyroclast', type: 'Attack', cost: 2,
     keywords: [], rarity: 'Common', complexityTier: 3,
-    cardText: 'Deal 14 damage. Consume all Heat.',
-    upgradeText: 'Deal 18 damage. Consume all Heat.',
+    cardText: 'Deal 14 damage. Vent all Heat.',
+    upgradeText: 'Deal 18 damage. Vent all Heat.',
   },
   {
     id: 'P-015', name: 'Rekindle', faction: 'Pyroclast', type: 'Skill', cost: 1,
@@ -409,8 +409,8 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   {
     id: 'P-021', name: 'Pyroclasm', faction: 'Pyroclast', type: 'Attack', cost: 2,
     keywords: [], rarity: 'Uncommon', complexityTier: 3,
-    cardText: 'Deal 9 damage to all enemies. Consume all Heat.',
-    upgradeText: 'Deal 12 damage to all enemies. Consume all Heat.',
+    cardText: 'Deal 9 damage to all enemies. Vent all Heat.',
+    upgradeText: 'Deal 12 damage to all enemies. Vent all Heat.',
   },
   {
     id: 'P-022', name: 'Soot Burst', faction: 'Pyroclast', type: 'Skill', cost: 0,

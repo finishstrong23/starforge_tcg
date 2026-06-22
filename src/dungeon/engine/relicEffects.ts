@@ -9,6 +9,7 @@ import type {
 import { CARD_POOL } from '../data/cards';
 import { createCardInstance } from './draft';
 import { getCardText } from './cardStats';
+import { addHeat } from './heat';
 
 // ─── Context types ────────────────────────────────────────────────────────────
 
@@ -48,9 +49,11 @@ export function applyRelicsToCombat(
   switch (trigger) {
     // ── combat_start ──────────────────────────────────────────────────────────
     case 'combat_start': {
-      // R-S01 Forgeheart Ember: gain 2 Heat (logged; Heat managed via combatLog)
+      // R-S01 Forgeheart Ember: gain 2 Heat.
       if (hasRelic(relics, 'R-S01')) {
-        s = addLog(s, 'Forgeheart Ember: +2 Heat');
+        const heat = addHeat(s.playerHeat, 2);
+        s = { ...s, playerHeat: heat.next };
+        s = addLog(s, heat.wasted > 0 ? 'Forgeheart Ember: Heat capped' : 'Forgeheart Ember: +2 Heat');
       }
 
       // R-C02 Fueled Boots: +1 Energy on first turn

@@ -59,17 +59,15 @@ function isConstruct(card: CardInstance): boolean {
 }
 
 function heatTone(heat: number): FactionResourceTone {
-  if (heat >= 10) return 'danger';
-  if (heat >= 6) return 'warning';
-  if (heat >= 3) return 'good';
+  if (heat >= 8) return 'good';
+  if (heat >= 4) return 'warning';
   return 'neutral';
 }
 
 function heatState(heat: number): string {
-  if (heat >= 10) return 'Critical';
-  if (heat >= 6) return 'Primed';
-  if (heat >= 3) return 'Warming';
-  return 'Cold';
+  if (heat >= 8) return 'Blazing';
+  if (heat >= 4) return 'Hot';
+  return 'Building';
 }
 
 export function getFactionResourceSummary(state: CombatState): FactionResourceSummary {
@@ -83,11 +81,16 @@ export function getFactionResourceSummary(state: CombatState): FactionResourceSu
       faction,
       title: 'Heat Engine',
       accent,
-      meter: { label: 'Heat', value: Math.min(heat, 12), max: 12, threshold: 6 },
+      meter: { label: 'Heat', value: Math.min(heat, 10), max: 10, threshold: 4 },
       rows: [
         { label: 'Stored', value: String(heat), detail: heatState(heat), tone: heatTone(heat) },
         { label: 'Payoffs', value: String(spenders), detail: 'cards care about Heat' },
-        { label: 'Burst line', value: heat >= 6 ? 'Online' : `${Math.max(0, 6 - heat)} Heat away`, tone: heat >= 6 ? 'good' : 'neutral' },
+        {
+          label: 'Spend cue',
+          value: heat >= 10 ? 'At cap' : heat >= 4 ? 'Online' : `${Math.max(0, 4 - heat)} Heat away`,
+          detail: heat >= 10 ? 'extra Heat is wasted' : 'Vent for tempo',
+          tone: heat >= 4 ? 'good' : 'neutral',
+        },
       ],
     };
   }

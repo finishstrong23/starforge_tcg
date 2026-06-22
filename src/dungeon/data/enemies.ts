@@ -119,12 +119,12 @@ const ACT2_STANDARD: EnemyDefinition[] = [
     ],
   },
   {
-    id: 'E2-05', name: 'Blast Furnace', lore: 'A walking Pyroclast furnace. Overheats on impact.',
+    id: 'E2-05', name: 'Blast Furnace', lore: 'A walking Pyroclast furnace. Vents pressure on impact.',
     maxHealth: 48, attack: 11, art: 'FUR', acts: [2], isElite: false, isBoss: false,
     intents: [
       { type: 'attack', value: 11, description: 'Flame vent - deal 11' },
       { type: 'buff', value: 4, description: 'Stoke - gain 4 Strength' },
-      { type: 'attack', value: 15, description: 'Overheat - deal 15, self-stun' },
+      { type: 'attack', value: 15, description: 'Pressure vent - deal 15, self-stun' },
     ],
   },
   {

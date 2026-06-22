@@ -49,8 +49,8 @@ describe('Phase 3 faction resource summaries', () => {
 
     expect(summary.title).toBe('Heat Engine');
     expect(summary.rows).toEqual(expect.arrayContaining([
-      expect.objectContaining({ label: 'Stored', value: '6', detail: 'Primed' }),
-      expect.objectContaining({ label: 'Burst line', value: 'Online' }),
+      expect.objectContaining({ label: 'Stored', value: '6', detail: 'Hot' }),
+      expect.objectContaining({ label: 'Spend cue', value: 'Online', detail: 'Vent for tempo' }),
     ]));
   });
 

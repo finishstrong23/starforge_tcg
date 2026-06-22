@@ -1,6 +1,8 @@
 import type { CardInstance, CombatPhase, CombatState, EffectDefinition, EnemyDefinition, RelicDefinition, Rift, StatusEffect, StatusEffectType } from '../types';
 import { getCardStats, getCardText, getCardCost, setActiveCardText, setActiveCardCost } from './cardStats';
 import { applyStructuredCardEffects, hasStructuredEffects } from './structuredEffects';
+import { MVP_FACTION } from '../config/mvp';
+import { addHeat } from './heat';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -258,7 +260,7 @@ export function initCombat(
   playerMaxHealth: number,
   _relics: RelicDefinition[],
   enemy: EnemyDefinition,
-  faction: string = 'Cogsmiths',
+  faction: string = MVP_FACTION,
   ascensionMods?: { enemyHpMul?: number; enemyDamageMul?: number; bossStrength?: number; drawPerTurn?: number },
 ): CombatState {
   const shuffled = shuffleDeck([...deck]);
@@ -957,9 +959,15 @@ function applySpellEffect(
   //                          Heat Shimmer ("Gain 4 Block and 1 Heat"), etc.
   const heatGainMatch = text.match(/(?:gain|generate) (\d+) heat|and (\d+) (?:more |extra )?heat/);
   if (heatGainMatch) {
-    const gained = parseInt(heatGainMatch[1] ?? heatGainMatch[2]);
-    s = { ...s, playerHeat: s.playerHeat + gained };
-    s = log(s, `Gained ${gained} Heat (total: ${s.playerHeat})`);
+    const amount = parseInt(heatGainMatch[1] ?? heatGainMatch[2]);
+    const heat = addHeat(s.playerHeat, amount);
+    s = { ...s, playerHeat: heat.next };
+    s = log(
+      s,
+      heat.wasted > 0
+        ? `Gained ${heat.gained} Heat (${heat.wasted} wasted at cap, total: ${s.playerHeat})`
+        : `Gained ${heat.gained} Heat (total: ${s.playerHeat})`,
+    );
   }
 
   // Heat-scaled damage: "deal N damage + M per heat spent (up to X heat)"
@@ -975,8 +983,8 @@ function applySpellEffect(
     s = log(s, `${card.name} deals ${dmg} (spent ${heatSpent} Heat)`);
   }
 
-  // Consume all heat: "deal N damage. consume all heat"
-  const consumeMatch = text.match(/consume all heat/);
+  // Vent all heat: "deal N damage. vent all heat"
+  const consumeMatch = text.match(/(?:vent|consume) all heat/);
   if (consumeMatch && !heatSpendMatch) {
     const heatBonus = s.playerHeat;
     // If there's already a dmgMatch damage applied above, add heat as bonus
@@ -984,7 +992,7 @@ function applySpellEffect(
       const bonusDmg = calcDamage(heatBonus, s.playerStatusEffects, s.enemy.statusEffects);
       const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, bonusDmg);
       s = { ...s, playerHeat: 0, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
-      s = log(s, `Consumed ${heatBonus} Heat for ${bonusDmg} bonus damage`);
+      s = log(s, `Vented ${heatBonus} Heat for ${bonusDmg} bonus damage`);
     } else {
       s = { ...s, playerHeat: 0 };
     }

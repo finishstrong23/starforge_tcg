@@ -661,8 +661,9 @@ const RightHUD: React.FC<{
   isEnemyTurn: boolean;
 }> = ({ cs, onEndTurn, isEnemyTurn }) => {
   const heat = cs.playerHeat ?? 0;
-  const heatLabel = heat >= 10 ? 'Critical' : heat >= 6 ? 'Primed' : heat >= 3 ? 'Warming' : 'Stored';
-  const heatColor = heat >= 10 ? '#ff3d1e' : heat >= 6 ? '#ff8a2a' : '#f0d060';
+  const heatLabel = heat >= 8 ? 'Blazing' : heat >= 4 ? 'Hot' : 'Building';
+  const heatColor = heat >= 8 ? '#ff5a2e' : heat >= 4 ? '#ffb13b' : '#f0d060';
+  const heatCue = heat >= 10 ? 'Spend' : '10 max';
 
   return (
     <div
@@ -693,9 +694,12 @@ const RightHUD: React.FC<{
               textAlign: 'center',
             }}
           >
-            <div style={{ fontSize: 20, fontWeight: 900, lineHeight: 1 }}>{heat}</div>
+            <div style={{ fontSize: 20, fontWeight: 900, lineHeight: 1 }}>{Math.min(heat, 10)}</div>
             <div style={{ fontSize: 7, fontWeight: 800, color: heatColor, letterSpacing: '0.12em', textTransform: 'uppercase', marginTop: 2 }}>
               {heatLabel}
+            </div>
+            <div style={{ fontSize: 7, opacity: 0.72, letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2 }}>
+              {heatCue}
             </div>
           </div>
         </div>

@@ -43,7 +43,7 @@ describe("Forgemaster's Sigil", () => {
     const state = applyRelicsToCombat('combat_start', [sigil], stateWithHand(['C-001']));
 
     expect(state.forgemasterSigilPending).toBe(true);
-    expect(state.combatLog).toContain("⚙️ Forgemaster's Sigil: first card played gains +2");
+    expect(state.combatLog).toContain("Forgemaster's Sigil: first card played gains +2");
   });
 
   it('adds +2 damage to the first attack card played, then consumes itself', () => {
@@ -52,7 +52,7 @@ describe("Forgemaster's Sigil", () => {
 
     expect(first.enemy.currentHealth).toBe(91);
     expect(first.forgemasterSigilPending).toBe(false);
-    expect(first.combatLog).toContain("⚙️ Forgemaster's Sigil empowers Rivet Strike");
+    expect(first.combatLog).toContain("Forgemaster's Sigil empowers Rivet Strike");
 
     const second = playCard(first, first.hand[0].instanceId, 'enemy');
     expect(second.enemy.currentHealth).toBe(84);

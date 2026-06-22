@@ -10,6 +10,7 @@ import { choicesForFaction, pickEventForNode } from '../engine/eventSelection';
 import { logEvent } from '../engine/telemetry';
 import type { DungeonEventChoiceDefinition } from '../types';
 import { getDungeonSceneArt } from '../assets/basicTokenArt';
+import { MVP_FACTION } from '../config/mvp';
 
 export const EventView: React.FC = () => {
   const {
@@ -72,7 +73,7 @@ export const EventView: React.FC = () => {
         const potion = getPotionDef(effect.potionId);
         if (potion) addPotion({ definitionId: potion.id });
       } else if (effect.type === 'add_curse') {
-        const curse = createCurseInstance(effect.curseId, draftFaction ?? runState.deck[0]?.faction ?? 'Cogsmiths');
+        const curse = createCurseInstance(effect.curseId, draftFaction ?? runState.deck[0]?.faction ?? MVP_FACTION);
         if (curse) addCardToDeck(curse);
       } else if (effect.type === 'map_modifier' || effect.type === 'class_resource') {
         const modifier = getRunModifierDef(effect.modifierId);

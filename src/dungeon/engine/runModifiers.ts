@@ -1,4 +1,5 @@
 import type { CombatState, RunModifierDefinition, RunState, StatusEffect } from '../types';
+import { addHeat } from './heat';
 
 function addStatus(
   effects: StatusEffect[],
@@ -44,7 +45,7 @@ export function applyRunModifiersToCombat(
           },
         };
       } else if (effect.type === 'heat') {
-        next = { ...next, playerHeat: next.playerHeat + effect.amount };
+        next = { ...next, playerHeat: addHeat(next.playerHeat, effect.amount).next };
       } else if (effect.type === 'block') {
         next = { ...next, playerShield: next.playerShield + effect.amount };
       } else if (effect.type === 'energy') {

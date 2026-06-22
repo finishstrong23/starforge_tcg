@@ -24,6 +24,7 @@ import { getAscensionMods } from '../engine/ascension';
 import { pickEventForNode } from '../engine/eventSelection';
 import { applyRunModifiersToCombat, consumeNextCombatModifiers } from '../engine/runModifiers';
 import { recordDungeonRunEnd } from '../engine/metaProgression';
+import { MVP_FACTION } from '../config/mvp';
 import {
   clearDungeonSaveSnapshot,
   createDungeonSaveSnapshot,
@@ -255,7 +256,7 @@ function reducer(state: ContextState, action: Action): ContextState {
             state.run.maxHealth,
             state.run.relics,
             enemy,
-            state.draftFaction ?? 'Cogsmiths',
+            state.draftFaction ?? MVP_FACTION,
             {
               enemyHpMul:     mods.enemyHpMul,
               enemyDamageMul: mods.enemyDamageMul,

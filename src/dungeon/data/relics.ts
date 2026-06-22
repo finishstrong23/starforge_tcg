@@ -104,7 +104,7 @@ export const RELIC_POOL: RelicDefinition[] = [
   // ─── Rare Relics (5) ──────────────────────────────────────────────────────
   {
     id: 'R-R01', name: 'Crown of the Unburnt', rarity: 'Rare', trigger: 'passive', art: 'CRN',
-    description: 'You can sit at Heat 10+ without taking the overheat self-damage.',
+    description: 'The first time each combat you Vent 5+ Heat, gain 2 HP.',
     flavor: 'A crown forged from congealed lava. Heavy.',
   },
   {

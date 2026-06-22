@@ -61,7 +61,7 @@ describe('BLESSING_POOL', () => {
       expect(b.name).toBeTruthy();
       expect(b.flavor).toBeTruthy();
       expect(b.effect).toBeTruthy();
-      expect(b.emoji).toBeTruthy();
+      expect(b.fallback).toBeTruthy();
       expect(b.color).toMatch(/^#[0-9a-fA-F]{6}$/);
     }
   });

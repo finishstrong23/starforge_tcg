@@ -10,6 +10,7 @@ import type {
   StatusEffectType,
 } from '../types';
 import { getCardText } from './cardStats';
+import { addHeat } from './heat';
 
 export function getActiveEffects(card: CardDefinition | CardInstance): EffectDefinition[] | undefined {
   if ('upgraded' in card && card.upgraded && card.upgradeEffects) return card.upgradeEffects;
@@ -177,8 +178,15 @@ function applyOneEffect(
     }
     case 'exhaust':
       return state;
-    case 'heat':
-      return log({ ...state, playerHeat: state.playerHeat + effect.amount }, `${card.name} gains ${effect.amount} Heat`);
+    case 'heat': {
+      const heat = addHeat(state.playerHeat, effect.amount);
+      return log(
+        { ...state, playerHeat: heat.next },
+        heat.wasted > 0
+          ? `${card.name} gains ${heat.gained} Heat (${heat.wasted} wasted at cap)`
+          : `${card.name} gains ${heat.gained} Heat`,
+      );
+    }
     case 'heal':
       return log({
         ...state,
