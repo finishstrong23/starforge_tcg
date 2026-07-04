@@ -26,11 +26,10 @@
     "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
     "types": ["node", "jest"],
-    "baseUrl": "./src",
     "paths": {
-      "@/*": ["./*"],
-      "@dungeon/*": ["./dungeon/*"],
-      "@utils/*": ["./utils/*"]
+      "@/*": ["./src/*"],
+      "@dungeon/*": ["./src/dungeon/*"],
+      "@utils/*": ["./src/utils/*"]
     }
   },
   "include": ["src/**/*"],

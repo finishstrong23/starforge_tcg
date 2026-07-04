@@ -6,9 +6,31 @@ on:
       - 'claude/**'
       - 'codex/**'
 
+# Serialize merges so two feature branches pushed at the same time can't
+# race each other into main.
+concurrency:
+  group: auto-deploy-main
+  cancel-in-progress: false
+
 jobs:
+  beta-readiness:
+    name: Beta Readiness Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run release:beta:check
+
   sync-to-main:
     name: Sync to Main
+    needs: beta-readiness
     runs-on: ubuntu-latest
     permissions:
       contents: write

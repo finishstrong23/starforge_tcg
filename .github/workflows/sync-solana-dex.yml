@@ -8,6 +8,11 @@ on:
     paths:
       - 'solana-dex/**'
 
+# Serialize syncs so overlapping runs can't interleave their force pushes.
+concurrency:
+  group: sync-solana-dex
+  cancel-in-progress: false
+
 jobs:
   sync:
     name: Push solana-dex/ to finishstrong23/solana-dex
@@ -18,6 +23,9 @@ jobs:
           fetch-depth: 0
 
       - name: Push subtree to solana-dex repo
+        # SOLANA_DEX_PAT should be a fine-grained PAT scoped to ONLY the
+        # finishstrong23/solana-dex repo with contents read/write — not a
+        # classic PAT, which would grant access to every repo on the account.
         env:
           SOLANA_DEX_TOKEN: ${{ secrets.SOLANA_DEX_PAT }}
         run: |
@@ -28,6 +36,10 @@ jobs:
           # Split out only the solana-dex/ directory
           SPLIT_SHA=$(git subtree split --prefix=solana-dex -b solana-dex-split)
 
-          # Push to the standalone solana-dex repo
+          # Push to the standalone solana-dex repo. The subtree split rewrites
+          # history each run, so the push is necessarily forced — but
+          # --force-with-lease against a fresh fetch refuses to clobber
+          # anything pushed to the target repo since this run started.
           git remote add solana-dex https://x-access-token:${SOLANA_DEX_TOKEN}@github.com/finishstrong23/solana-dex.git
-          git push solana-dex solana-dex-split:main --force
+          git fetch solana-dex main
+          git push solana-dex solana-dex-split:main --force-with-lease=main
