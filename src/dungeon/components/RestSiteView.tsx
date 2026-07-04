@@ -41,7 +41,7 @@ export const RestSiteView: React.FC = () => {
       padding: '2.5rem 1rem',
       minHeight: '100%',
       backgroundImage: [
-        'linear-gradient(180deg, rgba(7,7,18,0.68), rgba(7,7,18,0.90))',
+        'linear-gradient(180deg, rgba(7,7,18,0.14), rgba(7,7,18,0.52))',
         `url("${getDungeonSceneArt('rest')}")`,
       ].join(', '),
       backgroundSize: 'cover, cover',

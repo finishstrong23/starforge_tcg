@@ -26,15 +26,17 @@ export const App: React.FC = () => {
 
   return (
     <ErrorBoundary>
-      {/* "Start New Run" clears the saved run, then reloads. The reload
-          gives us a fresh DungeonRunProvider state (cleaner than wiring
-          a soft-reset reducer action just for one entry point). */}
-      <DungeonRoot onBack={() => {
-        clearDungeonSave();
-        if (typeof window !== 'undefined') window.location.reload();
-      }} />
-      <TelemetrySettingsPanel />
-      <TelemetryDebugPanel />
+      <div className="starforge-app-shell">
+        {/* "Start New Run" clears the saved run, then reloads. The reload
+            gives us a fresh DungeonRunProvider state (cleaner than wiring
+            a soft-reset reducer action just for one entry point). */}
+        <DungeonRoot onBack={() => {
+          clearDungeonSave();
+          if (typeof window !== 'undefined') window.location.reload();
+        }} />
+        <TelemetrySettingsPanel />
+        <TelemetryDebugPanel />
+      </div>
     </ErrorBoundary>
   );
 };

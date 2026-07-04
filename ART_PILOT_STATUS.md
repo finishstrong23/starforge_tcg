@@ -33,10 +33,10 @@ The previous generated faction/background packs were rejected because they were 
 | `faction:luminar` | `public/art/dungeon/factions/luminar.png` | Installed Basic Token pass | Halo shield and star prism token. |
 | `faction:warpriders` | `public/art/dungeon/factions/warpriders.png` | Installed Basic Token pass | Portal, split mask, and crescent blade token. |
 | `faction:phantom_corsairs` | `public/art/dungeon/factions/phantom_corsairs.png` | Installed Basic Token alias | Same accepted file as `warpriders.png`. |
-| `background:combat` | `public/art/dungeon/backgrounds/combat.png` | Installed Basic Token pass | Flat arena panel with banners and crystals. |
+| `background:combat` | `public/art/dungeon/backgrounds/combat.png` | Installed Basic Token pass | Flat arena panel with banners and stone markers. |
 | `background:shop` | `public/art/dungeon/backgrounds/shop.png` | Installed Basic Token pass | Flat shop panel with relic silhouettes. |
 | `background:rest` | `public/art/dungeon/backgrounds/rest.png` | Installed Basic Token pass | Flat rest panel with cushions and healing flame. |
-| `background:boss` | `public/art/dungeon/backgrounds/boss.png` | Installed Basic Token pass | Flat boss-door panel with crystal seal. |
+| `background:boss` | `public/art/dungeon/backgrounds/boss.png` | Installed Basic Token pass | Flat boss-door panel with ember seal. |
 | `background:supporting` | `public/art/dungeon/backgrounds/{draft,reward,blessing,event,victory,defeat}.svg` | Installed Basic Token SVG pass | Six supporting screens now use flat token scene panels behind UI overlays. |
 | `map:*` | `public/art/dungeon/map/{nodeType}.svg` | Installed Basic Token SVG pass | Seven map node tokens are live through the art registry. |
 | `enemy:BOSS-*` | `public/art/dungeon/bosses/{bossId}.svg` | Installed Basic Token SVG pass | Three boss tokens are live through the art registry. |

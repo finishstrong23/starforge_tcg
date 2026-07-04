@@ -1,26 +1,19 @@
-# Dungeon Combat Backgrounds
+# Dungeon Background Policy
 
-Drop compressed image files (`.jpg`, `.jpeg`, `.webp`) into this directory and
-they'll be bundled automatically by Vite. The combat view picks one at random
-per encounter, seeded by the enemy ID so the same encounter always shows the
-same scene. Large `.png` files may live here as source art, but they are not
-bundled into production builds.
+The Pyroclast MVP uses only original STARFORGE polished cartoon stage
+backgrounds: bright, readable, professional raster scenes with confident
+outlines, appealing shapes, and enough quiet space for UI.
 
-## Adding new backgrounds
+Do not add unrelated uploaded JPG, PNG, or WebP scene art to this directory.
+Combat backgrounds are selected deliberately through `index.ts` so the run
+stays visually consistent and app-ready.
 
-1. Save the image here. Recommended size: 1920x1080 or larger. Use JPG or WebP
-   for anything that ships in the app.
-2. Recommended naming: `bg-<theme>-<short-tag>.<ext>`.
-   Examples:
-   - `bg-starship-deck.jpg`
-   - `bg-jungle-ruins.jpg`
-   - `bg-forge-lava.jpg`
-   - `bg-void-purple.jpg`
-   - `bg-temple-fire.jpg`
-3. Commit the compressed file. The build picks it up on the next deploy.
+## Adding a New Background
 
-## Code
-
-The loader (`index.ts`) exports `BACKGROUNDS` (array of bundled URLs) and
-`pickRandomBackground(seed?)`. `CombatView.tsx` calls it with the current
-enemy's ID as the seed.
+1. Create a 16:9 PNG/WebP in `public/art/dungeon/backgrounds/`.
+2. Keep the scene polished but readable: large shapes, clean silhouettes, and
+   tasteful detail rather than flat icon art.
+3. Leave open space for UI overlays.
+4. Reject dark, moody, realistic, elementary, or cluttered scenes.
+5. Add the new asset URL to `BACKGROUNDS` in `index.ts` only if combat should
+   randomly use it.

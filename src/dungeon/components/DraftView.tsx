@@ -36,8 +36,8 @@ export const DraftView: React.FC = () => {
       flexDirection: 'column',
       alignItems: 'center',
       gap: 12,
-      padding: '3rem 1rem 4.75rem',
-      minHeight: '100vh',
+      padding: 'calc(3rem + var(--app-safe-top)) calc(1rem + var(--app-safe-right)) calc(4.75rem + var(--app-safe-bottom)) calc(1rem + var(--app-safe-left))',
+      minHeight: '100%',
       boxSizing: 'border-box',
       backgroundColor: '#060610',
       backgroundImage: [
@@ -48,6 +48,7 @@ export const DraftView: React.FC = () => {
       backgroundPosition: 'center, center',
       backgroundRepeat: 'no-repeat',
       color: '#f0f0f8',
+      fontFamily: 'var(--app-font-family)',
     },
     header: { textAlign: 'center' },
     title: {
@@ -93,7 +94,7 @@ export const DraftView: React.FC = () => {
     },
     cardGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 158px))',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(var(--dungeon-card-draft-w), var(--dungeon-card-draft-w)))',
       gap: 14,
       justifyContent: 'center',
     },

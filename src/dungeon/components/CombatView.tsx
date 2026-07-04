@@ -602,8 +602,8 @@ const EnergyOrb: React.FC<{ current: number; max: number }> = ({ current, max })
     <div
       style={{
         position: 'absolute',
-        bottom: 18,
-        left: 18,
+        bottom: 'calc(18px + var(--app-safe-bottom))',
+        left: 'var(--dungeon-energy-edge)',
         zIndex: 4,
         display: 'flex',
         flexDirection: 'column',
@@ -661,8 +661,8 @@ const RightHUD: React.FC<{
     <div
       style={{
         position: 'absolute',
-        bottom: 18,
-        right: 18,
+        bottom: 'calc(18px + var(--app-safe-bottom))',
+        right: 'var(--dungeon-hud-edge)',
         zIndex: 4,
         display: 'flex',
         alignItems: 'flex-end',
@@ -1276,6 +1276,7 @@ export const CombatView: React.FC = () => {
       display: 'flex',
       flexDirection: 'column',
       height: '100vh',
+      width: '100%',
       // Layered background: a dark vertical gradient + the encounter art (if any).
       // Gradient is stronger at the top and bottom so combat-log + HUD text stay legible.
       backgroundImage: bgUrl
@@ -1767,10 +1768,11 @@ export const CombatView: React.FC = () => {
       <div
         style={{
           position: 'absolute',
-          bottom: 14,
-          left: 110,    // clear the energy orb
-          right: 220,   // clear the right HUD (heat + discard + end turn)
+          bottom: 'var(--dungeon-hand-bottom)',
+          left: 'var(--dungeon-hand-left)',    // clear the energy orb
+          right: 'var(--dungeon-hand-right)',  // clear Heat, discard, and end-turn controls
           zIndex: 4,
+          minWidth: 0,
         }}
       >
         <HandComponent

@@ -4,7 +4,9 @@ import { factionArt, getFactionArt, getSceneArt, sceneArt } from './artRegistry'
 export const FACTION_TOKEN_ART: Record<Faction, string> = factionArt;
 
 export const DUNGEON_SCENE_ART = {
+  classSelect: sceneArt.classSelect,
   combat: sceneArt.combat,
+  map: sceneArt.map,
   shop: sceneArt.shop,
   rest: sceneArt.rest,
   boss: sceneArt.boss,

@@ -1,29 +1,30 @@
 # STARFORGE Art Asset Manifest
 
-This manifest tracks the Basic Token Style asset replacement plan. Previous generated faction/background art is rejected because it was too detailed, too polished, and too illustrative.
+This manifest tracks the Friendly Arcade Token Style asset replacement plan. Previous generated faction/background art is rejected because it was too detailed, too polished, too dark, or too illustrative.
 
 ## Style Anchor
 
 ```text
-Original STARFORGE Dungeon Run art, Basic Token Style.
-Clean flat-color fantasy game asset with thick dark outlines, chunky simple shapes, symbolic readable subject, minimal detail, limited palette, soft single shadow, tiny highlight accents, bright friendly colors, consistent mobile-readable design.
-No realism, no cinematic lighting, no complex rendering, no dense sci-fi detail, no anime polish, no text, no logos, no UI, no imitation of any specific game.
+Original STARFORGE Dungeon Run art, Friendly Arcade Token Style.
+Clean flat-color arcade fantasy game asset with thick dark outlines, chunky simple shapes, symbolic readable subject, minimal detail, limited palette, soft single shadow, tiny highlight accents, bright friendly colors, consistent mobile-readable design.
+Fun and accessible, expressive but not horror, broad-audience original STARFORGE identity.
+No realism, no cinematic lighting, no complex rendering, no dense sci-fi detail, no dark moody palette, no anime polish, no text, no logos, no UI, no imitation of any specific game.
 ```
 
 ## Path Conventions
 
-The first Basic Token implementation pass uses SVG for simple symbolic icons because it keeps outlines crisp, file sizes small, and revisions fast. PNG remains acceptable for generated painterly/raster assets such as backgrounds and future card art.
+The first Friendly Arcade implementation pass uses SVG for simple symbolic icons because it keeps outlines crisp, file sizes small, and revisions fast. PNG remains acceptable for future generated raster assets after the visual language is approved in-game.
 
 | Asset type | Target filename |
 |---|---|
 | Card art | `public/cards/{cardId}.svg` |
 | Boss art | `public/art/dungeon/bosses/{bossId}.svg` |
 | Relic icon | `public/art/dungeon/relics/{relicId}.svg` |
-| Faction token | `public/art/dungeon/factions/{raceLowercase}.png` |
+| Faction token | `public/art/dungeon/factions/{raceLowercase}.svg` for active MVP factions; legacy `.png` is allowed only for hidden/unused factions |
 | Card bundle art | `public/art/dungeon/bundles/{bundleId}.png` |
 | Potion icon | `public/art/dungeon/potions/{potionId}.svg` |
 | Potion effect icon | `public/art/dungeon/potions/effects/{category}.svg` |
-| Scene background | `public/art/dungeon/backgrounds/{sceneId}.png` |
+| Scene background | `public/art/dungeon/backgrounds/.svg` |
 | Map icon | `public/art/dungeon/map/{nodeType}.svg` |
 | Status icon | `public/art/dungeon/status/{statusId}.svg` |
 | UI art | `public/art/dungeon/ui/{assetId}.svg` |
@@ -32,36 +33,36 @@ The first Basic Token implementation pass uses SVG for simple symbolic icons bec
 
 Status key:
 
-- `Done`: Basic Token image exists and is wired into the active dungeon UI.
+- `Done`: Friendly Arcade Token image exists and is wired into the active dungeon UI.
 - `Placeholder`: plain glyph, gradient, text-only visual, or shape-only UI still carries the visual meaning.
 - `Missing asset`: UI has a slot or data concept but no production image path yet.
 
 | Surface | Active source | Current state | Priority | Replacement target |
 |---|---|---|---|---|
-| Faction select art | `src/dungeon/components/DungeonRoot.tsx` | Done for 4 factions | P0 | `public/art/dungeon/factions/{faction}.png` |
-| Main faction-select background | `src/dungeon/components/DungeonRoot.tsx` | Done, uses combat scene | P1 | Dedicated `public/art/dungeon/backgrounds/class_select.png` |
-| Combat backgrounds | `src/dungeon/components/CombatView.tsx`, `src/dungeon/assets/backgrounds/index.ts` | Partly done; Basic Token combat/boss mixed with old detailed jpgs | P0 | `public/art/dungeon/backgrounds/combat_{theme}.png` |
-| Shop background | `src/dungeon/components/ShopView.tsx` | Done, but needs visual QA | P0 | `public/art/dungeon/backgrounds/shop.png` |
-| Rest background | `src/dungeon/components/RestSiteView.tsx` | Done, but needs visual QA | P0 | `public/art/dungeon/backgrounds/rest.png` |
-| Boss background | `src/dungeon/components/CombatView.tsx` | Done for boss combat | P0 | `public/art/dungeon/backgrounds/boss.png` |
-| Draft screen background | `src/dungeon/components/DraftView.tsx` | Done with Basic Token SVG scene panel | P1 | `public/art/dungeon/backgrounds/draft.svg` |
-| Reward screen background | `src/dungeon/components/RewardView.tsx` | Done with Basic Token SVG scene panel | P1 | `public/art/dungeon/backgrounds/reward.svg` |
-| Blessing screen background | `src/dungeon/components/BlessingView.tsx` | Done with Basic Token SVG scene panel | P1 | `public/art/dungeon/backgrounds/blessing.svg` |
-| Event screen background | `src/dungeon/components/EventView.tsx` | Done with Basic Token SVG scene panel | P1 | `public/art/dungeon/backgrounds/event.svg` |
-| Run end screen | `src/dungeon/components/DungeonRoot.tsx` | Done with victory/defeat Basic Token SVG scene panels | P2 | `public/art/dungeon/backgrounds/victory.svg`, `defeat.svg` |
-| Map node icons | `src/dungeon/components/MapView.tsx` | SVG Basic Token pass installed | P0 | `public/art/dungeon/map/{nodeType}.svg` |
+| Faction select art | `src/dungeon/components/DungeonRoot.tsx` | Pyroclast MVP uses Friendly Arcade SVG; hidden factions may still have legacy PNG art | P0 | `public/art/dungeon/factions/pyroclast.svg` |
+| Main faction-select background | `src/dungeon/components/DungeonRoot.tsx` | Done, uses combat scene | P1 | Dedicated `public/art/dungeon/backgrounds/.svg` |
+| Combat backgrounds | `src/dungeon/components/CombatView.tsx`, `src/dungeon/assets/backgrounds/index.ts` | Friendly Arcade SVG pass installed; old detailed art should remain unused for Pyroclast MVP | P0 | `public/art/dungeon/backgrounds/combat.svg`, `boss.svg` |
+| Shop background | `src/dungeon/components/ShopView.tsx` | Done, but needs visual QA | P0 | `public/art/dungeon/backgrounds/.svg` |
+| Rest background | `src/dungeon/components/RestSiteView.tsx` | Done, but needs visual QA | P0 | `public/art/dungeon/backgrounds/.svg` |
+| Boss background | `src/dungeon/components/CombatView.tsx` | Done for boss combat | P0 | `public/art/dungeon/backgrounds/.svg` |
+| Draft screen background | `src/dungeon/components/DraftView.tsx` | Done with Friendly Arcade SVG scene panel | P1 | `public/art/dungeon/backgrounds/draft.svg` |
+| Reward screen background | `src/dungeon/components/RewardView.tsx` | Done with Friendly Arcade SVG scene panel | P1 | `public/art/dungeon/backgrounds/reward.svg` |
+| Blessing screen background | `src/dungeon/components/BlessingView.tsx` | Done with Friendly Arcade SVG scene panel | P1 | `public/art/dungeon/backgrounds/blessing.svg` |
+| Event screen background | `src/dungeon/components/EventView.tsx` | Done with Friendly Arcade SVG scene panel | P1 | `public/art/dungeon/backgrounds/event.svg` |
+| Run end screen | `src/dungeon/components/DungeonRoot.tsx` | Done with victory/defeat Friendly Arcade SVG scene panels | P2 | `public/art/dungeon/backgrounds/victory.svg`, `defeat.svg` |
+| Map node icons | `src/dungeon/components/MapView.tsx` | Friendly Arcade SVG pass installed | P0 | `public/art/dungeon/map/{nodeType}.svg` |
 | Map connector/path art | `src/dungeon/components/MapView.tsx` | Done with rounded route rails, active-path markers, and muted future paths | P1 | CSS/SVG route motif |
-| Enemy art | `src/dungeon/data/enemies.ts`, `src/dungeon/components/EnemyComponent.tsx` | 24 normal/elite enemy SVGs installed | P0 | `public/art/dungeon/enemies/{enemyId}.svg` |
-| Boss art | `src/dungeon/data/enemies.ts`, `src/dungeon/components/EnemyComponent.tsx` | 3 boss SVGs installed | P0 | `public/art/dungeon/bosses/{bossId}.svg` |
-| Enemy intent icons | `src/dungeon/components/EnemyComponent.tsx` | Done with six Basic Token SVGs | P1 | `public/art/dungeon/ui/intent_{intentType}.svg` |
-| Enemy/player status icons | `src/dungeon/components/EnemyComponent.tsx`, `CombatView.tsx`, `CardComponent.tsx` | Done with nine Basic Token SVGs | P1 | `public/art/dungeon/status/{statusId}.svg` |
+| Enemy art | `src/dungeon/data/enemies.ts`, `src/dungeon/components/EnemyComponent.tsx` | Friendly Arcade SVG portraits installed for all normal/elite enemies | P0 | `public/art/dungeon/enemies/{enemyId}.svg` |
+| Boss art | `src/dungeon/data/enemies.ts`, `src/dungeon/components/EnemyComponent.tsx` | Friendly Arcade SVG boss portraits installed | P0 | `public/art/dungeon/bosses/{bossId}.svg` |
+| Enemy intent icons | `src/dungeon/components/EnemyComponent.tsx` | Done with six Friendly Arcade Token SVGs | P1 | `public/art/dungeon/ui/intent_{intentType}.svg` |
+| Enemy/player status icons | `src/dungeon/components/EnemyComponent.tsx`, `CombatView.tsx`, `CardComponent.tsx` | Done with nine Friendly Arcade Token SVGs | P1 | `public/art/dungeon/status/{statusId}.svg` |
 | Card art | `src/dungeon/components/CardComponent.tsx` | Done for all 176 current dungeon cards; procedural fallback remains for future cards | P0 for first 16, P1 for all 176 | `public/cards/{cardId}.svg` |
 | Card backs / draw pile / discard pile | `src/dungeon/components/HandComponent.tsx`, `src/dungeon/components/CombatView.tsx` | Done for draw/discard/card-back SVGs; draw/discard and empty-hand card back wired into active UI | P1 | `public/art/dungeon/ui/card_back.svg`, `draw_pile.svg`, `discard_pile.svg` |
 | Relic icons | `src/dungeon/data/relics.ts`, `RelicBar.tsx`, rewards/shop | 26 SVG icons installed | P0 for visible relic bar/shop/rewards | `public/art/dungeon/relics/{relicId}.svg` |
 | Potion icons | `src/dungeon/components/PotionInventory.tsx`, `PotionPickupModal.tsx`, `ShopView.tsx` | 14 SVG icons installed | P0 | `public/art/dungeon/potions/{potionId}.svg` |
 | Potion drink burst | `src/dungeon/components/PotionDrinkBurst.tsx` | Done with eight category SVGs plus Phoenix SVG | P2 | `public/art/dungeon/potions/effects/{category}.svg` |
-| Faction resource panel | `src/dungeon/components/FactionResourcePanel.tsx` | Done with four Basic Token SVG header icons | P1 | `public/art/dungeon/ui/resource_{faction}.svg` |
-| Tutorial icons | `src/dungeon/components/TutorialOverlay.tsx` | Done with three Basic Token SVGs | P2 | `public/art/dungeon/ui/tutorial_{step}.svg` |
+| Faction resource panel | `src/dungeon/components/FactionResourcePanel.tsx` | Done with four Friendly Arcade Token SVG header icons | P1 | `public/art/dungeon/ui/resource_{faction}.svg` |
+| Tutorial icons | `src/dungeon/components/TutorialOverlay.tsx` | Done with three Friendly Arcade Token SVGs | P2 | `public/art/dungeon/ui/tutorial_{step}.svg` |
 | Telemetry/debug icon | `src/dungeon/components/TelemetryDebugPanel.tsx` | Emoji chart | P3 | Keep developer-only or replace with CSS icon |
 | Combat log prefixes | `src/dungeon/components/CombatView.tsx`, engine log producers | Done with renderer-level text-token badges; engine strings remain compatible | P2 | Text-only log tags |
 
@@ -76,55 +77,55 @@ Status key:
 
 ### Map Nodes
 
-All map icons were P0 because the map is the route-selection screen. The current map icon set is installed as Basic Token SVGs.
+All map icons were P0 because the map is the route-selection screen. The current map icon set is installed as Friendly Arcade Token SVGs.
 
 | Asset id | Type | Priority | Target filename | Notes |
 |---|---|---|---|---|
-| `map:combat` | Map icon | P0 | `public/art/dungeon/map/combat.png` | Crossed simple blades or burst token |
-| `map:elite` | Map icon | P0 | `public/art/dungeon/map/elite.png` | Crowned skull-mask token, not realistic skull |
-| `map:boss` | Map icon | P0 | `public/art/dungeon/map/boss.png` | Chunky crown/door seal token |
-| `map:rest` | Map icon | P0 | `public/art/dungeon/map/rest.png` | Camp shrine/healing flame token |
-| `map:shop` | Map icon | P0 | `public/art/dungeon/map/shop.png` | Coin pouch/merchant sign token |
-| `map:treasure` | Map icon | P0 | `public/art/dungeon/map/treasure.png` | Chest/gem token |
-| `map:event` | Map icon | P0 | `public/art/dungeon/map/event.png` | Question rune/token swirl |
+| `map:combat` | Map icon | P0 | `public/art/dungeon/map/.svg` | Crossed simple blades or burst token |
+| `map:elite` | Map icon | P0 | `public/art/dungeon/map/.svg` | Crowned skull-mask token, not realistic skull |
+| `map:boss` | Map icon | P0 | `public/art/dungeon/map/.svg` | Chunky crown/door seal token |
+| `map:rest` | Map icon | P0 | `public/art/dungeon/map/.svg` | Camp shrine/healing flame token |
+| `map:shop` | Map icon | P0 | `public/art/dungeon/map/.svg` | Coin pouch/merchant sign token |
+| `map:treasure` | Map icon | P0 | `public/art/dungeon/map/.svg` | Chest/gem token |
+| `map:event` | Map icon | P0 | `public/art/dungeon/map/.svg` | Question rune/token swirl |
 
 ### Enemies And Bosses
 
-Enemy data source: `src/dungeon/data/enemies.ts`. All 27 enemy entries now have Basic Token SVG art paths through the art registry, with short text-token fallbacks in data if an image fails to load.
+Enemy data source: `src/dungeon/data/enemies.ts`. All 27 enemy entries now have Friendly Arcade Token SVG art paths through the art registry, with short text-token fallbacks in data if an image fails to load.
 
 | Asset id | Type | Priority | Target filename | Subject |
 |---|---|---|---|---|
-| `enemy:BOSS-01` | Boss art | P0 | `public/art/dungeon/bosses/BOSS-01.png` | Scoria Titan |
-| `enemy:BOSS-02` | Boss art | P0 | `public/art/dungeon/bosses/BOSS-02.png` | Null Shepherd |
-| `enemy:BOSS-03` | Boss art | P0 | `public/art/dungeon/bosses/BOSS-03.png` | The Starforged |
-| `enemy:E1-01` | Enemy art | P0 | `public/art/dungeon/enemies/E1-01.png` | Cogsworn Scout |
-| `enemy:E1-02` | Enemy art | P0 | `public/art/dungeon/enemies/E1-02.png` | Ember Houndling |
-| `enemy:E1-03` | Enemy art | P0 | `public/art/dungeon/enemies/E1-03.png` | Chantling |
-| `enemy:E1-04` | Enemy art | P0 | `public/art/dungeon/enemies/E1-04.png` | Rift Nibbler |
-| `enemy:E1-05` | Enemy art | P0 | `public/art/dungeon/enemies/E1-05.png` | Wire-Tangle |
-| `enemy:E1-06` | Enemy art | P0 | `public/art/dungeon/enemies/E1-06.png` | Glasspicker |
-| `enemy:E1-07` | Enemy art | P0 | `public/art/dungeon/enemies/E1-07.png` | Sump Gremlin |
-| `enemy:E1-08` | Enemy art | P0 | `public/art/dungeon/enemies/E1-08.png` | Null Suit |
-| `enemy:E2-01` | Enemy art | P1 | `public/art/dungeon/enemies/E2-01.png` | Magma Strider |
-| `enemy:E2-02` | Enemy art | P1 | `public/art/dungeon/enemies/E2-02.png` | Halo Sentinel |
-| `enemy:E2-03` | Enemy art | P1 | `public/art/dungeon/enemies/E2-03.png` | Forgewright |
-| `enemy:E2-04` | Enemy art | P1 | `public/art/dungeon/enemies/E2-04.png` | Rift-Stalker |
-| `enemy:E2-05` | Enemy art | P1 | `public/art/dungeon/enemies/E2-05.png` | Blast Furnace |
-| `enemy:E2-06` | Enemy art | P1 | `public/art/dungeon/enemies/E2-06.png` | Circuit Priest |
-| `enemy:E2-07` | Enemy art | P1 | `public/art/dungeon/enemies/E2-07.png` | Split Reaver |
-| `enemy:E3-01` | Enemy art | P1 | `public/art/dungeon/enemies/E3-01.png` | Ashen Colossus |
-| `enemy:E3-02` | Enemy art | P1 | `public/art/dungeon/enemies/E3-02.png` | Starbound Inquisitor |
-| `enemy:E3-03` | Enemy art | P1 | `public/art/dungeon/enemies/E3-03.png` | Warforge Sovereign |
-| `enemy:E3-04` | Enemy art | P1 | `public/art/dungeon/enemies/E3-04.png` | Paradox Maw |
-| `enemy:E3-05` | Enemy art | P1 | `public/art/dungeon/enemies/E3-05.png` | Broken Choir |
-| `enemy:EL-01` | Elite art | P0 | `public/art/dungeon/enemies/EL-01.png` | Gearforged Juggernaut |
-| `enemy:EL-02` | Elite art | P0 | `public/art/dungeon/enemies/EL-02.png` | Sunfire Herald |
-| `enemy:EL-03` | Elite art | P0 | `public/art/dungeon/enemies/EL-03.png` | Magma Tyrant |
-| `enemy:EL-04` | Elite art | P0 | `public/art/dungeon/enemies/EL-04.png` | Rift Warden |
+| `enemy:BOSS-01` | Boss art | P0 | `public/art/dungeon/bosses/.svg` | Scoria Titan |
+| `enemy:BOSS-02` | Boss art | P0 | `public/art/dungeon/bosses/.svg` | Null Shepherd |
+| `enemy:BOSS-03` | Boss art | P0 | `public/art/dungeon/bosses/.svg` | The Starforged |
+| `enemy:E1-01` | Enemy art | P0 | `public/art/dungeon/enemies/.svg` | Cogsworn Scout |
+| `enemy:E1-02` | Enemy art | P0 | `public/art/dungeon/enemies/.svg` | Ember Houndling |
+| `enemy:E1-03` | Enemy art | P0 | `public/art/dungeon/enemies/.svg` | Chantling |
+| `enemy:E1-04` | Enemy art | P0 | `public/art/dungeon/enemies/.svg` | Rift Nibbler |
+| `enemy:E1-05` | Enemy art | P0 | `public/art/dungeon/enemies/.svg` | Wire-Tangle |
+| `enemy:E1-06` | Enemy art | P0 | `public/art/dungeon/enemies/.svg` | Glasspicker |
+| `enemy:E1-07` | Enemy art | P0 | `public/art/dungeon/enemies/.svg` | Sump Gremlin |
+| `enemy:E1-08` | Enemy art | P0 | `public/art/dungeon/enemies/.svg` | Null Suit |
+| `enemy:E2-01` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Magma Strider |
+| `enemy:E2-02` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Halo Sentinel |
+| `enemy:E2-03` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Forgewright |
+| `enemy:E2-04` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Rift-Stalker |
+| `enemy:E2-05` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Blast Furnace |
+| `enemy:E2-06` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Circuit Priest |
+| `enemy:E2-07` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Split Reaver |
+| `enemy:E3-01` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Ashen Colossus |
+| `enemy:E3-02` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Starbound Inquisitor |
+| `enemy:E3-03` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Warforge Sovereign |
+| `enemy:E3-04` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Paradox Maw |
+| `enemy:E3-05` | Enemy art | P1 | `public/art/dungeon/enemies/.svg` | Broken Choir |
+| `enemy:EL-01` | Elite art | P0 | `public/art/dungeon/enemies/.svg` | Gearforged Juggernaut |
+| `enemy:EL-02` | Elite art | P0 | `public/art/dungeon/enemies/.svg` | Sunfire Herald |
+| `enemy:EL-03` | Elite art | P0 | `public/art/dungeon/enemies/.svg` | Magma Tyrant |
+| `enemy:EL-04` | Elite art | P0 | `public/art/dungeon/enemies/.svg` | Rift Warden |
 
 ### Cards
 
-Card data source: `src/dungeon/data/cards.ts`. There are 176 current dungeon cards: 44 Cogsmiths, 40 Pyroclast IDs present plus starter/reward cards through `P-044`, 43 Luminar IDs present through `L-044`, and 44 Warp Riders. The active card UI loads authored SVGs first, then falls back to a procedural Basic Token SVG when an authored file is missing.
+Card data source: `src/dungeon/data/cards.ts`. There are 176 current dungeon cards: 44 Cogsmiths, 40 Pyroclast IDs present plus starter/reward cards through `P-044`, 43 Luminar IDs present through `L-044`, and 44 Warp Riders. The active card UI loads authored SVGs first, then falls back to a procedural Friendly Arcade Token SVG when an authored file is missing.
 
 Card art target: `public/cards/{cardId}.svg`.
 
@@ -200,7 +201,7 @@ Full card queue after P0:
 
 ### Relics
 
-Relic data source: `src/dungeon/data/relics.ts`. All 26 relics are wired through the art registry and now have Basic Token SVG icons.
+Relic data source: `src/dungeon/data/relics.ts`. All 26 relics are wired through the art registry and now have Friendly Arcade Token SVG icons.
 
 P0 relics are common, starter, and shop-visible relics. Boss/rare relics are P1 unless they are commonly surfaced by rewards.
 
@@ -218,7 +219,7 @@ P0 relics are common, starter, and shop-visible relics. Boss/rare relics are P1 
 
 ### Potions
 
-Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wired through the art registry and now have Basic Token SVG icons.
+Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wired through the art registry and now have Friendly Arcade Token SVG icons.
 
 | Asset id | Type | Priority | Target filename | Liquid/shape cue |
 |---|---|---|---|---|
@@ -276,17 +277,17 @@ Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wi
 
 ## Pilot Assets Already Created
 
-| Asset id | Type | Faction | Priority | Target filename | Basic Token subject |
+| Asset id | Type | Faction | Priority | Target filename | Friendly Arcade Token subject |
 |---|---|---|---|---|---|
 | `faction:pyroclast` | Faction token | Pyroclast | P0 | `public/art/dungeon/factions/pyroclast.png` | Lava mask plus hammer and flame triangle |
 | `faction:cogsmiths` | Faction token | Cogsmiths | P0 | `public/art/dungeon/factions/cogsmiths.png` | Gear core plus wrench and simple drone |
 | `faction:luminar` | Faction token | Luminar | P0 | `public/art/dungeon/factions/luminar.png` | Halo shield plus star prism |
 | `faction:warpriders` | Faction token | Warp Riders | P0 | `public/art/dungeon/factions/warpriders.png` | Portal ring plus crescent blade and split mask |
 | `faction:phantom_corsairs` | Faction token alias | Warp Riders / Phantom Corsairs | P0 | `public/art/dungeon/factions/phantom_corsairs.png` | Same file as `warpriders.png` while repo uses `Race.PHANTOM_CORSAIRS` |
-| `background:combat` | Scene panel | Neutral | P0 | `public/art/dungeon/backgrounds/combat.png` | Flat arena panel with ring floor, banners, crystals |
-| `background:shop` | Scene panel | Neutral | P0 | `public/art/dungeon/backgrounds/shop.png` | Flat merchant stall panel with relic shapes |
-| `background:rest` | Scene panel | Neutral | P0 | `public/art/dungeon/backgrounds/rest.png` | Flat camp shrine panel with cushions and healing flame |
-| `background:boss` | Scene panel | Neutral | P0 | `public/art/dungeon/backgrounds/boss.png` | Flat boss door panel with crystal seal |
+| `background:combat` | Scene panel | Neutral | P0 | `public/art/dungeon/backgrounds/.svg` | Flat arena panel with ring floor, banners, stone markers |
+| `background:shop` | Scene panel | Neutral | P0 | `public/art/dungeon/backgrounds/.svg` | Flat merchant stall panel with relic shapes |
+| `background:rest` | Scene panel | Neutral | P0 | `public/art/dungeon/backgrounds/.svg` | Flat camp shrine panel with cushions and healing flame |
+| `background:boss` | Scene panel | Neutral | P0 | `public/art/dungeon/backgrounds/.svg` | Flat boss door panel with ember seal |
 | `background:draft` | Scene panel | Neutral | Done | `public/art/dungeon/backgrounds/draft.svg` | Flat draft-table panel with card-token shapes |
 | `background:reward` | Scene panel | Neutral | Done | `public/art/dungeon/backgrounds/reward.svg` | Flat reward shrine panel with token prizes |
 | `background:blessing` | Scene panel | Neutral | Done | `public/art/dungeon/backgrounds/blessing.svg` | Flat halo shrine panel with simple blessing geometry |
@@ -296,14 +297,14 @@ Potion data source: `src/dungeon/data/potions.ts`. All 14 potion surfaces are wi
 
 ## Completed Visible Token Slice
 
-Phase 2 registry and UI image slots are implemented. The first visible Basic Token SVG slice is installed:
+Phase 2 registry and UI image slots are implemented. The first visible Friendly Arcade Token SVG slice is installed:
 
 1. Map node icons: 7 assets.
 2. Enemy art: 24 normal/elite assets.
 3. Boss art: 3 assets.
 4. Potion icons: 14 assets.
 5. Relic icons: 26 assets.
-6. Card fallback coverage: every card without authored art now receives a procedural Basic Token SVG based on faction, type, and id.
+6. Card fallback coverage: every card without authored art now receives a procedural Friendly Arcade Token SVG based on faction, type, and id.
 7. Combat UI icons: 6 intent SVGs, 9 status SVGs, and draw/discard/card-back SVGs.
 8. Supporting scene panels: draft, reward, blessing, event, victory, and defeat SVG backgrounds.
 9. Shop utility icons: gold and card-removal SVGs wired into shop pricing and services.
@@ -311,15 +312,15 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 11. Card art batch 3: 30 uncommon reward SVGs.
 12. Card art batch 4: 40 rare and high-impact reward SVGs.
 13. Card art batch 5: 57 final gap SVGs, completing authored coverage for all current dungeon cards.
-14. Tutorial icons: 3 Basic Token SVGs wired into first-run tutorial.
+14. Tutorial icons: 3 Friendly Arcade Token SVGs wired into first-run tutorial.
 15. Potion drink burst sigils: 8 category SVGs plus Phoenix SVG wired into potion use animation.
-16. Faction resource panel icons: 4 Basic Token SVGs wired into the combat HUD resource panel.
+16. Faction resource panel icons: 4 Friendly Arcade Token SVGs wired into the combat HUD resource panel.
 17. Combat log polish: raw glyph prefixes are stripped at render time and replaced by consistent text-token badges.
 18. Map route polish: dotted connector lines replaced with rounded board-route rails and active path markers.
 19. Visible text/glyph polish: major dungeon screen headers, modal labels, status fallbacks, and action chips now avoid emoji/mojibake.
 20. Card surface glyph polish: card stats, Lumens, Flux, summons, augments, and status fallbacks now use readable text chips.
 21. Potion/modal fallback polish: potion inventory, pickup, lumen allocation, shop potion prices, and telemetry fallback labels now use readable ASCII chips instead of emoji/mojibake.
-22. Blessing/token modal polish: act-start blessing choices now use six Basic Token SVG icons with ASCII fallbacks instead of raw emoji glyphs; combat choice and augment modal headers no longer use decorative glyph prefixes.
+22. Blessing/token modal polish: act-start blessing choices now use six Friendly Arcade Token SVG icons with ASCII fallbacks instead of raw emoji glyphs; combat choice and augment modal headers no longer use decorative glyph prefixes.
 23. Relic/enemy fallback polish: relic and enemy data fallback art fields now use readable ASCII chips instead of raw emoji glyphs if SVG assets fail to load.
 24. Enemy intent text polish: enemy intent descriptions and death notes now use simple ASCII separators for cleaner combat tooltips.
 25. Relic/potion log source polish: relic effect logs and potion drink logs now emit clean text so combat log badges do not depend on stripped emoji prefixes.
@@ -327,11 +328,11 @@ Phase 2 registry and UI image slots are implemented. The first visible Basic Tok
 27. Ascension text polish: ascension modifier summaries now use simple ASCII separators in run setup and summary UI.
 28. Relic log emoji cleanup: Starseer's Pendant now emits clean text instead of a raw star glyph in combat logs.
 29. Token naming cleanup: status, rift, intent, enemy, and relic fallback internals now use token language instead of emoji language.
-30. Rift HUD token art: active rifts now use four Basic Token SVG icons in the combat status row instead of a bare text marker.
+30. Rift HUD token art: active rifts now use four Friendly Arcade Token SVG icons in the combat status row instead of a bare text marker.
 31. Power HUD token art: active Power chips now use card token art with a PWR fallback instead of a plain text marker.
-32. Empty hand card-back art: the combat hand area now shows the Basic Token card-back asset when no cards are in hand.
-33. Combat log button token art: the top-right combat-log toggle now uses a Basic Token SVG instead of a raw visible glyph.
-34. View deck button token art: the persistent run deck button now reuses the Basic Token card-back asset.
+32. Empty hand card-back art: the combat hand area now shows the Friendly Arcade Token card-back asset when no cards are in hand.
+33. Combat log button token art: the top-right combat-log toggle now uses a Friendly Arcade Token SVG instead of a raw visible glyph.
+34. View deck button token art: the persistent run deck button now reuses the Friendly Arcade Token card-back asset.
 
 The next remaining visual batch is remaining low-priority developer/debug polish and final visual QA cleanup.
 
@@ -340,4 +341,5 @@ The next remaining visual batch is remaining low-priority developer/debug polish
 - Prefer symbolic art over character portraits.
 - No generated asset should look like a full splash illustration.
 - Backgrounds should be flat panels behind UI, not detailed landscapes.
+- Do not use crystals, gemstones, or glowing mineral shards as default art filler.
 - Relic and potion icons should look like collectible board-game pieces.

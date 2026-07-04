@@ -125,7 +125,7 @@ const cardGlyphStyle = (accent: string): React.CSSProperties => ({
 
 const cardMechanicLabelStyle = (accent: string): React.CSSProperties => ({
   fontSize: '0.7rem',
-  letterSpacing: '0.18em',
+  letterSpacing: '0.06em',
   color: accent,
   textTransform: 'uppercase',
   marginTop: '0.25rem',
@@ -133,7 +133,7 @@ const cardMechanicLabelStyle = (accent: string): React.CSSProperties => ({
 
 const detailHeaderStyle = (accent: string): React.CSSProperties => ({
   fontSize: '0.7rem',
-  letterSpacing: '0.25em',
+  letterSpacing: '0.08em',
   color: accent,
   textTransform: 'uppercase',
 });
@@ -144,27 +144,27 @@ const beginBtnStyle = (accent: string, disabled: boolean): React.CSSProperties =
   color: disabled ? '#6a6a80' : '#0a0a16',
   border: disabled ? '1px solid #2a2a40' : `1px solid ${accent}`,
   cursor: disabled ? 'not-allowed' : 'pointer',
-  letterSpacing: '0.18em',
+  letterSpacing: '0.08em',
   fontSize: '0.9rem',
-  fontWeight: 700,
-  borderRadius: '3px',
+  fontWeight: 800,
+  borderRadius: '6px',
   textTransform: 'uppercase',
 });
 
 const s: Record<string, React.CSSProperties> = {
   root: {
     width: '100%',
-    minHeight: '100vh',
+    minHeight: '100%',
     backgroundImage: [
-      'linear-gradient(180deg, rgba(7,7,18,0.74), rgba(7,7,18,0.92))',
-      `url("${getDungeonSceneArt('combat')}")`,
+      'linear-gradient(180deg, rgba(7,7,18,0.18), rgba(7,7,18,0.58))',
+      `url("${getDungeonSceneArt('classSelect')}")`,
     ].join(', '),
     backgroundSize: 'cover, cover',
     backgroundPosition: 'center, center',
     backgroundRepeat: 'no-repeat',
     color: '#f2f2f6',
-    fontFamily: 'var(--font-family, system-ui, sans-serif)',
-    padding: '1.5rem 2rem 6.5rem',
+    fontFamily: 'var(--app-font-family)',
+    padding: 'calc(1.5rem + var(--app-safe-top)) calc(2rem + var(--app-safe-right)) calc(6.5rem + var(--app-safe-bottom)) calc(2rem + var(--app-safe-left))',
     boxSizing: 'border-box',
     display: 'flex',
     flexDirection: 'column',
@@ -180,14 +180,15 @@ const s: Record<string, React.CSSProperties> = {
   },
   titleBlock: { display: 'flex', flexDirection: 'column', gap: '0.35rem' },
   title: {
-    fontSize: '2.2rem',
-    letterSpacing: '0.18em',
+    fontFamily: 'var(--app-display-font-family)',
+    fontSize: '2.35rem',
+    letterSpacing: '0.04em',
     margin: 0,
-    fontWeight: 600,
+    fontWeight: 900,
   },
   subtitle: {
     opacity: 0.55,
-    letterSpacing: '0.08em',
+    letterSpacing: '0.02em',
     fontSize: '0.85rem',
     margin: 0,
     textTransform: 'uppercase',
@@ -198,15 +199,15 @@ const s: Record<string, React.CSSProperties> = {
     border: '1px solid #3a3a52',
     color: '#d0d0d8',
     cursor: 'pointer',
-    letterSpacing: '0.12em',
+    letterSpacing: '0.04em',
     fontSize: '0.8rem',
-    borderRadius: '3px',
+    borderRadius: '6px',
   },
   sectionLabel: {
     width: '100%',
     maxWidth: '1200px',
     fontSize: '0.75rem',
-    letterSpacing: '0.25em',
+    letterSpacing: '0.08em',
     opacity: 0.4,
     textTransform: 'uppercase',
     marginBottom: '0.75rem',
@@ -226,7 +227,7 @@ const s: Record<string, React.CSSProperties> = {
     objectFit: 'cover',
     display: 'block',
   },
-  cardName: { fontSize: '1.1rem', fontWeight: 600, letterSpacing: '0.05em' },
+  cardName: { fontFamily: 'var(--app-display-font-family)', fontSize: '1.1rem', fontWeight: 800, letterSpacing: '0.01em' },
   cardTag: { fontSize: '0.8rem', opacity: 0.65 },
   cardMechanicBody: { fontSize: '0.82rem', opacity: 0.82, lineHeight: 1.4 },
   cardFooter: {
@@ -287,8 +288,8 @@ const s: Record<string, React.CSSProperties> = {
   },
   startRow: {
     position: 'fixed',
-    right: 24,
-    bottom: 18,
+    right: 'calc(24px + var(--app-safe-right))',
+    bottom: 'calc(18px + var(--app-safe-bottom))',
     zIndex: 130,
     display: 'flex',
     alignItems: 'center',
@@ -304,8 +305,8 @@ const s: Record<string, React.CSSProperties> = {
   runWrap: {
     position: 'relative',
     width: '100%',
-    minHeight: '100vh',
-    fontFamily: 'var(--font-family, system-ui, sans-serif)',
+    minHeight: '100%',
+    fontFamily: 'var(--app-font-family)',
   },
   deckBtn: {
     padding: '6px 14px',
@@ -323,8 +324,8 @@ const s: Record<string, React.CSSProperties> = {
   },
   menuBtn: {
     position: 'fixed',
-    top: 12,
-    right: 58,
+    top: 'var(--dungeon-menu-top)',
+    right: 'calc(58px + var(--app-safe-right))',
     zIndex: 121,
     padding: '9px 13px',
     background: 'linear-gradient(180deg, rgba(10,10,22,0.9), rgba(10,10,22,0.68))',
@@ -404,8 +405,8 @@ const s: Record<string, React.CSSProperties> = {
   },
   runOverlayStack: {
     position: 'fixed',
-    right: 12,
-    bottom: 10,
+    right: 'calc(12px + var(--app-safe-right))',
+    bottom: 'calc(10px + var(--app-safe-bottom))',
     zIndex: 120,
     display: 'flex',
     gap: 8,
@@ -422,7 +423,7 @@ const s: Record<string, React.CSSProperties> = {
     backgroundColor: '#060610',
     color: '#f0f0f8',
     padding: '2rem 1rem',
-    fontFamily: 'var(--font-family, system-ui, sans-serif)',
+    fontFamily: 'var(--app-font-family)',
   },
   endTitle: {
     fontSize: '2.5rem',
@@ -746,7 +747,7 @@ const AscensionPicker: React.FC<{
 // ─── Inner component (reads context, routes by phase) ────────────────────────
 
 const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-  const { runState, startNewRun, resetRun } = useDungeonRun();
+  const { runState, draftFaction, startNewRun, resetRun } = useDungeonRun();
   const [selectedId, setSelectedId] = useState<FactionId>(MVP_FACTION as FactionId);
   // Ascension selection. Default to the highest level the player has unlocked
   // for the chosen faction. Reset whenever the faction picker changes.
@@ -876,6 +877,15 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   }
 
   const restartRun = () => {
+    const faction = draftFaction ?? MVP_FACTION;
+    const ascension = runState.ascensionLevel;
+    setDeckOpen(false);
+    setRunMenuOpen(false);
+    resetRun();
+    startNewRun(faction, undefined, ascension);
+  };
+
+  const returnToSetup = () => {
     setDeckOpen(false);
     setRunMenuOpen(false);
     resetRun();
@@ -913,7 +923,7 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           <div style={s.menuPanel}>
             <h2 id="dungeon-run-menu-title" style={s.menuTitle}>Run Menu</h2>
             <p style={s.menuText}>
-              Quit this run instantly, inspect your deck, or return to the fight.
+              Restart instantly, inspect your deck, or return to the fight.
             </p>
             <button
               type="button"
@@ -937,7 +947,14 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               style={s.menuDanger}
               onClick={restartRun}
             >
-              Quit Run & Start Over
+              Restart Fresh Pyroclast Run
+            </button>
+            <button
+              type="button"
+              style={s.menuAction}
+              onClick={returnToSetup}
+            >
+              Return to Setup
             </button>
           </div>
         </div>

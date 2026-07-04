@@ -1,34 +1,15 @@
 // Dungeon-mode combat backgrounds.
 // ---------------------------------------------------------------------------
-// Drop .jpg / .webp files into this directory and they're auto-bundled by
-// Vite's import.meta.glob and selected at random per combat. Keep large PNGs as
-// source art only; shipping compressed backgrounds keeps mobile loads healthy.
-//
-// Recommended naming (helps future debugging — not enforced):
-//   bg-<theme>-<short>.<ext>
-//   e.g.  bg-starship-deck.jpg
-//         bg-jungle-ruins.jpg
-//         bg-forge-lava.jpg
-//         bg-void-purple.jpg
-//         bg-temple-fire.jpg
-
-const modules = import.meta.glob<string>('./*.{jpg,jpeg,webp}', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-});
-
-const basicTokenBackgrounds = [
-  `${import.meta.env.BASE_URL}art/dungeon/backgrounds/combat.png`,
-  `${import.meta.env.BASE_URL}art/dungeon/backgrounds/boss.png`,
-];
+// The Pyroclast MVP uses original polished cartoon stage backgrounds: bright,
+// readable, artful raster scenes with enough quiet space for combat UI. Do not
+// auto-load unrelated uploaded scene art here; each background should be added
+// deliberately after in-game review.
 
 export const BACKGROUNDS: string[] = [
-  ...basicTokenBackgrounds,
-  ...Object.values(modules),
+  `${import.meta.env.BASE_URL}art/dungeon/backgrounds/combat_pyroclast_arena.png`,
 ];
 
-/** FNV-1a-ish string hash → unsigned 32-bit. Used to seed background picks. */
+/** FNV-1a-ish string hash -> unsigned 32-bit. Used to seed background picks. */
 function hashString(s: string): number {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < s.length; i++) {
@@ -39,11 +20,9 @@ function hashString(s: string): number {
 }
 
 /**
- * Pick a random background URL.
- * - Pass a `seed` (e.g. enemy ID, node ID) for a stable result across renders
- *   so the background doesn't flicker between updates of the same scene.
+ * Pick a stable polished cartoon stage background URL.
+ * - Pass a seed such as enemy ID or node ID so the background stays stable.
  * - Without a seed, picks uniformly at random each call.
- * - Returns `null` if the directory is empty (caller should fall back).
  */
 export function pickRandomBackground(seed?: string): string | null {
   if (BACKGROUNDS.length === 0) return null;

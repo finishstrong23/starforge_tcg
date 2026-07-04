@@ -4,7 +4,7 @@ import type { Faction, IntentType, NodeType, PotionCategory, Rift, StatusEffectT
 const assetUrl = (path: string): string => `${import.meta.env.BASE_URL}${path}`;
 
 export const factionArt: Record<Faction, string> = {
-  Pyroclast: assetUrl('art/dungeon/factions/pyroclast.png'),
+  Pyroclast: assetUrl('art/dungeon/factions/pyroclast.svg'),
   Cogsmiths: assetUrl('art/dungeon/factions/cogsmiths.png'),
   Luminar: assetUrl('art/dungeon/factions/luminar.png'),
   WarpRiders: assetUrl('art/dungeon/factions/warpriders.png'),
@@ -18,12 +18,14 @@ export const factionResourceArt: Record<Faction, string> = {
 };
 
 export const sceneArt = {
-  combat: assetUrl('art/dungeon/backgrounds/combat.png'),
-  shop: assetUrl('art/dungeon/backgrounds/shop.png'),
-  rest: assetUrl('art/dungeon/backgrounds/rest.png'),
-  boss: assetUrl('art/dungeon/backgrounds/boss.png'),
+  classSelect: assetUrl('art/dungeon/backgrounds/pyroclast_courtyard.png'),
+  combat: assetUrl('art/dungeon/backgrounds/combat_canyon_river_simple.png'),
+  map: assetUrl('art/dungeon/backgrounds/map_overworld.png'),
+  shop: assetUrl('art/dungeon/backgrounds/shop_bazaar_no_crystals.png'),
+  rest: assetUrl('art/dungeon/backgrounds/rest_greenhouse_no_crystals.png'),
+  boss: assetUrl('art/dungeon/backgrounds/boss.svg'),
   draft: assetUrl('art/dungeon/backgrounds/draft.svg'),
-  reward: assetUrl('art/dungeon/backgrounds/reward.svg'),
+  reward: assetUrl('art/dungeon/backgrounds/reward_treasury_simple.png'),
   blessing: assetUrl('art/dungeon/backgrounds/blessing.svg'),
   event: assetUrl('art/dungeon/backgrounds/event.svg'),
   victory: assetUrl('art/dungeon/backgrounds/victory.svg'),

@@ -36,10 +36,10 @@ export const FactionResourcePanel: React.FC<FactionResourcePanelProps> = ({ cs }
       title={panelTooltip}
       style={{
         position: 'absolute',
-        top: 88,
-        right: 18,
+        top: 'calc(88px + var(--app-safe-top))',
+        right: 'var(--dungeon-hud-edge)',
         zIndex: 4,
-        width: 230,
+        width: 'clamp(218px, 15vw, 250px)',
         padding: '10px 11px',
         background: 'rgba(7, 8, 20, 0.82)',
         border: `1px solid ${summary.accent}77`,

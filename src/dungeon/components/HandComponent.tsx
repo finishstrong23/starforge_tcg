@@ -60,14 +60,17 @@ export const HandComponent: React.FC<HandComponentProps> = ({
   previews = {},
 }) => {
   const showPiles = drawCount !== undefined || discardCount !== undefined;
+  const [previewCard, setPreviewCard] = React.useState<CardInstance | null>(null);
 
   const s: Record<string, React.CSSProperties> = {
     wrapper: {
       display: 'flex',
       alignItems: 'flex-end',
-      gap: 8,
+      gap: 10,
       padding: '4px 8px 0',
       width: '100%',
+      minWidth: 0,
+      position: 'relative',
     },
     label: {
       fontSize: 9,
@@ -87,10 +90,15 @@ export const HandComponent: React.FC<HandComponentProps> = ({
     },
     row: {
       display: 'flex',
-      gap: 6,
-      flexWrap: 'wrap',
-      justifyContent: 'center',
+      gap: 8,
+      flexWrap: 'nowrap',
+      justifyContent: 'flex-start',
       width: '100%',
+      overflowX: 'auto',
+      overflowY: 'visible',
+      padding: '4px 6px 10px',
+      scrollSnapType: 'x proximity',
+      WebkitOverflowScrolling: 'touch',
     },
     emptyState: {
       display: 'flex',
@@ -107,10 +115,33 @@ export const HandComponent: React.FC<HandComponentProps> = ({
       alignItems: 'flex-end',
       flexShrink: 0,
     },
+    previewPanel: {
+      position: 'absolute',
+      left: '50%',
+      bottom: 'calc(100% + 12px)',
+      transform: 'translateX(-50%)',
+      zIndex: 30,
+      padding: 8,
+      borderRadius: 10,
+      background: 'rgba(5, 5, 14, 0.92)',
+      border: '1px solid #343452',
+      boxShadow: '0 18px 48px rgba(0,0,0,0.65)',
+      pointerEvents: 'none',
+    },
   };
 
   return (
     <div style={s.wrapper}>
+      {previewCard && (
+        <div style={s.previewPanel}>
+          <CardComponent
+            card={previewCard}
+            size="draft"
+            previewLines={previews[previewCard.instanceId]}
+          />
+        </div>
+      )}
+
       {/* Draw pile (left) */}
       {showPiles && (
         <PileBadge label="Draw" count={drawCount ?? 0} color="#3b8fff" fallback="D" src={uiArt.drawPile} />
@@ -138,15 +169,23 @@ export const HandComponent: React.FC<HandComponentProps> = ({
               const affordable = getCardCost(card) <= energy;
               const isSelected = card.instanceId === selectedId;
               return (
-                <CardComponent
+                <div
                   key={card.instanceId}
-                  card={card}
-                  selectable={!disabled && affordable}
-                  selected={isSelected}
-                  unaffordable={!affordable}
-                  previewLines={previews[card.instanceId]}
-                  onClick={!disabled && affordable ? () => onCardSelect(card.instanceId) : undefined}
-                />
+                  onPointerEnter={() => setPreviewCard(card)}
+                  onPointerLeave={() => setPreviewCard((current) => current?.instanceId === card.instanceId ? null : current)}
+                  onFocus={() => setPreviewCard(card)}
+                  onBlur={() => setPreviewCard((current) => current?.instanceId === card.instanceId ? null : current)}
+                  style={{ scrollSnapAlign: 'center' }}
+                >
+                  <CardComponent
+                    card={card}
+                    selectable={!disabled && affordable}
+                    selected={isSelected}
+                    unaffordable={!affordable}
+                    previewLines={previews[card.instanceId]}
+                    onClick={!disabled && affordable ? () => onCardSelect(card.instanceId) : undefined}
+                  />
+                </div>
               );
             })}
           </div>

@@ -209,7 +209,7 @@ export const ShopView: React.FC = () => {
       padding: '1.5rem 1rem 2rem',
       minHeight: '100%',
       backgroundImage: [
-        'linear-gradient(180deg, rgba(7,7,18,0.70), rgba(7,7,18,0.93))',
+        'linear-gradient(180deg, rgba(7,7,18,0.22), rgba(7,7,18,0.68))',
         `url("${getDungeonSceneArt('shop')}")`,
       ].join(', '),
       backgroundSize: 'cover, cover',

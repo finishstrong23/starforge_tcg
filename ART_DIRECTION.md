@@ -2,45 +2,53 @@
 
 ## Goal
 
-STARFORGE Dungeon Run uses **Basic Token Style**: flat, bright, symbolic, thick-lined, and highly consistent. Art should feel like clean game-piece artwork, not fantasy splash art. It must be easy to understand in under one second on mobile.
+STARFORGE Dungeon Run uses a **Simple Cartoon Adventure** direction. It should be bright, fun, readable, and broad-audience, but it must not look elementary or like placeholder token art. The game should feel approachable without losing artistry: strong compositions, confident outlines, chunky shapes, restrained detail, tasteful texture, and a clean professional game-art finish.
 
 The style is original to STARFORGE. Do not copy, trace, remix, or imitate the exact art style, composition language, UI, characters, card frames, icons, relics, bosses, or rendered look of Slay the Spire, STS2, Magic, Hearthstone, Marvel Snap, or any other shipped game.
 
 ## Visual Pillars
 
-1. Basic before beautiful
-   - One symbolic subject.
-   - 3-5 major shapes.
-   - 3-5 main colors.
-   - Thick dark outline.
-   - One soft shadow color.
-   - One tiny highlight accent.
+1. Clear, not crude
+   - Large readable shapes.
+   - Confident cartoon outlines.
+   - Professional color design.
+   - Tasteful surface texture.
+   - Detail where it helps the mood, not everywhere.
 
-2. Token readability
-   - Every card, icon, enemy, and faction image should work as a small game token.
-   - Prefer masks, weapons, relics, emblems, creatures, and simple silhouettes over full character scenes.
-   - The player should understand the subject before noticing texture.
+2. Backgrounds set the tone
+   - Backgrounds are simple cartoon stage paintings, not flat SVG token panels and not over-rendered splash art.
+   - They should establish the world while staying quiet behind UI.
+   - The player should feel the place immediately: arena, shop, rest site, map route, boss gate.
 
 3. Consistent set language
-   - Use the same line thickness, flat shading, and simple shape density across all assets.
-   - Avoid one-off cinematic illustrations.
-   - Use simple colored backplates or flat scene panels to unify assets.
+   - Use the same outline confidence, rounded shape language, and color warmth across assets.
+   - Avoid one-off cinematic illustrations or over-rendered concept art.
+   - Avoid oversimplified doodles that look temporary.
 
-4. Friendly tactical fantasy
+4. Friendly tactical adventure
    - Bright and approachable.
-   - Dangerous through shape and color, not horror or realism.
-   - Sci-fantasy is allowed only as simple symbols: stars, cores, portals, gears, prisms, crystals.
+   - Threats should feel energetic and game-like, not horror, gore, gloom, or realism.
+   - Enemy portraits are not mascot-cute and not scary-realistic; they sit in the middle: expressive, readable, and fun.
+   - Sci-fantasy is allowed only as simple toy-like symbols: stars, cores, portals, gears, masks, banners, and carved stone motifs.
+   - The visual tone is closer to a cartoon arcade game than a dark fantasy board game.
 
 ## Strict Complexity Rules
 
 - No photorealism.
 - No cinematic lighting.
-- No complex rendering.
+- No photoreal complex rendering.
 - No dense sci-fi machinery.
 - No anime polish.
-- No painterly splash detail.
+- No cinematic splash-art clutter.
+- No over-rendered collectible-card splash look.
 - No tiny costume detail.
+- No crystals, gemstones, or glowing mineral shards as default environmental decoration.
 - No foggy atmosphere or black-on-black values.
+- No dark moody sci-fi.
+- No elementary SVG-icon backgrounds.
+- No stretched token art posing as background art.
+- No intimidating horror treatment.
+- No generic grim fantasy board-game tone.
 - No text, logos, watermarks, card frames, or UI baked into art.
 - If the image needs zooming to understand, reject it.
 
@@ -49,8 +57,8 @@ The style is original to STARFORGE. Do not copy, trace, remix, or imitate the ex
 - Use bright flat colors with clear contrast.
 - Use dark ink-like outlines around the main subject.
 - Keep shadows simple and graphic.
-- Use small highlight accents only on magic, metal edges, crystals, or eyes.
-- Backgrounds should be simple panels, not detailed environments.
+- Use small highlight accents only on magic, metal edges, water, fire, or eyes.
+- Backgrounds should be simple cartoon stage scenes, not detailed realism and not flat icon panels.
 - Each faction gets a readable color/shape kit.
 
 ## Faction Rules
@@ -60,28 +68,51 @@ The style is original to STARFORGE. Do not copy, trace, remix, or imitate the ex
 - Symbols: lava masks, hammers, flame triangles, cracked stone, ember blades.
 - Colors: orange, red, yellow, charcoal, warm cream.
 - Shapes: chunky triangles, cracked blocks, flame points.
-- Avoid: grim fire priests, smoky lava scenes, realistic armor.
+- Avoid: grim fire priests, smoky lava scenes, realistic armor, dark molten horror.
 
 ### Cogsmiths
 
 - Symbols: gears, wrenches, teal cores, simple drones, blocky robot heads.
 - Colors: brass, teal, cream, warm gray, dark brown outline.
 - Shapes: circles, bolts, blocks, simple tool silhouettes.
-- Avoid: dense machinery, realistic engines, detailed human portraits.
+- Avoid: dense machinery, realistic engines, detailed human portraits, hard sci-fi clutter.
 
 ### Luminar
 
-- Symbols: halos, stars, prisms, shields, simple robes, light circles.
+- Symbols: halos, stars, shields, sun disks, simple robes, light circles.
 - Colors: ivory, gold, sky blue, lavender, soft navy.
 - Shapes: circles, stars, diamonds, calm symmetry.
-- Avoid: angel cliches, ornate holy geometry, glowing overexposure.
+- Avoid: angel cliches, ornate holy geometry, glowing overexposure, solemn cathedral mood.
 
 ### Warp Riders / Phantom Corsairs
 
 - Symbols: portals, crescent blades, split masks, swooshes, phase tokens.
 - Colors: violet, cyan, magenta, bright blue, charcoal.
 - Shapes: arcs, crescents, split silhouettes, motion ribbons.
-- Avoid: cyberpunk neon, black-purple mud, realistic assassins.
+- Avoid: cyberpunk neon, black-purple mud, realistic assassins, edgy stealth tropes.
+
+## Enemy And Boss Rules
+
+- Enemies use the same arcade-token language as cards and map icons.
+- Normal enemies should look like fun obstacles with expressive faces, clear silhouettes, and one obvious threat idea.
+- Bosses can be larger and more imposing, but still clean, colorful, and readable.
+- Avoid horror teeth, gore, realistic anatomy, creepy faces, and overly dark palettes.
+- Enemy art should never look like a detailed RPG portrait; it should look like a playable game token.
+
+## Background Rules
+
+- Backgrounds are bright simple cartoon stage paintings with a few large props.
+- Keep the middle of the screen quiet enough for cards, enemies, health, intents, and tooltips.
+- Use thick outlined banners, stones, platforms, clouds, stalls, shrines, water, plants, bridges, cloth, pottery, and simple scenery with clear composition.
+- Use simple soft fills and light texture; avoid flat vector-looking panels for main backgrounds.
+- No dense painting, fog, dramatic realism, tiny environmental storytelling, elementary icon art, crystals, gemstones, or mineral-shard filler.
+
+## Font Rules
+
+- The game should feel like a cartoon arcade game: chunky, friendly, readable.
+- Titles can be playful and bold.
+- Body/card text must stay plain enough to read quickly.
+- Avoid thin sci-fi fonts, severe fantasy fonts, and tiny all-caps-only UI text for core gameplay.
 
 ## Asset Rules
 
@@ -97,9 +128,10 @@ The style is original to STARFORGE. Do not copy, trace, remix, or imitate the ex
 Use this exact style anchor for generation prompts:
 
 ```text
-Original STARFORGE Dungeon Run art, Basic Token Style.
-Clean flat-color fantasy game asset with thick dark outlines, chunky simple shapes, symbolic readable subject, minimal detail, limited palette, soft single shadow, tiny highlight accents, bright friendly colors, consistent mobile-readable design.
-No realism, no cinematic lighting, no complex rendering, no dense sci-fi detail, no anime polish, no text, no logos, no UI, no imitation of any specific game.
+Original STARFORGE Dungeon Run art, Simple Cartoon Adventure Style.
+Bright clean cartoon game art with confident dark outlines, appealing chunky shapes, restrained detail, simple soft color fills, light texture, clean readable composition, and a broad-audience adventure tone.
+Fun and accessible, but not elementary; simple enough to read quickly, artful enough to feel like a real game.
+No crystals, no gemstones, no glowing mineral shards, no photorealism, no cinematic clutter, no dense rendering, no dark moody palette, no anime polish, no flat placeholder SVG look, no text, no logos, no UI, no imitation of any specific game.
 ```
 
 ## Copyright Boundaries

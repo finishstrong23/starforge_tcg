@@ -1,6 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <rect width="128" height="128" rx="28" fill="#8ee8a4"/>
-  <path d="M35 90h58" stroke="#231b1d" stroke-width="9" stroke-linecap="round"/>
-  <path d="M44 82c-5-19 20-25 20-49 17 20 30 30 18 49-8 13-30 13-38 0Z" fill="#ffcf5a" stroke="#231b1d" stroke-width="8" stroke-linejoin="round"/>
-  <path d="M56 85c-4-11 9-17 10-29 10 12 13 20 6 29-4 5-12 5-16 0Z" fill="#ff5a2e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-hidden="true">
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="0" flood-color="#000000" flood-opacity=".18"/>
+    </filter>
+  </defs>
+  <circle cx="64" cy="64" r="56" fill="#63d471" stroke="#17131d" stroke-width="8"/>
+  <circle cx="47" cy="42" r="13" fill="#ffffff" opacity=".35"/>
+  <path d="M64 30l22 43H42z" fill="#ff6b35" stroke="#17131d" stroke-width="8"/><path d="M34 92h60" stroke="#17131d" stroke-width="10" stroke-linecap="round"/><path d="M48 79l-12 21M80 79l12 21" stroke="#17131d" stroke-width="8" stroke-linecap="round"/>
+
 </svg>

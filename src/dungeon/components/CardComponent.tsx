@@ -257,16 +257,17 @@ export const CardComponent: React.FC<CardComponentProps> = ({
   const stats = getCardStats(card);
 
   const isDraftSize = !compact && size === 'draft';
-  const w = compact ? 64 : isDraftSize ? 158 : 108;
-  const h = compact ? 88 : isDraftSize ? 226 : 155;
-  const artSize = compact ? 24 : isDraftSize ? 74 : 48;
+  const w = compact ? 'var(--dungeon-card-compact-w)' : isDraftSize ? 'var(--dungeon-card-draft-w)' : 'var(--dungeon-card-w)';
+  const h = compact ? 'var(--dungeon-card-compact-h)' : isDraftSize ? 'var(--dungeon-card-draft-h)' : 'var(--dungeon-card-h)';
+  const artSize = compact ? 'var(--dungeon-card-compact-art)' : isDraftSize ? 'var(--dungeon-card-draft-art)' : 'var(--dungeon-card-art)';
+  const fallbackArtSize = compact ? 26 : isDraftSize ? 84 : 58;
 
   const styles: Record<string, React.CSSProperties> = {
     card: {
       position: 'relative',
       width: w,
       height: h,
-      borderRadius: compact ? 4 : 6,
+      borderRadius: compact ? 5 : 7,
       border: selected
         ? `2px solid ${accent}`
         : targetable
@@ -292,14 +293,14 @@ export const CardComponent: React.FC<CardComponentProps> = ({
     },
     costBadge: {
       position: 'absolute',
-      top: compact ? 2 : 4,
-      left: compact ? 2 : 4,
-      width: compact ? 16 : isDraftSize ? 24 : 22,
-      height: compact ? 16 : isDraftSize ? 24 : 22,
+      top: compact ? 3 : 5,
+      left: compact ? 3 : 5,
+      width: compact ? 18 : isDraftSize ? 28 : 26,
+      height: compact ? 18 : isDraftSize ? 28 : 26,
       borderRadius: '50%',
       background: unaffordable ? '#222' : accent,
       color: unaffordable ? '#555' : '#000',
-      fontSize: compact ? 9 : isDraftSize ? 14 : 12,
+      fontSize: compact ? 10 : isDraftSize ? 15 : 14,
       fontWeight: 700,
       display: 'flex',
       alignItems: 'center',
@@ -308,9 +309,9 @@ export const CardComponent: React.FC<CardComponentProps> = ({
     },
     typeTag: {
       position: 'absolute',
-      top: compact ? 2 : 4,
-      right: compact ? 2 : 4,
-      fontSize: compact ? 7 : isDraftSize ? 10 : 8,
+      top: compact ? 3 : 6,
+      right: compact ? 3 : 6,
+      fontSize: compact ? 8 : isDraftSize ? 11 : 10,
       letterSpacing: '0.06em',
       color: rarityColor,
       opacity: 0.85,
@@ -320,12 +321,12 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      padding: compact ? '18px 3px 3px' : isDraftSize ? '32px 10px 8px' : '26px 5px 4px',
-      gap: compact ? 1 : isDraftSize ? 5 : 2,
+      padding: compact ? '22px 4px 4px' : isDraftSize ? '36px 12px 10px' : '34px 8px 7px',
+      gap: compact ? 2 : isDraftSize ? 6 : 4,
       overflow: 'hidden',
     },
     name: {
-      fontSize: compact ? 7 : isDraftSize ? 12 : 9,
+      fontSize: compact ? 8 : isDraftSize ? 15 : 13,
       fontWeight: 700,
       color: '#fff',
       letterSpacing: '0.04em',
@@ -335,24 +336,24 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       whiteSpace: 'nowrap',
     },
     artBox: {
-      flex: compact ? 0 : isDraftSize ? '0 0 74px' : 1,
+      flex: compact ? 0 : isDraftSize ? '0 0 var(--dungeon-card-draft-art)' : 1,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       fontSize: compact ? 18 : isDraftSize ? 36 : 28,
       lineHeight: 1,
       overflow: 'hidden',
-      height: compact ? 22 : isDraftSize ? 74 : undefined,
+      height: compact ? 'calc(var(--dungeon-card-compact-art) * 0.92)' : isDraftSize ? 'var(--dungeon-card-draft-art)' : undefined,
       borderRadius: compact ? 3 : 5,
       background: compact ? 'transparent' : 'rgba(244, 236, 216, 0.08)',
     },
     text: {
-      fontSize: compact ? 0 : isDraftSize ? 11 : 7,
+      fontSize: compact ? 0 : isDraftSize ? 13 : 11,
       color: '#d6d6df',
-      lineHeight: isDraftSize ? 1.38 : 1.25,
+      lineHeight: isDraftSize ? 1.38 : 1.34,
       overflow: 'hidden',
       display: compact ? 'none' : '-webkit-box',
-      WebkitLineClamp: previewLines && previewLines.length > 0 ? 2 : isDraftSize ? 4 : 3,
+      WebkitLineClamp: previewLines && previewLines.length > 0 ? 2 : isDraftSize ? 4 : 4,
       WebkitBoxOrient: 'vertical',
     },
     preview: {
@@ -362,7 +363,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       marginTop: 3,
     },
     previewPill: {
-      fontSize: isDraftSize ? 8 : 6,
+      fontSize: isDraftSize ? 9 : 8,
       padding: '1px 4px',
       border: '1px solid #67e8aa66',
       borderRadius: 3,
@@ -378,7 +379,7 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       marginTop: 2,
     },
     kwBadge: {
-      fontSize: isDraftSize ? 8 : 6,
+      fontSize: isDraftSize ? 9 : 8,
       padding: '1px 3px',
       border: `1px solid ${accent}55`,
       borderRadius: 2,
@@ -390,12 +391,12 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       display: 'flex',
       justifyContent: 'space-between',
       padding: compact ? '0 2px 2px' : isDraftSize ? '0 8px 8px' : '0 4px 4px',
-      fontSize: compact ? 8 : isDraftSize ? 12 : 9,
+      fontSize: compact ? 9 : isDraftSize ? 14 : 12,
       fontWeight: 700,
     },
     statusRow: {
       position: 'absolute',
-      bottom: compact ? 20 : 28,
+      bottom: compact ? 22 : 32,
       left: 0,
       right: 0,
       display: 'flex',
@@ -573,11 +574,11 @@ export const CardComponent: React.FC<CardComponentProps> = ({
         <div style={styles.artBox}>
           <TokenArt
             src={getCardArt(card.id)}
-            fallback={<CardFallbackToken card={card} size={artSize} compact={compact} />}
+            fallback={<CardFallbackToken card={card} size={fallbackArtSize} compact={compact} />}
             alt=""
             style={{
               width: artSize,
-              height: compact ? 22 : artSize,
+              height: compact ? 'calc(var(--dungeon-card-compact-art) * 0.92)' : artSize,
             }}
             fallbackStyle={{ lineHeight: 0 }}
           />

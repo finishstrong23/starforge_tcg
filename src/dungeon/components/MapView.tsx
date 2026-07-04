@@ -3,6 +3,7 @@ import type { ActMap, MapNode, NodeType } from '../types';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { getAvailableNodes } from '../engine/mapgen';
 import { getMapNodeArt } from '../assets/artRegistry';
+import { getDungeonSceneArt } from '../assets/basicTokenArt';
 
 // ─── Layout constants ─────────────────────────────────────────────────────────
 
@@ -217,9 +218,17 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
       flexDirection: 'column',
       alignItems: 'stretch',
       width: '100%',
+      minHeight: '100vh',
       overflowY: 'auto',
       overflowX: 'auto',
-      padding: '0.25rem 0 1rem',
+      padding: 'calc(1.25rem + var(--app-safe-top)) 0 calc(4rem + var(--app-safe-bottom))',
+      backgroundImage: [
+        'linear-gradient(180deg, rgba(4, 5, 14, 0.18), rgba(4, 5, 14, 0.58))',
+        `url("${getDungeonSceneArt('map')}")`,
+      ].join(', '),
+      backgroundSize: 'cover, cover',
+      backgroundPosition: 'center, center',
+      backgroundRepeat: 'no-repeat',
     },
     actLabel: {
           fontSize: '0.7rem',
@@ -287,7 +296,7 @@ export const MapView: React.FC<MapViewProps> = ({ map: mapProp }) => {
         </defs>
 
         {/* ── Background ──────────────────────────────────────────────────── */}
-        <rect width={MAP_W} height={MAP_H} fill="#08081a" rx="8" />
+        <rect width={MAP_W} height={MAP_H} fill="#08081a" opacity="0.48" rx="8" />
 
         {/* Subtle lane guide lines */}
         {LANE_Y.map((cy) => (

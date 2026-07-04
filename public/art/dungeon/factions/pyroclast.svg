@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 576" role="img" aria-hidden="true">
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="0" flood-color="#000000" flood-opacity=".18"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="576" rx="26" fill="#ffe3a7"/>
+  <circle cx="208" cy="142" r="84" fill="#ffffff" opacity=".38"/>
+  <path d="M0 424c164-82 314-72 454 8 167 96 360 92 570-32v176H0z" fill="#e7b86f" opacity=".78"/>
+  <g filter="url(#softShadow)">
+    <path d="M478 66l92 162 86-88 34 164 102 42-82 62 16 118-138-48-92 68-92-68-138 48 16-118-82-62 102-42 34-164 86 88z" fill="#ff6b35" stroke="#17131d" stroke-width="24" stroke-linejoin="round"/>
+    <path d="M496 132l52 102 56-46 18 96 72 34-62 48 10 78-78-28-68 52-68-52-78 28 10-78-62-48 72-34 18-96 56 46z" fill="#ffd15a" stroke="#17131d" stroke-width="18" stroke-linejoin="round"/>
+    <path d="M332 236l-88-86 62-62 116 124" fill="#544942" stroke="#17131d" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M250 96l92 92M286 62l92 92" stroke="#17131d" stroke-width="22" stroke-linecap="round"/>
+    <path d="M692 244h120l38 132-80 96H632l-80-96 38-132z" fill="#4b4744" stroke="#17131d" stroke-width="24" stroke-linejoin="round"/>
+    <path d="M640 288h124l24 76-58 54h-56l-58-54z" fill="#fff0ba" stroke="#17131d" stroke-width="18" stroke-linejoin="round"/>
+    <path d="M702 294l32 70h-64z" fill="#ff6b35" stroke="#17131d" stroke-width="14" stroke-linejoin="round"/>
+    <circle cx="256" cy="382" r="34" fill="#ff6b35" stroke="#17131d" stroke-width="14"/>
+    <circle cx="845" cy="194" r="26" fill="#ffd15a" stroke="#17131d" stroke-width="12"/>
+    <path d="M164 454l112-34M812 494l96-56" stroke="#17131d" stroke-width="20" stroke-linecap="round"/>
+  </g>
+
+</svg>
