@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useDungeonRun } from '../context/DungeonRunContext';
+import { PotionPickupModal } from './PotionPickupModal';
 import { CARD_POOL } from '../data/cards';
 import { createCurseInstance } from '../data/curses';
 import { getPotionDef } from '../data/potions';
@@ -8,7 +9,7 @@ import { getRunModifierDef } from '../data/runModifiers';
 import { createCardInstance } from '../engine/draft';
 import { choicesForFaction, pickEventForNode } from '../engine/eventSelection';
 import { logEvent } from '../engine/telemetry';
-import type { DungeonEventChoiceDefinition } from '../types';
+import type { DungeonEventChoiceDefinition, PotionInstance } from '../types';
 import { getDungeonSceneArt } from '../assets/basicTokenArt';
 import { MVP_FACTION } from '../config/mvp';
 
@@ -27,9 +28,13 @@ export const EventView: React.FC = () => {
     addRunModifier,
     addRelic,
     addPotion,
+    discardPotion,
     returnToMap,
   } = useDungeonRun();
   const [picked, setPicked] = useState<string | null>(null);
+  // Potion granted by an event choice while the inventory is full — the
+  // player picks a slot to swap (or lets it go) instead of losing it silently.
+  const [overflowPotion, setOverflowPotion] = useState<PotionInstance | null>(null);
   const currentAct = runState?.currentAct ?? 1;
   const currentMap = runState?.actMaps[currentAct - 1];
   const currentNodeId = currentMap?.currentNodeId ?? 'event';
@@ -71,7 +76,10 @@ export const EventView: React.FC = () => {
         if (relic) addRelic(relic);
       } else if (effect.type === 'add_potion') {
         const potion = getPotionDef(effect.potionId);
-        if (potion) addPotion({ definitionId: potion.id });
+        if (potion) {
+          const ok = addPotion({ definitionId: potion.id });
+          if (!ok) setOverflowPotion({ definitionId: potion.id });
+        }
       } else if (effect.type === 'add_curse') {
         const curse = createCurseInstance(effect.curseId, draftFaction ?? runState.deck[0]?.faction ?? MVP_FACTION);
         if (curse) addCardToDeck(curse);
@@ -203,6 +211,20 @@ export const EventView: React.FC = () => {
         <button type="button" style={s.continueButton} onClick={returnToMap}>
           Return to Map
         </button>
+      )}
+
+      {/* Full-inventory swap picker for event-granted potions */}
+      {overflowPotion && (
+        <PotionPickupModal
+          incoming={overflowPotion}
+          currentSlots={runState.potions}
+          onSwap={(slotIndex) => {
+            discardPotion(slotIndex);
+            addPotion(overflowPotion, slotIndex);
+            setOverflowPotion(null);
+          }}
+          onDiscardIncoming={() => setOverflowPotion(null)}
+        />
       )}
     </div>
   );

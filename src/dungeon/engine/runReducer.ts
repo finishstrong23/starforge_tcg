@@ -379,12 +379,23 @@ export function reducer(state: ContextState, action: Action): ContextState {
     }
     case 'DAMAGE_PLAYER': {
       if (!state.run) return state;
+      const nextHealth = Math.max(0, state.run.currentHealth - action.amount);
+      // Non-combat damage (events) can kill: dropping to 0 ends the run
+      // instead of stranding a 0-HP player on the map.
+      if (nextHealth <= 0) {
+        return {
+          ...state,
+          run: {
+            ...state.run,
+            currentHealth: 0,
+            combatState: null,
+            phase: 'run_end_loss',
+          },
+        };
+      }
       return {
         ...state,
-        run: {
-          ...state.run,
-          currentHealth: Math.max(0, state.run.currentHealth - action.amount),
-        },
+        run: { ...state.run, currentHealth: nextHealth },
       };
     }
     case 'INCREASE_MAX_HEALTH': {

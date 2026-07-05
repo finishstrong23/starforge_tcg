@@ -196,6 +196,16 @@ const ACT3_STANDARD: EnemyDefinition[] = [
       { type: 'buff', value: 4, description: 'Harmonize - gain 4 Strength' },
     ],
   },
+  {
+    id: 'E3-06', name: 'Chrono Leech', lore: 'It drinks minutes. Victims age backwards into indecision.',
+    maxHealth: 52, attack: 13, art: 'LCH', acts: [3], isElite: false, isBoss: false,
+    intents: [
+      { type: 'attack', value: 13, description: 'Latch - deal 13' },
+      { type: 'special', value: 6, description: 'Drink the hour - deal 6, skip your draw' },
+      { type: 'attack', value: 7, description: 'Twin bite - deal 7 twice' },
+      { type: 'debuff', value: 3, description: 'Temporal drag - apply 3 Weak' },
+    ],
+  },
 ];
 
 // ─── Elites (4 elites across acts) ───────────────────────────────────────────
