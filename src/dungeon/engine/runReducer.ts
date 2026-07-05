@@ -297,6 +297,9 @@ export function reducer(state: ContextState, action: Action): ContextState {
           runForTransition = consumeNextCombatModifiers(runForTransition);
           combatState = applyRelicsToCombat('combat_start', state.run.relics, combatState, {
             combatIndex: state.run.runStats.totalCombats,
+            // Seeded so combat_start relic effects (Stasis Cube's card pick,
+            // Navigator's Bone reroll, ...) are reproducible per node.
+            rng: createSeededRng(runSeed, 'relicfx', state.run.currentAct, node.id),
           });
           logEvent('combat_start', {
             faction: state.draftFaction,

@@ -947,7 +947,7 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               style={s.menuDanger}
               onClick={restartRun}
             >
-              Restart Fresh Pyroclast Run
+              Restart Fresh Run
             </button>
             <button
               type="button"
