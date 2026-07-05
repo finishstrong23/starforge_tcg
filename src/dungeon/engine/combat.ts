@@ -1,4 +1,5 @@
-import type { CardInstance, CombatPhase, CombatState, EffectDefinition, EnemyDefinition, RelicDefinition, Rift, StatusEffect, StatusEffectType } from '../types';
+import type { CardInstance, CombatPhase, CombatState, EffectDefinition, EnemyDefinition, RelicDefinition, Rift, RunModifierDefinition, StatusEffect, StatusEffectType } from '../types';
+import { findEnemySummonInText } from '../data/enemies';
 import { getCardStats, getCardText, getCardCost, setActiveCardText, setActiveCardCost } from './cardStats';
 import { applyStructuredCardEffects, hasStructuredEffects } from './structuredEffects';
 import { MVP_FACTION } from '../config/mvp';
@@ -279,6 +280,70 @@ export function applyShieldedDamage(shield: number, health: number, damage: numb
   };
 }
 
+// ─── Enemy-side damage routing ──────────────────────────────────────────────
+
+function livingPlayerGuardian(s: CombatState): CardInstance | undefined {
+  return s.playerBoard.find((m) => m.keywords.includes('GUARDIAN') && (m.currentHealth ?? 0) > 0);
+}
+
+/**
+ * Enemy single-target damage against the player's side. A living GUARDIAN
+ * minion intercepts the hit (the taunt mirror of the player-side rule);
+ * otherwise it lands on the player through block.
+ */
+function damagePlayerSide(
+  state: CombatState,
+  raw: number,
+  attackerEffects: StatusEffect[],
+  source: string,
+): { state: CombatState; dealt: number } {
+  let s = state;
+  const guardian = livingPlayerGuardian(s);
+  if (guardian) {
+    const dmg = calcDamage(raw, attackerEffects, guardian.statusEffects);
+    s = {
+      ...s,
+      playerBoard: s.playerBoard.map((m) =>
+        m.instanceId === guardian.instanceId
+          ? { ...m, currentHealth: Math.max(0, (m.currentHealth ?? 0) - dmg) }
+          : m,
+      ),
+    };
+    s = log(s, `${source} hits ${guardian.name} (GUARDIAN) for ${dmg}`);
+    s = processDeaths(s);
+    return { state: s, dealt: dmg };
+  }
+  const dmg = calcDamage(raw, attackerEffects, s.playerStatusEffects);
+  const result = applyShieldedDamage(s.playerShield, s.playerHealth, dmg);
+  return { state: { ...s, playerHealth: result.health, playerShield: result.shield }, dealt: dmg };
+}
+
+/** Enemy AoE ("deal N to all"): hits the player through block AND every player minion. */
+function damageAllPlayerSide(
+  state: CombatState,
+  raw: number,
+  attackerEffects: StatusEffect[],
+  source: string,
+): CombatState {
+  let s = state;
+  const playerDmg = calcDamage(raw, attackerEffects, s.playerStatusEffects);
+  const result = applyShieldedDamage(s.playerShield, s.playerHealth, playerDmg);
+  s = { ...s, playerHealth: result.health, playerShield: result.shield };
+  for (const m of s.playerBoard) {
+    const dmg = calcDamage(raw, attackerEffects, m.statusEffects);
+    s = {
+      ...s,
+      playerBoard: s.playerBoard.map((b) =>
+        b.instanceId === m.instanceId
+          ? { ...b, currentHealth: Math.max(0, (b.currentHealth ?? 0) - dmg) }
+          : b,
+      ),
+    };
+  }
+  s = log(s, `${source} hits everything for ${playerDmg}`);
+  return processDeaths(s);
+}
+
 // ─── initCombat ──────────────────────────────────────────────────────────────
 
 export function initCombat(
@@ -367,10 +432,16 @@ export function drawCards(state: CombatState, count: number): CombatState {
   return withCombatRng(state, (wrapped) => drawCardsInner(wrapped, count));
 }
 
+const MAX_HAND_SIZE = 10;
+
 function drawCardsInner(state: CombatState, count: number): CombatState {
   let s = { ...state };
   let drawn = 0;
   while (drawn < count) {
+    if (s.hand.length >= MAX_HAND_SIZE) {
+      s = log(s, `Hand is full (${MAX_HAND_SIZE}) — remaining draws are lost`);
+      break;
+    }
     if (s.drawPile.length === 0) {
       if (s.discardPile.length === 0) break;
       s = { ...s, drawPile: shuffleDeck(s.discardPile), discardPile: [] };
@@ -1194,8 +1265,14 @@ function endPlayerTurnInner(state: CombatState, relics: RelicDefinition[]): Comb
   }
   const poisonDmg = getStack(s.playerStatusEffects, 'poison');
   if (poisonDmg > 0) {
+    // STS semantics: poison deals its stacks, then decays by 1.
     s = { ...s, playerHealth: Math.max(0, s.playerHealth - poisonDmg) };
-    s = { ...s, playerStatusEffects: addEffect(removeEffect(s.playerStatusEffects, 'poison'), 'poison', poisonDmg + 1) };
+    s = {
+      ...s,
+      playerStatusEffects: s.playerStatusEffects
+        .map((e) => e.type === 'poison' ? { ...e, stacks: e.stacks - 1 } : e)
+        .filter((e) => e.stacks > 0),
+    };
     s = log(s, `Poison deals ${poisonDmg} damage`);
   }
 
@@ -1239,8 +1316,9 @@ function endPlayerTurnInner(state: CombatState, relics: RelicDefinition[]): Comb
 
   // Reset minions and energy. Shield is cleared at the START of the player's next turn
   // (inside executeEnemyTurn, before drawing), so it can still absorb the enemy's attack.
-  // Also shift Flux state on every Flux card still in the player's draw pile / discard
-  // so the next turn's draws feel "shifted" (cards in hand are discarded above).
+  // Also shift Flux state on every Flux card — draw pile, discard pile, AND the
+  // held hand (the hand stays visible through the enemy turn and is discarded
+  // at the start of the next player turn, so it must rotate with the rest).
   const rotateFlux = <T extends CardInstance>(c: T): T =>
     isFluxCard(c) && c.fluxState ? { ...c, fluxState: shiftFlux(c.fluxState) } : c;
   s = {
@@ -1249,7 +1327,12 @@ function endPlayerTurnInner(state: CombatState, relics: RelicDefinition[]): Comb
     playerEnergy: s.playerMaxEnergy,
     drawPile: s.drawPile.map(rotateFlux),
     discardPile: s.discardPile.map(rotateFlux),
+    hand: s.hand.map(rotateFlux),
   };
+
+  // Tick player status durations (Weak/Vulnerable applied by enemies expire
+  // after their duration in rounds; burn/poison manage their own stacks above).
+  s = { ...s, playerStatusEffects: tickEffects(s.playerStatusEffects) };
 
   return checkCombatEnd(s);
 }
@@ -1277,62 +1360,170 @@ function executeEnemyTurnInner(state: CombatState): CombatState {
       s = log(s, `Aegis residue grants ${queued} Block`);
       s = { ...s, pendingTurnStartBlock: 0 };
     }
-    return s;
+    // Chaos-rift damage above can finish the enemy — don't strand a 0-HP foe.
+    return checkCombatEnd(s);
   }
 
   const { enemy } = s;
   const intent = enemy.intents[enemy.intentIndex % enemy.intents.length];
+  const stunned = (enemy.stunnedTurns ?? 0) > 0;
 
-  s = log(s, `${enemy.name}: ${intent.description}`);
+  if (stunned) {
+    // Stunned: the whole enemy side loses this action. The intent does NOT
+    // advance, so the telegraph the player sees stays truthful.
+    s = log(s, `${enemy.name} is stunned and cannot act`);
+    s = { ...s, enemy: { ...s.enemy, stunnedTurns: (s.enemy.stunnedTurns ?? 1) - 1 } };
+  } else {
+    s = log(s, `${enemy.name}: ${intent.description}`);
 
-  switch (intent.type) {
-    case 'attack': {
-      const value = intent.value ?? enemy.attack;
-      const repeated = parseRepeatedEnemyAttack(intent.description, value);
-      let totalDamage = 0;
-      for (let i = 0; i < repeated.hits; i++) {
-        const dmg = calcDamage(repeated.damage, enemy.statusEffects, s.playerStatusEffects);
-        const result = applyShieldedDamage(s.playerShield, s.playerHealth, dmg);
-        s = { ...s, playerHealth: result.health, playerShield: result.shield };
-        totalDamage += dmg;
-        if (s.playerHealth <= 0) break;
+    switch (intent.type) {
+      case 'attack': {
+        const value = intent.value ?? enemy.attack;
+        if (/to all/i.test(intent.description)) {
+          // AoE ("Quake - deal 8 to all"): hits player and player minions.
+          s = damageAllPlayerSide(s, value, enemy.statusEffects, enemy.name);
+          break;
+        }
+        const repeated = parseRepeatedEnemyAttack(intent.description, value);
+        let totalDamage = 0;
+        for (let i = 0; i < repeated.hits; i++) {
+          const hit = damagePlayerSide(s, repeated.damage, s.enemy.statusEffects, enemy.name);
+          s = hit.state;
+          totalDamage += hit.dealt;
+          if (s.playerHealth <= 0) break;
+        }
+        s = repeated.hits > 1
+          ? log(s, `${enemy.name} hits ${repeated.hits}x for ${totalDamage} total`)
+          : log(s, `${enemy.name} attacks for ${totalDamage}`);
+        break;
       }
-      s = repeated.hits > 1
-        ? log(s, `${enemy.name} hits ${repeated.hits}x for ${totalDamage} total`)
-        : log(s, `${enemy.name} attacks for ${totalDamage}`);
-      break;
-    }
-    case 'defend': {
-      const shield = intent.value ?? 8;
-      s = { ...s, enemy: { ...s.enemy, currentShield: (s.enemy.currentShield ?? 0) + shield } };
-      s = log(s, `${enemy.name} gains ${shield} Shield`);
-      break;
-    }
-    case 'buff': {
-      s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'strength', intent.value ?? 2) } };
-      s = log(s, `${enemy.name} gains Strength`);
-      break;
-    }
-    case 'debuff': {
-      s = { ...s, playerStatusEffects: addEffect(s.playerStatusEffects, 'weak', intent.value ?? 2, 2) };
-      s = log(s, `${enemy.name} applies Weak`);
-      break;
-    }
-    case 'summon': {
-      s = log(s, `${enemy.name} summons a minion`);
-      break;
-    }
-    case 'special': {
-      s = log(s, `${enemy.name} uses a special ability`);
-      // Apply 5 damage as a generic special
-      if (intent.value) {
-        const dmg = intent.value;
-        const result = applyShieldedDamage(s.playerShield, s.playerHealth, dmg);
-        s = { ...s, playerHealth: result.health, playerShield: result.shield };
+      case 'defend': {
+        const shield = intent.value ?? 8;
+        s = { ...s, enemy: { ...s.enemy, currentShield: (s.enemy.currentShield ?? 0) + shield } };
+        s = log(s, `${enemy.name} gains ${shield} Shield`);
+        break;
       }
-      break;
+      case 'buff': {
+        s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'strength', intent.value ?? 2) } };
+        s = log(s, `${enemy.name} gains Strength`);
+        break;
+      }
+      case 'debuff': {
+        // Parse every "<N> Weak" / "<N> Vulnerable" clause — intents like
+        // "apply 2 Weak, 2 Vulnerable" and "5 Vulnerable, 5 Weak" apply both.
+        const clauses: Array<{ stacks: number; status: StatusEffectType }> =
+          [...intent.description.matchAll(/(\d+)\s*(weak|vulnerable)/gi)]
+            .map((m) => ({ stacks: parseInt(m[1]), status: m[2].toLowerCase() as StatusEffectType }));
+        if (clauses.length === 0) {
+          clauses.push({ stacks: intent.value ?? 2, status: 'weak' });
+        }
+        for (const clause of clauses) {
+          // duration = stacks → "apply 3 Weak" reads as 3 turns of Weak.
+          s = { ...s, playerStatusEffects: addEffect(s.playerStatusEffects, clause.status, clause.stacks, clause.stacks) };
+          s = log(s, `${enemy.name} applies ${clause.stacks} ${clause.status === 'weak' ? 'Weak' : 'Vulnerable'}`);
+        }
+        break;
+      }
+      case 'summon': {
+        const def = findEnemySummonInText(intent.description);
+        const count = parseInt(intent.description.match(/(\d+)/)?.[1] ?? '1');
+        if (!def) {
+          s = log(s, `${enemy.name} tries to summon, but nothing answers`);
+          break;
+        }
+        for (let i = 0; i < count; i++) {
+          if (s.enemyBoard.length >= 4) {
+            s = log(s, `${enemy.name} cannot summon more (board full)`);
+            break;
+          }
+          const minion: CardInstance = {
+            id: `enemy-summon-${def.name.toLowerCase().replace(/\s+/g, '-')}`,
+            instanceId: `enemy-summon-${uid()}`,
+            name: def.name,
+            faction: enemy.name.includes('Forge') ? 'Cogsmiths' : 'WarpRiders',
+            type: 'Minion',
+            cost: 0,
+            attack: def.attack,
+            health: def.health,
+            currentHealth: def.health,
+            keywords: def.guardian ? ['GUARDIAN'] : [],
+            cardText: `Enemy summon. Attacks for ${def.attack} each enemy turn.`,
+            rarity: 'Common',
+            complexityTier: 1,
+            upgraded: false,
+            statusEffects: [],
+            hasAttacked: true, // acts starting next enemy turn
+            summonTurnsLeft: def.turns,
+          };
+          s = { ...s, enemyBoard: [...s.enemyBoard, minion] };
+        }
+        s = log(s, `${enemy.name} summons ${count > 1 ? `${count} ${def.name}s` : `a ${def.name}`}`);
+        break;
+      }
+      case 'special': {
+        const desc = intent.description.toLowerCase();
+        if (intent.value) {
+          const hit = damagePlayerSide(s, intent.value, s.enemy.statusEffects, enemy.name);
+          s = hit.state;
+          s = log(s, `${enemy.name} deals ${hit.dealt}`);
+        }
+        if (/steal a card/.test(desc) && s.hand.length > 0) {
+          const idx = Math.floor(combatRandom() * s.hand.length);
+          const stolen = s.hand[idx];
+          s = {
+            ...s,
+            hand: s.hand.filter((_, i) => i !== idx),
+            stolenCards: [...(s.stolenCards ?? []), stolen],
+          };
+          s = log(s, `${enemy.name} swallows ${stolen.name} — gone for this combat`);
+        }
+        if (/skip your draw/.test(desc)) {
+          s = { ...s, skipNextDraw: true };
+          s = log(s, `Chrono-lock: you will draw no cards next turn`);
+        }
+        if (/shuffle hand/.test(desc) && s.hand.length > 0) {
+          const pulled = s.hand.length;
+          s = {
+            ...s,
+            drawPile: shuffleDeck([...s.drawPile, ...s.hand]),
+            hand: [],
+          };
+          s = log(s, `${pulled} card${pulled === 1 ? '' : 's'} pulled from your hand into the draw pile`);
+        }
+        if (/skip your turn/.test(desc)) {
+          s = { ...s, haltPlayerNextTurn: true };
+          s = log(s, `Chrono-halt: time freezes around you`);
+        }
+        break;
+      }
+    }
+
+    // Attack riders ("deal 15, self-stun"): the enemy stuns itself after acting.
+    if (/self-stun/i.test(intent.description)) {
+      s = { ...s, enemy: { ...s.enemy, stunnedTurns: (s.enemy.stunnedTurns ?? 0) + 1 } };
+      s = log(s, `${enemy.name} is stunned by the recoil`);
+    }
+
+    // Enemy minions attack after the main action.
+    for (const m of s.enemyBoard) {
+      if (s.playerHealth <= 0) break;
+      const hit = damagePlayerSide(s, getCardStats(m).attack ?? 0, m.statusEffects, m.name);
+      s = hit.state;
+      s = log(s, `${m.name} attacks for ${hit.dealt}`);
     }
   }
+
+  // Tick enemy summon lifetimes. Expired summons dissipate.
+  const remainingSummons = s.enemyBoard
+    .map((m) => (m.summonTurnsLeft === undefined || m.summonTurnsLeft < 0)
+      ? m
+      : { ...m, summonTurnsLeft: m.summonTurnsLeft - 1 })
+    .filter((m) => {
+      if (m.summonTurnsLeft === undefined || m.summonTurnsLeft !== 0) return true;
+      s = log(s, `${m.name} dissipates`);
+      return false;
+    });
+  s = { ...s, enemyBoard: remainingSummons };
 
   // Tick enemy status effects
   const enemyBurnDmg = getStack(s.enemy.statusEffects, 'burn');
@@ -1343,16 +1534,20 @@ function executeEnemyTurnInner(state: CombatState): CombatState {
   }
   const enemyPoisonDmg = getStack(s.enemy.statusEffects, 'poison');
   if (enemyPoisonDmg > 0) {
+    // STS semantics: poison deals its stacks, then decays by 1.
     s = { ...s, enemy: { ...s.enemy, currentHealth: Math.max(0, s.enemy.currentHealth - enemyPoisonDmg) } };
+    s = { ...s, enemy: { ...s.enemy, statusEffects: s.enemy.statusEffects.map((e) => e.type === 'poison' ? { ...e, stacks: e.stacks - 1 } : e).filter((e) => e.stacks > 0) } };
     s = log(s, `Poison deals ${enemyPoisonDmg} to ${enemy.name}`);
   }
 
-  // Advance intent
+  // Advance intent (frozen while stunned so the telegraph stays truthful).
   s = {
     ...s,
     enemy: {
       ...s.enemy,
-      intentIndex: (s.enemy.intentIndex + 1) % s.enemy.intents.length,
+      intentIndex: stunned
+        ? s.enemy.intentIndex
+        : (s.enemy.intentIndex + 1) % s.enemy.intents.length,
       statusEffects: tickEffects(s.enemy.statusEffects),
     },
     turn: s.turn + 1,
@@ -1360,7 +1555,7 @@ function executeEnemyTurnInner(state: CombatState): CombatState {
 
   s = checkCombatEnd(s);
   if (s.phase === 'enemy_turn') {
-    // Start of new player turn: clear shield, discard the held hand, then draw 5.
+    // Start of new player turn: clear shield, discard the held hand, then draw.
     s = {
       ...s,
       phase: 'player_turn',
@@ -1368,7 +1563,13 @@ function executeEnemyTurnInner(state: CombatState): CombatState {
       discardPile: [...s.discardPile, ...s.hand],
       hand: [],
     };
-    s = drawCards(s, s.drawPerTurn ?? 5);
+
+    if (s.skipNextDraw) {
+      s = { ...s, skipNextDraw: false, phase: 'player_turn' };
+      s = log(s, `Chrono-lock: you draw no cards this turn`);
+    } else {
+      s = drawCards(s, s.drawPerTurn ?? 5);
+    }
     s = applyRiftStartOfTurn(s);
 
     // Aegis Mixture residue: queued block for the start of next turn.
@@ -1386,6 +1587,17 @@ function executeEnemyTurnInner(state: CombatState): CombatState {
         s = applySpellEffect(s, power, undefined, seg);
       }
     }
+
+    // Chrono-halt ("skip your turn"): the player sees their hand but cannot
+    // act — all energy is drained for this turn.
+    if (s.haltPlayerNextTurn) {
+      s = { ...s, haltPlayerNextTurn: false, playerEnergy: 0 };
+      s = log(s, `Time is halted — you cannot act this turn (0 Energy)`);
+    }
+
+    // Chaos-rift damage and Power turn-start effects above can be lethal in
+    // either direction — re-check before handing the turn back.
+    s = checkCombatEnd(s);
   }
 
   return s;
@@ -1494,7 +1706,72 @@ function applyDamageInner(state: CombatState, targetId: string, amount: number, 
 
 import { logEvent } from './telemetry';
 
+/**
+ * Enemy onDeath effects (elites). Fires exactly once, BEFORE the win is
+ * finalized, so a death-burst can still kill the player — the loss check
+ * below takes precedence, STS-style.
+ */
+function applyEnemyOnDeath(state: CombatState): CombatState {
+  let s: CombatState = { ...state, enemy: { ...state.enemy, onDeathProcessed: true } };
+  const text = s.enemy.onDeath ?? '';
+  s = log(s, `${s.enemy.name} — ${text}`);
+
+  // "Explodes for 6 damage to all." / "Death-burst: deal 15 to all enemies."
+  const burst = text.match(/explodes? for (\d+)/i) ?? text.match(/death-?burst: deal (\d+)/i);
+  if (burst) {
+    const raw = parseInt(burst[1]);
+    const dmg = calcDamage(raw, [], s.playerStatusEffects);
+    const result = applyShieldedDamage(s.playerShield, s.playerHealth, dmg);
+    s = { ...s, playerHealth: result.health, playerShield: result.shield };
+    s = {
+      ...s,
+      playerBoard: s.playerBoard.map((m) => ({
+        ...m,
+        currentHealth: Math.max(0, (m.currentHealth ?? 0) - raw),
+      })),
+    };
+    s = processDeaths(s);
+    s = log(s, `Death-burst hits you for ${dmg}`);
+  }
+
+  // "Releases stored Lumens - heals player 10 HP."
+  const heal = text.match(/heals? (?:the )?player (\d+)/i);
+  if (heal) {
+    const amount = parseInt(heal[1]);
+    s = { ...s, playerHealth: Math.min(s.playerMaxHealth, s.playerHealth + amount) };
+    s = log(s, `You are healed for ${amount} HP`);
+  }
+
+  // "Releases a stored rift - next combat starts with -1 Energy."
+  const curse = text.match(/next combat starts with -(\d+) energy/i);
+  if (curse) {
+    const amount = parseInt(curse[1]);
+    const modifier: RunModifierDefinition = {
+      id: 'rift-warden-stored-rift',
+      name: 'Stored Rift',
+      description: `Next combat: -${amount} Energy`,
+      duration: 'next_combat',
+      effects: [{ type: 'energy', amount: -amount }],
+    };
+    s = { ...s, pendingRunModifiers: [...(s.pendingRunModifiers ?? []), modifier] };
+    s = log(s, `A stored rift latches on — next combat starts with -${amount} Energy`);
+  }
+
+  return s;
+}
+
 export function checkCombatEnd(state: CombatState): CombatState {
+  // Enemy death effects resolve before the outcome is decided.
+  if (
+    state.enemy.currentHealth <= 0
+    && state.enemy.onDeath
+    && !state.enemy.onDeathProcessed
+    && state.phase !== 'combat_end_win'
+    && state.phase !== 'combat_end_loss'
+  ) {
+    state = applyEnemyOnDeath(state);
+  }
+
   // Only emit a telemetry event on the transition into a terminal phase,
   // not on subsequent calls in the same terminal state.
   if (state.playerHealth <= 0 && state.phase !== 'combat_end_loss') {

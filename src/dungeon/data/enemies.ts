@@ -291,6 +291,36 @@ const BOSSES: EnemyDefinition[] = [
   },
 ];
 
+// ─── Enemy summons ────────────────────────────────────────────────────────────
+// Minions spawned by 'summon' intents (Forgewright, Warforge Sovereign,
+// Null Shepherd, The Starforged). They persist on the enemy board, attack the
+// player each enemy turn, and expire after `turns` if not killed first.
+
+export interface EnemySummonDefinition {
+  name: string;
+  health: number;
+  attack: number;
+  /** GUARDIAN: player minions must attack this summon before the enemy. */
+  guardian?: boolean;
+  /** Enemy turns the summon persists. */
+  turns: number;
+}
+
+export const ENEMY_SUMMON_DEFS: EnemySummonDefinition[] = [
+  { name: 'Drone', health: 5, attack: 3, turns: 3 },
+  { name: 'Rift Nibbler', health: 7, attack: 3, turns: 3 },
+  { name: 'Sentry', health: 9, attack: 4, guardian: true, turns: 3 },
+];
+
+/** Match a summon definition mentioned in an intent description. */
+export function findEnemySummonInText(text: string): EnemySummonDefinition | undefined {
+  const lower = text.toLowerCase();
+  return ENEMY_SUMMON_DEFS.find((def) => {
+    const name = def.name.toLowerCase();
+    return lower.includes(name) || lower.includes(`${name}s`) || lower.includes(name.replace(/y$/, 'ies'));
+  });
+}
+
 // ─── Pool ────────────────────────────────────────────────────────────────────
 
 export const ENEMY_POOL: EnemyDefinition[] = [

@@ -141,7 +141,7 @@ describe('seeded node rolls', () => {
 
 describe('reward claims (reducer)', () => {
   function stateAtTreasure(): ContextState {
-    let s = startRun();
+    const s = startRun();
     const node = findNode(s, 'treasure');
     return reducer(s, { type: 'TRAVEL_TO_NODE', nodeId: node.id });
   }
@@ -335,7 +335,7 @@ describe('shop purchases (reducer)', () => {
 
 describe('blessing options (reducer)', () => {
   function stateAtBlessing(): ContextState {
-    let s = startRun();
+    const s = startRun();
     return reducer(s, { type: 'COMPLETE_DRAFT', deck: s.run!.deck });
   }
 

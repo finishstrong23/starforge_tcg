@@ -273,6 +273,10 @@ export interface EnemyInstance extends EnemyDefinition {
   statusEffects: StatusEffect[];
   intentIndex: number;            // current position in intent rotation
   minionsInPlay: CardInstance[];
+  /** Turns this enemy is stunned for (skips its action, intent does not advance). */
+  stunnedTurns?: number;
+  /** Guard so onDeath effects fire exactly once. */
+  onDeathProcessed?: boolean;
 }
 
 // ─── RELIC TYPES ────────────────────────────────────────────────────────────
@@ -376,6 +380,15 @@ export interface CombatState {
   /** Persisted RNG stream state. All in-combat randomness draws from this so
    *  a refresh mid-combat replays identically instead of rerolling. */
   rngState?: number;
+  /** Cards stolen from the hand by enemy specials — gone for this combat. */
+  stolenCards?: CardInstance[];
+  /** Set by enemy specials ("skip your draw") — next player turn draws 0. */
+  skipNextDraw?: boolean;
+  /** Set by enemy specials ("skip your turn") — next player turn starts with 0 energy. */
+  haltPlayerNextTurn?: boolean;
+  /** Run-level modifiers produced during combat (elite onDeath curses).
+   *  Merged into RunState.runModifiers by the reducer on combat win. */
+  pendingRunModifiers?: RunModifierDefinition[];
 }
 
 // ─── POTIONS ─────────────────────────────────────────────────────────────────

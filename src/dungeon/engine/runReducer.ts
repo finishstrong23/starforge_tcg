@@ -469,12 +469,18 @@ export function reducer(state: ContextState, action: Action): ContextState {
         // Apply combat-end relic effects (heal, gold)
         let updatedRun = applyRelicsToRun('combat_end', state.run.relics, state.run);
 
-        // Sync health from combat outcome
+        // Sync health from combat outcome. Elite onDeath curses (e.g. Rift
+        // Warden's Stored Rift) arrive as pendingRunModifiers on the final
+        // combat state and attach to the run here.
         updatedRun = {
           ...updatedRun,
           currentHealth: cs.playerHealth,
           maxHealth: cs.playerMaxHealth,
           combatState: null,
+          runModifiers: [
+            ...(updatedRun.runModifiers ?? []),
+            ...(cs.pendingRunModifiers ?? []),
+          ],
           runStats: {
             ...updatedRun.runStats,
             totalCombats: updatedRun.runStats.totalCombats + 1,
