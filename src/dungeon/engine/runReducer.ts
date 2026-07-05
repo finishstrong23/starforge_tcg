@@ -772,7 +772,14 @@ export function reducer(state: ContextState, action: Action): ContextState {
       const blessing = BLESSING_POOL.find((b) => b.id === action.blessingId);
       if (!blessing) return state;
 
-      const result = resolveBlessing(blessing, state.run);
+      // Seeded so blessings with random components ('treasure' relic pick,
+      // 'arsenal' card pick) are reproducible — the last Math.random in the
+      // run-state path.
+      const result = resolveBlessing(
+        blessing,
+        state.run,
+        createSeededRng(state.run.seed ?? state.seed, 'blessingfx', state.run.currentAct, blessing.id),
+      );
 
       // Build the new deck if the blessing added a card. The reducer owns
       // instance creation so the helper stays pure.

@@ -218,9 +218,10 @@ describe('Luminar — Cluster L-C rewrites (Retain mechanic removed)', () => {
     const reserve = [...Array(8)].map((_, i) => ({ ...makeInstance('L-001'), instanceId: `r-${i}` }));
     const card = makeInstance('L-016', true);
     const state = initCombat([card, channel, ...reserve], 50, 50, [], dummyEnemy, 'Luminar');
-    const inHand = state.hand.find((c) => c.id === 'L-016');
-    if (!inHand) { expect(true).toBe(true); return; }
-    const after = playCard(state, inHand.instanceId);
+    // Force a deterministic hand: the random shuffle only sometimes put the
+    // Channel card in the opening hand, which made the Lumen count flaky.
+    const forced = { ...state, hand: [card, channel], drawPile: reserve, discardPile: [] };
+    const after = playCard(forced, card.instanceId);
     // Channel card in hand picks up 2 Lumens
     const totalLumens = after.hand.reduce((sum, h) => sum + (h.lumens ?? 0), 0);
     expect(totalLumens).toBeGreaterThanOrEqual(2);
