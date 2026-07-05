@@ -152,6 +152,16 @@ function resolvePotionSlot(potions: (PotionInstance | null)[], slotIndex?: numbe
   return potions.findIndex((p) => p === null);
 }
 
+/**
+ * Attach a relic to the run and apply its acquisition effect (the
+ * 'run_start' trigger fires when the relic is picked up mid-run: Ironbark
+ * Amulet's +8 Max HP, Overclocked Core's -5, Heartwake Echo's -10%).
+ */
+function acquireRelic(run: RunState, relic: RelicDefinition): RunState {
+  const withRelic: RunState = { ...run, relics: [...run.relics, relic] };
+  return applyRelicsToRun('run_start', [relic], withRelic);
+}
+
 export function reducer(state: ContextState, action: Action): ContextState {
   switch (action.type) {
     // ── Start new run ─────────────────────────────────────────────────────────
@@ -347,7 +357,7 @@ export function reducer(state: ContextState, action: Action): ContextState {
         relicName: action.relic.name,
         relicRarity: action.relic.rarity,
       });
-      return { ...state, run: { ...state.run, relics: [...state.run.relics, action.relic] } };
+      return { ...state, run: acquireRelic(state.run, action.relic) };
     }
     case 'ADD_GOLD': {
       if (!state.run) return state;
@@ -570,8 +580,7 @@ export function reducer(state: ContextState, action: Action): ContextState {
       return {
         ...state,
         run: {
-          ...state.run,
-          relics: [...state.run.relics, relic],
+          ...acquireRelic(state.run, relic),
           pendingReward: { ...pr, relicTaken: true },
         },
       };
@@ -646,9 +655,7 @@ export function reducer(state: ContextState, action: Action): ContextState {
       return {
         ...state,
         run: {
-          ...state.run,
-          gold: state.run.gold - price,
-          relics: [...state.run.relics, relic],
+          ...acquireRelic({ ...state.run, gold: state.run.gold - price }, relic),
           shopStock: { ...stock, soldRelicIds: [...stock.soldRelicIds, action.relicId] },
         },
       };

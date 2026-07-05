@@ -18,6 +18,9 @@ export interface RelicContext {
   retainedCount?: number;          // turn_end: cards kept in hand
   combatIndex?: number;            // running total of combats (for every-3rd relics)
   killed?: boolean;                // on_kill: an enemy just died
+  /** RNG for random relic effects. Combat call sites pass the persisted
+   *  combat stream so effects replay deterministically after a refresh. */
+  rng?: () => number;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -31,10 +34,12 @@ function addLog(state: CombatState, msg: string): CombatState {
   return { ...state, combatLog, lastAction: msg };
 }
 
-function pickRandom<T>(arr: T[]): T | undefined {
+function pickRandom<T>(arr: T[], rng: () => number = Math.random): T | undefined {
   if (arr.length === 0) return undefined;
-  return arr[Math.floor(Math.random() * arr.length)];
+  return arr[Math.floor(rng() * arr.length)];
 }
+
+const FLUX_STATES: Array<'A' | 'B' | 'C'> = ['A', 'B', 'C'];
 
 // ─── Combat-state relic effects ───────────────────────────────────────────────
 
@@ -45,6 +50,7 @@ export function applyRelicsToCombat(
   ctx: RelicContext = {},
 ): CombatState {
   let s = state;
+  const rng = ctx.rng ?? Math.random;
 
   switch (trigger) {
     // ── combat_start ──────────────────────────────────────────────────────────
@@ -67,7 +73,7 @@ export function applyRelicsToCombat(
         const blockCards = CARD_POOL.filter(
           (c) => c.type === 'Skill' && c.cardText.toLowerCase().includes('block'),
         );
-        const def = pickRandom(blockCards);
+        const def = pickRandom(blockCards, rng);
         if (def) {
           s = { ...s, hand: [...s.hand, createCardInstance(def)] };
           s = addLog(s, `Stasis Cube: added ${def.name} to hand`);
@@ -81,9 +87,27 @@ export function applyRelicsToCombat(
         s = addLog(s, `Archivist's Orb: drew ${card.name}`);
       }
 
-      // R-C08 Sparkthief's Glove: first Attack dealt +3 (handled at card play; flag here)
+      // R-C08 Sparkthief's Glove: arm the once-per-combat first-Attack bonus.
+      // playCard consumes the flag and patches +3 onto the first Attack.
       if (hasRelic(relics, 'R-C08')) {
+        s = { ...s, sparkthiefPending: true };
         s = addLog(s, 'Sparkthief\'s Glove: first Attack deals +3');
+      }
+
+      // R-S04 Navigator's Bone: force-reroll one Flux card in hand.
+      if (hasRelic(relics, 'R-S04')) {
+        const fluxInHand = s.hand.filter((c) => /^\s*flux\./i.test(getCardText(c)));
+        const target = pickRandom(fluxInHand, rng);
+        if (target) {
+          const newState = FLUX_STATES[Math.floor(rng() * 3)];
+          s = {
+            ...s,
+            hand: s.hand.map((c) =>
+              c.instanceId === target.instanceId ? { ...c, fluxState: newState } : c,
+            ),
+          };
+          s = addLog(s, `Navigator's Bone: ${target.name} rerolled to ${newState}`);
+        }
       }
 
       // R-U01 Forgemaster's Sigil: first card played this combat gains +2 damage/block
@@ -110,10 +134,10 @@ export function applyRelicsToCombat(
         const cardsWithDebuffs = s.hand.filter((c) =>
           c.statusEffects.some((e) => debuffs.includes(e.type)),
         );
-        const target = pickRandom(cardsWithDebuffs);
+        const target = pickRandom(cardsWithDebuffs, rng);
         if (target) {
           const debuffTypes = target.statusEffects.filter((e) => debuffs.includes(e.type));
-          const toRemove = pickRandom(debuffTypes);
+          const toRemove = pickRandom(debuffTypes, rng);
           s = {
             ...s,
             hand: s.hand.map((c) =>
@@ -129,14 +153,16 @@ export function applyRelicsToCombat(
       // R-R05 Runekeeper's Tome: every 3rd combat, add a random Rare card
       if (hasRelic(relics, 'R-R05') && (ctx.combatIndex ?? 0) > 0 && (ctx.combatIndex ?? 0) % 3 === 0) {
         const rares = CARD_POOL.filter((c) => c.rarity === 'Rare');
-        const def = pickRandom(rares);
+        const def = pickRandom(rares, rng);
         if (def) {
           s = { ...s, hand: [...s.hand, createCardInstance(def)] };
           s = addLog(s, `Runekeeper's Tome: added ${def.name}`);
         }
       }
 
-      // R-B01 The Hierophant's Censer: draw 2 extra; first-turn +1 cost tracked via log
+      // R-B01 The Hierophant's Censer: draw 2 extra; all cards cost +1 for
+      // the first turn (enforced by playCard via costPenaltyThisTurn,
+      // cleared at the end of turn 1).
       if (hasRelic(relics, 'R-B01')) {
         const drawn: CardInstance[] = [];
         let pile = [...s.drawPile];
@@ -144,7 +170,7 @@ export function applyRelicsToCombat(
           drawn.push(pile[0]);
           pile = pile.slice(1);
         }
-        s = { ...s, hand: [...s.hand, ...drawn], drawPile: pile };
+        s = { ...s, hand: [...s.hand, ...drawn], drawPile: pile, costPenaltyThisTurn: 1 };
         s = addLog(s, `Hierophant's Censer: drew ${drawn.length} extra; all cards cost +1 this turn`);
       }
 
@@ -154,7 +180,7 @@ export function applyRelicsToCombat(
         const eligible = relics.filter(
           (r) => r.id !== 'R-B03' && r.trigger === 'combat_start',
         );
-        const echo = pickRandom(eligible);
+        const echo = pickRandom(eligible, rng);
         if (echo) {
           s = applyRelicsToCombat('combat_start', [echo], s, ctx);
           s = addLog(s, `Heartwake Echo: copied ${echo.name}`);
@@ -166,14 +192,21 @@ export function applyRelicsToCombat(
 
     // ── turn_start ────────────────────────────────────────────────────────────
     case 'turn_start': {
-      // R-R04 The Unmoored Eye: lock one Flux card to a random state (AI auto-picks)
+      // R-R04 The Unmoored Eye: lock one Flux card in hand — it keeps its
+      // current state and no longer rotates between turns.
       if (hasRelic(relics, 'R-R04')) {
         const fluxCards = s.hand.filter(
-          (c) => getCardText(c).toLowerCase().includes('flux'),
+          (c) => /^\s*flux\./i.test(getCardText(c)) && !c.fluxLocked,
         );
-        const card = pickRandom(fluxCards);
+        const card = pickRandom(fluxCards, rng);
         if (card) {
-          s = addLog(s, `Unmoored Eye: ${card.name} locked`);
+          s = {
+            ...s,
+            hand: s.hand.map((c) =>
+              c.instanceId === card.instanceId ? { ...c, fluxLocked: true } : c,
+            ),
+          };
+          s = addLog(s, `Unmoored Eye: ${card.name} locked to state ${card.fluxState ?? 'A'}`);
         }
       }
       break;
@@ -192,9 +225,11 @@ export function applyRelicsToCombat(
 
     // ── on_card_play ──────────────────────────────────────────────────────────
     case 'on_card_play': {
-      // R-C06 Stasis Coil: 10% chance the played card costs 1 less this turn (log only)
-      if (hasRelic(relics, 'R-C06') && Math.random() < 0.1) {
-        s = addLog(s, 'Stasis Coil: card cost reduced by 1');
+      // R-C06 Stasis Coil: 10% chance the played card costs 1 less — the
+      // cost was already paid, so refund 1 energy.
+      if (hasRelic(relics, 'R-C06') && rng() < 0.1) {
+        s = { ...s, playerEnergy: s.playerEnergy + 1 };
+        s = addLog(s, 'Stasis Coil: refunded 1 Energy');
       }
 
       // R-A01 Shard of the Choir: take 1 damage whenever any card is played

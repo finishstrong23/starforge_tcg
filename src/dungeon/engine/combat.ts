@@ -5,6 +5,7 @@ import { applyStructuredCardEffects, hasStructuredEffects } from './structuredEf
 import { MVP_FACTION } from '../config/mvp';
 import { addHeat } from './heat';
 import { makeStatefulRng, type StatefulRng } from './seededRng';
+import { applyRelicsToCombat } from './relicEffects';
 
 // ─── Combat RNG ─────────────────────────────────────────────────────────────
 // All in-combat randomness draws from a persisted stream (CombatState.rngState)
@@ -82,6 +83,24 @@ const FLUX_STATES: Array<'A' | 'B' | 'C'> = ['A', 'B', 'C'];
 
 export function isFluxCard(card: CardInstance): boolean {
   return /^\s*flux\./i.test(card.cardText);
+}
+
+// ─── Relic helpers ──────────────────────────────────────────────────────────
+
+function hasRelicOn(s: CombatState, id: string): boolean {
+  return (s.relics ?? []).some((r) => r.id === id);
+}
+
+/**
+ * Heal the player's HP in combat. Central chokepoint so Spire-Glass Lens's
+ * "cannot heal this combat" clause gates every in-combat heal source.
+ */
+function healPlayerHp(s: CombatState, amount: number): CombatState {
+  if (amount <= 0) return s;
+  if (s.healingBlocked) {
+    return log(s, `Spire-Glass Lens: healing blocked (${amount} HP lost)`);
+  }
+  return { ...s, playerHealth: Math.min(s.playerMaxHealth, s.playerHealth + amount) };
 }
 
 // ─── Block / Dexterity helper ────────────────────────────────────────────────
@@ -315,7 +334,13 @@ function damagePlayerSide(
   }
   const dmg = calcDamage(raw, attackerEffects, s.playerStatusEffects);
   const result = applyShieldedDamage(s.playerShield, s.playerHealth, dmg);
-  return { state: { ...s, playerHealth: result.health, playerShield: result.shield }, dealt: dmg };
+  // Spire-Glass Lens: any HP damage taken blocks healing this combat.
+  const healingBlocked = s.healingBlocked
+    || (result.health < s.playerHealth && hasRelicOn(s, 'R-B02'));
+  return {
+    state: { ...s, playerHealth: result.health, playerShield: result.shield, healingBlocked },
+    dealt: dmg,
+  };
 }
 
 /** Enemy AoE ("deal N to all"): hits the player through block AND every player minion. */
@@ -328,7 +353,13 @@ function damageAllPlayerSide(
   let s = state;
   const playerDmg = calcDamage(raw, attackerEffects, s.playerStatusEffects);
   const result = applyShieldedDamage(s.playerShield, s.playerHealth, playerDmg);
-  s = { ...s, playerHealth: result.health, playerShield: result.shield };
+  s = {
+    ...s,
+    playerHealth: result.health,
+    playerShield: result.shield,
+    healingBlocked: s.healingBlocked
+      || (result.health < s.playerHealth && hasRelicOn(s, 'R-B02')),
+  };
   for (const m of s.playerBoard) {
     const dmg = calcDamage(raw, attackerEffects, m.statusEffects);
     s = {
@@ -350,7 +381,7 @@ export function initCombat(
   deck: CardInstance[],
   playerHealth: number,
   playerMaxHealth: number,
-  _relics: RelicDefinition[],
+  relics: RelicDefinition[],
   enemy: EnemyDefinition,
   faction: string = MVP_FACTION,
   ascensionMods?: { enemyHpMul?: number; enemyDamageMul?: number; bossStrength?: number; drawPerTurn?: number; rngSeed?: number },
@@ -411,6 +442,7 @@ export function initCombat(
     pendingTurnStartBlock: 0,
     drawPerTurn: drawPer,
     rngState: ascensionMods?.rngSeed,
+    relics,
   };
   // Seed the combat RNG stream, then shuffle + opening draw inside it so the
   // whole opening hand is reproducible from rngSeed.
@@ -470,8 +502,19 @@ export function applyAugment(
   if (!augment || augment.type !== 'Augment') return state;
   const target = state.hand.find((c) => c.instanceId === targetInstanceId);
   if (!target || target.instanceId === augmentInstanceId) return state;
+
+  // Augment slots: 2 per card by default; Modular Heart adds a third.
+  const slotCap = hasRelicOn(state, 'R-R03') ? 3 : 2;
+  if ((target.augments?.length ?? 0) >= slotCap) {
+    return log(state, `${target.name} has no free Augment slot`);
+  }
+
   const augStats = getCardStats(augment);
-  if (state.playerEnergy < augStats.cost) return state;
+  // Pattern Caliper: the first Augment attached to each card costs 0.
+  const augCost = (hasRelicOn(state, 'R-S02') && (target.augments?.length ?? 0) === 0)
+    ? 0
+    : augStats.cost;
+  if (state.playerEnergy < augCost) return state;
 
   const augText = augStats.text.toLowerCase();
   // Patch the ACTIVE text via `setActiveCardText` (Phase 4 chokepoint write
@@ -549,11 +592,16 @@ export function applyAugment(
   // Spend energy, replace target in hand, exhaust augment.
   return {
     ...state,
-    playerEnergy: state.playerEnergy - augStats.cost,
+    playerEnergy: state.playerEnergy - augCost,
     hand: state.hand
       .filter((c) => c.instanceId !== augmentInstanceId)
       .map((c) => (c.instanceId === targetInstanceId ? buffed : c)),
-    combatLog: [...state.combatLog, `${augment.name} attached to ${target.name}`].slice(-8),
+    combatLog: [
+      ...state.combatLog,
+      augCost < augStats.cost
+        ? `Pattern Caliper: ${augment.name} attached to ${target.name} for free`
+        : `${augment.name} attached to ${target.name}`,
+    ].slice(-8),
     lastAction: `${augment.name} -> ${target.name}`,
   };
 }
@@ -587,23 +635,45 @@ function playCardInner(
   const card = state.hand.find((c) => c.instanceId === cardInstanceId);
   if (!card) return state;
   const sigilPending = state.forgemasterSigilPending === true;
-  const effectiveCard = sigilPending ? applyForgemasterSigilToCard(card) : card;
+  // Sparkthief's Glove: the first Attack this combat gets +3 damage.
+  const sparkthief = state.sparkthiefPending === true && card.type === 'Attack';
+  let effectiveCard = sigilPending ? applyForgemasterSigilToCard(card) : card;
+  if (sparkthief) {
+    effectiveCard = setActiveCardText(
+      effectiveCard,
+      getCardText(effectiveCard).replace(
+        /deal (\d+)( damage)/gi,
+        (_, n, rest) => `Deal ${parseInt(n) + 3}${rest}`,
+      ),
+    );
+    effectiveCard = {
+      ...effectiveCard,
+      effects: effectiveCard.effects?.map((e) => e.type === 'damage' ? { ...e, amount: e.amount + 3 } : e),
+      upgradeEffects: effectiveCard.upgradeEffects?.map((e) => e.type === 'damage' ? { ...e, amount: e.amount + 3 } : e),
+    };
+  }
   const effectiveTextOverride = sigilPending && textOverride
     ? applyForgemasterSigilToText(textOverride)
     : textOverride;
   const stats = getCardStats(effectiveCard);
-  if (state.playerEnergy < stats.cost) return state;
+  // Hierophant's Censer: everything costs +1 on the first turn.
+  const cost = stats.cost + (state.costPenaltyThisTurn ?? 0);
+  if (state.playerEnergy < cost) return state;
 
   let s: CombatState = {
     ...state,
-    playerEnergy: state.playerEnergy - stats.cost,
+    playerEnergy: state.playerEnergy - cost,
     hand: state.hand.filter((c) => c.instanceId !== cardInstanceId),
     forgemasterSigilPending: sigilPending ? false : state.forgemasterSigilPending,
+    sparkthiefPending: sparkthief ? false : state.sparkthiefPending,
   };
 
   s = log(s, `${card.name} played`);
   if (sigilPending) {
     s = log(s, `Forgemaster's Sigil empowers ${card.name}`);
+  }
+  if (sparkthief) {
+    s = log(s, `Sparkthief's Glove: ${card.name} deals +3`);
   }
 
   // Luminar Channel: Release effect fires on play, scaled by accumulated Lumens.
@@ -617,6 +687,12 @@ function playCardInner(
       const releaseWeak = text.match(/release:\s*apply\s*weak\s*\d+\s*per lumen/i);
       const releaseVuln = text.match(/release:\s*\+?\d+\s*vulnerable\s*per lumen/i);
 
+      // The Chorus Shard: all Release effects trigger twice.
+      const releasePasses = hasRelicOn(s, 'R-R02') ? 2 : 1;
+      for (let pass = 0; pass < releasePasses; pass++) {
+      if (pass > 0) {
+        s = log(s, `The Chorus Shard echoes the Release`);
+      }
       if (releaseDmg) {
         const perLumen = parseInt(releaseDmg[1]);
         const dmg = calcDamage(perLumen * lumens, s.playerStatusEffects, s.enemy.statusEffects);
@@ -637,6 +713,7 @@ function playCardInner(
       if (releaseVuln) {
         s = { ...s, enemy: { ...s.enemy, statusEffects: addEffect(s.enemy.statusEffects, 'vulnerable', lumens, 2) } };
         s = log(s, `Release: +${lumens} Vulnerable from Lumens`);
+      }
       }
     }
   }
@@ -695,6 +772,12 @@ function playCardInner(
   }
 
   s = { ...s, discardPile: card.type !== 'Spell' ? s.discardPile : [...s.discardPile] };
+
+  // Relic on_card_play triggers (Stasis Coil refund, Shard of the Choir).
+  s = applyRelicsToCombat('on_card_play', s.relics ?? [], s, {
+    cardPlayed: card,
+    rng: combatRandom,
+  });
 
   // Track stats
   s.combatLog = [...s.combatLog].slice(-8);
@@ -781,7 +864,7 @@ function applySpellEffect(
     s = log(s, `${card.name} hits ${hits}x for ${totalDealt} total`);
     if (card.keywords.includes('DRAIN')) {
       const heal = Math.floor(totalDealt / 2);
-      s = { ...s, playerHealth: Math.min(s.playerMaxHealth, s.playerHealth + heal) };
+      s = healPlayerHp(s, heal);
       s = log(s, `DRAIN heals ${heal} HP`);
     }
   }
@@ -811,7 +894,7 @@ function applySpellEffect(
     s = log(s, `${card.name} deals ${dmg} to ${s.enemy.name}`);
     if (card.keywords.includes('DRAIN')) {
       const heal = Math.floor(dmg / 2);
-      s = { ...s, playerHealth: Math.min(s.playerMaxHealth, s.playerHealth + heal) };
+      s = healPlayerHp(s, heal);
       s = log(s, `DRAIN heals ${heal} HP`);
     }
   }
@@ -851,7 +934,7 @@ function applySpellEffect(
   const healMatch = text.match(/heal (\d+)/);
   if (healMatch) {
     const healed = parseInt(healMatch[1]);
-    s = { ...s, playerHealth: Math.min(s.playerMaxHealth, s.playerHealth + healed) };
+    s = healPlayerHp(s, healed);
     s = log(s, `Healed ${healed} HP`);
   }
 
@@ -895,13 +978,18 @@ function applySpellEffect(
   const lumenLeftmost = !lumenEach ? text.match(/gain (\d+) lumens? on (?:a|the leftmost) channel card/) : null;
   const lumenDistributed = !lumenEach && !lumenLeftmost ? text.match(/gain (\d+) lumens? distributed/) : null;
 
+  // Channel cards hold at most 5 Lumens (design default); Suncaller's Lens
+  // raises the cap to 6.
+  const maxLumens = hasRelicOn(s, 'R-S03') ? 6 : 5;
+  const capLumens = (current: number, add: number): number => Math.min(maxLumens, current + add);
+
   const grantLumens = (n: number, mode: 'each' | 'first' | 'distributed'): void => {
     const channels = s.hand.filter(isChannelCard);
     if (channels.length === 0) return;
     if (mode === 'each') {
       s = {
         ...s,
-        hand: s.hand.map((c) => isChannelCard(c) ? { ...c, lumens: (c.lumens ?? 0) + n } : c),
+        hand: s.hand.map((c) => isChannelCard(c) ? { ...c, lumens: capLumens(c.lumens ?? 0, n) } : c),
       };
       s = log(s, `+${n} Lumen on ${channels.length} Channel card${channels.length === 1 ? '' : 's'}`);
     } else if (mode === 'first') {
@@ -909,7 +997,7 @@ function applySpellEffect(
       const target = s.hand[idx];
       s = {
         ...s,
-        hand: s.hand.map((c, i) => i === idx ? { ...c, lumens: (c.lumens ?? 0) + n } : c),
+        hand: s.hand.map((c, i) => i === idx ? { ...c, lumens: capLumens(c.lumens ?? 0, n) } : c),
       };
       s = log(s, `+${n} Lumen on ${target.name}`);
     } else {
@@ -923,7 +1011,7 @@ function applySpellEffect(
           if (!isChannelCard(c)) return c;
           const extra = !firstAssigned ? remainder : 0;
           firstAssigned = true;
-          return { ...c, lumens: (c.lumens ?? 0) + per + extra };
+          return { ...c, lumens: capLumens(c.lumens ?? 0, per + extra) };
         }),
       };
       s = log(s, `Distributed ${n} Lumens across ${channels.length} Channel card${channels.length === 1 ? '' : 's'}`);
@@ -1083,6 +1171,14 @@ function applySpellEffect(
     );
   }
 
+  // Crown of the Unburnt: the first 5+ Heat vent each combat restores 2 HP.
+  const crownCheck = (heatVented: number): void => {
+    if (heatVented >= 5 && hasRelicOn(s, 'R-R01') && !s.crownOfUnburntUsed) {
+      s = healPlayerHp({ ...s, crownOfUnburntUsed: true }, 2);
+      s = log(s, `Crown of the Unburnt: +2 HP from the vent`);
+    }
+  };
+
   // Heat-scaled damage: "deal N damage + M per heat spent (up to X heat)"
   const heatSpendMatch = text.match(/deal (\d+) damage \+ (\d+) per heat spent \(up to (\d+) heat\)/);
   if (heatSpendMatch) {
@@ -1094,6 +1190,7 @@ function applySpellEffect(
     const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
     s = { ...s, playerHeat: s.playerHeat - heatSpent, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
     s = log(s, `${card.name} deals ${dmg} (spent ${heatSpent} Heat)`);
+    crownCheck(heatSpent);
   }
 
   // Vent all heat: "deal N damage. vent all heat"
@@ -1109,6 +1206,7 @@ function applySpellEffect(
     } else {
       s = { ...s, playerHeat: 0 };
     }
+    crownCheck(heatBonus);
   }
 
   // Conditional: "if heat >= N, ..."
@@ -1167,7 +1265,7 @@ function attackWithMinionInner(state: CombatState, attackerId: string, targetId:
     // DRAIN
     if (attacker.keywords.includes('DRAIN')) {
       const heal = Math.floor(dmg / 2);
-      s = { ...s, playerHealth: Math.min(s.playerMaxHealth, s.playerHealth + heal) };
+      s = healPlayerHp(s, heal);
       s = log(s, `DRAIN heals ${heal}`);
     }
   } else {
@@ -1236,6 +1334,8 @@ function processDeaths(state: CombatState): CombatState {
   const deadEnemyMinions = s.enemyBoard.filter((m) => (m.currentHealth ?? 0) <= 0);
   for (const dead of deadEnemyMinions) {
     s = log(s, `Enemy ${dead.name} dies`);
+    // Relic on_kill triggers fire per enemy minion killed (Spire-Glass Lens).
+    s = applyRelicsToCombat('on_kill', s.relics ?? [], s, { killed: true, rng: combatRandom });
   }
   s = { ...s, enemyBoard: s.enemyBoard.filter((m) => (m.currentHealth ?? 0) > 0) };
 
@@ -1250,7 +1350,18 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
 
 function endPlayerTurnInner(state: CombatState, relics: RelicDefinition[]): CombatState {
   let s: CombatState = { ...state, phase: 'enemy_turn' as CombatPhase };
-  void relics; // relic effects applied by relicEffects.ts
+
+  // Relic turn_end triggers. The hand is retained through the enemy turn in
+  // this engine, so every held card counts as retained (Starseer's Pendant).
+  s = applyRelicsToCombat('turn_end', relics.length ? relics : (s.relics ?? []), s, {
+    retainedCount: s.hand.length,
+    rng: combatRandom,
+  });
+
+  // Hierophant's Censer's +1 cost applies to the first turn only.
+  if ((s.costPenaltyThisTurn ?? 0) !== 0) {
+    s = { ...s, costPenaltyThisTurn: 0 };
+  }
 
   // NOTE: Hand is intentionally NOT discarded here. It stays visible during
   // the enemy turn so the player can plan; it's discarded right before the
@@ -1320,7 +1431,7 @@ function endPlayerTurnInner(state: CombatState, relics: RelicDefinition[]): Comb
   // held hand (the hand stays visible through the enemy turn and is discarded
   // at the start of the next player turn, so it must rotate with the rest).
   const rotateFlux = <T extends CardInstance>(c: T): T =>
-    isFluxCard(c) && c.fluxState ? { ...c, fluxState: shiftFlux(c.fluxState) } : c;
+    isFluxCard(c) && c.fluxState && !c.fluxLocked ? { ...c, fluxState: shiftFlux(c.fluxState) } : c;
   s = {
     ...s,
     playerBoard: s.playerBoard.map((m) => ({ ...m, hasAttacked: false })),
@@ -1588,6 +1699,9 @@ function executeEnemyTurnInner(state: CombatState): CombatState {
       }
     }
 
+    // Relic turn_start triggers (Unmoored Eye flux lock).
+    s = applyRelicsToCombat('turn_start', s.relics ?? [], s, { rng: combatRandom });
+
     // Chrono-halt ("skip your turn"): the player sees their hand but cannot
     // act — all energy is drained for this turn.
     if (s.haltPlayerNextTurn) {
@@ -1786,6 +1900,8 @@ export function checkCombatEnd(state: CombatState): CombatState {
     return log({ ...state, phase: 'combat_end_loss' }, 'You have been defeated!');
   }
   if (state.enemy.currentHealth <= 0 && state.phase !== 'combat_end_win') {
+    // Relic on_kill triggers fire for the main enemy kill (Spire-Glass Lens).
+    state = applyRelicsToCombat('on_kill', state.relics ?? [], state, { killed: true });
     logEvent('combat_end', {
       victory: true,
       faction: state.playerFaction,

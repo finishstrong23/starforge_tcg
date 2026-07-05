@@ -74,6 +74,8 @@ export interface CardInstance extends CardDefinition {
   augments?: string[];
   /** Luminar Channel cards: number of Lumens accumulated on this card. */
   lumens?: number;
+  /** The Unmoored Eye: this Flux card no longer rotates between turns. */
+  fluxLocked?: boolean;
 }
 
 // ─── STRUCTURED EFFECTS ──────────────────────────────────────────────────────
@@ -389,6 +391,17 @@ export interface CombatState {
   /** Run-level modifiers produced during combat (elite onDeath curses).
    *  Merged into RunState.runModifiers by the reducer on combat win. */
   pendingRunModifiers?: RunModifierDefinition[];
+  /** Relics carried into this combat (stored so combat-internal triggers —
+   *  turn_start/turn_end/on_card_play/on_kill — can fire without plumbing). */
+  relics?: RelicDefinition[];
+  /** Sparkthief's Glove: the first Attack this combat deals +3. */
+  sparkthiefPending?: boolean;
+  /** Hierophant's Censer: all cards cost +N for the first turn. */
+  costPenaltyThisTurn?: number;
+  /** Crown of the Unburnt: its once-per-combat heal has fired. */
+  crownOfUnburntUsed?: boolean;
+  /** Spire-Glass Lens: HP damage was taken — healing is blocked this combat. */
+  healingBlocked?: boolean;
 }
 
 // ─── POTIONS ─────────────────────────────────────────────────────────────────
