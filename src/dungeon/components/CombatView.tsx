@@ -1706,6 +1706,7 @@ export const CombatView: React.FC = () => {
             isTargeted={canTargetEnemy}
             intentPulsing={isEnemyTurn}
             intentResolving={enemyActing}
+            playerStatusEffects={cs.playerStatusEffects}
             onClick={canTargetEnemy ? handleEnemyClick : undefined}
           />
         </div>

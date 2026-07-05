@@ -1,5 +1,6 @@
 import React from 'react';
-import type { EnemyInstance, IntentType } from '../types';
+import type { EnemyInstance, IntentType, StatusEffect } from '../types';
+import { getEffectiveIntentValue } from '../engine/combat';
 import { getEnemyArt, getIntentArt, getStatusArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
 import { getStatusDisplayMeta, getStatusTooltip } from '../utils/statusDisplay';
@@ -29,6 +30,9 @@ export interface EnemyComponentProps {
   intentPulsing?: boolean;
   /** Enemy is mid-action - flash brighter. */
   intentResolving?: boolean;
+  /** Player statuses so the telegraphed number reflects live modifiers
+   *  (enemy Strength/Weak, player Vulnerable). */
+  playerStatusEffects?: StatusEffect[];
   onClick?: () => void;
 }
 
@@ -37,9 +41,14 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
   isTargeted = false,
   intentPulsing = false,
   intentResolving = false,
+  playerStatusEffects,
   onClick,
 }) => {
   const intent = enemy.intents[enemy.intentIndex % enemy.intents.length];
+  const effectiveValue = playerStatusEffects
+    ? getEffectiveIntentValue(enemy, playerStatusEffects)
+    : intent.value;
+  const intentModified = effectiveValue !== undefined && effectiveValue !== intent.value;
   const hpPct = Math.max(0, (enemy.currentHealth / enemy.maxHealth) * 100);
   const hpColor = hpPct > 60 ? '#22cc44' : hpPct > 30 ? '#ffcc00' : '#ff4444';
   const intentColor = INTENT_COLOR[intent.type];
@@ -244,7 +253,10 @@ export const EnemyComponent: React.FC<EnemyComponentProps> = ({
         <div style={s.intentBlock}>
           <span style={s.intentLabel}>
             {intentResolving ? 'Acting...' : intentPulsing ? 'Incoming' : 'Next Turn'}
-            {intent.value !== undefined && ` - ${intent.value}`}
+            {effectiveValue !== undefined && ` - ${effectiveValue}`}
+            {intentModified && (
+              <span title={`Base ${intent.value}, modified by Strength/Weak/Vulnerable`}> *</span>
+            )}
           </span>
           <span style={s.intentText}>{intent.description}</span>
         </div>

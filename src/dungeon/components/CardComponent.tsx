@@ -449,8 +449,23 @@ export const CardComponent: React.FC<CardComponentProps> = ({
       );
     });
 
+  // Compact cards (board minions, deck-removal grid) hide their rules text
+  // for space — surface it as a native tooltip so their function is always
+  // inspectable on desktop.
+  const compactTooltip = compact
+    ? `${card.name} — ${stats.cost} energy`
+      + (stats.attack !== undefined ? ` — ${stats.attack}/${stats.health ?? '?'}` : '')
+      + `\n${fluxBody ?? stats.text}`
+      + (card.keywords.length > 0 ? `\n[${card.keywords.join(', ')}]` : '')
+    : undefined;
+
   return (
-    <div style={styles.card} onClick={onClick} role={onClick ? 'button' : undefined}>
+    <div
+      style={styles.card}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      title={compactTooltip}
+    >
       {/* Cost */}
       <div style={styles.costBadge}>{stats.cost}</div>
       {/* Type / rarity */}

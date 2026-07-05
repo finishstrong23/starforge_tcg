@@ -281,6 +281,24 @@ function tickEffects(effects: StatusEffect[]): StatusEffect[] {
 
 // ─── Damage calculation ──────────────────────────────────────────────────────
 
+/**
+ * The number an enemy intent will ACTUALLY deal/apply right now, with the
+ * enemy's Strength/Weak and the player's Vulnerable factored in. The UI
+ * shows this instead of the static authored value so the telegraph never
+ * understates incoming damage after a buff.
+ */
+export function getEffectiveIntentValue(
+  enemy: { intents: { type: string; value?: number }[]; intentIndex: number; statusEffects: StatusEffect[]; attack: number },
+  playerStatusEffects: StatusEffect[],
+): number | undefined {
+  const intent = enemy.intents[enemy.intentIndex % enemy.intents.length];
+  if (intent.value === undefined) return undefined;
+  if (intent.type === 'attack' || intent.type === 'special') {
+    return calcDamage(intent.value, enemy.statusEffects, playerStatusEffects);
+  }
+  return intent.value;
+}
+
 function calcDamage(base: number, attackerEffects: StatusEffect[], defenderEffects: StatusEffect[]): number {
   let dmg = base;
   if (getStack(attackerEffects, 'strength') > 0) dmg += getStack(attackerEffects, 'strength');

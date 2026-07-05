@@ -151,25 +151,42 @@ export const RestSiteView: React.FC = () => {
         </div>
       )}
 
-      {/* Upgrade deck picker */}
+      {/* Upgrade deck picker — each option shows what the upgrade will do
+          so the smith choice is never made blind. */}
       {mode === 'upgrading' && !done && (
         <>
           <div style={s.sectionLabel}>Choose a card to upgrade</div>
           <div style={s.cardGrid}>
             {deck
               .filter((c) => !c.upgraded)
-              .map((card) => (
-                <div
-                  key={card.instanceId}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => handleUpgrade(card.instanceId)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') handleUpgrade(card.instanceId); }}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <CardComponent card={card} selectable />
-                </div>
-              ))}
+              .map((card) => {
+                const deltas: string[] = [];
+                if (card.upgradedCost !== undefined && card.upgradedCost !== card.cost) {
+                  deltas.push(`cost ${card.cost} → ${card.upgradedCost}`);
+                }
+                if (card.upgradedAttack !== undefined && card.upgradedAttack !== card.attack) {
+                  deltas.push(`attack ${card.attack} → ${card.upgradedAttack}`);
+                }
+                if (card.upgradedHealth !== undefined && card.upgradedHealth !== card.health) {
+                  deltas.push(`health ${card.health} → ${card.upgradedHealth}`);
+                }
+                const preview = card.upgradeText ?? (deltas.length > 0 ? '' : 'Improved effect');
+                return (
+                  <div
+                    key={card.instanceId}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleUpgrade(card.instanceId)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleUpgrade(card.instanceId); }}
+                    style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, maxWidth: 130 }}
+                  >
+                    <CardComponent card={card} selectable />
+                    <div style={{ fontSize: 9, lineHeight: 1.35, color: '#8fd8a0', textAlign: 'center' }}>
+                      + {[preview, ...deltas].filter(Boolean).join(' · ')}
+                    </div>
+                  </div>
+                );
+              })}
             {deck.filter((c) => !c.upgraded).length === 0 && (
               <div style={{ opacity: 0.5, fontSize: 12 }}>All cards already upgraded.</div>
             )}
