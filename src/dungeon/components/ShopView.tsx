@@ -2,60 +2,21 @@ import React, { useState } from 'react';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { CardComponent } from './CardComponent';
 import { PotionPickupModal } from './PotionPickupModal';
-import { CARD_POOL } from '../data/cards';
-import { RELIC_POOL } from '../data/relics';
 import { createCardInstance } from '../engine/draft';
-import { getPotionDef, potionShopPrice, rollShopPotions } from '../data/potions';
+import {
+  REMOVAL_COST,
+  REMOVALS_PER_SHOP,
+  cardPrice,
+  getCardDefById,
+  getRelicById,
+  relicPrice,
+} from '../engine/nodeRewards';
+import { getPotionDef, potionShopPrice } from '../data/potions';
 import { getAscensionMods } from '../engine/ascension';
 import { getDungeonSceneArt } from '../assets/basicTokenArt';
 import { getMapNodeArt, getPotionArt, getRelicArt, uiArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
 import type { CardDefinition, PotionInstance, RelicDefinition } from '../types';
-
-const CARD_PRICE: Record<string, number> = {
-  Common: 50, Uncommon: 75, Rare: 100, Epic: 140, Legendary: 175,
-};
-
-const REMOVAL_COST = 75;
-
-function pickRandom<T>(arr: T[]): T | undefined {
-  return arr.length ? arr[Math.floor(Math.random() * arr.length)] : undefined;
-}
-
-function randomCards(count: number, faction?: string, deck: { id: string; upgraded: boolean }[] = []): CardDefinition[] {
-  // Same faction-lock rationale as generateRewardOptions: cross-faction cards
-  // are mechanically useless and feel like dead picks.
-  // Phase 5 integration: also skip cards the player already owns in upgraded
-  // form. Selling the player a base copy of Cinder Strike when they have
-  // Cinder Strike+ in their deck would be strictly worse than what they own.
-  const ownedUpgradedIds = new Set(deck.filter((c) => c.upgraded).map((c) => c.id));
-  const pool = (faction ? CARD_POOL.filter((c) => c.faction === faction) : CARD_POOL)
-    .filter((c) => !ownedUpgradedIds.has(c.id));
-  const used = new Set<string>();
-  const out: CardDefinition[] = [];
-  let tries = 0;
-  while (out.length < count && tries++ < 200) {
-    const c = pickRandom(pool);
-    if (c && !used.has(c.id)) { used.add(c.id); out.push(c); }
-  }
-  return out;
-}
-
-function randomRelics(count: number): RelicDefinition[] {
-  const pool = RELIC_POOL.filter((r) => r.rarity === 'Common' || r.rarity === 'Uncommon' || r.rarity === 'Rare');
-  const used = new Set<string>();
-  const out: RelicDefinition[] = [];
-  let tries = 0;
-  while (out.length < count && tries++ < 100) {
-    const r = pickRandom(pool);
-    if (r && !used.has(r.id)) { used.add(r.id); out.push(r); }
-  }
-  return out;
-}
-
-function relicPrice(relic: RelicDefinition): number {
-  return relic.rarity === 'Boss' ? 200 : relic.rarity === 'Rare' ? 150 : relic.rarity === 'Uncommon' ? 120 : 100;
-}
 
 const GoldValue: React.FC<{ amount: number; iconSize?: number }> = ({ amount, iconSize = 16 }) => (
   <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 4, lineHeight: 1 }}>
@@ -70,22 +31,35 @@ const GoldValue: React.FC<{ amount: number; iconSize?: number }> = ({ amount, ic
   </span>
 );
 
+/**
+ * Shop screen.
+ *
+ * Pure renderer: the stock is rolled ONCE by the run reducer when the shop
+ * node is entered (seeded from run seed + node id) and persisted on RunState
+ * with sold flags. Purchases are atomic reducer actions (gold + item + sold
+ * flag in one dispatch). Refreshing the page restores the identical stock —
+ * the old mount-time rolls let players reroll inventory with F5.
+ */
 export const ShopView: React.FC = () => {
-  const { runState, draftFaction, addCardToDeck, addRelic, addPotion, discardPotion, removeCardFromDeck, spendGold, returnToMap } = useDungeonRun();
+  const {
+    runState,
+    shopBuyCard, shopBuyRelic, shopBuyPotion, shopRemoveCard,
+    returnToMap,
+  } = useDungeonRun();
   const act = (runState?.currentAct ?? 1) as 1 | 2 | 3;
-  // Phase 5: pass deck so the shop skips cards the player already owns in upgraded form.
-  const [shopCards] = useState<CardDefinition[]>(() =>
-    randomCards(4, draftFaction ?? undefined, runState?.deck ?? []),
-  );
-  const [shopRelics] = useState<RelicDefinition[]>(() => randomRelics(2));
-  // 2-3 potions per shop. Roll deterministically once on mount.
-  const [shopPotions] = useState<PotionInstance[]>(() => rollShopPotions(2 + Math.floor(Math.random() * 2)));
-  const [boughtCardIds, setBoughtCardIds] = useState<Set<string>>(new Set());
-  const [boughtRelicIds, setBoughtRelicIds] = useState<Set<string>>(new Set());
-  const [boughtPotionIdx, setBoughtPotionIdx] = useState<Set<number>>(new Set());
+  const stock = runState?.shopStock ?? null;
+
+  const shopCards = (stock?.cardIds ?? [])
+    .map((id) => getCardDefById(id))
+    .filter((def): def is CardDefinition => Boolean(def));
+  const shopRelics = (stock?.relicIds ?? [])
+    .map((id) => getRelicById(id))
+    .filter((relic): relic is RelicDefinition => Boolean(relic));
+  const shopPotions = stock?.potions ?? [];
+
   const [removingCard, setRemovingCard] = useState(false);
   // Pending potion purchase (when inventory is full and we need a discard pick).
-  const [pendingPurchase, setPendingPurchase] = useState<{ potion: PotionInstance; shopIndex: number; price: number } | null>(null);
+  const [pendingPurchase, setPendingPurchase] = useState<{ potion: PotionInstance; shopIndex: number } | null>(null);
 
   const gold = runState?.gold ?? 0;
   const currentHealth = runState?.currentHealth ?? 0;
@@ -97,6 +71,8 @@ export const ShopView: React.FC = () => {
   // A3 shop price multiplier. Round up so the multiplier always actually bites.
   const scalePrice = (n: number): number => Math.ceil(n * ascensionMods.shopPriceMul);
   const potionPrice = scalePrice(potionShopPrice(act));
+  const removalsLeft = REMOVALS_PER_SHOP - (stock?.removalsUsed ?? 0);
+  const canRemove = removalsLeft > 0 && gold >= REMOVAL_COST;
 
   const itemWrapperStyle = (bought: boolean, affordable: boolean): React.CSSProperties => ({
     display: 'flex',
@@ -151,52 +127,30 @@ export const ShopView: React.FC = () => {
     letterSpacing: '0.08em',
   });
 
-  const buyCard = (def: CardDefinition) => {
-    const price = scalePrice(CARD_PRICE[def.rarity] ?? 75);
-    if (gold < price || boughtCardIds.has(def.id)) return;
-    addCardToDeck(createCardInstance(def));
-    spendGold(price);
-    setBoughtCardIds((prev) => new Set([...prev, def.id]));
-  };
-
-  const buyRelic = (relic: RelicDefinition) => {
-    const price = scalePrice(relicPrice(relic));
-    if (gold < price || boughtRelicIds.has(relic.id)) return;
-    addRelic(relic);
-    spendGold(price);
-    setBoughtRelicIds((prev) => new Set([...prev, relic.id]));
-  };
-
   const buyPotion = (potion: PotionInstance, shopIndex: number) => {
-    if (gold < potionPrice || boughtPotionIdx.has(shopIndex)) return;
+    if (gold < potionPrice || stock?.soldPotionIndexes.includes(shopIndex)) return;
     const slots = runState?.potions ?? [];
     const empty = slots.findIndex((p) => p === null);
     if (empty === -1) {
       // Inventory full - defer the purchase, show the pickup modal so the
       // player picks a slot (or cancels). Gold is only spent if they accept.
-      setPendingPurchase({ potion, shopIndex, price: potionPrice });
+      setPendingPurchase({ potion, shopIndex });
       return;
     }
-    addPotion(potion);
-    spendGold(potionPrice);
-    setBoughtPotionIdx((prev) => new Set([...prev, shopIndex]));
+    shopBuyPotion(shopIndex);
   };
 
   const handlePurchaseSwap = (slotIndex: number) => {
     if (!pendingPurchase) return;
-    discardPotion(slotIndex);
-    addPotion(pendingPurchase.potion, slotIndex);
-    spendGold(pendingPurchase.price);
-    setBoughtPotionIdx((prev) => new Set([...prev, pendingPurchase.shopIndex]));
+    shopBuyPotion(pendingPurchase.shopIndex, slotIndex);
     setPendingPurchase(null);
   };
 
   const handlePurchaseCancel = () => setPendingPurchase(null);
 
   const removeCard = (instanceId: string) => {
-    if (gold < REMOVAL_COST) return;
-    removeCardFromDeck(instanceId);
-    spendGold(REMOVAL_COST);
+    if (!canRemove) return;
+    shopRemoveCard(instanceId);
     setRemovingCard(false);
   };
 
@@ -360,17 +314,17 @@ export const ShopView: React.FC = () => {
       <div style={s.sectionLabel}>Cards for sale</div>
       <div style={s.cardRow}>
         {shopCards.map((def) => {
-          const price = scalePrice(CARD_PRICE[def.rarity] ?? 75);
-          const bought = boughtCardIds.has(def.id);
+          const price = scalePrice(cardPrice(def));
+          const bought = stock?.soldCardIds.includes(def.id) ?? false;
           const affordable = gold >= price;
           return (
             <div
               key={def.id}
               style={itemWrapperStyle(bought, affordable)}
-              onClick={!bought && affordable ? () => buyCard(def) : undefined}
+              onClick={!bought && affordable ? () => shopBuyCard(def.id) : undefined}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !bought && affordable) buyCard(def); }}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !bought && affordable) shopBuyCard(def.id); }}
             >
               <CardComponent card={createCardInstance(def)} unaffordable={!affordable || bought} />
               <div style={priceBadgeFn(price, bought)}>
@@ -386,16 +340,16 @@ export const ShopView: React.FC = () => {
       <div style={s.relicRow}>
         {shopRelics.map((relic) => {
           const price = scalePrice(relicPrice(relic));
-          const bought = boughtRelicIds.has(relic.id);
+          const bought = stock?.soldRelicIds.includes(relic.id) ?? false;
           const affordable = gold >= price;
           return (
             <div
               key={relic.id}
               style={relicBoxStyle(bought, affordable)}
-              onClick={!bought && affordable ? () => buyRelic(relic) : undefined}
+              onClick={!bought && affordable ? () => shopBuyRelic(relic.id) : undefined}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' && !bought && affordable) buyRelic(relic); }}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !bought && affordable) shopBuyRelic(relic.id); }}
             >
               <TokenArt
                 src={getRelicArt(relic.id)}
@@ -430,14 +384,18 @@ export const ShopView: React.FC = () => {
             />
             <span>Card Removal</span>
           </div>
-          <div style={s.serviceDesc}>Permanently remove a card from your deck</div>
+          <div style={s.serviceDesc}>
+            {removalsLeft > 0
+              ? 'Permanently remove a card from your deck (once per shop)'
+              : 'Removal already used at this shop'}
+          </div>
         </div>
         <button
           type="button"
-          style={serviceBtnStyle(gold >= REMOVAL_COST)}
-          onClick={() => gold >= REMOVAL_COST && setRemovingCard(true)}
+          style={serviceBtnStyle(canRemove)}
+          onClick={() => canRemove && setRemovingCard(true)}
         >
-          <GoldValue amount={REMOVAL_COST} iconSize={14} />
+          {removalsLeft > 0 ? <GoldValue amount={REMOVAL_COST} iconSize={14} /> : 'Used'}
         </button>
       </div>
 
@@ -473,7 +431,7 @@ export const ShopView: React.FC = () => {
             {shopPotions.map((inst, idx) => {
               const def = getPotionDef(inst.definitionId);
               if (!def) return null;
-              const bought = boughtPotionIdx.has(idx);
+              const bought = stock?.soldPotionIndexes.includes(idx) ?? false;
               const affordable = gold >= potionPrice;
               const rarityColor =
                 def.rarity === 'rare' ? '#ffcc00' : def.rarity === 'uncommon' ? '#3b8fff' : '#aaaaaa';

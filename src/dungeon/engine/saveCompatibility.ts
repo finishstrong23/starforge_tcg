@@ -80,6 +80,17 @@ function normalizeRun(rawRun: unknown, now: number): RunState | null {
       : null,
     potions,
     runModifiers: asArray(rawRun.runModifiers),
+    // Node-resolution state (persisted offers + claim flags). Missing on
+    // legacy saves — ensureNodeStates() synthesizes them at hydration.
+    pendingReward: isRecord(rawRun.pendingReward)
+      ? rawRun.pendingReward as unknown as RunState['pendingReward']
+      : null,
+    shopStock: isRecord(rawRun.shopStock)
+      ? rawRun.shopStock as unknown as RunState['shopStock']
+      : null,
+    blessingOptionIds: Array.isArray(rawRun.blessingOptionIds)
+      ? (rawRun.blessingOptionIds as unknown[]).filter((v): v is string => typeof v === 'string')
+      : null,
     runStats: {
       totalCombats: typeof rawStats.totalCombats === 'number' ? rawStats.totalCombats : 0,
       elitesDefeated: typeof rawStats.elitesDefeated === 'number' ? rawStats.elitesDefeated : 0,

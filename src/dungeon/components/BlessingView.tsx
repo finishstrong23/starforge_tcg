@@ -10,22 +10,25 @@
 
 import React, { useState } from 'react';
 import type { Blessing } from '../data/blessings';
-import { rollBlessings } from '../data/blessings';
+import { BLESSING_POOL } from '../data/blessings';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { getDungeonSceneArt } from '../assets/basicTokenArt';
 import { getBlessingArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
 
 export const BlessingView: React.FC = () => {
-  const { runState, draftFaction, applyBlessing } = useDungeonRun();
-  // Roll 3 distinct blessings once on mount. Re-rolling on re-render would
-  // let players reload to fish for the blessing they want.
-  const [options] = useState<Blessing[]>(() =>
-    rollBlessings(3, Math.random, draftFaction ?? undefined),
-  );
+  const { runState, applyBlessing } = useDungeonRun();
   const [picked, setPicked] = useState<Blessing | null>(null);
 
   if (!runState) return null;
+
+  // Options are rolled by the run reducer when the blessing phase is entered
+  // (seeded from run seed + act) and persisted on RunState — a page refresh
+  // restores the same three offers instead of rerolling. The reducer also
+  // rejects APPLY_BLESSING for ids that weren't offered.
+  const options: Blessing[] = (runState.blessingOptionIds ?? [])
+    .map((id) => BLESSING_POOL.find((b) => b.id === id))
+    .filter((b): b is Blessing => Boolean(b));
 
   const act = runState.currentAct;
   const isOpener = act === 1;

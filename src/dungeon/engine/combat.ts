@@ -3,11 +3,38 @@ import { getCardStats, getCardText, getCardCost, setActiveCardText, setActiveCar
 import { applyStructuredCardEffects, hasStructuredEffects } from './structuredEffects';
 import { MVP_FACTION } from '../config/mvp';
 import { addHeat } from './heat';
+import { makeStatefulRng, type StatefulRng } from './seededRng';
+
+// ─── Combat RNG ─────────────────────────────────────────────────────────────
+// All in-combat randomness draws from a persisted stream (CombatState.rngState)
+// so a refresh mid-combat replays identically instead of rerolling. Public
+// entry points wrap their body in withCombatRng; internal code calls
+// combatRandom(). Nested entry-point calls share the outer wrapper's stream.
+
+let activeRng: StatefulRng | null = null;
+
+function combatRandom(): number {
+  // Only reachable outside a wrapper as a defensive fallback.
+  return activeRng ? activeRng.next() : Math.random();
+}
+
+export function withCombatRng(state: CombatState, fn: (s: CombatState) => CombatState): CombatState {
+  if (activeRng) return fn(state); // outer wrapper owns the stream
+  const seed = state.rngState ?? ((Math.random() * 0x100000000) >>> 0);
+  const rng = makeStatefulRng(seed);
+  activeRng = rng;
+  try {
+    const result = fn(state.rngState === seed ? state : { ...state, rngState: seed });
+    return { ...result, rngState: rng.state() };
+  } finally {
+    activeRng = null;
+  }
+}
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function uid(): string {
-  return Math.random().toString(36).slice(2, 10);
+  return Math.floor(combatRandom() * 0x100000000).toString(36) + Math.floor(combatRandom() * 0x100000000).toString(36);
 }
 
 function clamp(n: number, min: number, max: number): number {
@@ -104,7 +131,7 @@ function powerSegmentsForTrigger(card: CardInstance, trigger: PowerTrigger): str
 }
 
 function randomFluxState(): 'A' | 'B' | 'C' {
-  return FLUX_STATES[Math.floor(Math.random() * 3)];
+  return FLUX_STATES[Math.floor(combatRandom() * 3)];
 }
 
 function shiftFlux(s: 'A' | 'B' | 'C'): 'A' | 'B' | 'C' {
@@ -261,9 +288,8 @@ export function initCombat(
   _relics: RelicDefinition[],
   enemy: EnemyDefinition,
   faction: string = MVP_FACTION,
-  ascensionMods?: { enemyHpMul?: number; enemyDamageMul?: number; bossStrength?: number; drawPerTurn?: number },
+  ascensionMods?: { enemyHpMul?: number; enemyDamageMul?: number; bossStrength?: number; drawPerTurn?: number; rngSeed?: number },
 ): CombatState {
-  const shuffled = shuffleDeck([...deck]);
   const hpMul    = ascensionMods?.enemyHpMul ?? 1;
   const dmgMul   = ascensionMods?.enemyDamageMul ?? 1;
   const drawPer  = ascensionMods?.drawPerTurn ?? 5;
@@ -300,7 +326,7 @@ export function initCombat(
     playerStatusEffects: [],
     playerBoard: [],
     hand: [],
-    drawPile: shuffled,
+    drawPile: [...deck],
     discardPile: [],
     enemy: {
       ...scaledEnemy,
@@ -319,14 +345,17 @@ export function initCombat(
     skipNextEnemyTurn: false,
     pendingTurnStartBlock: 0,
     drawPerTurn: drawPer,
+    rngState: ascensionMods?.rngSeed,
   };
-  return drawCards(state, drawPer);
+  // Seed the combat RNG stream, then shuffle + opening draw inside it so the
+  // whole opening hand is reproducible from rngSeed.
+  return withCombatRng(state, (s) => drawCards({ ...s, drawPile: shuffleDeck(s.drawPile) }, drawPer));
 }
 
 function shuffleDeck(cards: CardInstance[]): CardInstance[] {
   const arr = [...cards];
   for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(combatRandom() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
@@ -335,6 +364,10 @@ function shuffleDeck(cards: CardInstance[]): CardInstance[] {
 // ─── drawCards ───────────────────────────────────────────────────────────────
 
 export function drawCards(state: CombatState, count: number): CombatState {
+  return withCombatRng(state, (wrapped) => drawCardsInner(wrapped, count));
+}
+
+function drawCardsInner(state: CombatState, count: number): CombatState {
   let s = { ...state };
   let drawn = 0;
   while (drawn < count) {
@@ -466,6 +499,15 @@ export function getCardChoice(card: CardInstance): { optionA: string; optionB: s
 }
 
 export function playCard(
+  state: CombatState,
+  cardInstanceId: string,
+  targetId?: string,
+  textOverride?: string,
+): CombatState {
+  return withCombatRng(state, (wrapped) => playCardInner(wrapped, cardInstanceId, targetId, textOverride));
+}
+
+function playCardInner(
   state: CombatState,
   cardInstanceId: string,
   targetId?: string,
@@ -605,7 +647,7 @@ function applySpellEffect(
   if (rangeDmgMatch) {
     const lo = parseInt(rangeDmgMatch[1]);
     const hi = parseInt(rangeDmgMatch[2]);
-    const roll = lo + Math.floor(Math.random() * (hi - lo + 1));
+    const roll = lo + Math.floor(combatRandom() * (hi - lo + 1));
     const dmg = calcDamage(roll, s.playerStatusEffects, s.enemy.statusEffects);
     const result = applyShieldedDamage(s.enemy.currentShield, s.enemy.currentHealth, dmg);
     s = { ...s, enemy: { ...s.enemy, currentHealth: result.health, currentShield: result.shield } };
@@ -750,7 +792,7 @@ function applySpellEffect(
   if (chanceSelfDmg) {
     const chance = parseInt(chanceSelfDmg[1]);
     const dmg = parseInt(chanceSelfDmg[2]);
-    if (Math.random() * 100 < chance) {
+    if (combatRandom() * 100 < chance) {
       s = { ...s, playerHealth: Math.max(0, s.playerHealth - dmg) };
       s = log(s, `${card.name} backfires for ${dmg}`);
     } else {
@@ -843,8 +885,8 @@ function applySpellEffect(
     const turns     = summonTurnEnd && summonTurnEnd[4] ? parseInt(summonTurnEnd[4]) : -1; // -1 = permanent
 
     const summon: CardInstance = {
-      id: `summon-${card.id}-${Date.now()}`,
-      instanceId: `summon-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id: `summon-${card.id}`,
+      instanceId: `summon-${card.id}-${uid()}`,
       name,
       faction: 'Cogsmiths',
       type: 'Minion',
@@ -889,7 +931,7 @@ function applySpellEffect(
       const types: Rift['type'][] = ['cost', 'energy', 'chaos'];
       const newRifts: Rift[] = [];
       for (let i = 0; i < count; i++) {
-        const type = types[Math.floor(Math.random() * types.length)];
+        const type = types[Math.floor(combatRandom() * types.length)];
         newRifts.push({ type, turnsRemaining: turns });
       }
       s = { ...s, playerRifts: [...s.playerRifts, ...newRifts] };
@@ -1028,6 +1070,10 @@ function applySpellEffect(
 // ─── attackWithMinion ────────────────────────────────────────────────────────
 
 export function attackWithMinion(state: CombatState, attackerId: string, targetId: string): CombatState {
+  return withCombatRng(state, (wrapped) => attackWithMinionInner(wrapped, attackerId, targetId));
+}
+
+function attackWithMinionInner(state: CombatState, attackerId: string, targetId: string): CombatState {
   let s = { ...state };
   const attacker = s.playerBoard.find((m) => m.instanceId === attackerId);
   if (!attacker || attacker.hasAttacked) return s;
@@ -1128,6 +1174,10 @@ function processDeaths(state: CombatState): CombatState {
 // ─── endPlayerTurn ───────────────────────────────────────────────────────────
 
 export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): CombatState {
+  return withCombatRng(state, (wrapped) => endPlayerTurnInner(wrapped, relics));
+}
+
+function endPlayerTurnInner(state: CombatState, relics: RelicDefinition[]): CombatState {
   let s: CombatState = { ...state, phase: 'enemy_turn' as CombatPhase };
   void relics; // relic effects applied by relicEffects.ts
 
@@ -1207,6 +1257,10 @@ export function endPlayerTurn(state: CombatState, relics: RelicDefinition[]): Co
 // ─── Enemy turn ──────────────────────────────────────────────────────────────
 
 export function executeEnemyTurn(state: CombatState): CombatState {
+  return withCombatRng(state, executeEnemyTurnInner);
+}
+
+function executeEnemyTurnInner(state: CombatState): CombatState {
   let s: CombatState = { ...state };
 
   // Chronoshift Philter: short-circuit. Enemy doesn't act this turn; their
@@ -1359,7 +1413,7 @@ function applyRiftStartOfTurn(state: CombatState): CombatState {
       case 'cost': {
         // Discount one random card in hand by 1 (min 0) for this turn only.
         if (s.hand.length > 0) {
-          const idx = Math.floor(Math.random() * s.hand.length);
+          const idx = Math.floor(combatRandom() * s.hand.length);
           const target = s.hand[idx];
           const effectiveCost = getCardCost(target);
           const newCost = Math.max(0, effectiveCost - 1);
@@ -1398,6 +1452,10 @@ function applyRiftStartOfTurn(state: CombatState): CombatState {
 // ─── applyDamage ─────────────────────────────────────────────────────────────
 
 export function applyDamage(state: CombatState, targetId: string, amount: number, source: string): CombatState {
+  return withCombatRng(state, (wrapped) => applyDamageInner(wrapped, targetId, amount, source));
+}
+
+function applyDamageInner(state: CombatState, targetId: string, amount: number, source: string): CombatState {
   let s = { ...state };
   s = log(s, `${source} deals ${amount} damage to ${targetId}`);
 

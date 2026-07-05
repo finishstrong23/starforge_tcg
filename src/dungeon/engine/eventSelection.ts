@@ -5,15 +5,7 @@ import { POTION_POOL } from '../data/potions';
 import { RELIC_POOL } from '../data/relics';
 import { RUN_MODIFIER_POOL } from '../data/runModifiers';
 import type { DungeonEventChoiceDefinition, DungeonEventDefinition, Faction } from '../types';
-
-function hashSeed(seed: string): number {
-  let h = 2166136261 >>> 0;
-  for (let i = 0; i < seed.length; i++) {
-    h ^= seed.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
+import { hashSeed } from './seededRng';
 
 export function pickEventForNode(
   act: 1 | 2 | 3,

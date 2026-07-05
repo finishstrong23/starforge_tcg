@@ -1,134 +1,67 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useDungeonRun } from '../context/DungeonRunContext';
 import { CardComponent } from './CardComponent';
 import { PotionPickupModal } from './PotionPickupModal';
-import { RELIC_POOL } from '../data/relics';
-import { createCardInstance, generateRewardOptions } from '../engine/draft';
-import { getPotionDef, rollPotionDrop } from '../data/potions';
-import { getAscensionMods } from '../engine/ascension';
+import { createCardInstance } from '../engine/draft';
+import { getCardDefById, getRelicById } from '../engine/nodeRewards';
+import { getPotionDef } from '../data/potions';
 import { getPotionArt, getRelicArt } from '../assets/artRegistry';
 import { TokenArt } from './TokenArt';
-import type { CardDefinition, PotionInstance, RelicDefinition } from '../types';
+import type { CardDefinition } from '../types';
 import { getDungeonSceneArt } from '../assets/basicTokenArt';
 
-function pickRandom<T>(arr: T[]): T | undefined {
-  return arr.length ? arr[Math.floor(Math.random() * arr.length)] : undefined;
-}
-
-function generateRewardRelic(isBoss: boolean, rareWeightMul = 1): RelicDefinition | undefined {
-  if (isBoss) return pickRandom(RELIC_POOL.filter((r) => r.rarity === 'Boss'));
-
-  // Weighted pick across Uncommon (weight 1) and Rare (weight rareWeightMul).
-  // A8 halves rareWeightMul to 0.5 → a Rare drop is half as likely.
-  const uncommons = RELIC_POOL.filter((r) => r.rarity === 'Uncommon');
-  const rares     = RELIC_POOL.filter((r) => r.rarity === 'Rare');
-  if (uncommons.length === 0 && rares.length === 0) return undefined;
-
-  const totalW = uncommons.length + rares.length * rareWeightMul;
-  if (totalW <= 0) return pickRandom(uncommons);
-  const roll = Math.random() * totalW;
-  if (roll < uncommons.length) return pickRandom(uncommons);
-  return pickRandom(rares) ?? pickRandom(uncommons);
-}
-
+/**
+ * Post-combat / treasure reward screen.
+ *
+ * Pure renderer: the reward bundle (gold, card options, relic, potion) is
+ * rolled ONCE by the run reducer when the reward phase is entered, persisted
+ * on RunState, and claimed through idempotent reducer actions. Refreshing
+ * the page restores the identical bundle with claim flags intact — the old
+ * mount-time Math.random rolls made F5 an infinite gold/reroll exploit.
+ */
 export const RewardView: React.FC = () => {
-  const { runState, draftFaction, addCardToDeck, addRelic, addGold, addPotion, discardPotion, returnToMap, advanceAct } = useDungeonRun();
+  const {
+    runState,
+    takeRewardCard, skipRewardCard, takeRewardRelic, takeRewardPotion, skipRewardPotion,
+    returnToMap, advanceAct,
+  } = useDungeonRun();
 
-  const act = runState?.currentAct ?? 1;
-  const currentMap = runState?.actMaps[(runState?.currentAct ?? 1) - 1];
-  const isBossReward = currentMap?.completed ?? false;
-  const combatIndex = runState?.runStats.totalCombats ?? 0;
-  const showRelic = isBossReward || combatIndex % 3 === 0;
-
-  // Per-act room number for tier-weighted rewards: count of visited nodes in
-  // the current act's map. Restarts each act per spec ("Act 2 room 1 is room
-  // 1 for weighting, NOT room 14").
-  const roomNumber = currentMap?.nodes.filter((n) => n.visited).length ?? 1;
-
-  // Determine elite from the most-recently-visited node's type.
-  const lastNode = currentMap?.nodes.find((n) => n.id === currentMap?.currentNodeId);
-  const isElite = lastNode?.type === 'elite';
-
-  // Ascension modifiers — A7 scales gold reward, A8 halves rare relic odds.
-  const ascensionMods = getAscensionMods(runState?.ascensionLevel ?? 0);
-
-  // Combat gold rewards (rolled once on mount). Regular ~10-18, elite ~25-35,
-  // boss ~45-60. Scaled by A7's goldRewardMul.
-  const [goldGained] = useState<number>(() => {
-    const base = isBossReward ? 45 + Math.floor(Math.random() * 16)  // 45-60
-               : isElite       ? 25 + Math.floor(Math.random() * 11) // 25-35
-                               : 10 + Math.floor(Math.random() * 9); // 10-18
-    return Math.max(1, Math.round(base * ascensionMods.goldRewardMul));
-  });
-  // Award the gold once on mount (StrictMode-safe: initialiser of useState only runs once).
-  const [, setGoldAwarded] = useState(false);
-
-  const [cardOptions] = useState<CardDefinition[]>(() =>
-    // Pass the deck so the roller can skip cards the player already owns
-    // in upgraded form (Phase 5 integration policy).
-    generateRewardOptions(
-      roomNumber,
-      act as 1 | 2 | 3,
-      draftFaction ?? undefined,
-      Math.random,
-      runState?.deck ?? [],
-    ),
-  );
-  const [relicOffer] = useState<RelicDefinition | undefined>(() =>
-    showRelic ? generateRewardRelic(isBossReward, ascensionMods.rareRelicMul) : undefined,
-  );
-  // Roll a potion drop once per reward screen. Elites + bosses always drop,
-  // regular combats roll at 40 % per spec.
-  const [potionOffer] = useState<PotionInstance | null>(() =>
-    rollPotionDrop({ isElite, isBoss: isBossReward }),
-  );
-
-  // Award the rolled gold exactly once when the reward screen mounts.
-  useEffect(() => {
-    setGoldAwarded((awarded) => {
-      if (!awarded && goldGained > 0) addGold(goldGained);
-      return true;
-    });
-  }, []);
-
-  const [picked, setPicked] = useState(false);
-  const [relicTaken, setRelicTaken] = useState(false);
-  const [potionTaken, setPotionTaken] = useState(false);
   const [pickupModalOpen, setPickupModalOpen] = useState(false);
 
-  const handleCardPick = (def: CardDefinition) => {
-    addCardToDeck(createCardInstance(def));
-    setPicked(true);
-  };
+  const reward = runState?.pendingReward ?? null;
+  const isBossReward = reward?.isBossReward ?? false;
+  const isElite = reward?.isElite ?? false;
+  const isTreasure = reward?.isTreasure ?? false;
 
-  const handleRelicTake = (relic: RelicDefinition) => {
-    addRelic(relic);
-    setRelicTaken(true);
-  };
+  const cardOptions = (reward?.cardOptionIds ?? [])
+    .map((id) => getCardDefById(id))
+    .filter((def): def is CardDefinition => Boolean(def));
+  const relicOffer = reward?.relicId ? getRelicById(reward.relicId) : undefined;
+  const potionOffer = reward?.potion ?? null;
 
-  const handlePotionTake = (potion: PotionInstance) => {
-    if (!runState) return;
-    const slots = runState.potions ?? [];
-    const empty = slots.findIndex((p) => p === null);
+  const picked = reward?.cardResolved ?? true;
+  const relicTaken = reward?.relicTaken ?? true;
+  const potionTaken = reward?.potionResolved ?? true;
+  const goldGained = reward?.gold ?? 0;
+
+  const handlePotionTake = () => {
+    if (!runState || !potionOffer) return;
+    const empty = runState.potions.findIndex((p) => p === null);
     if (empty === -1) {
       // Inventory full → open the pickup picker
       setPickupModalOpen(true);
       return;
     }
-    const ok = addPotion(potion);
-    if (ok) setPotionTaken(true);
+    takeRewardPotion();
   };
 
   const handlePotionSwap = (slotIndex: number) => {
-    if (!potionOffer) return;
-    discardPotion(slotIndex);          // free the slot
-    addPotion(potionOffer, slotIndex); // and immediately fill it with the new potion
-    setPotionTaken(true);
+    takeRewardPotion(slotIndex);
     setPickupModalOpen(false);
   };
 
   const handlePotionSkip = () => {
-    setPotionTaken(true);
+    skipRewardPotion();
     setPickupModalOpen(false);
   };
 
@@ -237,10 +170,12 @@ export const RewardView: React.FC = () => {
     transition: 'opacity 200ms',
   });
 
+  const title = isBossReward ? 'Boss Reward' : isTreasure ? 'Treasure' : 'Victory';
+
   return (
     <div style={s.root}>
       <div style={{ textAlign: 'center' }}>
-        <h2 style={s.title}>{isBossReward ? 'Boss Reward' : 'Victory'}</h2>
+        <h2 style={s.title}>{title}</h2>
         <div style={s.subtitle}>
           {picked ? 'Card added to deck.' : 'Choose a card to add to your deck.'}
         </div>
@@ -260,16 +195,16 @@ export const RewardView: React.FC = () => {
               <div
                 key={def.id}
                 style={cardWrapperFn(false)}
-                onClick={() => handleCardPick(def)}
+                onClick={() => takeRewardCard(def.id)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter') handleCardPick(def); }}
+                onKeyDown={(e) => { if (e.key === 'Enter') takeRewardCard(def.id); }}
               >
                 <CardComponent card={createCardInstance(def)} selectable />
               </div>
             ))}
           </div>
-          <button type="button" style={s.skipBtn} onClick={() => setPicked(true)}>
+          <button type="button" style={s.skipBtn} onClick={skipRewardCard}>
             Skip card
           </button>
         </>
@@ -289,14 +224,14 @@ export const RewardView: React.FC = () => {
       {relicOffer && !relicTaken && (
         <>
           <div style={s.sectionLabel}>
-            {isBossReward ? 'Boss Relic' : 'Relic Offer'}
+            {isBossReward ? 'Boss Relic' : isTreasure ? 'Chest Relic' : 'Relic Offer'}
           </div>
           <div
             style={s.relicBox}
-            onClick={() => handleRelicTake(relicOffer)}
+            onClick={takeRewardRelic}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleRelicTake(relicOffer); }}
+            onKeyDown={(e) => { if (e.key === 'Enter') takeRewardRelic(); }}
           >
             <TokenArt
               src={getRelicArt(relicOffer.id)}
@@ -337,10 +272,10 @@ export const RewardView: React.FC = () => {
                 width: '100%',
                 boxShadow: `0 0 12px ${rarityColor}33`,
               }}
-              onClick={() => handlePotionTake(potionOffer)}
+              onClick={handlePotionTake}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter') handlePotionTake(potionOffer); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') handlePotionTake(); }}
             >
               <TokenArt
                 src={getPotionArt(def.id)}
@@ -357,7 +292,7 @@ export const RewardView: React.FC = () => {
                 <div style={{ fontSize: 10, opacity: 0.85, lineHeight: 1.4 }}>{def.effect}</div>
               </div>
             </div>
-            <button type="button" style={s.skipBtn} onClick={() => setPotionTaken(true)}>
+            <button type="button" style={s.skipBtn} onClick={skipRewardPotion}>
               Skip potion
             </button>
           </>

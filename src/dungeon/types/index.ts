@@ -373,6 +373,9 @@ export interface CombatState {
   drawPerTurn?: number;
   /** Forgemaster's Sigil: next card played this combat gets +2 damage/block. */
   forgemasterSigilPending?: boolean;
+  /** Persisted RNG stream state. All in-combat randomness draws from this so
+   *  a refresh mid-combat replays identically instead of rerolling. */
+  rngState?: number;
 }
 
 // ─── POTIONS ─────────────────────────────────────────────────────────────────
@@ -471,6 +474,43 @@ export interface DungeonEventDefinition {
   choices: DungeonEventChoiceDefinition[];
 }
 
+// ─── NODE RESOLUTION STATE ──────────────────────────────────────────────────
+// Rolled once (seeded from the run seed + node id) when the player enters a
+// reward/shop/blessing screen, then persisted in RunState. Refreshing the
+// page restores the same offers with the same claim flags — no rerolls, no
+// double gold.
+
+export interface PendingReward {
+  /** Map node this bundle was rolled for (null for legacy saves). */
+  sourceNodeId: string | null;
+  isBossReward: boolean;
+  isElite: boolean;
+  isTreasure: boolean;
+  /** Gold rolled for this reward. Already added to run gold when the bundle
+   *  was created — display-only here. */
+  gold: number;
+  /** Card choice offer (CardDefinition ids). */
+  cardOptionIds: string[];
+  /** True once the player picked a card or skipped the pick. */
+  cardResolved: boolean;
+  relicId?: string;
+  relicTaken: boolean;
+  potion?: PotionInstance;
+  /** True once the potion was taken or skipped. */
+  potionResolved: boolean;
+}
+
+export interface ShopStock {
+  cardIds: string[];
+  soldCardIds: string[];
+  relicIds: string[];
+  soldRelicIds: string[];
+  potions: PotionInstance[];
+  soldPotionIndexes: number[];
+  /** Card removals purchased at this shop (capped at 1 per visit, STS-style). */
+  removalsUsed: number;
+}
+
 // ─── RUN STATE ───────────────────────────────────────────────────────────────
 export type RunPhase =
   | 'draft'
@@ -514,6 +554,13 @@ export interface RunState {
   potions: (PotionInstance | null)[];
   /** Event/blessing consequences waiting to affect future combat or the current act. */
   runModifiers?: RunModifierDefinition[];
+  /** Rolled reward bundle for the reward screen being resolved. Cleared on
+   *  leaving the screen. Persisted so a refresh cannot re-award or reroll. */
+  pendingReward?: PendingReward | null;
+  /** Rolled stock for the shop node being visited. Cleared on leaving. */
+  shopStock?: ShopStock | null;
+  /** Blessing options rolled for the current blessing screen. */
+  blessingOptionIds?: string[] | null;
   runStats: {
     totalCombats: number;
     elitesDefeated: number;

@@ -1,27 +1,5 @@
 import type { ActMap, MapNode, NodeType } from '../types';
-
-// ─── Seeded PRNG ──────────────────────────────────────────────────────────────
-
-/** Mulberry32 — small, fast, good enough for map-gen determinism. */
-function mulberry32(seed: number) {
-  let a = seed >>> 0;
-  return function rng(): number {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function hashSeed(seed: string): number {
-  let h = 2166136261 >>> 0;
-  for (let i = 0; i < seed.length; i++) {
-    h ^= seed.charCodeAt(i);
-    h = Math.imul(h, 16777619);
-  }
-  return h >>> 0;
-}
+import { hashSeed, mulberry32 } from './seededRng';
 
 // ─── Topology constants ───────────────────────────────────────────────────────
 // The map is a 9-row grid. Row 0 = three start nodes (one per column), one

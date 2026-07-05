@@ -51,9 +51,9 @@ const RARITY_WEIGHTS: Record<number, Record<string, number>> = {
 
 const PYRO_OPENING_DRAFT_IDS = ['P-003', 'P-010', 'P-016', 'P-007'];
 
-function weightedRarityPick(round: number): 'Common' | 'Uncommon' | 'Rare' {
+function weightedRarityPick(round: number, rng: () => number = Math.random): 'Common' | 'Uncommon' | 'Rare' {
   const weights = RARITY_WEIGHTS[Math.min(round, 3)];
-  const roll = Math.random() * 100;
+  const roll = rng() * 100;
   if (roll < weights['Common']) return 'Common';
   if (roll < weights['Common'] + weights['Uncommon']) return 'Uncommon';
   return 'Rare';
@@ -69,11 +69,13 @@ function countCopies(deck: CardInstance[], defId: string): number {
  * @param round       1-indexed draft round (affects rarity distribution)
  * @param existingDeck current deck (used to cap duplicates at 3)
  * @param faction     player's primary faction (receives 70 % of offers)
+ * @param rng         RNG (defaults to Math.random; seeded by the run reducer)
  */
 export function generateDraftOptions(
   round: number,
   existingDeck: CardInstance[],
   faction?: Faction,
+  rng: () => number = Math.random,
 ): CardDefinition[] {
   if (faction === 'Pyroclast' && round === 1) {
     return PYRO_OPENING_DRAFT_IDS
@@ -97,7 +99,7 @@ export function generateDraftOptions(
     // was provided, fall back to the full pool.
     const pool = faction ? CARD_POOL.filter((c) => c.faction === faction) : CARD_POOL;
 
-    const rarity = weightedRarityPick(round);
+    const rarity = weightedRarityPick(round, rng);
     const candidates = pool.filter(
       (c) =>
         c.rarity === rarity &&
@@ -107,7 +109,7 @@ export function generateDraftOptions(
 
     if (candidates.length === 0) continue;
 
-    const pick = candidates[Math.floor(Math.random() * candidates.length)];
+    const pick = candidates[Math.floor(rng() * candidates.length)];
     usedIds.add(pick.id);
     chosen.push(pick);
   }
