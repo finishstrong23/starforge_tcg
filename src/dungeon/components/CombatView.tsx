@@ -1765,13 +1765,16 @@ export const CombatView: React.FC = () => {
         />
       )}
 
-      {/* ── Bottom-center: Hand. Sits between the energy orb and the right HUD. */}
+      {/* ── Bottom-center: Hand. Sits between the energy orb and the right HUD.
+          Both insets use the (larger) right-HUD clearance so the container —
+          and therefore the cards — are centered on the SCREEN. Asymmetric
+          insets used to shift the whole hand ~70px left of center. */}
       <div
         style={{
           position: 'absolute',
           bottom: 'var(--dungeon-hand-bottom)',
-          left: 'var(--dungeon-hand-left)',    // clear the energy orb
-          right: 'var(--dungeon-hand-right)',  // clear Heat, discard, and end-turn controls
+          left: 'var(--dungeon-hand-right)',
+          right: 'var(--dungeon-hand-right)',
           zIndex: 4,
           minWidth: 0,
         }}

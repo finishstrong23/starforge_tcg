@@ -62,6 +62,18 @@ export const HandComponent: React.FC<HandComponentProps> = ({
   const showPiles = drawCount !== undefined || discardCount !== undefined;
   const [previewCard, setPreviewCard] = React.useState<CardInstance | null>(null);
 
+  // The hover preview is normally cleared by pointer-leave, but playing a
+  // card unmounts it under the cursor and no leave event ever fires — the
+  // big preview used to stay stuck mid-screen. Clear it whenever the
+  // previewed card leaves the hand or the hand is disabled (enemy turn).
+  React.useEffect(() => {
+    setPreviewCard((current) =>
+      current && !disabled && hand.some((c) => c.instanceId === current.instanceId)
+        ? current
+        : null,
+    );
+  }, [hand, disabled]);
+
   const s: Record<string, React.CSSProperties> = {
     wrapper: {
       display: 'flex',
@@ -92,6 +104,9 @@ export const HandComponent: React.FC<HandComponentProps> = ({
       display: 'flex',
       gap: 8,
       flexWrap: 'nowrap',
+      // Centering happens via auto margins on the first/last card (below):
+      // that centers the hand when it fits, but unlike justify-content:center
+      // it never clips the leftmost cards once the row overflows and scrolls.
       justifyContent: 'flex-start',
       width: '100%',
       overflowX: 'auto',
@@ -133,7 +148,7 @@ export const HandComponent: React.FC<HandComponentProps> = ({
   return (
     <div style={s.wrapper}>
       {previewCard && (
-        <div style={s.previewPanel}>
+        <div style={s.previewPanel} data-testid="hand-card-preview">
           <CardComponent
             card={previewCard}
             size="draft"
@@ -165,7 +180,7 @@ export const HandComponent: React.FC<HandComponentProps> = ({
           </div>
         ) : (
           <div style={s.row}>
-            {hand.map((card) => {
+            {hand.map((card, idx) => {
               const affordable = getCardCost(card) <= energy;
               const isSelected = card.instanceId === selectedId;
               return (
@@ -175,7 +190,11 @@ export const HandComponent: React.FC<HandComponentProps> = ({
                   onPointerLeave={() => setPreviewCard((current) => current?.instanceId === card.instanceId ? null : current)}
                   onFocus={() => setPreviewCard(card)}
                   onBlur={() => setPreviewCard((current) => current?.instanceId === card.instanceId ? null : current)}
-                  style={{ scrollSnapAlign: 'center' }}
+                  style={{
+                    scrollSnapAlign: 'center',
+                    marginLeft: idx === 0 ? 'auto' : undefined,
+                    marginRight: idx === hand.length - 1 ? 'auto' : undefined,
+                  }}
                 >
                   <CardComponent
                     card={card}
