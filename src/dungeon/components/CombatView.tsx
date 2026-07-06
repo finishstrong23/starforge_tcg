@@ -24,6 +24,8 @@ import { getStatusDisplayMeta, getStatusTooltip } from '../utils/statusDisplay';
 const ENEMY_TURN_DELAY_MS = 1200;
 const ENEMY_ACTION_LINGER_MS = 900;
 const FLOAT_DURATION_MS = 1300;
+/** How long the Victory/Defeat overlay holds before the screen changes. */
+const COMBAT_END_BEAT_MS = 1500;
 const HEAT_TOOLTIP = 'Heat powers Pyroclast cards. Build it with fire cards, then Vent it often for damage, Block, draw, or Ignite. Heat caps at 10; extra Heat is wasted.';
 
 // ─── Floating combat numbers ──────────────────────────────────────────────────
@@ -908,7 +910,32 @@ export const CombatView: React.FC = () => {
     potionName: string;
   } | null>(null);
 
-  const cs = runState?.combatState;
+  // ── Combat-end beat ────────────────────────────────────────────────────
+  // Terminal combat states are held locally for a beat so the Victory /
+  // Defeat overlay is actually seen: dispatching them immediately makes the
+  // reducer swap phases and unmount this view in the same frame (the overlay
+  // was dead code). The finalize effect below then performs the real
+  // dispatch — and also catches terminal states that arrive through the
+  // reducer directly (e.g. a potion kill via USE_POTION), which previously
+  // stranded the combat with no transition at all.
+  const [heldTerminal, setHeldTerminal] = useState<CombatState | null>(null);
+
+  const cs = heldTerminal ?? runState?.combatState;
+
+  const commitCombat = useCallback((next: CombatState) => {
+    if (next.phase === 'combat_end_win' || next.phase === 'combat_end_loss') {
+      setHeldTerminal(next);
+      return;
+    }
+    setCombatState(next);
+  }, [setCombatState]);
+
+  useEffect(() => {
+    if (!cs) return;
+    if (cs.phase !== 'combat_end_win' && cs.phase !== 'combat_end_loss') return;
+    const id = window.setTimeout(() => setCombatState(cs), COMBAT_END_BEAT_MS);
+    return () => window.clearTimeout(id);
+  }, [cs, setCombatState]);
 
   // Pick a stable random background per encounter, seeded by enemy ID so the
   // same fight always shows the same scene (and re-renders don't flicker).
@@ -1068,7 +1095,7 @@ export const CombatView: React.FC = () => {
       const next = playCard(cs, instanceId, 'enemy');
       setSelectedCardId(null);
       setSelectedMinionId(null);
-      setCombatState(next);
+      commitCombat(next);
       return;
     }
 
@@ -1078,14 +1105,14 @@ export const CombatView: React.FC = () => {
     }
     setSelectedCardId(instanceId);
     setSelectedMinionId(null);
-  }, [cs, selectedCardId, setCombatState]);
+  }, [cs, selectedCardId, commitCombat]);
 
   const handleAugmentTargetPick = useCallback((targetId: string) => {
     if (!cs || !pendingAugment) return;
     const next = applyAugment(cs, pendingAugment.cardId, targetId);
     setPendingAugment(null);
-    setCombatState(next);
-  }, [cs, pendingAugment, setCombatState]);
+    commitCombat(next);
+  }, [cs, pendingAugment, commitCombat]);
 
   const handleAugmentCancel = useCallback(() => setPendingAugment(null), []);
 
@@ -1093,8 +1120,8 @@ export const CombatView: React.FC = () => {
     if (!cs || !pendingChoice) return;
     const next = playCard(cs, pendingChoice.cardId, 'enemy', optionText);
     setPendingChoice(null);
-    setCombatState(next);
-  }, [cs, pendingChoice, setCombatState]);
+    commitCombat(next);
+  }, [cs, pendingChoice, commitCombat]);
 
   const handleChoiceCancel = useCallback(() => setPendingChoice(null), []);
 
@@ -1113,7 +1140,7 @@ export const CombatView: React.FC = () => {
     if (selectedCardId) {
       const next = playCard(cs, selectedCardId, 'enemy');
       setSelectedCardId(null);
-      setCombatState(next);
+      commitCombat(next);
       return;
     }
 
@@ -1122,9 +1149,9 @@ export const CombatView: React.FC = () => {
       const targetId = guardians.length > 0 ? guardians[0].instanceId : 'enemy';
       const next = attackWithMinion(cs, selectedMinionId, targetId);
       setSelectedMinionId(null);
-      setCombatState(next);
+      commitCombat(next);
     }
-  }, [cs, selectedCardId, selectedMinionId, setCombatState, pendingPotionTarget, usePotion]);
+  }, [cs, selectedCardId, selectedMinionId, commitCombat, pendingPotionTarget, usePotion]);
 
   const handleEnemyMinionClick = useCallback((minionId: string) => {
     if (!cs) return;
@@ -1139,16 +1166,16 @@ export const CombatView: React.FC = () => {
     if (selectedCardId) {
       const next = playCard(cs, selectedCardId, minionId);
       setSelectedCardId(null);
-      setCombatState(next);
+      commitCombat(next);
       return;
     }
 
     if (selectedMinionId) {
       const next = attackWithMinion(cs, selectedMinionId, minionId);
       setSelectedMinionId(null);
-      setCombatState(next);
+      commitCombat(next);
     }
-  }, [cs, selectedCardId, selectedMinionId, setCombatState, pendingPotionTarget, usePotion]);
+  }, [cs, selectedCardId, selectedMinionId, commitCombat, pendingPotionTarget, usePotion]);
 
   const handlePlayerMinionClick = useCallback((minionId: string) => {
     if (!cs) return;
@@ -1166,8 +1193,8 @@ export const CombatView: React.FC = () => {
     setSelectedCardId(null);
     setSelectedMinionId(null);
     const next = endPlayerTurn(cs, relics);
-    setCombatState(next);
-  }, [cs, relics, setCombatState]);
+    commitCombat(next);
+  }, [cs, relics, commitCombat]);
 
   // ── Potion drinking ───────────────────────────────────────────────────
   // Phase 2 minimum:
@@ -1231,14 +1258,14 @@ export const CombatView: React.FC = () => {
       setEnemyActing(true);
       resolveId = window.setTimeout(() => {
         const next = executeEnemyTurn(cs);
-        setCombatState(next);
+        commitCombat(next);
       }, ENEMY_ACTION_LINGER_MS);
     }, ENEMY_TURN_DELAY_MS);
     return () => {
       window.clearTimeout(showIntentId);
       if (resolveId !== null) window.clearTimeout(resolveId);
     };
-  }, [cs, setCombatState]);
+  }, [cs, commitCombat]);
 
   const cardPreviews = useMemo(() => {
     const previews: Record<string, string[]> = {};
