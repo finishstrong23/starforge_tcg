@@ -36,7 +36,6 @@ interface DungeonRootProps {
 
 const FACTIONS: Array<{
   id: FactionId;
-  glyph: string;
   accent: string;
   tagline: string;
   mechanic: string;
@@ -45,7 +44,6 @@ const FACTIONS: Array<{
 }> = [
   {
     id: 'Pyroclast',
-    glyph: 'PY',
     accent: '#ff5a2e',
     tagline: 'Volcanic-born war-creatures.',
     mechanic: 'Heat',
@@ -55,7 +53,6 @@ const FACTIONS: Array<{
   },
   {
     id: 'Luminar',
-    glyph: 'LU',
     accent: '#f5d67a',
     tagline: 'Star-priests, celestial channelers.',
     mechanic: 'Lumens / Channel',
@@ -65,7 +62,6 @@ const FACTIONS: Array<{
   },
   {
     id: 'Cogsmiths',
-    glyph: 'CO',
     accent: '#4aa8e0',
     tagline: 'Artificer engineers. Modular warbands.',
     mechanic: 'Augments',
@@ -75,7 +71,6 @@ const FACTIONS: Array<{
   },
   {
     id: 'WarpRiders',
-    glyph: 'WR',
     accent: '#c27dff',
     tagline: 'Dimensional raiders. Riders of the rift.',
     mechanic: 'Flux',
@@ -116,13 +111,6 @@ const factionArtFrameStyle = (accent: string): React.CSSProperties => ({
   boxShadow: `0 8px 20px ${accent}18`,
 });
 
-const cardGlyphStyle = (accent: string): React.CSSProperties => ({
-  fontSize: '1.6rem',
-  color: accent,
-  width: '2rem',
-  textAlign: 'center',
-});
-
 const cardMechanicLabelStyle = (accent: string): React.CSSProperties => ({
   fontSize: '0.7rem',
   letterSpacing: '0.06em',
@@ -154,7 +142,12 @@ const beginBtnStyle = (accent: string, disabled: boolean): React.CSSProperties =
 const s: Record<string, React.CSSProperties> = {
   root: {
     width: '100%',
-    minHeight: '100%',
+    // The app shell is a fixed-viewport container (overflow hidden), so the
+    // setup screen must own its scrolling — with four faction cards the
+    // content is taller than most viewports, and without this the ascension
+    // picker and everything below was simply clipped.
+    height: '100%',
+    overflowY: 'auto',
     backgroundImage: [
       'linear-gradient(180deg, rgba(7,7,18,0.18), rgba(7,7,18,0.58))',
       `url("${getDungeonSceneArt('classSelect')}")`,
@@ -216,7 +209,9 @@ const s: Record<string, React.CSSProperties> = {
     width: '100%',
     maxWidth: '1200px',
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+    // 230px min lets all four faction cards share one row on typical
+    // desktop widths instead of wrapping into a two-row wall.
+    gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))',
     gap: '1rem',
     marginBottom: '2rem',
   },
@@ -290,7 +285,9 @@ const s: Record<string, React.CSSProperties> = {
     position: 'fixed',
     right: 'calc(24px + var(--app-safe-right))',
     bottom: 'calc(18px + var(--app-safe-bottom))',
-    zIndex: 130,
+    // Above the telemetry debug/privacy panels (zIndex 998-999), which
+    // float in the same corner and used to cover the Begin Run button.
+    zIndex: 1200,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
@@ -305,7 +302,8 @@ const s: Record<string, React.CSSProperties> = {
   runWrap: {
     position: 'relative',
     width: '100%',
-    minHeight: '100%',
+    height: '100%',
+    overflowY: 'auto',
     fontFamily: 'var(--app-font-family)',
   },
   deckBtn: {
@@ -818,9 +816,10 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   />
                 </div>
                 <div style={s.cardHeader}>
-                  <div style={cardGlyphStyle(f.accent)}>{f.glyph}</div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={s.cardName}>{f.id === 'WarpRiders' ? 'Warp Riders' : f.id}</span>
+                    <span style={{ ...s.cardName, color: f.accent }}>
+                      {f.id === 'WarpRiders' ? 'Warp Riders' : f.id}
+                    </span>
                     <span style={s.cardTag}>{f.tagline}</span>
                   </div>
                 </div>
