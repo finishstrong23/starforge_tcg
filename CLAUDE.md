@@ -1,271 +1,83 @@
-# STARFORGE TCG — AI Assistant Guide
+# STARFORGE: Shattered Reach — AI Assistant Guide
 
 ## Overview
-STARFORGE TCG is a mobile-first Trading Card Game featuring 10 asymmetric alien races and a unique card transformation system (STARFORGE). Built with TypeScript, React, and Vite, with Capacitor for native mobile deployment. Deployed to Vercel from the `main` branch.
+STARFORGE is a single-player, Slay-the-Spire-style roguelite deck-builder ("Shattered Reach"): 4 factions (Pyroclast, Cogsmiths, Luminar, Warp Riders), 3 acts with procedurally generated branching maps, turn-based card combat, relics, potions, events, and ascension levels 0-10. TypeScript + React 18 + Vite. Deployed to Vercel from `main`.
+
+> The repo name says "TCG" for historical reasons. The original 1v1 trading card game was removed — this repository is the dungeon roguelite only. `src/ui/App.tsx` boots straight into `DungeonRoot`; there is no menu, no multiplayer, no backend beyond a Vercel serverless telemetry intake (`api/event.ts`).
 
 ## Key Commands
 ```bash
-npm run dev          # Start dev server (port 3000, network-accessible)
-npm run build:ui     # Production build (Vite → dist/)
-npm run build        # TypeScript compile only (tsc → dist/)
-npm test             # Run tests (Jest + ts-jest)
-npm run test:watch   # Watch mode for tests
-npm run test:coverage # Tests with coverage report
-npm run lint         # ESLint (src/**/*.ts,tsx)
-npm run preview      # Preview production build locally
-```
-
-### Mobile (Capacitor)
-```bash
-npm run cap:sync     # Build + sync to native projects
-npm run cap:android  # Build, sync, and open Android Studio
-npm run cap:ios      # Build, sync, and open Xcode
+npm run dev            # Vite dev server
+npm test               # Jest (node env; ~750 tests, all deterministic)
+npm run lint           # ESLint over src/
+npm run build          # tsc typecheck/compile
+npm run build:ui       # Vite production build → dist/
+npm run preview        # Serve the production build locally
+npm run balance:report        # Offline balance lab report
+npm run telemetry:summary     # Aggregate telemetry logs
+npm run release:beta:check    # The CI auto-merge gate, runnable locally
 ```
 
 ## Project Structure
 ```
 src/
-├── index.ts              # Main entry point, exports all modules + quick-start helpers
-├── assets.d.ts           # Asset type declarations
-├── assets/               # Static assets (logo.png, board.png, background.png)
-├── types/                # Core type definitions
-│   ├── Card.ts           # Card, CardDefinition, CardInstance types
-│   ├── Effects.ts        # Effect system types
-│   ├── Game.ts           # GameState, TurnPhase, etc.
-│   ├── Keywords.ts       # 21 keywords (CombatKeyword, TriggerKeyword, OriginalKeyword)
-│   ├── Player.ts         # Player state types
-│   ├── Race.ts           # 10 races enum + metadata (Race, RaceInfo, RaceData)
-│   └── Starforge.ts      # STARFORGE transformation types
-├── engine/               # Core game engine
-│   ├── GameEngine.ts     # Main game loop, turn management, game actions
-│   └── EffectResolver.ts # Card effect resolution pipeline
-├── combat/               # Combat system
-│   ├── CombatResolver.ts # Attack resolution, keyword interactions
-│   └── DeathProcessor.ts # Death triggers, Last Words processing
-├── cards/                # Card system
-│   ├── CardDatabase.ts   # Card registry (globalCardDatabase)
-│   └── CardFactory.ts    # Card instance creation (globalCardFactory)
-├── data/                 # Card data definitions
-│   ├── SampleCards.ts    # Base set card definitions
-│   ├── ExpansionCards.ts # Expansion card definitions
-│   ├── BalancedStarterDecks.ts # Pre-built balanced decks per race
-│   └── CardCollection.ts # Collection management
-├── game/                 # Game state management
-│   ├── GameState.ts      # State initialization and management
-│   ├── Board.ts          # Board/field zone logic
-│   └── Zone.ts           # Zone types (hand, deck, field, graveyard)
-├── ai/                   # AI opponents
-│   ├── AIPlayer.ts       # AI decision-making logic
-│   └── AIBattleSimulator.ts # AI battle simulation
-├── heroes/               # Hero system
-│   └── HeroDefinitions.ts # Hero powers and stats per race
-├── events/               # Event system
-│   ├── EventEmitter.ts   # Pub/sub event bus
-│   ├── GameEvent.ts      # Event type definitions
-│   └── FactionWars.ts    # Faction wars event mode
-├── campaign/             # Single-player campaign
-│   ├── CampaignData.ts   # Campaign level/story data
-│   └── CampaignState.ts  # Campaign progress state
-├── dungeon/              # Dungeon run mode
-│   ├── DungeonData.ts    # Dungeon encounters/rewards
-│   └── DungeonState.ts   # Dungeon run state
-├── puzzle/               # Puzzle mode
-│   ├── PuzzleData.ts     # Puzzle definitions
-│   └── PuzzleState.ts    # Puzzle progress state
-├── tagteam/              # Tag team mode (2v2)
-│   ├── TagTeamData.ts    # Tag team rules/data
-│   └── TagTeamState.ts   # Tag team game state
-├── progression/          # Player progression systems
-│   ├── Achievements.ts   # Achievement definitions and tracking
-│   ├── BattlePass.ts     # Battle pass tiers and rewards
-│   ├── CardCosmetics.ts  # Card skins, borders, effects
-│   ├── CardPacks.ts      # Pack opening system
-│   ├── CraftingSystem.ts # Card crafting/disenchanting
-│   ├── DailyQuests.ts    # Daily quest generation
-│   ├── ReplaySystem.ts   # Game replay recording/playback
-│   ├── SeasonalRewards.ts # Season-end rewards
-│   └── TournamentMode.ts # Tournament bracket system
-├── stats/                # Statistics and ratings
-│   ├── GameStats.ts      # Per-game statistics tracking
-│   └── PvPRating.ts      # ELO/MMR rating system
-├── analytics/            # Analytics
-│   └── AnalyticsService.ts # Event tracking service
-├── cosmetics/            # Cosmetic items
-│   └── BoardPets.ts      # Board pet companions
-├── audio/                # Audio
-│   └── SoundManager.ts   # Sound effect and music management
-├── lore/                 # Game lore
-│   └── CardVoicelines.ts # Card voice line data
-├── mobile/               # Mobile-specific
-│   └── MobileOptimization.ts # Mobile performance optimizations
-├── i18n/                 # Internationalization (stub)
-├── legal/                # Legal text (stub)
-├── utils/                # Utilities
-│   ├── DeckCodes.ts      # Deck import/export codes
-│   ├── ids.ts            # ID generation
-│   ├── random.ts         # Seeded random utilities
-│   ├── shuffle.ts        # Array shuffling
-│   └── object.ts         # Object helpers
-└── ui/                   # React UI layer
-    ├── main.tsx          # React entry point
-    ├── App.tsx           # Root app component with routing
-    ├── accessibility.ts  # Accessibility utilities
-    ├── capacitor.ts      # Capacitor native bridge setup
-    ├── context/          # React context providers
-    │   ├── GameContext.tsx    # Single-player game state context
-    │   └── PvPGameContext.tsx # PvP multiplayer context
-    ├── network/
-    │   └── MultiplayerManager.ts # PeerJS-based P2P multiplayer
-    ├── styles/
-    │   └── global.css    # Global CSS styles
-    └── components/       # ~50 React components (see below)
+├── dungeon/              # THE LIVE GAME
+│   ├── engine/           # Pure-TS game logic (all of it unit-testable)
+│   │   ├── runReducer.ts       # Single mutation point for run state (all actions)
+│   │   ├── combat.ts           # Combat engine (turns, intents, effects, deaths)
+│   │   ├── mapgen.ts           # 9-row/25-node act map generator (seeded)
+│   │   ├── nodeRewards.ts      # Seeded reward/shop/blessing rolls + shop pricing
+│   │   ├── seededRng.ts        # hashSeed / mulberry32 / resumable stream
+│   │   ├── relicEffects.ts     # All relic trigger handlers
+│   │   ├── saveCompatibility.ts# localStorage save schema + migration
+│   │   ├── draft.ts, heat.ts, ascension.ts, eventSelection.ts, ...
+│   ├── data/             # Content: cards.ts (176), enemies.ts (28), relics.ts (26),
+│   │                     #   potions.ts, events.ts (24), blessings.ts, curses.ts
+│   ├── components/       # React views (renderers over persisted state, ~25 files)
+│   ├── context/DungeonRunContext.tsx  # Provider: hydrate/persist + dispatch wrappers
+│   └── config/mvp.ts     # Faction availability switch (all four live)
+├── roguelite/            # LEGACY module. Still live: cards/ (starter decks, card pool
+│                         #   re-exports) and types. DEAD for the live game: engine/,
+│                         #   persistence/ (the live dungeon has its own).
+└── ui/                   # App shell (fixed-viewport; screens own their scrolling)
+tests/roguelite/          # All tests (Jest, node env, .ts only — no component tests)
+scripts/                  # beta-readiness.mjs (CI gate), balance/telemetry/patch tools
+docs/SHATTERED_REACH_MVP_STATUS.md  # DoD → evidence map for the MVP
 ```
 
-### Key UI Components
-| Component | Purpose |
-|---|---|
-| `MainMenu.tsx` | Main menu with game mode selection |
-| `GameBoard.tsx` | Primary game board (field, hands, heroes) |
-| `Card.tsx` | Card rendering with keywords, stats, art |
-| `DeckBuilder.tsx` | Deck construction interface |
-| `CollectionManager.tsx` | Card collection browser |
-| `CampaignMap.tsx` / `CampaignGame.tsx` | Campaign mode UI |
-| `DungeonRun.tsx` | Dungeon run mode |
-| `PuzzleMode.tsx` | Puzzle challenges |
-| `TagTeamMode.tsx` | 2v2 tag team mode |
-| `Lobby.tsx` | Multiplayer lobby |
-| `PackOpening.tsx` | Card pack opening animation |
-| `StarforgeLogo.tsx` | Logo component (uses raw GitHub URLs with commit SHAs) |
-| `SpaceBackground.tsx` | Animated space background |
+## Architecture Rules (load-bearing — do not violate)
 
-### Root-Level Utility Scripts
-Data processing and balance tools (run with `node`):
-- `convert-cards.mjs` — Convert card data formats
-- `read-xlsx.mjs` — Import cards from Excel spreadsheets
-- `rebuild-decks.mjs` / `rewrite-decks.mjs` — Regenerate starter decks
-- `balance-test.mjs` / `tune-balance*.mjs` — Card balance testing and tuning
-- `adjust-stats.mjs` — Batch card stat adjustments
-- `add-last-words.mjs` / `re-keyword.mjs` — Keyword processing utilities
+1. **Single card definition with `upgraded` flag.** A card's upgrade is expressed on the same `CardDefinition` via `upgradeText` / `upgradedCost` / `upgradedAttack` / `upgradedHealth` (+ optional `upgradeEffects`). Never create separate upgraded card definitions.
+2. **All run-state mutations go through `runReducer.ts`.** Views dispatch actions; they never compute outcomes. Reward claims, shop purchases, and blessing picks are idempotent reducer actions guarded by persisted flags.
+3. **No bare `Math.random` in any run-affecting path.** Node-level rolls use `createSeededRng(runSeed, <purpose>, act, nodeId)`; in-combat randomness goes through the persisted stream (`CombatState.rngState` via `withCombatRng` — internal code calls `combatRandom()`). This is what makes saves refresh-proof (no save-scumming) and full runs reproducible from a seed. The full-run certification suite will flake if you break this.
+4. **Rolled offers persist with claim state.** Rewards (`RunState.pendingReward`), shop stock (`shopStock`), and blessing options (`blessingOptionIds`) live on `RunState` — never in component state.
+5. **Combat effects** resolve primarily via regex over card text (`applySpellEffect`), with `structuredEffects.ts` as the migration path for cards carrying `effects` arrays. When adding cards, match existing text patterns exactly or add structured effects.
+6. **Relics** are data (`data/relics.ts`) + handlers (`relicEffects.ts`). Triggers fired by the engine: `combat_start` (reducer), `combat_end`/acquisition `run_start` (reducer), `turn_start`/`turn_end`/`on_card_play`/`on_kill` (combat.ts). Relics are carried on `CombatState.relics`.
+7. **UI shell is `overflow: hidden` at every level** (`html/body`, `#root`, `.starforge-app-shell`). Any screen that can grow taller than the viewport must set `height: 100%; overflowY: auto` on its root or it will clip.
 
-## Tech Stack
-- **Language**: TypeScript 5.3 (strict mode, ES2020 target)
-- **UI**: React 18 + Vite 5
-- **Testing**: Jest 29 + ts-jest
-- **Linting**: ESLint 8 + @typescript-eslint
-- **Mobile**: Capacitor 8 (Android + iOS)
-- **Multiplayer**: PeerJS (P2P WebRTC)
-- **CI/CD**: GitHub Actions → Vercel (web), Fastlane (mobile)
-- **Build output**: `dist/` directory
-
-## TypeScript Configuration
-- Strict mode enabled (`strict: true`, `strictNullChecks`, `noImplicitAny`, `noImplicitReturns`)
-- Module resolution: `bundler`
-- Path aliases configured in `tsconfig.json`, `vite.config.ts`, and `jest.config.js`:
-  - `@/*` → `src/*`
-  - `@types/*` → `src/types/*`
-  - `@cards/*`, `@game/*`, `@combat/*`, `@events/*`, `@heroes/*`, `@utils/*`, etc.
-
-## ESLint Rules
-- `@typescript-eslint/no-unused-vars`: warn (underscore-prefixed args/vars ignored)
-- `@typescript-eslint/no-explicit-any`: warn
-- `no-console`: off
-- JS files are ignored (only `.ts`/`.tsx` linted)
+## Save Format
+`localStorage['sf:dungeon:save:v1']` — a `DungeonSaveSnapshot` (see `saveCompatibility.ts`). Written on every reducer transition; hydrated on boot with `ensureNodeStates()` healing legacy saves. Ended runs never rehydrate.
 
 ## Testing
-- Tests live in `tests/` directory, mirroring `src/` structure
-- Test patterns: `**/*.test.ts`, `**/*.spec.ts`, `**/__tests__/**/*.ts`
-- Current test files:
-  - `tests/engine/GameEngine.test.ts` — Core engine tests
-  - `tests/engine/EffectResolver.test.ts` — Effect resolution tests
-  - `tests/combat/CombatResolver.test.ts` — Combat system tests
-  - `tests/combat/DeathProcessor.test.ts` — Death processing tests
-  - `tests/keywords/KeywordIntegration.test.ts` — Keyword interaction tests
-  - `tests/ai/AIPlayer.test.ts` — AI player tests
-- Run `npm test` before committing changes to engine, combat, or AI code
+- Jest, `testEnvironment: node`, ts-jest transforms `.ts` only — engine and reducer tests, no component/DOM tests. Put tests in `tests/roguelite/`.
+- Key suites: `fullRunSimulation` (reducer-driven 3-act certification, all factions, refresh-resume), `liveMapgen` (3000-seed stress), `nodeRewards` (save-scum hardening), `enemyBehaviors`, `relicSystem`, `pyroclastMvpMechanics`, per-faction `cardUpgrades*`.
+- `tests/roguelite/mapgen.test.ts` targets the LEGACY `src/roguelite` generator (kept for the dead module); the live generator's suite is `liveMapgen.test.ts`.
+- Everything must stay deterministic — a test that depends on shuffle luck is a bug.
 
-## Game Architecture
+### Visual verification (headless browser)
+`playwright-core` is a devDependency and Chromium is preinstalled at `/opt/pw-browsers/chromium-1194/chrome-linux/chrome`. To drive a real mid-run screen: build a `ContextState` with the reducer in a throwaway jest test, write `createDungeonSaveSnapshot(state)` to JSON, then in Playwright `page.addInitScript` set `localStorage['sf:dungeon:save:v1']` (and `sf:tutorial:dismissed:v1` = `1`) before `page.goto` on `npm run preview`. The app hydrates directly into that screen.
 
-### Core Concepts
-- **10 Races**: Cogsmiths, Luminar, Pyroclast, Voidborn, Biotitans, Crystalline, Warp Riders, Hivemind, Astromancers, Chronobound (+ Neutral)
-- **21 Keywords**: 8 combat (Guardian, Barrier, Swift, Blitz, etc.), 2 trigger (Deploy, Last Words), 11 original (Salvage, Upgrade, Illuminate, Immolate, STARFORGE, etc.)
-- **STARFORGE**: Unique mechanic — cards transform/upgrade mid-game
-- **Crystal System**: Mana/resource system (crystals per turn)
+## CI/CD
+- `ci.yml`: lint + test + build on push/PR.
+- `auto-deploy.yml`: pushes to `claude/**` branches auto-merge to `main` **gated on `scripts/beta-readiness.mjs`** — a green push to a `claude/**` branch ships to production Vercel. Run `npm run release:beta:check` before pushing.
+- `deploy.yml`: Vercel deploy on push to `main`.
 
-### Game Flow
-1. `GameEngine.initializeGame(player1Setup, player2Setup)` — sets up game state
-2. Players alternate turns: Draw → Play cards → Attack → End turn
-3. `EffectResolver` handles card effects; `CombatResolver` resolves attacks
-4. `DeathProcessor` handles destroy triggers and Last Words
-
-### Key Singletons
-- `globalCardDatabase` — Card definition registry
-- `globalCardFactory` — Card instance factory
-- Use `initializeSampleDatabase()` or `initializeFullDatabase()` to populate
-
-## CI/CD (GitHub Actions)
-Three workflows in `.github/workflows/`:
-
-1. **`ci.yml`** — Runs on push/PR to `main`/`master`
-   - **Lint**: `npm run lint`
-   - **Test**: `npm test -- --ci --coverage` (uploads coverage artifact)
-   - **Build**: `npm run build` + `npm run build:ui` (uploads dist artifact)
-   - Node 22, ubuntu-latest
-
-2. **`deploy.yml`** — Runs on push to `main` or manual dispatch
-   - Deploys web to Vercel (staging → production)
-   - Builds mobile on macOS with Fastlane (production only)
-
-3. **`auto-deploy.yml`** — Runs on pushes to `claude/**` branches
-   - Auto-merges feature branches to main
-
-## Branch Strategy
-- `main` — deployed branch (Vercel auto-deploys)
-- Feature branches — create from `main`, merge back via PR or sync script
-
-## Patch System
-Patch-based workflow for tracking and replaying incremental changes.
-
-### Creating a patch
-```bash
-./scripts/generate-patch.sh main my-feature-name
-```
-Creates `patches/NNNN-my-feature-name.patch` with the diff from main.
-
-### Applying patches to main
-```bash
-git checkout main
-./scripts/apply-patch.sh --all                    # apply all unapplied patches
-./scripts/apply-patch.sh patches/0002-foo.patch   # apply one specific patch
-git commit -am "Apply patch: description"
-git push origin main
-```
-
-### Full sync (when patches can't apply cleanly)
-```bash
-./scripts/sync-to-main.sh
-```
-Replaces main's content with the current branch.
-
-### Patch tracking
-- `patches/.applied` tracks which patches have been applied
-- Patches are numbered sequentially: `0001-`, `0002-`, etc.
-
-## Asset URLs
-Logo and images use raw GitHub URLs with commit SHAs to bypass CDN caching:
-```
-https://raw.githubusercontent.com/finishstrong23/starforge_tcg/{commit-sha}/src/assets/logo.png
-```
-When updating assets, update the commit SHA in `src/ui/components/StarforgeLogo.tsx`.
+## Branch & Patch Workflow
+- `main` deploys. Feature work on `claude/**` branches (auto-merged when the gate passes).
+- `scripts/generate-patch.sh` / `apply-patch.sh` / `sync-to-main.sh` exist for the patch-based flow; the auto-merge path is the primary one.
 
 ## Conventions
-- Card definitions go in `src/data/` — each definition uses the `CardDefinition` type from `src/types/Card.ts`
-- New game modes follow the pattern: data file + state file in a dedicated `src/{mode}/` directory, with a corresponding UI component in `src/ui/components/`
-- Progression features go in `src/progression/`
-- All modules export through `index.ts` barrel files
-- The main `src/index.ts` re-exports the public API for the game engine
-- Use the existing event system (`EventEmitter`) for decoupled communication between systems
-
-## Other Documentation
-- `ROADMAP.md` — Launch strategy and development phases
-- `LAUNCH_READINESS.md` — Go/no-go assessment and gap analysis
-- `EMBELLISHMENT_ROADMAP.md` — Art and audio pipeline plan
+- Engine logic lives in `.ts` modules under `src/dungeon/engine/` so it is testable; React components are thin renderers over persisted state.
+- Content additions go in `src/dungeon/data/` and are validated by data-audit tests (`dungeonEvents`, `actContent`, `factionAudit`) — run them after any content change; unknown ids fail the suite.
+- Every event must keep ≥2 faction-agnostic choices; faction-gated choices use `requiresFaction`.
+- Telemetry via `logEvent()` (`engine/telemetry.ts`) — safe in node, no-ops outside the browser.
