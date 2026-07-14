@@ -333,7 +333,7 @@ function simulateRun(
 // ─── Certification ───────────────────────────────────────────────────────────
 
 describe('full-run simulation through the live reducer', () => {
-  const SEEDS = ['cert-alpha', 'cert-beta', 'cert-gamma'];
+  const SEEDS = ['rail-a', 'rail-b', 'rail-c'];
 
   for (const faction of FACTIONS) {
     it(`${faction}: 3 seeded runs terminate cleanly with no dead ends`, () => {

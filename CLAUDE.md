@@ -25,7 +25,7 @@ src/
 │   ├── engine/           # Pure-TS game logic (all of it unit-testable)
 │   │   ├── runReducer.ts       # Single mutation point for run state (all actions)
 │   │   ├── combat.ts           # Combat engine (turns, intents, effects, deaths)
-│   │   ├── mapgen.ts           # 9-row/25-node act map generator (seeded)
+│   │   ├── mapgen.ts           # 4-rail act map generator (seeded; equal routes)
 │   │   ├── nodeRewards.ts      # Seeded reward/shop/blessing rolls + shop pricing
 │   │   ├── seededRng.ts        # hashSeed / mulberry32 / resumable stream
 │   │   ├── relicEffects.ts     # All relic trigger handlers
@@ -60,7 +60,7 @@ docs/SHATTERED_REACH_MVP_STATUS.md  # DoD → evidence map for the MVP
 
 ## Testing
 - Jest, `testEnvironment: node`, ts-jest transforms `.ts` only — engine and reducer tests, no component/DOM tests. Put tests in `tests/roguelite/`.
-- Key suites: `fullRunSimulation` (reducer-driven 3-act certification, all factions, refresh-resume), `liveMapgen` (3000-seed stress), `nodeRewards` (save-scum hardening), `enemyBehaviors`, `relicSystem`, `pyroclastMvpMechanics`, per-faction `cardUpgrades*`.
+- Key suites: `fullRunSimulation` (reducer-driven 3-act certification, all factions, refresh-resume), `liveMapgen` (3000-seed rail invariants: identical multiset per rail, elite window, chain edges), `nodeRewards` (save-scum hardening), `enemyBehaviors`, `relicSystem`, `pyroclastMvpMechanics`, per-faction `cardUpgrades*`.
 - `tests/roguelite/mapgen.test.ts` targets the LEGACY `src/roguelite` generator (kept for the dead module); the live generator's suite is `liveMapgen.test.ts`.
 - Everything must stay deterministic — a test that depends on shuffle luck is a bug.
 

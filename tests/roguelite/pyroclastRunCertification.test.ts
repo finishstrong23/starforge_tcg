@@ -3,7 +3,7 @@ import type { NodeType } from '../../src/dungeon/types';
 
 describe('Pyroclast MVP run certification harness', () => {
   it('is deterministic for the same seed and options', () => {
-    const options = { maxActs: 1 as const, maxTurnsPerCombat: 36, maxNodesPerAct: 9 };
+    const options = { maxActs: 1 as const, maxTurnsPerCombat: 36, maxNodesPerAct: 10 };
 
     const first = simulateCertifiedPyroclastRun('pyro-cert-determinism', options);
     const second = simulateCertifiedPyroclastRun('pyro-cert-determinism', options);
@@ -17,7 +17,7 @@ describe('Pyroclast MVP run certification harness', () => {
       simulateCertifiedPyroclastRun(seed, {
         maxActs: 1,
         maxTurnsPerCombat: 40,
-        maxNodesPerAct: 9,
+        maxNodesPerAct: 10,
       }),
     );
 
@@ -39,7 +39,7 @@ describe('Pyroclast MVP run certification harness', () => {
       simulateCertifiedPyroclastRun(`pyro-cert-coverage-${index + 1}`, {
         maxActs: 1,
         maxTurnsPerCombat: 40,
-        maxNodesPerAct: 9,
+        maxNodesPerAct: 10,
       }),
     );
 

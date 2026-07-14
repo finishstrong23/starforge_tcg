@@ -134,22 +134,28 @@ describe('initCombat — ascension wiring', () => {
 });
 
 describe('generateActMap — ascension wiring', () => {
-  it('extraElites=0 keeps default elite count for Act 1 (2 elites)', () => {
+  it('extraElites=0 keeps default elite count for Act 1 (1 per rail = 4)', () => {
     const map = generateActMap(1, 'test-seed', 0);
     const elites = map.nodes.filter((n) => n.type === 'elite').length;
-    expect(elites).toBe(2);
+    expect(elites).toBe(4);
   });
 
-  it('extraElites=1 adds one elite to Act 1 (3 elites)', () => {
+  it('extraElites=1 adds one elite to EVERY rail (Act 1: 8 total)', () => {
     const map = generateActMap(1, 'test-seed', 1);
     const elites = map.nodes.filter((n) => n.type === 'elite').length;
-    expect(elites).toBe(3);
+    expect(elites).toBe(8);
   });
 
-  it('extra elites take from the combat pool, total slots stays at 18', () => {
+  it('extra elites take from the combat pool, middle slot count stays at 28', () => {
     const map = generateActMap(1, 'test-seed', 1);
-    // Rows 1-6, 3 cols = 18 procedural nodes (plus row 0 starts and row 7 rests).
-    const proceduralNodes = map.nodes.filter((n) => n.row >= 1 && n.row <= 6);
-    expect(proceduralNodes).toHaveLength(18);
+    // Rows 1-7, 4 rails = 28 procedural nodes (plus openers, rests, boss).
+    const proceduralNodes = map.nodes.filter((n) => n.row >= 1 && n.row <= 7);
+    expect(proceduralNodes).toHaveLength(28);
+    // Conversion is combat -> elite, applied symmetrically per rail.
+    for (let rail = 0; rail < 4; rail++) {
+      const railMiddle = proceduralNodes.filter((n) => n.col === rail);
+      expect(railMiddle.filter((n) => n.type === 'elite')).toHaveLength(2);
+      expect(railMiddle.filter((n) => n.type === 'combat')).toHaveLength(1);
+    }
   });
 });

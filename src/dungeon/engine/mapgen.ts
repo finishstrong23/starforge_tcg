@@ -1,25 +1,41 @@
 import type { ActMap, MapNode, NodeType } from '../types';
 import { hashSeed, mulberry32 } from './seededRng';
 
-// ─── Topology constants ───────────────────────────────────────────────────────
-// The map is a 9-row grid. Row 0 = three start nodes (one per column), one
-// per path. Rows 1–6 are the procedural middle. The convergence band (1–2
-// consecutive rows somewhere in rows 1–5) allows ±1 column crossing; all
-// other rows are lane-locked. The band position is seeded-random each run so
-// every map has a distinct shape. Rows 5→6→7 always funnel back to separate
-// rest stops before the single boss.
+// ─── Topology ─────────────────────────────────────────────────────────────────
+// Each act offers FOUR parallel rails into one shared boss. A rail is a fixed
+// chain of 9 rooms (rows 0–8) + the boss (row 9): picking a rail's first room
+// commits the player to that rail — there are no cross edges.
+//
+// Every rail in an act carries the SAME room multiset in a different seeded
+// order, so all routes are exactly equal in fights, elites, and rewards — the
+// choice is sequencing (shop before or after the elite? rest early or late?),
+// never quantity. This replaced the branching 3-lane map whose worst-case
+// routes could reach the boss with a single fight and no elite.
+//
+// Rail shape:
+//   row 0      combat opener (warm-up, always)
+//   rows 1–7   the act's middle multiset, shuffled per rail; elites are
+//              confined to the middle window (rows 3–6) so they always land
+//              mid-act, jittered per rail
+//   row 8      rest (the guaranteed pre-boss breather)
+//   row 9      shared boss
 
-const COLS = 3;
-const MID_ROWS = [1, 2, 3, 4, 5, 6];
-const REST_ROW = 7;
-const BOSS_ROW = 8;
-const TOTAL_ROWS = 9;
+const RAILS = 4;
+const MIDDLE_ROWS = [1, 2, 3, 4, 5, 6, 7];
+const REST_ROW = 8;
+const BOSS_ROW = 9;
 
-/** Per-act distributions for the 18 middle slots (rows 1–6 × 3 cols). */
-const ACT_DISTRIBUTIONS: Record<1 | 2 | 3, Record<Exclude<NodeType, 'boss'>, number>> = {
-  1: { combat: 8, elite: 2, rest: 2, shop: 2, treasure: 2, event: 2 },
-  2: { combat: 7, elite: 3, rest: 2, shop: 2, treasure: 2, event: 2 },
-  3: { combat: 6, elite: 4, rest: 2, shop: 2, treasure: 2, event: 2 },
+/** Elites may only occupy these rows ("towards the middle"). */
+const ELITE_MIN_ROW = 3;
+const ELITE_MAX_ROW = 6;
+
+type MiddleType = Exclude<NodeType, 'boss'>;
+
+/** Per-act middle multiset (rows 1–7, identical on every rail). */
+const ACT_MIDDLE: Record<1 | 2 | 3, MiddleType[]> = {
+  1: ['combat', 'combat', 'elite', 'rest', 'shop', 'event', 'treasure'],
+  2: ['combat', 'combat', 'combat', 'elite', 'shop', 'event', 'treasure'],
+  3: ['combat', 'combat', 'elite', 'elite', 'shop', 'event', 'treasure'],
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -37,165 +53,104 @@ function nodeId(row: number, col: number): string {
   return `n-${row}-${col}`;
 }
 
-function pickRandom<T>(arr: T[], rng: () => number): T {
-  return arr[Math.floor(rng() * arr.length)];
+/** Row occupied by the middle slot at index i (rows 1–7). */
+function rowOfIndex(i: number): number {
+  return MIDDLE_ROWS[0] + i;
+}
+
+/**
+ * A rail ordering is valid when every elite sits inside the middle window,
+ * and (when there are exactly two) they aren't back-to-back.
+ */
+function elitesValid(order: MiddleType[]): boolean {
+  const eliteRows = order
+    .map((t, i) => (t === 'elite' ? rowOfIndex(i) : -1))
+    .filter((r) => r !== -1);
+  if (eliteRows.some((r) => r < ELITE_MIN_ROW || r > ELITE_MAX_ROW)) return false;
+  if (eliteRows.length === 2 && Math.abs(eliteRows[0] - eliteRows[1]) < 2) return false;
+  return true;
+}
+
+/**
+ * Deterministic fallback if the seeded shuffle keeps failing: swap elites
+ * into legal window slots (spread across the window when there are two).
+ */
+function forceElitesIntoWindow(order: MiddleType[]): MiddleType[] {
+  const out = order.slice();
+  const eliteIdx = out.map((t, i) => (t === 'elite' ? i : -1)).filter((i) => i !== -1);
+  // Preferred window slots, spread out: rows 3, 5, 6, 4 → indices 2, 4, 5, 3.
+  const targets = [2, 4, 5, 3];
+  eliteIdx.forEach((from, n) => {
+    const to = targets[n % targets.length];
+    if (from === to) return;
+    [out[from], out[to]] = [out[to], out[from]];
+  });
+  return out;
 }
 
 // ─── Map generation ───────────────────────────────────────────────────────────
 
 export function generateActMap(actNumber: 1 | 2 | 3, seed: string, extraElites = 0): ActMap {
   const rng = mulberry32(hashSeed(`${seed}-act${actNumber}`));
-  const nodes: MapNode[] = [];
 
-  // Row 0: THREE combat start nodes — the player chooses a path.
-  for (let col = 0; col < COLS; col++) {
-    nodes.push({
-      id: nodeId(0, col),
-      row: 0,
-      col,
-      type: 'combat',
-      visited: false,
-      connections: [],
-    });
-  }
-
-  // Rows 1–6: procedural distribution (18 slots).
-  // Ascension A2+ adds `extraElites` elite nodes to each act, taken from
-  // the combat pool (so the total slot count stays at 18).
-  const dist = { ...ACT_DISTRIBUTIONS[actNumber] };
+  // The shared multiset. Ascension A2+ converts combats into elites on EVERY
+  // rail equally, so routes stay identical in difficulty.
+  const multiset: MiddleType[] = [...ACT_MIDDLE[actNumber]];
   for (let i = 0; i < extraElites; i++) {
-    if (dist.combat <= 0) break;
-    dist.combat -= 1;
-    dist.elite  += 1;
-  }
-  const typePool: Exclude<NodeType, 'boss'>[] = [];
-  (Object.keys(dist) as Exclude<NodeType, 'boss'>[]).forEach((t) => {
-    for (let i = 0; i < dist[t]; i++) typePool.push(t);
-  });
-  const shuffledTypes = shuffle(typePool, rng);
-
-  let idx = 0;
-  for (const row of MID_ROWS) {
-    for (let col = 0; col < COLS; col++) {
-      const type = shuffledTypes[idx++] ?? 'combat';
-      nodes.push({
-        id: nodeId(row, col),
-        row,
-        col,
-        type,
-        visited: false,
-        connections: [],
-      });
-    }
+    const ci = multiset.indexOf('combat');
+    if (ci === -1) break;
+    multiset[ci] = 'elite';
   }
 
-  // Row 7: one rest per column — every path gets a breather before the boss.
-  for (let col = 0; col < COLS; col++) {
-    nodes.push({
-      id: nodeId(REST_ROW, col),
-      row: REST_ROW,
-      col,
-      type: 'rest',
-      visited: false,
-      connections: [],
-    });
-  }
-
-  // Row 8: single centered boss.
+  const nodes: MapNode[] = [];
   const bossId = nodeId(BOSS_ROW, 1);
-  nodes.push({
-    id: bossId,
-    row: BOSS_ROW,
-    col: 1,
-    type: 'boss',
-    visited: false,
-    connections: [],
-  });
 
-  // ── Randomised convergence band ──────────────────────────────────────────
-  // Pick a window of 1–2 consecutive rows (anywhere in rows 1–5) where paths
-  // may cross ±1 column. Everything outside that window stays lane-locked.
-  // Rows 5 and 6 are always lane-locked so paths re-separate before the rests.
-  const convStart = 1 + Math.floor(rng() * 4); // 1, 2, 3, or 4
-  const convWindowSize = rng() < 0.62 ? 2 : 1;
-  const convEnd = Math.min(convStart + convWindowSize - 1, 4); // never past row 4
-  const convergenceRows = new Set<number>();
-  for (let r = convStart; r <= convEnd; r++) convergenceRows.add(r);
-
-  // Probability of a lane-locked node also sprouting an optional ±1 branch.
-  // Kept low so the three-path feel dominates. Disabled for rows adjacent to
-  // the convergence band (would blur the visual separation too much).
-  const BRANCH_PROB = 0.22;
-
-  // ── Wire edges ────────────────────────────────────────────────────────────
-  for (let r = 0; r < TOTAL_ROWS - 1; r++) {
-    const sources = nodes.filter((n) => n.row === r);
-    const targets = nodes.filter((n) => n.row === r + 1);
-
-    // Row 7 → 8: every rest stop funnels into the single boss.
-    if (r === REST_ROW) {
-      const boss = targets[0];
-      if (boss) {
-        for (const src of sources) src.connections.push(boss.id);
-      }
-      continue;
+  for (let rail = 0; rail < RAILS; rail++) {
+    // Order the middle rooms; elites must land in the middle window.
+    let order = shuffle(multiset, rng);
+    let guard = 0;
+    while (!elitesValid(order) && guard++ < 40) {
+      order = shuffle(multiset, rng);
     }
+    if (!elitesValid(order)) order = forceElitesIntoWindow(order);
 
-    const allowCross = convergenceRows.has(r);
+    const railRooms: MapNode[] = [];
 
-    if (!allowCross) {
-      // Lane-locked: guaranteed same-column edge plus an occasional branch.
-      for (const src of sources) {
-        const tgt = targets.find((t) => t.col === src.col);
-        if (tgt) src.connections.push(tgt.id);
+    // Row 0: combat opener.
+    railRooms.push({
+      id: nodeId(0, rail), row: 0, col: rail, type: 'combat', visited: false, connections: [],
+    });
 
-        // Optional branch: only in rows far enough from the convergence band.
-        const distFromConv = Math.min(
-          Math.abs(r - convStart + 1),
-          Math.abs(r - convEnd),
-        );
-        if (distFromConv >= 2 && rng() < BRANCH_PROB) {
-          const adj = targets.filter((t) => Math.abs(t.col - src.col) === 1);
-          if (adj.length > 0) {
-            const branch = adj[Math.floor(rng() * adj.length)];
-            if (branch && !src.connections.includes(branch.id)) {
-              src.connections.push(branch.id);
-            }
-          }
-        }
-      }
-      continue;
+    // Rows 1–7: the shuffled middle.
+    order.forEach((type, i) => {
+      railRooms.push({
+        id: nodeId(rowOfIndex(i), rail), row: rowOfIndex(i), col: rail, type, visited: false, connections: [],
+      });
+    });
+
+    // Row 8: guaranteed pre-boss rest.
+    railRooms.push({
+      id: nodeId(REST_ROW, rail), row: REST_ROW, col: rail, type: 'rest', visited: false, connections: [],
+    });
+
+    // Chain the rail: each room leads only to the next; the rest leads to the boss.
+    for (let i = 0; i < railRooms.length - 1; i++) {
+      railRooms[i].connections.push(railRooms[i + 1].id);
     }
+    railRooms[railRooms.length - 1].connections.push(bossId);
 
-    // Convergence band: ±1 column edges, 1–2 per source, for a narrow mixing
-    // window. Paths touch here but re-commit to their lane after convEnd.
-    for (const src of sources) {
-      const candidates = targets.filter((t) => Math.abs(t.col - src.col) <= 1);
-      if (candidates.length === 0) continue;
-
-      const count = 1 + (rng() < 0.5 ? 1 : 0);
-      const picked = shuffle(candidates, rng).slice(0, Math.min(count, candidates.length));
-      for (const t of picked) {
-        if (!src.connections.includes(t.id)) src.connections.push(t.id);
-      }
-    }
-
-    // Guarantee every convergence-band target has at least one incoming edge.
-    for (const tgt of targets) {
-      const hasIncoming = sources.some((s) => s.connections.includes(tgt.id));
-      if (hasIncoming) continue;
-
-      const eligibleSources = sources.filter((s) => Math.abs(s.col - tgt.col) <= 1);
-      if (eligibleSources.length === 0) continue;
-      const src = pickRandom(eligibleSources, rng);
-      if (!src.connections.includes(tgt.id)) src.connections.push(tgt.id);
-    }
+    nodes.push(...railRooms);
   }
+
+  // Row 9: single shared boss.
+  nodes.push({
+    id: bossId, row: BOSS_ROW, col: 1, type: 'boss', visited: false, connections: [],
+  });
 
   return {
     actNumber,
     nodes,
-    currentNodeId: null, // player picks one of the three row-0 starts
+    currentNodeId: null, // player picks one of the four rail openers
     completed: false,
   };
 }
@@ -203,7 +158,7 @@ export function generateActMap(actNumber: 1 | 2 | 3, seed: string, extraElites =
 // ─── Traversal helpers ────────────────────────────────────────────────────────
 
 export function getAvailableNodes(map: ActMap, currentNodeId: string | null): MapNode[] {
-  // Before entering the map, the three row-0 start nodes are the available picks.
+  // Before entering the map, the rail openers (row 0) are the available picks.
   if (!currentNodeId) {
     return map.nodes.filter((n) => n.row === 0);
   }

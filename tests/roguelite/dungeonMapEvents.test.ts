@@ -2,7 +2,7 @@ import { generateActMap, getAvailableNodes, visitNode } from '../../src/dungeon/
 import type { ActMap, MapNode } from '../../src/dungeon/types';
 
 function bodyNodes(map: ActMap): MapNode[] {
-  return map.nodes.filter((node) => node.row >= 1 && node.row <= 6);
+  return map.nodes.filter((node) => node.row >= 1 && node.row <= 7);
 }
 
 function reachableIds(map: ActMap): Set<string> {
@@ -25,8 +25,9 @@ describe('Phase 4 dungeon event nodes', () => {
     for (const act of [1, 2, 3] as const) {
       const map = generateActMap(act, 'phase-4-events');
       const middle = bodyNodes(map);
-      expect(middle).toHaveLength(18);
-      expect(middle.filter((node) => node.type === 'event')).toHaveLength(2);
+      expect(middle).toHaveLength(28);
+      // One event per rail — every route sees exactly one event room.
+      expect(middle.filter((node) => node.type === 'event')).toHaveLength(4);
     }
   });
 
@@ -34,11 +35,11 @@ describe('Phase 4 dungeon event nodes', () => {
     const map = generateActMap(1, 'event-placement');
     for (const node of map.nodes.filter((n) => n.type === 'event')) {
       expect(node.row).toBeGreaterThanOrEqual(1);
-      expect(node.row).toBeLessThanOrEqual(6);
+      expect(node.row).toBeLessThanOrEqual(7);
     }
     expect(map.nodes.filter((node) => node.row === 0).every((node) => node.type === 'combat')).toBe(true);
-    expect(map.nodes.filter((node) => node.row === 7).every((node) => node.type === 'rest')).toBe(true);
-    expect(map.nodes.filter((node) => node.row === 8).every((node) => node.type === 'boss')).toBe(true);
+    expect(map.nodes.filter((node) => node.row === 8).every((node) => node.type === 'rest')).toBe(true);
+    expect(map.nodes.filter((node) => node.row === 9).every((node) => node.type === 'boss')).toBe(true);
   });
 
   it('event nodes remain reachable from the start choices', () => {

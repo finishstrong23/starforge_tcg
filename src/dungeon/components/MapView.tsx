@@ -9,9 +9,11 @@ import { getDungeonSceneArt } from '../assets/basicTokenArt';
 
 const MAP_W = 820;
 const MAP_H = 300;
-const ROW_X = [58, 145, 232, 319, 406, 493, 580, 667, 762];
-const LANE_Y = [70, 150, 230];
-const R = 23;   // node radius
+// Horizontal rail layout: ROW_X positions the 10 rooms (rows 0-9, boss last),
+// LANE_Y positions the 4 rails. The boss row is vertically centered.
+const ROW_X = [52, 132, 212, 292, 372, 452, 532, 612, 692, 776];
+const LANE_Y = [52, 118, 184, 250];
+const R = 21;   // node radius
 
 // ─── Theme ────────────────────────────────────────────────────────────────────
 
@@ -161,7 +163,11 @@ const MapNodeCircle: React.FC<NodeProps> = ({
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function nodePos(row: number, col: number): { x: number; y: number } {
-  return { x: ROW_X[row] ?? ROW_X[0], y: LANE_Y[col] ?? LANE_Y[1] };
+  // The shared boss (last row) sits vertically centered across all rails.
+  const y = row === ROW_X.length - 1
+    ? (LANE_Y[0] + LANE_Y[LANE_Y.length - 1]) / 2
+    : LANE_Y[col] ?? LANE_Y[1];
+  return { x: ROW_X[row] ?? ROW_X[0], y };
 }
 
 function routePath(from: { x: number; y: number }, to: { x: number; y: number }): string {

@@ -504,7 +504,7 @@ export function simulateCertifiedPyroclastRun(
   const faction: Faction = 'Pyroclast';
   const maxActs = options.maxActs ?? 1;
   const maxTurnsPerCombat = options.maxTurnsPerCombat ?? 36;
-  const maxNodesPerAct = options.maxNodesPerAct ?? 9;
+  const maxNodesPerAct = options.maxNodesPerAct ?? 10;
   const rng = SplitMix64.fromString(seed);
 
   return withScopedMathRandom(rng.derive('certification-math-random'), () => {
