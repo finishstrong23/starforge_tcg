@@ -21,3 +21,6 @@ reports/test-results/
 reports/screenshots/
 /test-results/
 /playwright-report/
+
+# UI smoke artifacts
+.tmp/

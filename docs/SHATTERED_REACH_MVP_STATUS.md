@@ -43,7 +43,7 @@ No placeholder/debug text in the player path (audited). Added (commit `501c985`)
 
 ## 8. All tests green, new systems covered — DONE
 
-753 passing (baseline was 663; +90 covering every new system): seeded rewards/persistence (26), enemy behaviors (24), relics (17), act content (9), live mapgen 3000-seed stress (7), full-run certification (7). The coverage inversion is closed: the live 9-row map generator has its own stress suite (`liveMapgen.test.ts`), and certification drives the shipped reducer through all 3 acts instead of a reimplementation capped at Act 1. One pre-existing flaky test fixed (L-016, shuffle-dependent).
+753 passing (baseline was 663; +90 covering every new system): seeded rewards/persistence (26), enemy behaviors (24), relics (17), act content (9), live mapgen 3000-seed stress (7), full-run certification (7). The coverage inversion is closed: the live rail map generator has its own stress suite (`liveMapgen.test.ts`), and certification drives the shipped reducer through all 3 acts instead of a reimplementation capped at Act 1. One pre-existing flaky test fixed (L-016, shuffle-dependent).
 
 ## 9. No regressions to the 1v1 mode — N/A
 

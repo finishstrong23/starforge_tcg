@@ -1,7 +1,7 @@
 {
   "name": "starforge-dungeon",
   "version": "0.2.0",
-  "description": "STARFORGE Dungeon Run — single-player roguelite card game",
+  "description": "STARFORGE Dungeon Run \u2014 single-player roguelite card game",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -16,7 +16,8 @@
     "telemetry:summary": "node scripts/aggregate-telemetry.mjs",
     "balance:report": "node scripts/balance-report.mjs",
     "performance:budget": "node scripts/performance-budget.mjs",
-    "release:beta:check": "node scripts/beta-readiness.mjs"
+    "release:beta:check": "node scripts/beta-readiness.mjs",
+    "qa:ui-smoke": "node scripts/ui-smoke.mjs"
   },
   "keywords": [
     "roguelite",
