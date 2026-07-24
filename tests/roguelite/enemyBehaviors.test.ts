@@ -167,7 +167,7 @@ describe('special intents', () => {
   });
 
   it('special damage respects Strength and Vulnerable (calcDamage)', () => {
-    let s = makeCombat('E3-04', 1); // Swallow - deal 7
+    let s = makeCombat('E3-04', 1); // Swallow - deal 9
     s = {
       ...s,
       playerShield: 0,
@@ -175,8 +175,8 @@ describe('special intents', () => {
       playerStatusEffects: [{ type: 'vulnerable', stacks: 2, duration: 2 }],
     };
     const after = executeEnemyTurn(s);
-    // (7 + 3 strength) * 1.25 vulnerable = 12 (floor)
-    expect(after.playerHealth).toBe(s.playerHealth - Math.floor((7 + 3) * 1.25));
+    // (9 + 3 strength) * 1.25 vulnerable = 15 (floor)
+    expect(after.playerHealth).toBe(s.playerHealth - Math.floor((9 + 3) * 1.25));
   });
 
   it('Blast Furnace self-stun skips its next action without advancing the intent', () => {
@@ -193,23 +193,23 @@ describe('special intents', () => {
 
 describe('AoE and guardian routing', () => {
   it('"deal N to all" hits the player and every player minion', () => {
-    let s = makeCombat('E3-01', 2); // 'Quake - deal 8 to all'
+    let s = makeCombat('E3-01', 2); // 'Quake - deal 10 to all'
     const guardian = makeGuardian(12);
     s = { ...s, playerBoard: [guardian], playerShield: 0 };
     const after = executeEnemyTurn(s);
-    expect(after.playerHealth).toBe(s.playerHealth - 8);
+    expect(after.playerHealth).toBe(s.playerHealth - 10);
     const minion = after.playerBoard.find((m) => m.instanceId === guardian.instanceId);
-    expect(minion?.currentHealth).toBe(12 - 8);
+    expect(minion?.currentHealth).toBe(12 - 10);
   });
 
   it('single-target enemy attacks are intercepted by a player GUARDIAN', () => {
-    let s = makeCombat('E1-01', 0); // 'Rivet burst - deal 6'
+    let s = makeCombat('E1-01', 0); // 'Rivet burst - deal 8'
     const guardian = makeGuardian(12);
     s = { ...s, playerBoard: [guardian], playerShield: 0 };
     const after = executeEnemyTurn(s);
     expect(after.playerHealth).toBe(s.playerHealth); // player untouched
     const minion = after.playerBoard.find((m) => m.instanceId === guardian.instanceId);
-    expect(minion?.currentHealth).toBe(12 - 6);
+    expect(minion?.currentHealth).toBe(12 - 8);
   });
 });
 
