@@ -312,32 +312,32 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   {
     id: 'P-004', name: 'Flame Lash', faction: 'Pyroclast', type: 'Attack', cost: 1,
     keywords: [], rarity: 'Common', complexityTier: 2,
-    cardText: 'Deal 8 damage. If Heat >= 3, apply Ignite 2.',
+    cardText: 'Deal 8 damage. Apply Ignite 2. If Heat >= 3, apply Ignite 2.',
     upgradeText: 'Deal 10 damage. Apply Ignite 3.',
   },
   {
     id: 'P-005', name: 'Ember Volley', faction: 'Pyroclast', type: 'Attack', cost: 1,
     keywords: ['BLITZ'], rarity: 'Common', complexityTier: 1,
-    cardText: 'Deal 3 damage 3 times.',
-    upgradeText: 'Deal 4 damage 3 times.',
+    cardText: 'Deal 3 damage 3 times. Gain 1 Heat.',
+    upgradeText: 'Deal 4 damage 3 times. Gain 1 Heat.',
   },
   {
     id: 'P-006', name: 'Ash Cloud', faction: 'Pyroclast', type: 'Skill', cost: 1,
     keywords: [], rarity: 'Common', complexityTier: 1,
-    cardText: 'Apply 2 Weak to all enemies.',
-    upgradeText: 'Apply 2 Weak to all enemies. Gain 5 Block.',
+    cardText: 'Apply 2 Weak to all enemies. Gain 1 Heat.',
+    upgradeText: 'Apply 2 Weak to all enemies. Gain 5 Block. Gain 1 Heat.',
   },
   {
     id: 'P-007', name: 'Oil Flask', faction: 'Pyroclast', type: 'Skill', cost: 0,
     keywords: [], rarity: 'Common', complexityTier: 2,
-    cardText: 'Apply Ignite 3.',
-    upgradeText: 'Apply Ignite 5.',
+    cardText: 'Apply Ignite 3. Gain 1 Heat.',
+    upgradeText: 'Apply Ignite 5. Gain 2 Heat.',
   },
   {
     id: 'P-008', name: 'Magma Fist', faction: 'Pyroclast', type: 'Attack', cost: 2,
-    keywords: [], rarity: 'Common', complexityTier: 1,
-    cardText: 'Deal 13 damage.',
-    upgradeText: 'Deal 16 damage. Apply Ignite 2.',
+    keywords: [], rarity: 'Common', complexityTier: 2,
+    cardText: 'Deal 13 damage. If Heat >= 3, deal 5 more damage.',
+    upgradeText: 'Deal 16 damage. Apply Ignite 2. If Heat >= 3, deal 5 more damage.',
   },
   {
     id: 'P-009', name: 'Heat Shimmer', faction: 'Pyroclast', type: 'Skill', cost: 1,
@@ -356,8 +356,8 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   {
     id: 'P-011', name: 'Cauterize', faction: 'Pyroclast', type: 'Skill', cost: 1,
     keywords: [], rarity: 'Common', complexityTier: 1,
-    cardText: 'Heal 4 HP. Take 2 damage.',
-    upgradeText: 'Heal 6 HP. Take 1 damage.',
+    cardText: 'Heal 4 HP. Gain 2 Heat.',
+    upgradeText: 'Heal 6 HP. Gain 3 Heat.',
   },
   {
     id: 'P-012', name: 'Ember Tap', faction: 'Pyroclast', type: 'Skill', cost: 0,
@@ -392,14 +392,14 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   {
     id: 'P-017', name: 'Dragonbreath', faction: 'Pyroclast', type: 'Attack', cost: 2,
     keywords: [], rarity: 'Uncommon', complexityTier: 1,
-    cardText: 'Deal 7 damage to all enemies.',
-    upgradeText: 'Deal 9 damage to all enemies. Apply Ignite 1 to all.',
+    cardText: 'Deal 7 damage to all enemies. Gain 2 Heat.',
+    upgradeText: 'Deal 9 damage to all enemies. Apply Ignite 1 to all. Gain 2 Heat.',
   },
   {
     id: 'P-018', name: 'Forge Heart', faction: 'Pyroclast', type: 'Power', cost: 2,
     keywords: [], rarity: 'Uncommon', complexityTier: 2,
-    cardText: 'At turn start, gain 4 Block.',
-    upgradeText: 'At turn start, gain 6 Block and 1 Heat.',
+    cardText: 'At turn start, gain 4 Block and 1 Heat.',
+    upgradeText: 'At turn start, gain 6 Block and 2 Heat.',
   },
   {
     id: 'P-019', name: 'Molten Skin', faction: 'Pyroclast', type: 'Power', cost: 1,
@@ -410,8 +410,8 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   {
     id: 'P-020', name: 'Overclock', faction: 'Pyroclast', type: 'Skill', cost: 1,
     keywords: [], rarity: 'Uncommon', complexityTier: 2,
-    cardText: 'Draw 2 cards. Apply Ignite 2 to yourself.',
-    upgradeText: 'Draw 3 cards. Apply Ignite 2 to yourself.',
+    cardText: 'Draw 2 cards. Gain 2 Heat. Apply Ignite 2 to yourself.',
+    upgradeText: 'Draw 3 cards. Gain 2 Heat. Apply Ignite 2 to yourself.',
   },
   {
     id: 'P-021', name: 'Pyroclasm', faction: 'Pyroclast', type: 'Attack', cost: 2,
@@ -422,8 +422,8 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   {
     id: 'P-022', name: 'Soot Burst', faction: 'Pyroclast', type: 'Skill', cost: 0,
     keywords: [], rarity: 'Uncommon', complexityTier: 1,
-    cardText: 'Apply Vulnerable 1 to all enemies.',
-    upgradeText: 'Apply Vulnerable 2 to all enemies.',
+    cardText: 'Apply Vulnerable 1 to all enemies. Gain 1 Heat.',
+    upgradeText: 'Apply Vulnerable 2 to all enemies. Gain 1 Heat.',
   },
   {
     id: 'P-023', name: 'Meltdown', faction: 'Pyroclast', type: 'Attack', cost: 3,
@@ -434,20 +434,20 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   {
     id: 'P-024', name: 'Glass Cannon', faction: 'Pyroclast', type: 'Attack', cost: 1,
     keywords: [], rarity: 'Uncommon', complexityTier: 1,
-    cardText: 'Deal 14 damage. Lose 5 HP.',
-    upgradeText: 'Deal 18 damage. Lose 3 HP.',
+    cardText: 'Deal 14 damage. Lose 5 HP. Gain 2 Heat.',
+    upgradeText: 'Deal 18 damage. Lose 3 HP. Gain 2 Heat.',
   },
   {
     id: 'P-025', name: 'Combustion', faction: 'Pyroclast', type: 'Attack', cost: 2,
     keywords: [], rarity: 'Uncommon', complexityTier: 3,
-    cardText: 'Deal 8 damage. Apply Ignite 3.',
-    upgradeText: 'Deal 12 damage. Apply Ignite 4.',
+    cardText: 'Deal 8 damage. Apply Ignite 3. If Heat >= 5, apply Ignite 3.',
+    upgradeText: 'Deal 12 damage. Apply Ignite 4. If Heat >= 5, apply Ignite 4.',
   },
   {
     id: 'P-026', name: 'Ash Dancer', faction: 'Pyroclast', type: 'Attack', cost: 1,
     keywords: [], rarity: 'Uncommon', complexityTier: 1,
-    cardText: 'Deal 7 damage. Draw 1 card.',
-    upgradeText: 'Deal 9 damage. Draw 2 cards.',
+    cardText: 'Deal 7 damage. Draw 1 card. Gain 1 Heat.',
+    upgradeText: 'Deal 9 damage. Draw 2 cards. Gain 1 Heat.',
   },
   {
     id: 'P-027', name: 'Fuel the Flames', faction: 'Pyroclast', type: 'Skill', cost: 1,
@@ -463,9 +463,9 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   },
   {
     id: 'P-029', name: 'Incinerator', faction: 'Pyroclast', type: 'Attack', cost: 2,
-    keywords: [], rarity: 'Uncommon', complexityTier: 1,
-    cardText: 'Deal 12 damage. Exhaust.',
-    upgradeText: 'Deal 18 damage. Exhaust.',
+    keywords: [], rarity: 'Uncommon', complexityTier: 2,
+    cardText: 'Deal 12 damage. If Heat >= 4, deal 6 more damage. Exhaust.',
+    upgradeText: 'Deal 18 damage. If Heat >= 4, deal 6 more damage. Exhaust.',
   },
   {
     id: 'P-030', name: 'Spirit of Fire', faction: 'Pyroclast', type: 'Power', cost: 2,
@@ -475,21 +475,21 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   },
   {
     id: 'P-031', name: 'Sunfire Blade', faction: 'Pyroclast', type: 'Attack', cost: 2,
-    keywords: [], rarity: 'Rare', complexityTier: 2,
-    cardText: 'Deal 18 damage and apply Ignite 4.',
-    upgradeText: 'Deal 22 damage and apply Ignite 5.',
+    keywords: [], rarity: 'Rare', complexityTier: 3,
+    cardText: 'Deal 18 damage. Apply Ignite 4. If Heat >= 6, apply Ignite 4.',
+    upgradeText: 'Deal 22 damage. Apply Ignite 5. If Heat >= 6, apply Ignite 5.',
   },
   {
     id: 'P-032', name: 'Volcano', faction: 'Pyroclast', type: 'Power', cost: 3,
     keywords: [], rarity: 'Rare', complexityTier: 1,
-    cardText: 'At start of each turn, deal 4 damage to all enemies.',
-    upgradeText: 'At start of each turn, deal 6 damage to all enemies.',
+    cardText: 'At start of each turn, deal 4 damage to all enemies and gain 1 Heat.',
+    upgradeText: 'At start of each turn, deal 6 damage to all enemies and gain 1 Heat.',
   },
   {
     id: 'P-033', name: 'Immolate', faction: 'Pyroclast', type: 'Attack', cost: 2,
     keywords: ['IMMOLATE'], rarity: 'Rare', complexityTier: 2,
-    cardText: 'Deal 22 damage to all enemies. Apply Ignite 2.',
-    upgradeText: 'Deal 28 damage to all enemies. Apply Ignite 4.',
+    cardText: 'Deal 22 damage to all enemies. Apply Ignite 2. If Heat >= 5, apply Ignite 3.',
+    upgradeText: 'Deal 28 damage to all enemies. Apply Ignite 4. If Heat >= 5, apply Ignite 4.',
   },
   {
     id: 'P-034', name: 'Phoenix Form', faction: 'Pyroclast', type: 'Power', cost: 3,
@@ -500,8 +500,8 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   {
     id: 'P-035', name: 'Ring of Fire', faction: 'Pyroclast', type: 'Power', cost: 2,
     keywords: [], rarity: 'Rare', complexityTier: 2,
-    cardText: 'At turn start, deal 4 damage to all enemies.',
-    upgradeText: 'At turn start, deal 6 damage to all enemies and apply Ignite 1.',
+    cardText: 'Gain 2 Heat. At turn start, deal 4 damage to all enemies.',
+    upgradeText: 'Gain 3 Heat. At turn start, deal 6 damage to all enemies and apply Ignite 1.',
   },
   {
     id: 'P-036', name: "Sun's Fury", faction: 'Pyroclast', type: 'Attack', cost: 3,
@@ -550,15 +550,15 @@ const PYROCLAST_CARDS: CardDefinition[] = [
   },
   {
     id: 'P-042', name: 'Bash', faction: 'Pyroclast', type: 'Attack', cost: 1,
-    keywords: [], rarity: 'Common', complexityTier: 1,
-    cardText: 'Deal 8 damage.',
-    upgradeText: 'Deal 11 damage.',
+    keywords: [], rarity: 'Common', complexityTier: 2,
+    cardText: 'Deal 8 damage. If Heat >= 4, deal 4 more damage.',
+    upgradeText: 'Deal 11 damage. If Heat >= 4, deal 5 more damage.',
   },
   {
     id: 'P-043', name: 'Bracer', faction: 'Pyroclast', type: 'Skill', cost: 1,
     keywords: [], rarity: 'Common', complexityTier: 1,
-    cardText: 'Gain 6 Block. Draw 1 card.',
-    upgradeText: 'Gain 8 Block. Draw 1 card.',
+    cardText: 'Gain 5 Block. Draw 1 card. Gain 1 Heat.',
+    upgradeText: 'Gain 7 Block. Draw 1 card. Gain 1 Heat.',
   },
   {
     id: 'P-044', name: 'Rally', faction: 'Pyroclast', type: 'Skill', cost: 0,

@@ -10,20 +10,20 @@ import type { CardInstance, ComplexityTier, Faction } from '../../src/dungeon/ty
 // ─── getRewardWeights — direct unit tests ────────────────────────────────────
 
 describe('getRewardWeights', () => {
-  it('returns { 80, 20, 0 } for early rooms (1-3)', () => {
-    expect(getRewardWeights(1)).toEqual({ tier1: 80, tier2: 20, tier3: 0 });
-    expect(getRewardWeights(3)).toEqual({ tier1: 80, tier2: 20, tier3: 0 });
+  it('returns { 60, 35, 5 } for early rooms (1-3)', () => {
+    expect(getRewardWeights(1)).toEqual({ tier1: 60, tier2: 35, tier3: 5 });
+    expect(getRewardWeights(3)).toEqual({ tier1: 60, tier2: 35, tier3: 5 });
   });
 
-  it('returns { 50, 40, 10 } for mid rooms (4-7)', () => {
-    expect(getRewardWeights(4)).toEqual({ tier1: 50, tier2: 40, tier3: 10 });
-    expect(getRewardWeights(7)).toEqual({ tier1: 50, tier2: 40, tier3: 10 });
+  it('returns { 35, 45, 20 } for mid rooms (4-7)', () => {
+    expect(getRewardWeights(4)).toEqual({ tier1: 35, tier2: 45, tier3: 20 });
+    expect(getRewardWeights(7)).toEqual({ tier1: 35, tier2: 45, tier3: 20 });
   });
 
-  it('returns { 25, 45, 30 } for late rooms (8+)', () => {
-    expect(getRewardWeights(8)).toEqual({ tier1: 25, tier2: 45, tier3: 30 });
-    expect(getRewardWeights(13)).toEqual({ tier1: 25, tier2: 45, tier3: 30 });
-    expect(getRewardWeights(99)).toEqual({ tier1: 25, tier2: 45, tier3: 30 });
+  it('returns { 20, 45, 35 } for late rooms (8+)', () => {
+    expect(getRewardWeights(8)).toEqual({ tier1: 20, tier2: 45, tier3: 35 });
+    expect(getRewardWeights(13)).toEqual({ tier1: 20, tier2: 45, tier3: 35 });
+    expect(getRewardWeights(99)).toEqual({ tier1: 20, tier2: 45, tier3: 35 });
   });
 
   it('weight totals are always 100', () => {

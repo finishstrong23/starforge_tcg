@@ -22,7 +22,7 @@ export function createCardInstance(def: CardDefinition): CardInstance {
 // 10-card starting decks. Pyroclast MVP teaches Build -> Vent immediately.
 const STARTER_IDS: Record<Faction, string[]> = {
   Cogsmiths:  ['C-001','C-001','C-001','C-001','C-001','C-002','C-002','C-002','C-002','C-041'],
-  Pyroclast:  ['P-001','P-001','P-001','P-001','P-002','P-002','P-002','P-003','P-003','P-010'],
+  Pyroclast:  ['P-001','P-001','P-001','P-041','P-002','P-002','P-002','P-003','P-003','P-010'],
   Luminar:    ['L-001','L-001','L-001','L-001','L-001','L-002','L-002','L-002','L-002','L-041'],
   WarpRiders: ['W-041','W-041','W-041','W-041','W-041','W-042','W-042','W-042','W-042','W-043'],
 };
@@ -133,9 +133,9 @@ export interface RewardWeights {
 
 /** Tier weights by room depth (1-indexed). Restarts each act. */
 export function getRewardWeights(roomNumber: number): RewardWeights {
-  if (roomNumber <= 3) return { tier1: 80, tier2: 20, tier3: 0 };
-  if (roomNumber <= 7) return { tier1: 50, tier2: 40, tier3: 10 };
-  return { tier1: 25, tier2: 45, tier3: 30 };
+  if (roomNumber <= 3) return { tier1: 60, tier2: 35, tier3: 5 };
+  if (roomNumber <= 7) return { tier1: 35, tier2: 45, tier3: 20 };
+  return { tier1: 20, tier2: 45, tier3: 35 };
 }
 
 /** Rarity weights by act number — same curve as the existing reward gen. */
