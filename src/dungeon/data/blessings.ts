@@ -163,7 +163,12 @@ export function applyBlessing(
       };
     }
     case 'arsenal': {
-      const eligible = CARD_POOL.filter((c) => c.rarity === 'Rare');
+      // Faction-lock the pull (same policy as the draft/reward rollers):
+      // cross-faction rares reference mechanics this player can't use.
+      const runFaction = run.deck.find((c) => c.type !== 'Curse')?.faction;
+      const eligible = CARD_POOL.filter(
+        (c) => c.rarity === 'Rare' && (!runFaction || c.faction === runFaction),
+      );
       const picked = pickRandom(eligible, rng);
       if (!picked) return { patch: {} };
       // Note: the deck holds CardInstances, not CardDefinitions. The

@@ -4,19 +4,18 @@ import type { Faction } from '../types';
 export const MVP_FACTION: Faction = 'Pyroclast';
 
 /**
- * Factions selectable at run setup. All four core factions are live.
- * (The 2026-06-22 single-faction MVP lock was a deliberate tuning-focus
- * decision — reversed for the Shattered Reach MVP, whose definition of done
- * requires a draftable pool from all four factions. Re-lock by shrinking
- * this list; everything else keys off it.)
+ * Factions selectable at run setup. Re-locked to Pyroclast (2026-07-24):
+ * the MVP ships one deeply tuned faction — heat-first card pool, StS-hard
+ * enemies. The other three factions' content and engine tests stay live in
+ * the repo; unlock by growing this list, everything else keys off it.
  */
-export const MVP_VISIBLE_FACTIONS: Faction[] = ['Pyroclast', 'Cogsmiths', 'Luminar', 'WarpRiders'];
+export const MVP_VISIBLE_FACTIONS: Faction[] = ['Pyroclast'];
 
 export const MVP_MODE = {
-  enabled: false,
-  title: 'Choose Your Faction',
-  setupSubtitle: 'Four factions, four ways through the Shattered Reach',
-  hiddenFactionCopy: '',
+  enabled: true,
+  title: 'Pyroclast Trials',
+  setupSubtitle: 'Master the Heat engine. Survive the Shattered Reach.',
+  hiddenFactionCopy: 'Cogsmiths, Luminar, and Warp Riders return in a later update.',
 } as const;
 
 export function isMvpFaction(faction: Faction): boolean {

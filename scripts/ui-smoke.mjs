@@ -8,7 +8,7 @@
  * Drives the real production build in headless Chromium and verifies the
  * player-facing states that have regressed before:
  *   1. Setup screen  — Begin Run visible and unobstructed, full faction
- *                      names (no PY/CO/LU/WR), all four factions present.
+ *                      names (no PY/CO/LU/WR), Pyroclast-only lock copy.
  *   2. Map screen    — four rail itineraries render, four openers offered,
  *                      boss present.
  *   3. Combat screen — hand centered on the viewport, hover preview
@@ -98,7 +98,8 @@ try {
   }
   const text = await page.evaluate(() => document.body.innerText);
   check('no faction abbreviations', !/\b(PY|CO|LU|WR)\b/.test(text));
-  check('all four faction names', ['Pyroclast', 'Luminar', 'Cogsmiths', 'Warp Riders'].every((n) => text.includes(n)));
+  check('Pyroclast Trials lock copy', /pyroclast trials/i.test(text) && /return in a later update/i.test(text));
+  check('Pyroclast selectable', text.includes('Pyroclast'));
   await page.screenshot({ path: join(OUT, 'shot-setup.png') });
   await page.close();
 

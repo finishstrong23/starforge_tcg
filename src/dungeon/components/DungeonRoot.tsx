@@ -831,6 +831,12 @@ const DungeonRootInner: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           })}
         </div>
 
+        {MVP_MODE.enabled && MVP_MODE.hiddenFactionCopy && (
+          <p style={{ width: '100%', maxWidth: '1200px', margin: '0.5rem 0 0', fontSize: '0.78rem', opacity: 0.5, letterSpacing: '0.02em' }}>
+            {MVP_MODE.hiddenFactionCopy}
+          </p>
+        )}
+
         <FactionDetail faction={selected} deck={selectedDeck} />
 
         <AscensionPicker
