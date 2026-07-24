@@ -334,3 +334,46 @@ The Phase 2 deliverable doc (per faction) must:
    style entry in this audit doc (or a sibling).
 
 Phase 2 will not start until the user reviews this doc.
+
+---
+
+## 2026-07-24 addendum — heat-first pool rework (Pyroclast Trials MVP)
+
+The MVP re-locked to Pyroclast with the design bar "nearly every card
+generates, spends, or scales with Heat" (42 of 44; P-001 Cinder Strike stays
+the canonical vanilla, P-044 Rally stays neutral velocity). 22 cards were
+retexted, P-004 got an honesty fix (text now matches actual engine behavior),
+and 4 cards were retagged (P-008/P-029/P-042 T1→2, P-031 T2→3). All texts
+reuse already-supported parser patterns — no engine changes. Structured-effects
+cards (P-001/002/003/010/041) untouched. Starter deck swaps one Cinder Strike
+for Spark (P-041). Reward tier weights steepened to 60/35/5 · 35/45/20 ·
+20/45/35.
+
+| ID | Card | New base text | New upgrade text |
+|---|---|---|---|
+| P-005 | Ember Volley | Deal 3 damage 3 times. Gain 1 Heat. | Deal 4 damage 3 times. Gain 1 Heat. |
+| P-006 | Ash Cloud | Apply 2 Weak to all enemies. Gain 1 Heat. | Apply 2 Weak to all enemies. Gain 5 Block. Gain 1 Heat. |
+| P-007 | Oil Flask | Apply Ignite 3. Gain 1 Heat. | Apply Ignite 5. Gain 2 Heat. |
+| P-008 | Magma Fist (T1→T2) | Deal 13 damage. If Heat >= 3, deal 5 more damage. | Deal 16 damage. Apply Ignite 2. If Heat >= 3, deal 5 more damage. |
+| P-011 | Cauterize | Heal 4 HP. Gain 2 Heat. | Heal 6 HP. Gain 3 Heat. |
+| P-017 | Dragonbreath | Deal 7 damage to all enemies. Gain 2 Heat. | Deal 9 damage to all enemies. Apply Ignite 1 to all. Gain 2 Heat. |
+| P-018 | Forge Heart | At turn start, gain 4 Block and 1 Heat. | At turn start, gain 6 Block and 2 Heat. |
+| P-020 | Overclock | Draw 2 cards. Gain 2 Heat. Apply Ignite 2 to yourself. | Draw 3 cards. Gain 2 Heat. Apply Ignite 2 to yourself. |
+| P-022 | Soot Burst | Apply Vulnerable 1 to all enemies. Gain 1 Heat. | Apply Vulnerable 2 to all enemies. Gain 1 Heat. |
+| P-024 | Glass Cannon | Deal 14 damage. Lose 5 HP. Gain 2 Heat. | Deal 18 damage. Lose 3 HP. Gain 2 Heat. |
+| P-025 | Combustion | Deal 8 damage. Apply Ignite 3. If Heat >= 5, apply Ignite 3. | Deal 12 damage. Apply Ignite 4. If Heat >= 5, apply Ignite 4. |
+| P-026 | Ash Dancer | Deal 7 damage. Draw 1 card. Gain 1 Heat. | Deal 9 damage. Draw 2 cards. Gain 1 Heat. |
+| P-029 | Incinerator (T1→T2) | Deal 12 damage. If Heat >= 4, deal 6 more damage. Exhaust. | Deal 18 damage. If Heat >= 4, deal 6 more damage. Exhaust. |
+| P-031 | Sunfire Blade (T2→T3) | Deal 18 damage. Apply Ignite 4. If Heat >= 6, apply Ignite 4. | Deal 22 damage. Apply Ignite 5. If Heat >= 6, apply Ignite 5. |
+| P-032 | Volcano | At start of each turn, deal 4 damage to all enemies and gain 1 Heat. | Same with 6 damage. |
+| P-033 | Immolate | Deal 22 damage to all enemies. Apply Ignite 2. If Heat >= 5, apply Ignite 3. | Deal 28 damage to all enemies. Apply Ignite 4. If Heat >= 5, apply Ignite 4. |
+| P-035 | Ring of Fire | Gain 2 Heat. At turn start, deal 4 damage to all enemies. | Gain 3 Heat. At turn start, deal 6 damage to all enemies and apply Ignite 1. |
+| P-042 | Bash (T1→T2) | Deal 8 damage. If Heat >= 4, deal 4 more damage. | Deal 11 damage. If Heat >= 4, deal 5 more damage. |
+| P-043 | Bracer | Gain 5 Block. Draw 1 card. Gain 1 Heat. | Gain 7 Block. Draw 1 card. Gain 1 Heat. |
+| P-004 | Flame Lash (honesty fix) | Deal 8 damage. Apply Ignite 2. If Heat >= 3, apply Ignite 2. | (upgrade unchanged) |
+
+Parser rules honored: conditional ignite is written as two clauses (the
+`apply ignite N` regex fires unconditionally, so the guaranteed part is its
+own sentence); the safe conditional rider is `If Heat >= N, deal M more
+damage.`; no parser-only `+ M per Heat spent` cards (double-fire — P-010
+works only via structured `vent_damage`).

@@ -1,7 +1,7 @@
 # STARFORGE: Shattered Reach — AI Assistant Guide
 
 ## Overview
-STARFORGE is a single-player, Slay-the-Spire-style roguelite deck-builder ("Shattered Reach"): 4 factions (Pyroclast, Cogsmiths, Luminar, Warp Riders), 3 acts with procedurally generated branching maps, turn-based card combat, relics, potions, events, and ascension levels 0-10. TypeScript + React 18 + Vite. Deployed to Vercel from `main`.
+STARFORGE is a single-player, Slay-the-Spire-style roguelite deck-builder ("Shattered Reach"). The shipped MVP is the **Pyroclast Trials**: Pyroclast only, heat-first card pool, StS-hard enemy tuning. Three other factions (Cogsmiths, Luminar, Warp Riders) exist as hidden content — their cards, starter decks, and engine tests stay live, but they are not selectable (`config/mvp.ts`). 3 acts with 4-rail seeded maps, turn-based card combat, relics, potions, events, ascension 0-10. TypeScript + React 18 + Vite. Deployed to Vercel from `main`.
 
 > The repo name says "TCG" for historical reasons. The original 1v1 trading card game was removed — this repository is the dungeon roguelite only. `src/ui/App.tsx` boots straight into `DungeonRoot`; there is no menu, no multiplayer, no backend beyond a Vercel serverless telemetry intake (`api/event.ts`).
 
@@ -35,7 +35,7 @@ src/
 │   │                     #   potions.ts, events.ts (24), blessings.ts, curses.ts
 │   ├── components/       # React views (renderers over persisted state, ~25 files)
 │   ├── context/DungeonRunContext.tsx  # Provider: hydrate/persist + dispatch wrappers
-│   └── config/mvp.ts     # Faction availability switch (all four live)
+│   └── config/mvp.ts     # Faction availability switch (locked to Pyroclast)
 ├── roguelite/            # LEGACY module. Still live: cards/ (starter decks, card pool
 │                         #   re-exports) and types. DEAD for the live game: engine/,
 │                         #   persistence/ (the live dungeon has its own).
@@ -60,7 +60,7 @@ docs/SHATTERED_REACH_MVP_STATUS.md  # DoD → evidence map for the MVP
 
 ## Testing
 - Jest, `testEnvironment: node`, ts-jest transforms `.ts` only — engine and reducer tests, no component/DOM tests. Put tests in `tests/roguelite/`.
-- Key suites: `fullRunSimulation` (reducer-driven 3-act certification, all factions, refresh-resume), `liveMapgen` (3000-seed rail invariants: identical multiset per rail, elite window, chain edges), `nodeRewards` (save-scum hardening), `enemyBehaviors`, `relicSystem`, `pyroclastMvpMechanics`, per-faction `cardUpgrades*`.
+- Key suites: `fullRunSimulation` (reducer-driven 3-act certification: termination for all four factions, pinned Pyroclast win seeds `PYRO_WIN_SEEDS`, refresh-resume, A10 doom losses), `liveMapgen` (3000-seed rail invariants: identical multiset per rail, elite window, chain edges), `nodeRewards` (save-scum hardening), `enemyBehaviors`, `relicSystem`, `pyroclastMvpMechanics`, per-faction `cardUpgrades*`. If a balance change breaks the pinned win seeds, rescan (temporary loop over `pyro-win-N` seeds), pin new winners, remove the scan.
 - `tests/roguelite/mapgen.test.ts` targets the LEGACY `src/roguelite` generator (kept for the dead module); the live generator's suite is `liveMapgen.test.ts`.
 - Everything must stay deterministic — a test that depends on shuffle luck is a bug.
 

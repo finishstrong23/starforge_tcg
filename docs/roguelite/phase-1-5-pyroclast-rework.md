@@ -92,3 +92,13 @@ Recommendation if curve correctness matters more than honest tagging: redesign o
 ## Verification
 
 `npx tsc --noEmit` passes with zero errors. Pyroclast pool count: 44 (was 40). Starter deck composition correct. Existing engine code is undisturbed — `applySpellEffect` already parses "deal N damage" / "gain N heat" patterns, so the new cards work without engine changes.
+
+---
+
+## 2026-07-24 — superseded in part by the heat-first pool rework
+
+The Pyroclast Trials MVP (single-faction re-lock) reworked 22 of these cards
+so that 42 of 44 touch Heat, retagged 4 tiers (P-008/P-029/P-042 → T2,
+P-031 → T3), and steepened `getRewardWeights` to 60/35/5 · 35/45/20 ·
+20/45/35. The starter now swaps one Cinder Strike for Spark. Full card table:
+see the addendum in `card-upgrades-pyroclast.md`.

@@ -1,5 +1,10 @@
 # Shattered Reach — MVP Status Report
 
+> **2026-07-24 update**: the MVP has since been re-scoped to a single faction
+> — see **[Addendum: the Pyroclast Trials rework](#addendum-2026-07-24--the-pyroclast-trials-rework)**
+> at the bottom. §4's "all four factions selectable" claims describe the
+> earlier four-faction milestone and are superseded by the re-lock.
+
 Date: 2026-07-05 · Branch: `claude/shattered-reach-mvp-60gzqq`
 Verification: **753 tests / 39 suites passing** (verified stable across 12+ consecutive runs), `tsc --noEmit` clean, `eslint src` clean, `vite build` clean, `beta-readiness` CI gate passing.
 
@@ -59,3 +64,60 @@ The 1v1 TCG no longer exists in this repository; the codebase is dungeon-only (`
 ## Felt-quality signals from certification
 
 Simple-bot winrate at Ascension 0 is ~8% (1 win / 12 runs), with deaths distributed across all three acts — no trivial-fight, dead-branch, or unwinnable-seed signals in the certification batches. Economy affords 1-2 shop purchases by mid-Act 1. Bosses now use their full mechanical kit (summons, specials, compound debuffs).
+
+---
+
+## Addendum (2026-07-24) — the Pyroclast Trials rework
+
+Product direction changed from "four playable factions" to **one great
+faction**. Three commits re-scoped the MVP (`e7a9c8e`, `1b72b1a`, `f337757`):
+
+### 1. Heat-first card pool (`e7a9c8e`)
+
+42 of 44 Pyroclast cards now generate, spend, or scale with Heat (was 22).
+The Ignite family gained Heat riders so burn feeds the faction engine instead
+of living beside it. 22 retexts + P-004 honesty fix + 4 tier retags, all using
+already-supported parser patterns (no engine changes). Starter swaps one
+Cinder Strike for Spark; reward tier weights steepened (60/35/5 · 35/45/20 ·
+20/45/35). Full card table: `docs/roguelite/card-upgrades-pyroclast.md`.
+
+### 2. StS-hard enemy retune (`1b72b1a`)
+
+All 28 enemies raised, then corrected against measured 300-seed certification
+funnels. Act 1 trash +11-21% HP and +1-2 damage; Act 2/3 trash keep damage
+raises but HP near original (the scans showed stacked HP+damage+multi-hit
+raises created an attrition death spiral); elites +10-20% HP (every rail
+forces an elite, so elite raises weigh ~3× a choose-your-path map). Findings
+worth keeping:
+
+- **The Starforged was never beatable** — at original stats the certification
+  bot went 0/33 (Reforge Strength multiplies per hammer hit: a fixed
+  45-damage turn-3 volley). Rebuilt as a spike-check: 165 HP, atk 18,
+  hammers 12×2, Reforge 4, STARFORGE 34 — sharper per-turn threat, now ~30%
+  winnable by decks that block the telegraphs.
+- Final boss-gate funnel (certification bot, A0): Scoria Titan 86% win at 79%
+  entry HP → Null Shepherd 45% at 60% → The Starforged 30% at 58%.
+
+### 3. Re-lock + certification retarget (`f337757`)
+
+`config/mvp.ts` → `['Pyroclast']`, "Pyroclast Trials" setup copy, hidden-
+faction note rendered. The `arsenal` blessing's random-Rare pull is now
+faction-locked (could previously hand a dead cross-faction card). The
+`fullRunSimulation` win assertion is Pyroclast-only over pinned
+`PYRO_WIN_SEEDS`; the four-faction termination/no-dead-end loop, refresh-
+resume, and A10 doom-loss tests remain.
+
+### Difficulty evidence (A0)
+
+| Metric | Four-faction MVP | Pyroclast Trials |
+|---|---|---|
+| Certification-bot winrate | ~8% (1/12, any faction) | **1.0%** (3/300, Pyroclast) |
+| Naive-bot winrate (balance lab, 5 profiles) | 0% | 0% |
+| Naive-bot avg death floor | 10.3–12.3 | 10.0–10.5 |
+| Naive-bot avg turns | 12.4–20.5 | 11.5–20.6 |
+
+The certification bot is deliberately mediocre; ~1% for it is consistent with
+the chosen bar of "mastery wins roughly 1 in 4-5 runs". Pinned win seeds
+(`pyro-win-82/241/253`) prove the full victory path stays reachable. 753
+tests / 38 suites green; `tsc`, `eslint`, beta gate, and `qa:ui-smoke` all
+pass against the production bundle.
